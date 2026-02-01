@@ -21,7 +21,10 @@ import { TypewriterText, useTypewriterSequence } from '../components';
 const TOTAL_POINTS = 18;
 
 /** 出身加成配置（前端展示用） */
-const ORIGIN_BONUS: Record<string, Partial<Record<keyof CharacterAttributes, number>>> = {
+const ORIGIN_BONUS: Record<
+  string,
+  Partial<Record<keyof CharacterAttributes, number>>
+> = {
   noble: { wisdom: 1, spirit: 1 },
   wanderer: { perception: 1, vitality: 1 },
   scholar: { wisdom: 2, strength: -1 },
@@ -55,11 +58,12 @@ const DANTIAN_GROUPS = [
   },
 ];
 
-/** 打字机旁白 */
+/** 打字机旁白（原创） */
 const INTRO_TEXTS = [
-  '命格已定，根基尚可雕琢。',
-  '十八点根基，分入六脉。慧根通悟性，心眼明是非，气海聚内力，脉络行真气，筋骨定外功，血气续生机。',
-  '少侠，且将根基点细细分配——',
+  '老道将铜钱收好，从柜子里翻出一面铜镜。镜面昏暗，映不出人影，却隐隐有光华流转。',
+  '"命格是天给的，但这副骨头是自己的。"老道把铜镜推到你面前，"人有三丹田——神、气、精。上丹田主悟性灵觉，中丹田通经脉内息，下丹田定筋骨血气。"',
+  '他竖起一根手指："一共十八分根基。怎么分，你自己拿主意。"',
+  '"这决定了你往后在江湖上吃饭的本事。想清楚了再落子，落子无悔。"',
 ];
 
 export const AttributeAllocateScreen = ({ navigation, route }: any) => {
@@ -145,14 +149,19 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
             activeOpacity={0.9}
             onPress={handleIntroComplete}
           >
-            <IntroSequence texts={INTRO_TEXTS} onComplete={handleIntroComplete} />
+            <IntroSequence
+              texts={INTRO_TEXTS}
+              onComplete={handleIntroComplete}
+            />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
         )}
 
         {/* 属性分配主内容 */}
         {showContent && (
-          <Animated.View style={[styles.mainContent, { opacity: contentOpacity }]}>
+          <Animated.View
+            style={[styles.mainContent, { opacity: contentOpacity }]}
+          >
             {/* 顶部 */}
             <View style={styles.header}>
               <Text style={styles.title}>分根基</Text>
@@ -209,7 +218,10 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
 
                         <View style={styles.attrControls}>
                           <TouchableOpacity
-                            style={[styles.controlBtn, !canSub && styles.controlBtnDisabled]}
+                            style={[
+                              styles.controlBtn,
+                              !canSub && styles.controlBtnDisabled,
+                            ]}
                             onPress={() => handleSub(attr.key)}
                             disabled={!canSub}
                           >
@@ -227,13 +239,17 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
                             <Text style={styles.valueText}>{val}</Text>
                             {bonusVal !== 0 && (
                               <Text style={styles.bonusText}>
-                                ({bonusVal > 0 ? '+' : ''}{bonusVal})
+                                ({bonusVal > 0 ? '+' : ''}
+                                {bonusVal})
                               </Text>
                             )}
                           </View>
 
                           <TouchableOpacity
-                            style={[styles.controlBtn, !canAdd && styles.controlBtnDisabled]}
+                            style={[
+                              styles.controlBtn,
+                              !canAdd && styles.controlBtnDisabled,
+                            ]}
                             onPress={() => handleAdd(attr.key)}
                             disabled={!canAdd}
                           >
@@ -302,14 +318,16 @@ const IntroSequence: React.FC<{
   texts: string[];
   onComplete: () => void;
 }> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } =
-    useTypewriterSequence(texts, {
+  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
+    texts,
+    {
       speed: 70,
       delayBetween: 800,
       onAllComplete: () => {
         setTimeout(onComplete, 600);
       },
-    });
+    },
+  );
 
   return (
     <View style={styles.introContent}>

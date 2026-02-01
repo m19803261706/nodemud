@@ -68,12 +68,13 @@ const ORIGINS = [
   },
 ];
 
-/** 打字机旁白文字 */
+/** 打字机旁白文字（原创） */
 const INTRO_TEXTS = [
-  '大漠孤烟，长河落日，江南烟雨，塞北风霜——',
-  '天下之大，何处不是江湖？',
-  '少年立于渡口，目送最后一艘客船远去。风卷起衣角，卷不走心头那把无名之火。',
-  '你是谁？从何处来？这江湖，又将赐你怎样的命数？',
+  '官道上走了三天三夜，脚底的草鞋磨穿了两双。远处群山如墨，近处炊烟零落，一间歪歪斜斜的客栈挑着半面酒旗。',
+  '掌柜是个独臂老头儿，右手翻炒着锅里的花生米，头也不抬地问了一句：',
+  '"小家伙，打哪儿来的？"',
+  '你怔了一怔。是啊，你打哪儿来？又要往何处去？',
+  '这一路上你想了无数遍，却始终没有答案。或许答案就藏在前方那条看不见尽头的路上。',
 ];
 
 export const OriginSelectScreen = ({ navigation, route }: any) => {
@@ -150,7 +151,9 @@ export const OriginSelectScreen = ({ navigation, route }: any) => {
 
         {/* 出身选择内容 */}
         {showContent && (
-          <Animated.View style={[styles.mainContent, { opacity: contentOpacity }]}>
+          <Animated.View
+            style={[styles.mainContent, { opacity: contentOpacity }]}
+          >
             {/* 标题 */}
             <View style={styles.header}>
               <Text style={styles.title}>择出身</Text>

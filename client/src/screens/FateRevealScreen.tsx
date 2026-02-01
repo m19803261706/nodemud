@@ -50,11 +50,12 @@ const renderStars = (value: number, max: number = 5) => {
   return result;
 };
 
-/** 打字机旁白 — 等待排盘期间 */
+/** 打字机旁白 — 等待排盘期间（原创） */
 const FATE_INTRO_TEXTS = [
-  '天有日月，人有命数。',
-  '紫微垣中，一百零八颗星辰轮转不休，每一颗都牵系着世间某人的来路与归途。',
-  '且看这漫天星斗，为你排下怎样一盘棋局——',
+  '客栈后院有一间偏房，门上贴着一张泛黄的符纸。屋里坐着个白发老道，面前摆着一副铜钱和一盘残棋。',
+  '老道抬眼看了看你，忽然笑道："有意思。老朽替人看了四十年命数，像你这般眼神的——不多见。"',
+  '他拈起三枚铜钱，在掌心里摇了摇。铜钱落在桌上，叮叮当当，像是远山的寺钟。',
+  '老道的笑容慢慢收住了，他盯着铜钱看了许久，低声说道：',
 ];
 
 export const FateRevealScreen = ({ navigation, route }: any) => {
@@ -155,15 +156,15 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
                 onComplete={() => setIntroComplete(true)}
               />
             </View>
-            {loading && (
-              <Text style={styles.loadingText}>紫微排盘中...</Text>
-            )}
+            {loading && <Text style={styles.loadingText}>紫微排盘中...</Text>}
           </View>
         )}
 
         {/* 命格揭示 */}
         {fateRevealed && fateData && (
-          <Animated.View style={[styles.fateContainer, { opacity: fateOpacity }]}>
+          <Animated.View
+            style={[styles.fateContainer, { opacity: fateOpacity }]}
+          >
             {/* 命格名 */}
             <View style={styles.fateNameArea}>
               <TypewriterText
@@ -176,7 +177,9 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
             </View>
 
             {/* 命格详情（渐入） */}
-            <Animated.View style={[styles.fateDetail, { opacity: detailOpacity }]}>
+            <Animated.View
+              style={[styles.fateDetail, { opacity: detailOpacity }]}
+            >
               {/* 诗句 */}
               <Text style={styles.fatePoem}>{fateData.fatePoem}</Text>
 
@@ -194,7 +197,9 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
                   <View key={dim.key} style={styles.dimensionItem}>
                     <Text style={styles.dimensionLabel}>{dim.label}</Text>
                     <Text style={styles.dimensionStars}>
-                      {renderStars(fateData[dim.key as keyof FateData] as number)}
+                      {renderStars(
+                        fateData[dim.key as keyof FateData] as number,
+                      )}
                     </Text>
                     <Text style={styles.dimensionDesc}>{dim.desc}</Text>
                   </View>
@@ -204,12 +209,16 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
               {/* 附加信息 */}
               <View style={styles.extraInfo}>
                 <Text style={styles.extraText}>
-                  {fateData.wuxingju} · 命主{fateData.mingzhuStar} · 身主{fateData.shenzhuStar}
+                  {fateData.wuxingju} · 命主{fateData.mingzhuStar} · 身主
+                  {fateData.shenzhuStar}
                 </Text>
               </View>
 
               {/* 继续按钮 */}
-              <TouchableOpacity onPress={handleContinue} style={styles.continueArea}>
+              <TouchableOpacity
+                onPress={handleContinue}
+                style={styles.continueArea}
+              >
                 <LinearGradient
                   colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
                   style={styles.continueButton}
@@ -240,14 +249,16 @@ const IntroSequence: React.FC<{
   texts: string[];
   onComplete: () => void;
 }> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } =
-    useTypewriterSequence(texts, {
+  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
+    texts,
+    {
       speed: 70,
       delayBetween: 800,
       onAllComplete: () => {
         setTimeout(onComplete, 600);
       },
-    });
+    },
+  );
 
   return (
     <>

@@ -59,11 +59,13 @@ const renderStars = (value: number, max: number = 5) => {
   return result;
 };
 
-/** 打字机旁白 */
+/** 打字机旁白（原创） */
 const INTRO_TEXTS = [
-  '根基已定，六脉归位。',
-  '江湖之中，名号便是一柄无形之剑。它可以是你的盾，也可以是你的枷锁。',
-  '少侠，你叫什么名字？',
+  '铜镜上的光华渐渐收敛，你长长地呼出一口气。窗外不知何时下起了雨，檐上的水珠一滴一滴落在青石板上。',
+  '老道起身走到门边，背对着你，望着那片雨幕。',
+  '"在江湖上行走，总得有个名号。叫什么不打紧，打紧的是——叫出这个名字的时候，你自己认不认。"',
+  '他回过头来，雨光映在他脸上，那双浑浊的眼睛忽然亮了一下。',
+  '"说吧，你叫什么？"',
 ];
 
 export const CharacterConfirmScreen = ({ navigation, route }: any) => {
@@ -77,7 +79,11 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
 
   // 监听创建结果
   useEffect(() => {
-    const handleSuccess = (data: { characterId: string; characterName: string; message: string }) => {
+    const handleSuccess = (data: {
+      characterId: string;
+      characterName: string;
+      message: string;
+    }) => {
       setLoading(false);
       showToast({
         type: 'success',
@@ -149,7 +155,12 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
       return;
     }
     setLoading(true);
-    const msg = MessageFactory.create('createCharacterConfirm', name, origin, attributes);
+    const msg = MessageFactory.create(
+      'createCharacterConfirm',
+      name,
+      origin,
+      attributes,
+    );
     if (!wsService.send(msg)) {
       setLoading(false);
       showAlert({
@@ -176,14 +187,19 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
             activeOpacity={0.9}
             onPress={handleIntroComplete}
           >
-            <IntroSequence texts={INTRO_TEXTS} onComplete={handleIntroComplete} />
+            <IntroSequence
+              texts={INTRO_TEXTS}
+              onComplete={handleIntroComplete}
+            />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
         )}
 
         {/* 确认主内容 */}
         {showContent && (
-          <Animated.View style={[styles.mainContent, { opacity: contentOpacity }]}>
+          <Animated.View
+            style={[styles.mainContent, { opacity: contentOpacity }]}
+          >
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
@@ -249,17 +265,17 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
 
                 {/* 六属性 */}
                 <View style={styles.attrGrid}>
-                  {(Object.keys(ATTR_LABELS) as (keyof CharacterAttributes)[]).map(
-                    key => (
-                      <View key={key} style={styles.attrItem}>
-                        <Text style={styles.attrLabel}>{ATTR_LABELS[key]}</Text>
-                        <Text style={styles.attrValue}>{attributes[key]}</Text>
-                        <Text style={styles.attrCap}>
-                          /{fateData.attributeCaps[key]}
-                        </Text>
-                      </View>
-                    ),
-                  )}
+                  {(
+                    Object.keys(ATTR_LABELS) as (keyof CharacterAttributes)[]
+                  ).map(key => (
+                    <View key={key} style={styles.attrItem}>
+                      <Text style={styles.attrLabel}>{ATTR_LABELS[key]}</Text>
+                      <Text style={styles.attrValue}>{attributes[key]}</Text>
+                      <Text style={styles.attrCap}>
+                        /{fateData.attributeCaps[key]}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               </View>
             </ScrollView>
@@ -310,14 +326,16 @@ const IntroSequence: React.FC<{
   texts: string[];
   onComplete: () => void;
 }> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } =
-    useTypewriterSequence(texts, {
+  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
+    texts,
+    {
       speed: 70,
       delayBetween: 800,
       onAllComplete: () => {
         setTimeout(onComplete, 600);
       },
-    });
+    },
+  );
 
   return (
     <View style={styles.introContent}>

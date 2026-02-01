@@ -15,20 +15,24 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { TypewriterText, useTypewriterSequence } from '../components';
 
-/** 打字机旁白文字 */
+/** 打字机旁白文字（原创，模拟金庸叙事口吻） */
 const INTRO_TEXTS = [
-  '天下风云出我辈，一入江湖岁月催。',
-  '皇图霸业谈笑中，不胜人生一场醉。',
-  '少年，你可准备好了？',
+  '那年深秋，嘉兴府南湖上薄雾如纱，几只乌篷船泊在芦苇荡里，桨声都听不真切。',
+  '岸边茶棚的说书先生拍了一下醒木，道："诸位客官且听——这武林中的恩怨情仇，说到底不过八个字。"',
+  '"身不由己，命不由天。"',
+  '你攥紧了包袱，推开那扇吱呀作响的柴门，踏入了这滚滚红尘。',
 ];
 
 export const CreateCharacterScreen = ({ navigation }: any) => {
   const [showContent, setShowContent] = useState(false);
-  const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
+  const [selectedGender, setSelectedGender] = useState<
+    'male' | 'female' | null
+  >(null);
   const contentOpacity = useState(new Animated.Value(0))[0];
 
-  const { currentIndex, visibleTexts, handleComplete } =
-    useTypewriterSequence(INTRO_TEXTS, {
+  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
+    INTRO_TEXTS,
+    {
       speed: 80,
       delayBetween: 1000,
       onAllComplete: () => {
@@ -39,7 +43,8 @@ export const CreateCharacterScreen = ({ navigation }: any) => {
           useNativeDriver: true,
         }).start();
       },
-    });
+    },
+  );
 
   const handleSkip = useCallback(() => {
     setShowContent(true);
@@ -94,7 +99,9 @@ export const CreateCharacterScreen = ({ navigation }: any) => {
 
         {/* 性别选择 */}
         {showContent && (
-          <Animated.View style={[styles.mainContent, { opacity: contentOpacity }]}>
+          <Animated.View
+            style={[styles.mainContent, { opacity: contentOpacity }]}
+          >
             {/* 装饰线 */}
             <View style={styles.topDecoration}>
               <LinearGradient
