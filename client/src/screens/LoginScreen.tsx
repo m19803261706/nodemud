@@ -32,11 +32,16 @@ export const LoginScreen = ({ navigation }: any) => {
         type: 'error',
         title: '连接失败',
         message: '无法连接到服务器，请检查网络',
-        buttons: [{ text: '重试', onPress: () => wsService.connect('ws://localhost:4001') }],
+        buttons: [
+          {
+            text: '重试',
+            onPress: () => wsService.connect('ws://localhost:4001'),
+          },
+        ],
       });
     });
 
-    wsService.on('loginSuccess', (data) => {
+    wsService.on('loginSuccess', data => {
       if (data.hasCharacter) {
         navigation.navigate('GameHome', { characterId: data.characterId });
       } else {
@@ -44,15 +49,12 @@ export const LoginScreen = ({ navigation }: any) => {
       }
     });
 
-    wsService.on('loginFailed', (data) => {
+    wsService.on('loginFailed', data => {
       showAlert({
         type: 'error',
         title: '登录失败',
         message: data.message,
-        buttons: [
-          { text: '返回' },
-          { text: '重试', onPress: handleLogin },
-        ],
+        buttons: [{ text: '返回' }, { text: '重试', onPress: handleLogin }],
       });
     });
 
@@ -61,7 +63,11 @@ export const LoginScreen = ({ navigation }: any) => {
 
   const handleLogin = () => {
     if (!username || !password) {
-      showToast({ type: 'warning', title: '提示', message: '请填写侠名和口令' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '请填写侠名和口令',
+      });
       return;
     }
     wsService.send(MessageFactory.create('login', username, password));
@@ -120,7 +126,9 @@ export const LoginScreen = ({ navigation }: any) => {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                >
                   <Feather
                     name={showPassword ? 'eye' : 'eye-off'}
                     size={20}
@@ -136,7 +144,12 @@ export const LoginScreen = ({ navigation }: any) => {
                 style={styles.rememberMe}
                 onPress={() => setRememberMe(!rememberMe)}
               >
-                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]} />
+                <View
+                  style={[
+                    styles.checkbox,
+                    rememberMe && styles.checkboxChecked,
+                  ]}
+                />
                 <Text style={styles.rememberText}>记住侠名</Text>
               </TouchableOpacity>
               <TouchableOpacity>

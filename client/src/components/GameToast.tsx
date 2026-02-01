@@ -130,10 +130,7 @@ export const GameToast: React.FC<GameToastProps> = ({
 
   return (
     <Animated.View
-      style={[
-        styles.wrapper,
-        { transform: [{ translateY }], opacity },
-      ]}
+      style={[styles.wrapper, { transform: [{ translateY }], opacity }]}
     >
       <LinearGradient
         colors={['#F5F0E8', '#EBE5DA']}

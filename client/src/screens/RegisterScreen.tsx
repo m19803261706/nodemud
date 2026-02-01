@@ -50,10 +50,7 @@ export const RegisterScreen = ({ navigation }: any) => {
         type: 'error',
         title: '注册失败',
         message: data.message,
-        buttons: [
-          { text: '返回' },
-          { text: '重试', onPress: handleRegister },
-        ],
+        buttons: [{ text: '返回' }, { text: '重试', onPress: handleRegister }],
       });
     });
   }, [navigation]);
@@ -65,37 +62,65 @@ export const RegisterScreen = ({ navigation }: any) => {
     }
 
     if (username.length < 6 || username.length > 10) {
-      showToast({ type: 'warning', title: '提示', message: '侠名长度应为 6-10 个字符' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '侠名长度应为 6-10 个字符',
+      });
       return;
     }
 
     if (!/(?=.*[0-9])(?=.*[a-zA-Z])/.test(username)) {
-      showToast({ type: 'warning', title: '提示', message: '侠名必须包含数字和字母' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '侠名必须包含数字和字母',
+      });
       return;
     }
 
     if (phone.length !== 11 || !/^\d{11}$/.test(phone)) {
-      showToast({ type: 'warning', title: '提示', message: '请输入正确的 11 位手机号' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '请输入正确的 11 位手机号',
+      });
       return;
     }
 
     if (password.length < 6) {
-      showToast({ type: 'warning', title: '提示', message: '口令至少 6 个字符' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '口令至少 6 个字符',
+      });
       return;
     }
 
     if (!/(?=.*[0-9])(?=.*[a-zA-Z])/.test(password)) {
-      showToast({ type: 'warning', title: '提示', message: '口令必须包含数字和字母' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '口令必须包含数字和字母',
+      });
       return;
     }
 
     if (password !== confirmPassword) {
-      showToast({ type: 'warning', title: '提示', message: '两次口令输入不一致' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '两次口令输入不一致',
+      });
       return;
     }
 
     if (!agreeTerms) {
-      showToast({ type: 'warning', title: '提示', message: '请阅读并同意江湖规矩' });
+      showToast({
+        type: 'warning',
+        title: '提示',
+        message: '请阅读并同意江湖规矩',
+      });
       return;
     }
 
@@ -175,7 +200,9 @@ export const RegisterScreen = ({ navigation }: any) => {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                >
                   <Feather
                     name={showPassword ? 'eye' : 'eye-off'}
                     size={18}
@@ -197,7 +224,9 @@ export const RegisterScreen = ({ navigation }: any) => {
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
                 />
-                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
                   <Feather
                     name={showConfirmPassword ? 'eye' : 'eye-off'}
                     size={18}
@@ -227,8 +256,7 @@ export const RegisterScreen = ({ navigation }: any) => {
               <View style={styles.agreeTextWrap}>
                 <Text style={styles.agreeText}>
                   我已阅读并同意
-                  <Text style={styles.agreeLink}> 《江湖规矩》 </Text>
-                  与
+                  <Text style={styles.agreeLink}> 《江湖规矩》 </Text>与
                   <Text style={styles.agreeLink}> 《侠客守则》</Text>
                 </Text>
               </View>

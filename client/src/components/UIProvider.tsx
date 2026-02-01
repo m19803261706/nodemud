@@ -3,7 +3,13 @@
  * 提供 showAlert 和 showToast 方法，管理弹窗/通知队列
  */
 
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
 import { GameAlert, GameAlertProps, AlertButton } from './GameAlert';
 import { GameToast, GameToastProps, ToastType } from './GameToast';
 
@@ -42,7 +48,9 @@ export const useUI = (): UIContextValue => {
 };
 
 /** UIProvider 组件 */
-export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Alert 状态
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState<AlertConfig>({
