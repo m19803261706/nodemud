@@ -21,9 +21,11 @@ const Stack = createNativeStackNavigator();
 /** 应用根组件 */
 function App(): React.JSX.Element {
   // App 启动时建立 WebSocket 连接（类似 MUD 的 telnet 连接大厅）
+  // 不在 cleanup 中断开，连接跟随进程生命周期而非组件生命周期
   useEffect(() => {
-    wsService.connect(WS_URL);
-    return () => wsService.disconnect();
+    if (!wsService.isConnected) {
+      wsService.connect(WS_URL);
+    }
   }, []);
 
   return (
