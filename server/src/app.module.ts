@@ -5,10 +5,7 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-// import { TypeOrmModule } from '@nestjs/typeorm';
-// import { ConfigService } from '@nestjs/config';
 import { validate } from './config/env.validation';
-// import { getDatabaseConfig } from './config/database.config';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -20,16 +17,7 @@ import { HealthModule } from './health/health.module';
       envFilePath: '.env',
     }),
 
-    // 数据库模块 - TypeORM MySQL 连接
-    // 注意: 启动时需要配置正确的数据库连接信息
-    // 取消下方注释以启用数据库连接
-    /*
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: getDatabaseConfig,
-      inject: [ConfigService],
-    }),
-    */
+    // TODO: 启用数据库连接 - 参见 config/database.config.ts
 
     // 功能模块
     HealthModule,

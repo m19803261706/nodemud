@@ -13,12 +13,14 @@
 **改进**: 使用项目级 `docs/drafts/` 目录
 
 **已修改的命令**:
+
 - ✅ `~/.claude/commands/cx/prd.md`
 - ✅ `~/.claude/commands/cx/design.md`
 - ✅ `~/.claude/commands/cx/scope.md`
 - ✅ `~/.claude/commands/cx/adr.md`
 
 **改进代码**:
+
 ```bash
 # 保存文档草稿到项目 docs 目录（便于后期管理和删除）
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
@@ -33,6 +35,7 @@ gh issue create \
 ```
 
 **文档草稿目录结构**:
+
 ```
 nodemud/
 └── docs/
@@ -46,6 +49,7 @@ nodemud/
 ```
 
 **优点**:
+
 - ✅ 文档不会因系统重启丢失
 - ✅ 便于后期查看和管理
 - ✅ 可追溯文档草稿历史
@@ -60,9 +64,11 @@ nodemud/
 **改进**: Epic 闭环时自动关闭所有关联的文档 Issue
 
 **已修改的命令**:
+
 - ✅ `~/.claude/commands/cx/exec.md`
 
 **改进代码**（在 Epic 闭环检测中新增）:
+
 ```bash
 if [ "$total" -eq "$done_count" ]; then
   # 1. 关闭 Epic
@@ -109,6 +115,7 @@ fi
 ```
 
 **完美闭环流程**:
+
 ```
 1. 子任务完成 → 关闭子任务 Issue + 标记 cx-done
 2. 检测依赖 → 解锁被阻塞的任务
@@ -121,6 +128,7 @@ fi
 ```
 
 **优点**:
+
 - ✅ 完整的文档生命周期管理
 - ✅ 自动化闭环，无需手动关闭
 - ✅ 清晰的文档状态追踪
@@ -133,6 +141,7 @@ fi
 ### 当前 Epic #4 的完美闭环
 
 已手动完成（作为示范）:
+
 ```
 ✅ Scope #1  [项目蓝图] (OPEN) - 继续跟踪
 ✅ PRD #2    [需求文档] (CLOSED)
@@ -144,10 +153,12 @@ fi
 ### 下次执行验证
 
 下次运行 `/cx:prd` 时：
+
 - 文档草稿会保存到 `docs/drafts/prd-功能名.md`
 - Issue 创建时使用 `--body-file` 而不是 `--body`
 
 下次运行 `/cx:exec --all` 完成 Epic 时：
+
 - PRD、Design Doc、ADR Issue 会自动关闭
 - Scope 进度会自动更新
 
@@ -156,6 +167,7 @@ fi
 ## 影响范围
 
 ### 全局配置文件（已修改）
+
 - `~/.claude/commands/cx/prd.md`
 - `~/.claude/commands/cx/design.md`
 - `~/.claude/commands/cx/scope.md`
@@ -163,9 +175,11 @@ fi
 - `~/.claude/commands/cx/exec.md`
 
 ### 项目配置文件（已修改）
+
 - `.gitignore` - 添加 `docs/drafts/*.md` 配置
 
 ### 新增目录
+
 - `docs/` - 文档根目录
 - `docs/drafts/` - 文档草稿目录（自动创建）
 
@@ -176,17 +190,21 @@ fi
 ### 文档草稿管理策略
 
 **选项 A: 不提交草稿（推荐）**
+
 ```bash
 # 在 .gitignore 中启用
 docs/drafts/*.md
 ```
+
 优点：Issue 已在 GitHub，本地草稿可随时删除
 
 **选项 B: 提交草稿**
+
 ```bash
 # 在 .gitignore 中注释掉
 # docs/drafts/*.md
 ```
+
 优点：本地保留完整草稿历史，便于对比修改
 
 **当前配置**: 选项 A（注释形式，可随时切换）

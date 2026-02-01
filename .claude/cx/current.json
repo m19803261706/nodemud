@@ -15,42 +15,52 @@
     {
       "number": 5,
       "title": "[backend] 后端项目初始化与配置",
-      "status": "cx-ready",
+      "status": "cx-done",
       "phase": 1,
       "parallel_group": "p1",
-      "depends_on": []
+      "depends_on": [],
+      "completed_at": "2026-02-02T00:40:00+08:00",
+      "commit": "0386871"
     },
     {
       "number": 6,
       "title": "[frontend] 前端项目初始化与欢迎页面",
-      "status": "cx-ready",
+      "status": "cx-done",
       "phase": 2,
       "parallel_group": "p2",
-      "depends_on": []
+      "depends_on": [],
+      "completed_at": "2026-02-02T00:40:00+08:00",
+      "commit": "c05c3b4"
     },
     {
       "number": 7,
       "title": "[tools] 代码规范工具配置（Prettier + Husky）",
-      "status": "cx-ready",
+      "status": "cx-done",
       "phase": 3,
       "parallel_group": "p3",
-      "depends_on": []
+      "depends_on": [],
+      "completed_at": "2026-02-02T00:40:00+08:00",
+      "commit": "a70c84e"
     },
     {
       "number": 8,
       "title": "[project] pnpm Workspace 与项目级配置",
-      "status": "cx-ready",
+      "status": "cx-done",
       "phase": 4,
       "parallel_group": "p4",
-      "depends_on": []
+      "depends_on": [],
+      "completed_at": "2026-02-02T00:40:00+08:00",
+      "commit": "a70c84e"
     },
     {
       "number": 9,
       "title": "[test] 集成测试与验收",
-      "status": "cx-blocked",
+      "status": "cx-done",
       "phase": 5,
       "parallel_group": null,
-      "depends_on": [5, 6, 7, 8]
+      "depends_on": [5, 6, 7, 8],
+      "completed_at": "2026-02-02T00:42:00+08:00",
+      "commit": "559919d"
     }
   ],
   "execution_order": [5, 6, 7, 8, 9]

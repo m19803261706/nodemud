@@ -6,18 +6,14 @@
 import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
-/**
- * 环境枚举
- */
+/** 支持的运行环境 */
 enum Environment {
   Development = 'development',
   Production = 'production',
   Test = 'test',
 }
 
-/**
- * 环境变量验证类
- */
+/** 环境变量约束定义 */
 class EnvironmentVariables {
   @IsEnum(Environment)
   NODE_ENV: Environment;

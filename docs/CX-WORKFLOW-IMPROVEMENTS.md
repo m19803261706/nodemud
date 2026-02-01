@@ -14,6 +14,7 @@ gh issue create --body-file /tmp/prd_issue.md
 ```
 
 **缺点**：
+
 - 系统重启后临时文件丢失
 - 不便于后期查看和管理
 - 无法追溯文档草稿历史
@@ -34,6 +35,7 @@ gh issue create --body-file "$PROJECT_ROOT/docs/drafts/prd-${feature_name}.md"
 ```
 
 **目录结构**：
+
 ```
 nodemud/
 ├── docs/
@@ -46,6 +48,7 @@ nodemud/
 ```
 
 **.gitignore 配置**：
+
 ```
 # 可选：文档草稿不提交（Issue 已创建到 GitHub）
 docs/drafts/*.md
@@ -93,6 +96,7 @@ prd_url=$(gh issue create \
 Epic 完成后，只关闭了 Epic 和子任务 Issue，但是 PRD、Design Doc、ADR 等文档 Issue 仍然 OPEN。
 
 **当前状态**（不完美）：
+
 ```
 Scope #1  [项目蓝图] (OPEN)
   ↓
@@ -105,6 +109,7 @@ Epic #4   [功能总览] (CLOSED) ✅
 ```
 
 **期望状态**（完美闭环）：
+
 ```
 Scope #1  [项目蓝图] (OPEN) ✅ 继续跟踪整体进度
   ↓
@@ -207,6 +212,7 @@ docs/drafts/*.md
 - ✅ Scope #1 已更新进度
 
 完整的文档链路：
+
 ```
 Scope #1  [项目蓝图] (OPEN) - 继续跟踪整体进度
   ↓
