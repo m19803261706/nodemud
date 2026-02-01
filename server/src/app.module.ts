@@ -10,6 +10,7 @@ import { validate } from './config/env.validation';
 import { getDatabaseConfig } from './config/database.config';
 import { HealthModule } from './health/health.module';
 import { AccountModule } from './account/account.module';
+import { WebSocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AccountModule } from './account/account.module';
     // 功能模块
     HealthModule,
     AccountModule,
+    WebSocketModule,
   ],
 })
 export class AppModule {}

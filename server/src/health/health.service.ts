@@ -35,9 +35,7 @@ export class HealthService {
       uptime: process.uptime(),
       database: dbStatus,
       environment: process.env.NODE_ENV || 'development',
-      message: isConnected
-        ? '系统运行正常'
-        : '系统运行正常（数据库连接失败）',
+      message: isConnected ? '系统运行正常' : '系统运行正常（数据库连接失败）',
     };
   }
 }
