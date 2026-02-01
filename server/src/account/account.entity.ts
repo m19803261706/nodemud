@@ -37,8 +37,7 @@ export class Account {
   @Column({
     type: 'varchar',
     length: 20,
-    unique: true,
-    comment: '手机号（唯一，11位）',
+    comment: '手机号（11位）',
   })
   phone: string;
 

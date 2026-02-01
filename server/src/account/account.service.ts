@@ -100,18 +100,6 @@ export class AccountService {
         };
       }
 
-      // 检查手机号是否存在
-      const existingPhone = await this.accountRepository.findOne({
-        where: { phone },
-      });
-      if (existingPhone) {
-        return {
-          success: false,
-          reason: 'phone_exists',
-          message: '手机号已被注册',
-        };
-      }
-
       // bcrypt 加密密码（rounds=10）
       const hashedPassword = await bcrypt.hash(password, 10);
 

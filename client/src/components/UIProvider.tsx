@@ -11,6 +11,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import { Keyboard } from 'react-native';
 import { GameAlert, GameAlertProps, AlertButton } from './GameAlert';
 import { GameToast, GameToastProps, ToastType } from './GameToast';
 import { wsService } from '../services/WebSocketService';
@@ -70,6 +71,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
 
   /** 显示 Alert 弹窗 */
   const showAlert = useCallback((config: AlertConfig) => {
+    // 收起键盘，避免输入框层级覆盖弹窗
+    Keyboard.dismiss();
     // 包装按钮 onPress，自动关闭弹窗
     const wrappedButtons = (config.buttons || [{ text: '确定' }]).map(btn => ({
       ...btn,
@@ -89,6 +92,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
 
   /** 显示 Toast 通知 */
   const showToast = useCallback((config: ToastConfig) => {
+    Keyboard.dismiss();
     // 先关闭当前 Toast，再显示新的
     setToastVisible(false);
     setTimeout(() => {
@@ -115,7 +119,12 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       showToast({
         type: typeMap[data.level] || 'info',
-        title: data.level === 'error' ? '错误' : data.level === 'warning' ? '注意' : '提示',
+        title:
+          data.level === 'error'
+            ? '错误'
+            : data.level === 'warning'
+              ? '注意'
+              : '提示',
         message: data.message,
         duration: data.duration,
       });
