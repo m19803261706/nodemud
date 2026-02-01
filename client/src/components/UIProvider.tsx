@@ -12,8 +12,8 @@ import React, {
   useRef,
 } from 'react';
 import { Keyboard } from 'react-native';
-import { GameAlert, GameAlertProps, AlertButton } from './GameAlert';
-import { GameToast, GameToastProps, ToastType } from './GameToast';
+import { GameAlert, AlertButton } from './GameAlert';
+import { GameToast, ToastType } from './GameToast';
 import { wsService } from '../services/WebSocketService';
 
 /** Alert 配置 */
@@ -110,21 +110,14 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
   /** 监听服务端推送的 toast / alert 消息 */
   useEffect(() => {
     const handleServerToast = (data: any) => {
-      // 服务端 level 映射到前端 ToastType
-      const typeMap: Record<string, ToastType> = {
-        success: 'success',
-        error: 'error',
-        warning: 'warning',
-        info: 'info',
+      // 服务端 level 映射到前端标题
+      const titleMap: Record<string, string> = {
+        error: '错误',
+        warning: '注意',
       };
       showToast({
-        type: typeMap[data.level] || 'info',
-        title:
-          data.level === 'error'
-            ? '错误'
-            : data.level === 'warning'
-              ? '注意'
-              : '提示',
+        type: data.level || 'info',
+        title: titleMap[data.level] || '提示',
         message: data.message,
         duration: data.duration,
       });

@@ -84,7 +84,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /** 获取 Socket ID */
   private getSocketId(client: any): string {
-    return client._socket?.remoteAddress + ':' + client._socket?.remotePort || 'unknown';
+    const address = client._socket?.remoteAddress;
+    const port = client._socket?.remotePort;
+    return address && port ? `${address}:${port}` : 'unknown';
   }
 
   /** 获取 Session */

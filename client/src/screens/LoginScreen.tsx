@@ -44,7 +44,6 @@ export const LoginScreen = ({ navigation }: any) => {
       });
     });
 
-    return () => {};
   }, [navigation]);
 
   const handleLogin = () => {

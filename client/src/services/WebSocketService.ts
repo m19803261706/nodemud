@@ -144,7 +144,7 @@ class WebSocketService {
 
   /**
    * 处理接收到的消息
-   * @param data JSON 字符串
+   * @param raw JSON 字符串
    */
   private handleMessage(raw: string) {
     const message = MessageFactory.deserialize<ServerMessage>(raw);

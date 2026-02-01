@@ -4,7 +4,7 @@
  * 调整：飞鸽传书（邮箱）→ 联系飞鸽（手机号）
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { showAlert, showToast } = useUI();
 
-  React.useEffect(() => {
+  useEffect(() => {
     wsService.on('registerSuccess', data => {
       showAlert({
         type: 'success',
@@ -79,7 +79,7 @@ export const RegisterScreen = ({ navigation }: any) => {
       return;
     }
 
-    if (phone.length !== 11 || !/^\d{11}$/.test(phone)) {
+    if (!/^\d{11}$/.test(phone)) {
       showToast({
         type: 'warning',
         title: '提示',
