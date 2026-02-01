@@ -4,7 +4,6 @@
  */
 
 import { MessageFactory } from '@packages/core';
-import type { ServerMessage } from '@packages/core';
 
 class WebSocketService {
   private ws: WebSocket | null = null;
@@ -109,7 +108,12 @@ class WebSocketService {
       console.error('WebSocket 未连接');
       return false;
     }
-    this.ws.send(MessageFactory.serialize(message));
+    // NestJS WsAdapter 要求 { event, data } 格式路由到 @SubscribeMessage
+    const payload = JSON.stringify({
+      event: 'message',
+      data: MessageFactory.serialize(message),
+    });
+    this.ws.send(payload);
     return true;
   }
 
@@ -141,15 +145,18 @@ class WebSocketService {
    * 处理接收到的消息
    * @param data JSON 字符串
    */
-  private handleMessage(data: string) {
-    const message = MessageFactory.deserialize<ServerMessage>(data);
-    if (!message) {
-      console.error('无效消息:', data);
-      return;
+  private handleMessage(raw: string) {
+    try {
+      const message = JSON.parse(raw);
+      if (!message || !message.type) {
+        console.error('无效消息:', raw);
+        return;
+      }
+      // 分发消息到监听器
+      this.emit(message.type, message.data);
+    } catch {
+      console.error('消息解析失败:', raw);
     }
-
-    // 分发消息到监听器
-    this.emit(message.type, message.data);
   }
 
   /**
