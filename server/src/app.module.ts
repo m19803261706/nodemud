@@ -4,8 +4,10 @@
  */
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { validate } from './config/env.validation';
+import { getDatabaseConfig } from './config/database.config';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -17,7 +19,12 @@ import { HealthModule } from './health/health.module';
       envFilePath: '.env',
     }),
 
-    // TODO: 启用数据库连接 - 参见 config/database.config.ts
+    // 数据库模块 - TypeORM + MySQL
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: getDatabaseConfig,
+    }),
 
     // 功能模块
     HealthModule,
