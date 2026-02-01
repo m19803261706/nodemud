@@ -115,3 +115,6 @@ yarn-error.log
 
 # Misc
 .env.local
+
+# CX 工作流文档草稿（可选：Issue 已创建到 GitHub，本地草稿可删除）
+# docs/drafts/*.md
