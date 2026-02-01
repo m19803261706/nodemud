@@ -18,7 +18,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { MessageFactory } from '@packages/core';
 import type { CharacterAttributes } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
-import { TypewriterText, useTypewriterSequence, useUI } from '../components';
+import { TypewriterText, useUI } from '../components';
 
 /** 角色名正则：2-6 个中文字符 */
 const NAME_REGEX = /^[\u4e00-\u9fa5]{2,6}$/;
@@ -60,13 +60,8 @@ const renderStars = (value: number, max: number = 5) => {
 };
 
 /** 打字机旁白（原创） */
-const INTRO_TEXTS = [
-  '铜镜上的光华渐渐收敛，你长长地呼出一口气。窗外不知何时下起了雨，檐上的水珠一滴一滴落在青石板上。',
-  '老道起身走到门边，背对着你，望着那片雨幕。',
-  '"在江湖上行走，总得有个名号。叫什么不打紧，打紧的是——叫出这个名字的时候，你自己认不认。"',
-  '他回过头来，雨光映在他脸上，那双浑浊的眼睛忽然亮了一下。',
-  '"说吧，你叫什么？"',
-];
+const INTRO_TEXT =
+  '铜镜上的光华渐渐收敛，你长长地呼出一口气。窗外不知何时下起了雨，檐上的水珠一滴一滴落在青石板上。老道起身走到门边，背对着你，望着那片雨幕。\n"在江湖上行走，总得有个名号。叫什么不打紧，打紧的是——叫出这个名字的时候，你自己认不认。"\n他回过头来，雨光映在他脸上，那双浑浊的眼睛忽然亮了一下。"说吧，你叫什么？"';
 
 export const CharacterConfirmScreen = ({ navigation, route }: any) => {
   const { origin, gender, fateData, attributes } = route.params;
@@ -187,9 +182,11 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
             activeOpacity={0.9}
             onPress={handleIntroComplete}
           >
-            <IntroSequence
-              texts={INTRO_TEXTS}
+            <TypewriterText
+              text={INTRO_TEXT}
+              speed={70}
               onComplete={handleIntroComplete}
+              style={styles.introText}
             />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
@@ -321,38 +318,6 @@ export const CharacterConfirmScreen = ({ navigation, route }: any) => {
   );
 };
 
-/** 旁白序列子组件 */
-const IntroSequence: React.FC<{
-  texts: string[];
-  onComplete: () => void;
-}> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
-    texts,
-    {
-      speed: 70,
-      delayBetween: 800,
-      onAllComplete: () => {
-        setTimeout(onComplete, 600);
-      },
-    },
-  );
-
-  return (
-    <View style={styles.introContent}>
-      {visibleTexts.map((text: string, i: number) => (
-        <TypewriterText
-          key={i}
-          text={text}
-          speed={70}
-          style={styles.introText}
-          onComplete={i === currentIndex ? handleComplete : undefined}
-          showCursor={i === currentIndex}
-        />
-      ))}
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -365,9 +330,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 36,
-  },
-  introContent: {
-    gap: 20,
   },
   introText: {
     fontSize: 16,

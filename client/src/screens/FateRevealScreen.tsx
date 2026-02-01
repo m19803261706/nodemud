@@ -16,7 +16,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { MessageFactory } from '@packages/core';
 import type { CharacterAttributes } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
-import { TypewriterText, useTypewriterSequence, useUI } from '../components';
+import { TypewriterText, useUI } from '../components';
 
 /** 命格数据（从服务端接收） */
 interface FateData {
@@ -51,12 +51,8 @@ const renderStars = (value: number, max: number = 5) => {
 };
 
 /** 打字机旁白 — 等待排盘期间（原创） */
-const FATE_INTRO_TEXTS = [
-  '客栈后院有一间偏房，门上贴着一张泛黄的符纸。屋里坐着个白发老道，面前摆着一副铜钱和一盘残棋。',
-  '老道抬眼看了看你，忽然笑道："有意思。老朽替人看了四十年命数，像你这般眼神的——不多见。"',
-  '他拈起三枚铜钱，在掌心里摇了摇。铜钱落在桌上，叮叮当当，像是远山的寺钟。',
-  '老道的笑容慢慢收住了，他盯着铜钱看了许久，低声说道：',
-];
+const FATE_INTRO_TEXT =
+  '客栈后院有一间偏房，门上贴着一张泛黄的符纸。屋里坐着个白发老道，面前摆着一副铜钱和一盘残棋。老道抬眼看了看你，忽然笑道："有意思。老朽替人看了四十年命数，像你这般眼神的——不多见。"\n他拈起三枚铜钱，在掌心里摇了摇。铜钱落在桌上，叮叮当当，像是远山的寺钟。老道的笑容慢慢收住了，他盯着铜钱看了许久，低声说道：';
 
 export const FateRevealScreen = ({ navigation, route }: any) => {
   const { origin, gender } = route.params;
@@ -150,12 +146,12 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
         {/* 打字机旁白（排盘过渡） */}
         {!introComplete && (
           <View style={styles.introContainer}>
-            <View style={styles.introContent}>
-              <IntroSequence
-                texts={FATE_INTRO_TEXTS}
-                onComplete={() => setIntroComplete(true)}
-              />
-            </View>
+            <TypewriterText
+              text={FATE_INTRO_TEXT}
+              speed={70}
+              onComplete={() => setIntroComplete(true)}
+              style={styles.introText}
+            />
             {loading && <Text style={styles.loadingText}>紫微排盘中...</Text>}
           </View>
         )}
@@ -244,38 +240,6 @@ export const FateRevealScreen = ({ navigation, route }: any) => {
   );
 };
 
-/** 旁白序列子组件 */
-const IntroSequence: React.FC<{
-  texts: string[];
-  onComplete: () => void;
-}> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
-    texts,
-    {
-      speed: 70,
-      delayBetween: 800,
-      onAllComplete: () => {
-        setTimeout(onComplete, 600);
-      },
-    },
-  );
-
-  return (
-    <>
-      {visibleTexts.map((text, i) => (
-        <TypewriterText
-          key={i}
-          text={text}
-          speed={70}
-          style={styles.introText}
-          onComplete={i === currentIndex ? handleComplete : undefined}
-          showCursor={i === currentIndex}
-        />
-      ))}
-    </>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -288,9 +252,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 36,
-  },
-  introContent: {
-    gap: 20,
   },
   introText: {
     fontSize: 16,

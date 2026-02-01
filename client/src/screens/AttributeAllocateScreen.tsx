@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { CharacterAttributes } from '@packages/core';
-import { TypewriterText, useTypewriterSequence } from '../components';
+import { TypewriterText } from '../components';
 
 /** 属性总根基点 */
 const TOTAL_POINTS = 18;
@@ -59,12 +59,8 @@ const DANTIAN_GROUPS = [
 ];
 
 /** 打字机旁白（原创） */
-const INTRO_TEXTS = [
-  '老道将铜钱收好，从柜子里翻出一面铜镜。镜面昏暗，映不出人影，却隐隐有光华流转。',
-  '"命格是天给的，但这副骨头是自己的。"老道把铜镜推到你面前，"人有三丹田——神、气、精。上丹田主悟性灵觉，中丹田通经脉内息，下丹田定筋骨血气。"',
-  '他竖起一根手指："一共十八分根基。怎么分，你自己拿主意。"',
-  '"这决定了你往后在江湖上吃饭的本事。想清楚了再落子，落子无悔。"',
-];
+const INTRO_TEXT =
+  '老道将铜钱收好，从柜子里翻出一面铜镜。镜面昏暗，映不出人影，却隐隐有光华流转。"命格是天给的，但这副骨头是自己的。"老道把铜镜推到你面前，"人有三丹田——神、气、精。上丹田主悟性灵觉，中丹田通经脉内息，下丹田定筋骨血气。"\n他竖起一根手指："一共十八分根基。怎么分，你自己拿主意。这决定了你往后在江湖上吃饭的本事。想清楚了再落子，落子无悔。"';
 
 export const AttributeAllocateScreen = ({ navigation, route }: any) => {
   const { origin, gender, fateData } = route.params;
@@ -149,9 +145,11 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
             activeOpacity={0.9}
             onPress={handleIntroComplete}
           >
-            <IntroSequence
-              texts={INTRO_TEXTS}
+            <TypewriterText
+              text={INTRO_TEXT}
+              speed={70}
               onComplete={handleIntroComplete}
+              style={styles.introText}
             />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
@@ -313,38 +311,6 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
   );
 };
 
-/** 旁白序列子组件 */
-const IntroSequence: React.FC<{
-  texts: string[];
-  onComplete: () => void;
-}> = ({ texts, onComplete }) => {
-  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
-    texts,
-    {
-      speed: 70,
-      delayBetween: 800,
-      onAllComplete: () => {
-        setTimeout(onComplete, 600);
-      },
-    },
-  );
-
-  return (
-    <View style={styles.introContent}>
-      {visibleTexts.map((text: string, i: number) => (
-        <TypewriterText
-          key={i}
-          text={text}
-          speed={70}
-          style={styles.introText}
-          onComplete={i === currentIndex ? handleComplete : undefined}
-          showCursor={i === currentIndex}
-        />
-      ))}
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -357,9 +323,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 36,
-  },
-  introContent: {
-    gap: 20,
   },
   introText: {
     fontSize: 16,

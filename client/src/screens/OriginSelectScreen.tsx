@@ -14,7 +14,7 @@ import {
   Animated,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { TypewriterText, useTypewriterSequence } from '../components';
+import { TypewriterText } from '../components';
 
 /** 出身配置数据（与服务端 ORIGIN_CONFIG 对应） */
 const ORIGINS = [
@@ -69,13 +69,8 @@ const ORIGINS = [
 ];
 
 /** 打字机旁白文字（原创） */
-const INTRO_TEXTS = [
-  '官道上走了三天三夜，脚底的草鞋磨穿了两双。远处群山如墨，近处炊烟零落，一间歪歪斜斜的客栈挑着半面酒旗。',
-  '掌柜是个独臂老头儿，右手翻炒着锅里的花生米，头也不抬地问了一句：',
-  '"小家伙，打哪儿来的？"',
-  '你怔了一怔。是啊，你打哪儿来？又要往何处去？',
-  '这一路上你想了无数遍，却始终没有答案。或许答案就藏在前方那条看不见尽头的路上。',
-];
+const INTRO_TEXT =
+  '官道上走了三天三夜，脚底的草鞋磨穿了两双。远处群山如墨，近处炊烟零落，一间歪歪斜斜的客栈挑着半面酒旗。掌柜是个独臂老头儿，右手翻炒着锅里的花生米，头也不抬地问了一句：\n"小家伙，打哪儿来的？"\n你怔了一怔。是啊，你打哪儿来？又要往何处去？这一路上你想了无数遍，却始终没有答案。或许答案就藏在前方那条看不见尽头的路上。';
 
 export const OriginSelectScreen = ({ navigation, route }: any) => {
   const gender = route.params?.gender || 'male';
@@ -83,19 +78,14 @@ export const OriginSelectScreen = ({ navigation, route }: any) => {
   const [showContent, setShowContent] = useState(false);
   const contentOpacity = useState(new Animated.Value(0))[0];
 
-  const { currentIndex, visibleTexts, handleComplete, allComplete } =
-    useTypewriterSequence(INTRO_TEXTS, {
-      speed: 70,
-      delayBetween: 800,
-      onAllComplete: () => {
-        setShowContent(true);
-        Animated.timing(contentOpacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }).start();
-      },
-    });
+  const handleIntroComplete = useCallback(() => {
+    setShowContent(true);
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, [contentOpacity]);
 
   const handleContinue = useCallback(() => {
     if (!selectedOrigin) {
@@ -129,22 +119,12 @@ export const OriginSelectScreen = ({ navigation, route }: any) => {
             activeOpacity={0.9}
             onPress={handleSkip}
           >
-            <View style={styles.introContent}>
-              {visibleTexts.map((text, i) => (
-                <TypewriterText
-                  key={i}
-                  text={text}
-                  speed={70}
-                  delay={0}
-                  onComplete={i === currentIndex ? handleComplete : undefined}
-                  style={[
-                    styles.introText,
-                    i === visibleTexts.length - 1 && styles.introTextLast,
-                  ]}
-                  showCursor={i === currentIndex}
-                />
-              ))}
-            </View>
+            <TypewriterText
+              text={INTRO_TEXT}
+              speed={70}
+              onComplete={handleIntroComplete}
+              style={styles.introText}
+            />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
         )}
@@ -246,19 +226,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 36,
   },
-  introContent: {
-    gap: 20,
-  },
   introText: {
     fontSize: 16,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
     lineHeight: 28,
     letterSpacing: 1,
-  },
-  introTextLast: {
-    color: '#3A3530',
-    fontWeight: '500',
   },
   skipHint: {
     position: 'absolute',

@@ -13,15 +13,11 @@ import {
   Animated,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { TypewriterText, useTypewriterSequence } from '../components';
+import { TypewriterText } from '../components';
 
 /** 打字机旁白文字（原创，模拟金庸叙事口吻） */
-const INTRO_TEXTS = [
-  '那年深秋，嘉兴府南湖上薄雾如纱，几只乌篷船泊在芦苇荡里，桨声都听不真切。',
-  '岸边茶棚的说书先生拍了一下醒木，道："诸位客官且听——这武林中的恩怨情仇，说到底不过八个字。"',
-  '"身不由己，命不由天。"',
-  '你攥紧了包袱，推开那扇吱呀作响的柴门，踏入了这滚滚红尘。',
-];
+const INTRO_TEXT =
+  '那年深秋，嘉兴府南湖上薄雾如纱，几只乌篷船泊在芦苇荡里，桨声都听不真切。岸边茶棚的说书先生拍了一下醒木，道："诸位客官且听——这武林中的恩怨情仇，说到底不过八个字。"\n"身不由己，命不由天。"\n你攥紧了包袱，推开那扇吱呀作响的柴门，踏入了这滚滚红尘。';
 
 export const CreateCharacterScreen = ({ navigation }: any) => {
   const [showContent, setShowContent] = useState(false);
@@ -30,21 +26,14 @@ export const CreateCharacterScreen = ({ navigation }: any) => {
   >(null);
   const contentOpacity = useState(new Animated.Value(0))[0];
 
-  const { currentIndex, visibleTexts, handleComplete } = useTypewriterSequence(
-    INTRO_TEXTS,
-    {
-      speed: 80,
-      delayBetween: 1000,
-      onAllComplete: () => {
-        setShowContent(true);
-        Animated.timing(contentOpacity, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }).start();
-      },
-    },
-  );
+  const handleIntroComplete = useCallback(() => {
+    setShowContent(true);
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, [contentOpacity]);
 
   const handleSkip = useCallback(() => {
     setShowContent(true);
@@ -77,22 +66,12 @@ export const CreateCharacterScreen = ({ navigation }: any) => {
             activeOpacity={0.9}
             onPress={handleSkip}
           >
-            <View style={styles.introContent}>
-              {visibleTexts.map((text, i) => (
-                <TypewriterText
-                  key={i}
-                  text={text}
-                  speed={80}
-                  delay={0}
-                  onComplete={i === currentIndex ? handleComplete : undefined}
-                  style={[
-                    styles.introText,
-                    i === visibleTexts.length - 1 && styles.introTextLast,
-                  ]}
-                  showCursor={i === currentIndex}
-                />
-              ))}
-            </View>
+            <TypewriterText
+              text={INTRO_TEXT}
+              speed={80}
+              onComplete={handleIntroComplete}
+              style={styles.introText}
+            />
             <Text style={styles.skipHint}>点击屏幕跳过</Text>
           </TouchableOpacity>
         )}
@@ -198,19 +177,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 36,
   },
-  introContent: {
-    gap: 20,
-  },
   introText: {
     fontSize: 18,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
     lineHeight: 32,
     letterSpacing: 2,
-  },
-  introTextLast: {
-    color: '#3A3530',
-    fontWeight: '500',
   },
   skipHint: {
     position: 'absolute',
