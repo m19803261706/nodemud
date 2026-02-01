@@ -1,0 +1,137 @@
+{
+  "timestamp": "2026-02-02T00:00:00+08:00",
+  "project": {
+    "name": "RenZai Game (人在江湖)",
+    "description": "水墨风武侠 MUD 游戏 - React Native + NestJS + WebSocket",
+    "packageManager": "pnpm",
+    "languages": ["TypeScript"],
+    "totalFiles": 35,
+    "scannedFiles": 35,
+    "coveragePercent": 100
+  },
+  "modules": [
+    {
+      "name": "client",
+      "path": "client/",
+      "language": "TypeScript (React Native)",
+      "role": "水墨风移动端客户端（iOS/Android）",
+      "claudeMd": "client/CLAUDE.md",
+      "entry": "client/App.tsx",
+      "interfaces": [
+        "client/src/services/WebSocketService.ts"
+      ],
+      "screens": [
+        "client/src/screens/LoginScreen.tsx",
+        "client/src/screens/RegisterScreen.tsx",
+        "client/src/screens/CreateCharacterScreen.tsx",
+        "client/src/screens/GameHomeScreen.tsx"
+      ],
+      "components": [
+        "client/src/components/GameAlert.tsx",
+        "client/src/components/GameToast.tsx",
+        "client/src/components/UIProvider.tsx"
+      ],
+      "config": [
+        "client/metro.config.js",
+        "client/package.json"
+      ],
+      "testDir": null,
+      "coverage": {
+        "entry": true,
+        "interfaces": true,
+        "dataModel": false,
+        "tests": false,
+        "gaps": ["无独立测试文件", "CreateCharacterScreen/GameHomeScreen 为占位页"]
+      }
+    },
+    {
+      "name": "server",
+      "path": "server/",
+      "language": "TypeScript (NestJS)",
+      "role": "后端服务：WebSocket Gateway、账号管理、数据库",
+      "claudeMd": "server/CLAUDE.md",
+      "entry": "server/src/main.ts",
+      "interfaces": [
+        "server/src/websocket/websocket.gateway.ts",
+        "server/src/health/health.controller.ts"
+      ],
+      "handlers": [
+        "server/src/websocket/handlers/auth.handler.ts",
+        "server/src/websocket/handlers/ping.handler.ts"
+      ],
+      "entities": [
+        "server/src/account/account.entity.ts"
+      ],
+      "services": [
+        "server/src/account/account.service.ts"
+      ],
+      "config": [
+        "server/nest-cli.json",
+        "server/tsconfig.json",
+        "server/src/config/database.config.ts",
+        "server/src/config/env.validation.ts"
+      ],
+      "testDir": "server/test/",
+      "coverage": {
+        "entry": true,
+        "interfaces": true,
+        "dataModel": true,
+        "tests": true,
+        "gaps": []
+      }
+    },
+    {
+      "name": "core",
+      "path": "packages/core/",
+      "language": "TypeScript",
+      "role": "前后端共享消息类型和 MessageFactory",
+      "claudeMd": "packages/core/CLAUDE.md",
+      "entry": "packages/core/src/index.ts",
+      "interfaces": [
+        "packages/core/src/factory/MessageFactory.ts"
+      ],
+      "types": [
+        "packages/core/src/types/base.ts",
+        "packages/core/src/types/messages/auth.ts",
+        "packages/core/src/types/messages/ping.ts",
+        "packages/core/src/types/messages/ui.ts"
+      ],
+      "handlers": [
+        "packages/core/src/factory/handlers/login.ts",
+        "packages/core/src/factory/handlers/loginSuccess.ts",
+        "packages/core/src/factory/handlers/loginFailed.ts",
+        "packages/core/src/factory/handlers/register.ts",
+        "packages/core/src/factory/handlers/registerSuccess.ts",
+        "packages/core/src/factory/handlers/registerFailed.ts",
+        "packages/core/src/factory/handlers/ping.ts",
+        "packages/core/src/factory/handlers/toast.ts",
+        "packages/core/src/factory/handlers/alert.ts"
+      ],
+      "config": [
+        "packages/core/package.json",
+        "packages/core/tsconfig.json"
+      ],
+      "testDir": null,
+      "coverage": {
+        "entry": true,
+        "interfaces": true,
+        "dataModel": false,
+        "tests": false,
+        "gaps": ["无测试文件"]
+      }
+    }
+  ],
+  "rootFiles": [
+    "package.json",
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml",
+    ".gitignore",
+    ".npmrc",
+    "CLAUDE.md"
+  ],
+  "scan": {
+    "truncated": false,
+    "ignoredPatterns": ["node_modules/", "dist/", "build/", ".git/", "*.lock", "ios/Pods/"],
+    "nextSteps": []
+  }
+}
