@@ -11,13 +11,14 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   SafeAreaView,
   ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
 import { MessageFactory } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
+import { useUI } from '../components';
 
 export const RegisterScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
@@ -25,61 +26,79 @@ export const RegisterScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { showAlert, showToast } = useUI();
 
   React.useEffect(() => {
-    // 监听注册响应
     wsService.on('registerSuccess', data => {
-      Alert.alert('注册成功', data.message, [
-        {
-          text: '确定',
-          onPress: () => navigation.navigate('CreateCharacter'),
-        },
-      ]);
+      showAlert({
+        type: 'success',
+        title: '注册成功',
+        message: data.message,
+        buttons: [
+          {
+            text: '进入江湖',
+            onPress: () => navigation.navigate('CreateCharacter'),
+          },
+        ],
+      });
     });
 
     wsService.on('registerFailed', data => {
-      Alert.alert('注册失败', data.message);
+      showAlert({
+        type: 'error',
+        title: '注册失败',
+        message: data.message,
+        buttons: [
+          { text: '返回' },
+          { text: '重试', onPress: handleRegister },
+        ],
+      });
     });
   }, [navigation]);
 
   const handleRegister = () => {
-    // 前端验证
     if (!username || !phone || !password || !confirmPassword) {
-      Alert.alert('提示', '请填写完整信息');
+      showToast({ type: 'warning', title: '提示', message: '请填写完整信息' });
       return;
     }
 
-    if (username.length < 3 || username.length > 20) {
-      Alert.alert('提示', '侠名长度应为 3-20 个字符');
+    if (username.length < 6 || username.length > 10) {
+      showToast({ type: 'warning', title: '提示', message: '侠名长度应为 6-10 个字符' });
+      return;
+    }
+
+    if (!/(?=.*[0-9])(?=.*[a-zA-Z])/.test(username)) {
+      showToast({ type: 'warning', title: '提示', message: '侠名必须包含数字和字母' });
       return;
     }
 
     if (phone.length !== 11 || !/^\d{11}$/.test(phone)) {
-      Alert.alert('提示', '请输入正确的 11 位手机号');
+      showToast({ type: 'warning', title: '提示', message: '请输入正确的 11 位手机号' });
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('提示', '口令至少 6 个字符');
+      showToast({ type: 'warning', title: '提示', message: '口令至少 6 个字符' });
       return;
     }
 
     if (!/(?=.*[0-9])(?=.*[a-zA-Z])/.test(password)) {
-      Alert.alert('提示', '口令必须包含数字和字母');
+      showToast({ type: 'warning', title: '提示', message: '口令必须包含数字和字母' });
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('提示', '两次口令输入不一致');
+      showToast({ type: 'warning', title: '提示', message: '两次口令输入不一致' });
       return;
     }
 
     if (!agreeTerms) {
-      Alert.alert('提示', '请阅读并同意用户协议');
+      showToast({ type: 'warning', title: '提示', message: '请阅读并同意江湖规矩' });
       return;
     }
 
-    // 发送注册消息
     wsService.send(
       MessageFactory.create('register', username, password, phone),
     );
@@ -94,8 +113,15 @@ export const RegisterScreen = ({ navigation }: any) => {
     >
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* 顶部装饰 */}
-          <View style={styles.topDecoration} />
+          {/* 顶部装饰 - 渐变分隔线 */}
+          <View style={styles.topDecoration}>
+            <LinearGradient
+              colors={['#8B7A5A00', '#8B7A5A40', '#8B7A5A00']}
+              style={styles.gradientBorder}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+            />
+          </View>
 
           {/* 标题区域 */}
           <View style={styles.titleArea}>
@@ -111,21 +137,23 @@ export const RegisterScreen = ({ navigation }: any) => {
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="为自己取个响亮的名号..."
+                  placeholder="6-10位，需包含数字和字母"
                   placeholderTextColor="#8B7A5A80"
                   value={username}
                   onChangeText={setUsername}
+                  maxLength={10}
+                  autoCapitalize="none"
                 />
               </View>
             </View>
 
-            {/* 手机号输入框 */}
+            {/* 手机号输入框（设计稿为邮箱，调整为手机号） */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>联系飞鸽</Text>
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="请输入你的联系飞鸽..."
+                  placeholder="请输入11位手机号"
                   placeholderTextColor="#8B7A5A80"
                   value={phone}
                   onChangeText={setPhone}
@@ -138,30 +166,44 @@ export const RegisterScreen = ({ navigation }: any) => {
             {/* 设置口令输入框 */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>设置口令</Text>
-              <View style={styles.inputWrapper}>
+              <View style={styles.passwordWrapper}>
                 <TextInput
-                  style={styles.input}
-                  placeholder="设置一个安全的口令..."
+                  style={styles.passwordInput}
+                  placeholder="至少6位，需包含数字和字母"
                   placeholderTextColor="#8B7A5A80"
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                 />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Feather
+                    name={showPassword ? 'eye' : 'eye-off'}
+                    size={18}
+                    color="#8B7A5A60"
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
             {/* 确认口令输入框 */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>确认口令</Text>
-              <View style={styles.inputWrapper}>
+              <View style={styles.passwordWrapper}>
                 <TextInput
-                  style={styles.input}
-                  placeholder="再次输入口令..."
+                  style={styles.passwordInput}
+                  placeholder="再次输入口令"
                   placeholderTextColor="#8B7A5A80"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                 />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Feather
+                    name={showConfirmPassword ? 'eye' : 'eye-off'}
+                    size={18}
+                    color="#8B7A5A60"
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -176,13 +218,18 @@ export const RegisterScreen = ({ navigation }: any) => {
                     styles.checkbox,
                     agreeTerms && styles.checkboxChecked,
                   ]}
-                />
+                >
+                  {agreeTerms && (
+                    <Feather name="check" size={12} color="#6B5D4D" />
+                  )}
+                </View>
               </TouchableOpacity>
               <View style={styles.agreeTextWrap}>
                 <Text style={styles.agreeText}>
                   我已阅读并同意
-                  <Text style={styles.agreeLink}> 《用户协议》 </Text>和
-                  <Text style={styles.agreeLink}> 《隐私政策》</Text>
+                  <Text style={styles.agreeLink}> 《江湖规矩》 </Text>
+                  与
+                  <Text style={styles.agreeLink}> 《侠客守则》</Text>
                 </Text>
               </View>
             </View>
@@ -210,8 +257,14 @@ export const RegisterScreen = ({ navigation }: any) => {
             </View>
           </View>
 
-          {/* 底部装饰 */}
+          {/* 底部装饰 - 渐变分隔线 */}
           <View style={styles.bottomDecoration}>
+            <LinearGradient
+              colors={['#8B7A5A00', '#8B7A5A40', '#8B7A5A00']}
+              style={styles.gradientBorderTop}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+            />
             <Text style={styles.footerText}>江湖路远 · 不负韶华</Text>
           </View>
         </ScrollView>
@@ -232,8 +285,11 @@ const styles = StyleSheet.create({
   },
   topDecoration: {
     height: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#8B7A5A40',
+    justifyContent: 'flex-end',
+  },
+  gradientBorder: {
+    height: 1,
+    width: '100%',
   },
   titleArea: {
     alignItems: 'center',
@@ -277,7 +333,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     justifyContent: 'center',
   },
+  passwordWrapper: {
+    height: 44,
+    backgroundColor: '#F5F0E830',
+    borderWidth: 1,
+    borderColor: '#8B7A5A40',
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   input: {
+    fontSize: 13,
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+  },
+  passwordInput: {
+    flex: 1,
     fontSize: 13,
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
@@ -296,18 +368,20 @@ const styles = StyleSheet.create({
     height: 16,
     borderWidth: 1,
     borderColor: '#8B7A5A60',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#8B7A5A60',
+    backgroundColor: 'transparent',
   },
   agreeTextWrap: {
     flex: 1,
   },
   agreeText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
-    lineHeight: 18,
+    lineHeight: 17,
   },
   agreeLink: {
     color: '#6B5D4D',
@@ -352,9 +426,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#8B7A5A40',
+  },
+  gradientBorderTop: {
+    height: 1,
+    width: '100%',
+    position: 'absolute',
+    top: 0,
   },
   footerText: {
     fontSize: 12,

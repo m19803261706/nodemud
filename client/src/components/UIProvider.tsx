@@ -1,0 +1,122 @@
+/**
+ * UIProvider - 全局 UI 上下文
+ * 提供 showAlert 和 showToast 方法，管理弹窗/通知队列
+ */
+
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { GameAlert, GameAlertProps, AlertButton } from './GameAlert';
+import { GameToast, GameToastProps, ToastType } from './GameToast';
+
+/** Alert 配置 */
+interface AlertConfig {
+  type: 'success' | 'error';
+  title: string;
+  message?: string;
+  buttons?: AlertButton[];
+}
+
+/** Toast 配置 */
+interface ToastConfig {
+  type: ToastType;
+  title: string;
+  message?: string;
+  duration?: number;
+}
+
+/** UI 上下文接口 */
+interface UIContextValue {
+  showAlert: (config: AlertConfig) => void;
+  showToast: (config: ToastConfig) => void;
+  hideAlert: () => void;
+}
+
+const UIContext = createContext<UIContextValue | null>(null);
+
+/** 获取 UI 上下文 Hook */
+export const useUI = (): UIContextValue => {
+  const ctx = useContext(UIContext);
+  if (!ctx) {
+    throw new Error('useUI 必须在 UIProvider 内部使用');
+  }
+  return ctx;
+};
+
+/** UIProvider 组件 */
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Alert 状态
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<AlertConfig>({
+    type: 'success',
+    title: '',
+  });
+
+  // Toast 状态
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastConfig, setToastConfig] = useState<ToastConfig>({
+    type: 'info',
+    title: '',
+  });
+  const toastKey = useRef(0);
+
+  /** 显示 Alert 弹窗 */
+  const showAlert = useCallback((config: AlertConfig) => {
+    // 包装按钮 onPress，自动关闭弹窗
+    const wrappedButtons = (config.buttons || [{ text: '确定' }]).map(btn => ({
+      ...btn,
+      onPress: () => {
+        setAlertVisible(false);
+        btn.onPress?.();
+      },
+    }));
+    setAlertConfig({ ...config, buttons: wrappedButtons });
+    setAlertVisible(true);
+  }, []);
+
+  /** 隐藏 Alert */
+  const hideAlert = useCallback(() => {
+    setAlertVisible(false);
+  }, []);
+
+  /** 显示 Toast 通知 */
+  const showToast = useCallback((config: ToastConfig) => {
+    // 先关闭当前 Toast，再显示新的
+    setToastVisible(false);
+    setTimeout(() => {
+      toastKey.current += 1;
+      setToastConfig(config);
+      setToastVisible(true);
+    }, 50);
+  }, []);
+
+  /** Toast 关闭回调 */
+  const handleToastClose = useCallback(() => {
+    setToastVisible(false);
+  }, []);
+
+  return (
+    <UIContext.Provider value={{ showAlert, showToast, hideAlert }}>
+      {children}
+
+      {/* 全局 Alert */}
+      <GameAlert
+        visible={alertVisible}
+        type={alertConfig.type}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        buttons={alertConfig.buttons}
+        onDismiss={hideAlert}
+      />
+
+      {/* 全局 Toast */}
+      <GameToast
+        key={toastKey.current}
+        visible={toastVisible}
+        type={toastConfig.type}
+        title={toastConfig.title}
+        message={toastConfig.message}
+        duration={toastConfig.duration}
+        onClose={handleToastClose}
+      />
+    </UIContext.Provider>
+  );
+};
