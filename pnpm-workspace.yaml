@@ -1,0 +1,6 @@
+# pnpm Workspace 配置
+# 定义 Monorepo 中的所有子项目
+
+packages:
+  - 'server'   # 后端 NestJS 服务
+  - 'client'   # 前端 React Native 应用

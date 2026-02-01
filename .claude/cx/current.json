@@ -1,0 +1,57 @@
+{
+  "feature": "基础目录与项目初始化",
+  "created_at": "2026-02-02T00:30:00+08:00",
+  "project_number": 3,
+  "docs": {
+    "prd": 2,
+    "design": 3,
+    "adr": []
+  },
+  "epic": {
+    "number": 4,
+    "title": "[Epic] 基础目录与项目初始化"
+  },
+  "issues": [
+    {
+      "number": 5,
+      "title": "[backend] 后端项目初始化与配置",
+      "status": "cx-ready",
+      "phase": 1,
+      "parallel_group": "p1",
+      "depends_on": []
+    },
+    {
+      "number": 6,
+      "title": "[frontend] 前端项目初始化与欢迎页面",
+      "status": "cx-ready",
+      "phase": 2,
+      "parallel_group": "p2",
+      "depends_on": []
+    },
+    {
+      "number": 7,
+      "title": "[tools] 代码规范工具配置（Prettier + Husky）",
+      "status": "cx-ready",
+      "phase": 3,
+      "parallel_group": "p3",
+      "depends_on": []
+    },
+    {
+      "number": 8,
+      "title": "[project] pnpm Workspace 与项目级配置",
+      "status": "cx-ready",
+      "phase": 4,
+      "parallel_group": "p4",
+      "depends_on": []
+    },
+    {
+      "number": 9,
+      "title": "[test] 集成测试与验收",
+      "status": "cx-blocked",
+      "phase": 5,
+      "parallel_group": null,
+      "depends_on": [5, 6, 7, 8]
+    }
+  ],
+  "execution_order": [5, 6, 7, 8, 9]
+}

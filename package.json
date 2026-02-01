@@ -1,0 +1,26 @@
+{
+  "name": "nodemud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "现代化文本 MUD 游戏 Monorepo",
+  "scripts": {
+    "server:dev": "cd server && pnpm run start:dev",
+    "server:build": "cd server && pnpm run build",
+    "server:start": "cd server && pnpm run start:prod",
+    "client:start": "cd client && pnpm run start",
+    "client:android": "cd client && pnpm run android",
+    "client:ios": "cd client && pnpm run ios",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "lint": "pnpm --filter server lint && pnpm --filter client lint"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "husky": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

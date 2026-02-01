@@ -1,0 +1,26 @@
+# 依赖
+node_modules/
+pnpm-lock.yaml
+
+# 编译输出
+dist/
+*.tsbuildinfo
+
+# 环境变量
+.env
+
+# 日志
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
