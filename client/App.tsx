@@ -15,7 +15,7 @@ import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CreateCharacterScreen } from './src/screens/CreateCharacterScreen';
 import { GameHomeScreen } from './src/screens/GameHomeScreen';
 
-const WS_URL = 'ws://localhost:4001';
+const WS_URL = 'ws://localhost:4000';
 const Stack = createNativeStackNavigator();
 
 /** 应用根组件 */

@@ -16,21 +16,14 @@ import { Server } from 'ws';
 import { MessageFactory } from '@packages/core';
 import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
-import { AuthHandler } from './handlers/auth.handler';
-import { PingHandler } from './handlers/ping.handler';
 
-@WebSocketGateway(4001, { transports: ['websocket'] })
+@WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
   // Session 存储（内存 Map）
   private sessions = new Map<string, Session>();
-
-  constructor(
-    private readonly authHandler: AuthHandler,
-    private readonly pingHandler: PingHandler,
-  ) {}
 
   /** 客户端连接 */
   handleConnection(client: any) {
@@ -52,7 +45,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /** 监听客户端消息 */
   @SubscribeMessage('message')
-  async handleMessage(@ConnectedSocket() client: any, @MessageBody() data: string) {
+  handleMessage(@ConnectedSocket() client: any, @MessageBody() data: string) {
     const socketId = this.getSocketId(client);
     const session = this.sessions.get(socketId);
 
@@ -70,28 +63,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     console.log('收到消息:', message.type, 'from', socketId);
 
-    // 消息路由
-    switch (message.type) {
-      case 'login':
-        await this.authHandler.handleLogin(client, session, message.data);
-        break;
-      case 'register':
-        await this.authHandler.handleRegister(client, message.data);
-        break;
-      case 'ping':
-        this.pingHandler.handlePing(client, session);
-        break;
-      default:
-        console.error('未知消息类型:', message.type);
-    }
+    // TODO: 消息路由（任务 #21 实现）
+    // 暂时只记录日志
   }
 
   /** 获取 Socket ID */
   private getSocketId(client: any): string {
-    return (
-      client._socket?.remoteAddress + ':' + client._socket?.remotePort ||
-      'unknown'
-    );
+    return client._socket?.remoteAddress + ':' + client._socket?.remotePort || 'unknown';
   }
 
   /** 获取 Session */
@@ -99,4 +77,3 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.sessions.get(socketId);
   }
 }
-
