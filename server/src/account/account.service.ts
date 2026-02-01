@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { Account } from './account.entity';
+import { Character } from '../character/character.entity';
 
 /** 注册结果 */
 interface RegisterResult {
@@ -37,6 +38,8 @@ export class AccountService {
   constructor(
     @InjectRepository(Account)
     private readonly accountRepository: Repository<Account>,
+    @InjectRepository(Character)
+    private readonly characterRepository: Repository<Character>,
   ) {}
 
   /**
@@ -163,8 +166,11 @@ export class AccountService {
       account.lastLoginAt = new Date();
       await this.accountRepository.save(account);
 
-      // TODO: 检查是否有角色（后期实现）
-      const hasCharacter = false;
+      // 查询是否已有角色
+      const character = await this.characterRepository.findOne({
+        where: { accountId: account.id },
+      });
+      const hasCharacter = !!character;
 
       return {
         success: true,
@@ -173,8 +179,8 @@ export class AccountService {
           username: account.username,
         },
         hasCharacter,
-        characterId: undefined,
-        characterName: undefined,
+        characterId: character?.id,
+        characterName: character?.name,
         message: '登录成功',
       };
     } catch (error) {

@@ -17,13 +17,17 @@ import { MessageFactory } from '@packages/core';
 import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
 import { AuthHandler } from './handlers/auth.handler';
+import { CharacterHandler } from './handlers/character.handler';
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly authHandler: AuthHandler) {}
+  constructor(
+    private readonly authHandler: AuthHandler,
+    private readonly characterHandler: CharacterHandler,
+  ) {}
 
   // Session 存储（内存 Map）
   private sessions = new Map<string, Session>();
@@ -73,6 +77,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         break;
       case 'register':
         await this.authHandler.handleRegister(client, message.data as any);
+        break;
+      case 'createCharacterStep1':
+        await this.characterHandler.handleStep1(client, session, message.data as any);
+        break;
+      case 'createCharacterConfirm':
+        await this.characterHandler.handleConfirm(client, session, message.data as any);
         break;
       case 'ping':
         // 心跳，无需处理

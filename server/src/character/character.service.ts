@@ -14,6 +14,7 @@ export interface CreateCharacterData {
   accountId: string;
   name: string;
   origin: Character['origin'];
+  gender: 'male' | 'female';
   fateName: string;
   fateType: string;
   fatePoem: string;

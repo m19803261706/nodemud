@@ -3,13 +3,7 @@
  * 角色数据表映射（一账号一角色）
  */
 
-import {
-  Entity,
-  Column,
-  PrimaryColumn,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
 
 /** 出身枚举 */
 export type CharacterOriginType =
@@ -50,6 +44,13 @@ export class Character {
     comment: '出身类型',
   })
   origin: CharacterOriginType;
+
+  @Column({
+    type: 'enum',
+    enum: ['male', 'female'],
+    comment: '性别（影响紫微排盘结果）',
+  })
+  gender: 'male' | 'female';
 
   // ========== 命格字段 ==========
 
