@@ -1,6 +1,7 @@
 /**
  * GameToast 通知组件 - 水墨风
  * 支持成功/失败/警告/信息四种类型，匹配 Pencil 设计稿
+ * 使用 Modal 确保渲染在最顶层
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -8,8 +9,10 @@ import {
   View,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   Animated,
+  Modal,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
@@ -129,65 +132,80 @@ export const GameToast: React.FC<GameToastProps> = ({
   }
 
   return (
-    <Animated.View
-      style={[styles.wrapper, { transform: [{ translateY }], opacity }]}
-    >
-      <LinearGradient
-        colors={['#F5F0E8', '#EBE5DA']}
-        style={styles.container}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      >
-        {/* 渐变边框 - 用绝对定位的 LinearGradient 模拟 */}
-        <View style={styles.borderTop}>
-          <LinearGradient
-            colors={config.borderColors}
-            style={styles.borderLine}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-          />
-        </View>
+    <Modal visible transparent animationType="none" statusBarTranslucent>
+      {/* 透明背景，点击穿透 */}
+      <TouchableWithoutFeedback onPress={handleClose}>
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[styles.wrapper, { transform: [{ translateY }], opacity }]}
+          >
+            <TouchableWithoutFeedback>
+              <LinearGradient
+                colors={['#F5F0E8', '#EBE5DA']}
+                style={styles.container}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+              >
+                {/* 顶部渐变色条 */}
+                <View style={styles.borderTop}>
+                  <LinearGradient
+                    colors={config.borderColors}
+                    style={styles.borderLine}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                  />
+                </View>
 
-        {/* 图标 */}
-        <View
-          style={[
-            styles.iconCircle,
-            {
-              backgroundColor: config.iconBg,
-              borderColor: config.iconBorder,
-            },
-          ]}
-        >
-          <Feather name={config.icon} size={14} color={config.iconColor} />
-        </View>
+                {/* 图标 */}
+                <View
+                  style={[
+                    styles.iconCircle,
+                    {
+                      backgroundColor: config.iconBg,
+                      borderColor: config.iconBorder,
+                    },
+                  ]}
+                >
+                  <Feather
+                    name={config.icon}
+                    size={14}
+                    color={config.iconColor}
+                  />
+                </View>
 
-        {/* 文字区域 */}
-        <View style={styles.textArea}>
-          <Text style={styles.title}>{title}</Text>
-          {message ? <Text style={styles.message}>{message}</Text> : null}
-        </View>
+                {/* 文字区域 */}
+                <View style={styles.textArea}>
+                  <Text style={styles.title}>{title}</Text>
+                  {message ? (
+                    <Text style={styles.message}>{message}</Text>
+                  ) : null}
+                </View>
 
-        {/* 关闭按钮 */}
-        <TouchableOpacity
-          onPress={handleClose}
-          style={styles.closeButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Feather name="x" size={16} color="#8B7A5A60" />
-        </TouchableOpacity>
-      </LinearGradient>
-    </Animated.View>
+                {/* 关闭按钮 */}
+                <TouchableOpacity
+                  onPress={handleClose}
+                  style={styles.closeButton}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  <Feather name="x" size={16} color="#8B7A5A60" />
+                </TouchableOpacity>
+              </LinearGradient>
+            </TouchableWithoutFeedback>
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    right: 0,
+  modalOverlay: {
+    flex: 1,
     alignItems: 'center',
-    zIndex: 9999,
+    paddingTop: 60,
+  },
+  wrapper: {
+    alignItems: 'center',
   },
   container: {
     width: 320,
@@ -196,16 +214,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,
-    borderRadius: 4,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#8B7A5A20',
-    overflow: 'hidden',
+    borderColor: '#8B7A5A30',
     // 阴影
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
   borderTop: {
     position: 'absolute',
@@ -213,6 +230,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    overflow: 'hidden',
   },
   borderLine: {
     height: 2,
@@ -241,10 +261,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
+    lineHeight: 18,
   },
   closeButton: {
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
