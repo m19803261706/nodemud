@@ -43,11 +43,11 @@ Client (React Native)
 
 ## 模块索引
 
-| 模块 | 路径 | 语言 | 职责 |
-|------|------|------|------|
-| Client | `client/` | TypeScript (React Native) | 水墨风 UI、WebSocket 通信、路由导航 |
-| Server | `server/` | TypeScript (NestJS) | WebSocket Gateway、账号管理、数据库 |
-| Core | `packages/core/` | TypeScript | 共享消息类型、MessageFactory、序列化/反序列化 |
+| 模块   | 路径             | 语言                      | 职责                                          |
+| ------ | ---------------- | ------------------------- | --------------------------------------------- |
+| Client | `client/`        | TypeScript (React Native) | 水墨风 UI、WebSocket 通信、路由导航           |
+| Server | `server/`        | TypeScript (NestJS)       | WebSocket Gateway、账号管理、数据库           |
+| Core   | `packages/core/` | TypeScript                | 共享消息类型、MessageFactory、序列化/反序列化 |
 
 ## 开发命令
 
@@ -64,11 +64,12 @@ cd packages/core && pnpm build
 ### 启动开发服务
 
 ```bash
-# 后端（NestJS，端口 4000，支持热重载）
-pnpm server:dev          # 或 cd server && pnpm start:dev
+# 推荐：core watch + server 并行启动（core 修改自动编译，server 自动重载）
+pnpm dev
 
-# 前端 Metro bundler
-pnpm client:start        # 或 cd client && pnpm start
+# 或分别启动
+pnpm server:dev          # 后端（NestJS，端口 4000，支持热重载）
+pnpm client:start        # 前端 Metro bundler
 
 # iOS 模拟器
 pnpm client:ios          # 或 cd client && pnpm ios
@@ -239,7 +240,7 @@ packages/core/
 
 ## 重要注意事项
 
-1. **core 包修改后必须重新构建**: `cd packages/core && pnpm build`，否则 server/client 引用的是旧的编译产物
+1. **core 包修改**: 使用 `pnpm dev` 启动开发环境时，core 会自动 watch 并重新编译，无需手动 `pnpm build`。如果单独启动 server（`pnpm server:dev`），则需手动 `cd packages/core && pnpm build`
 2. **WebSocket 端口**: 服务端统一端口 4000（HTTP + WS 共用）
 3. **数据库**: 开发环境使用 `synchronize: true` 自动同步表结构，生产环境**必须关闭**
 4. **密码加密**: bcrypt（rounds=10），不可逆

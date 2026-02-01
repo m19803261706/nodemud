@@ -4,6 +4,7 @@
   "private": true,
   "description": "现代化文本 MUD 游戏 Monorepo",
   "scripts": {
+    "dev": "concurrently -n core,server -c blue,green \"pnpm --filter @packages/core build:watch\" \"pnpm --filter server start:dev\"",
     "server:dev": "cd server && pnpm run start:dev",
     "server:build": "cd server && pnpm run build",
     "server:start": "cd server && pnpm run start:prod",
@@ -15,8 +16,9 @@
     "lint": "pnpm --filter server lint && pnpm --filter client lint"
   },
   "devDependencies": {
-    "prettier": "^3.0.0",
-    "husky": "^8.0.0"
+    "concurrently": "^9.2.1",
+    "husky": "^8.0.0",
+    "prettier": "^3.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
