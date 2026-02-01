@@ -3,5 +3,6 @@
  */
 
 export * from './auth';
+export * from './character';
 export * from './ping';
 export * from './ui';

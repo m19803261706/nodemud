@@ -10,6 +10,12 @@ import './handlers/register';
 import './handlers/ping';
 // 服务端消息
 import './handlers/loginSuccess';
+// 角色创建消息
+import './handlers/createCharacterStep1';
+import './handlers/createCharacterFate';
+import './handlers/createCharacterConfirm';
+import './handlers/createCharacterSuccess';
+import './handlers/createCharacterFailed';
 import './handlers/loginFailed';
 import './handlers/registerSuccess';
 import './handlers/registerFailed';
