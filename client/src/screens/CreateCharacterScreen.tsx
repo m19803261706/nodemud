@@ -1,13 +1,62 @@
 /**
- * 创建角色页面（占位符）
- * 登录后无角色或注册成功后显示
+ * 创建角色入口页面
+ * 打字机旁白 + 性别选择后进入出身选择流程
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  Animated,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { TypewriterText, useTypewriterSequence } from '../components';
 
-export const CreateCharacterScreen = () => {
+/** 打字机旁白文字 */
+const INTRO_TEXTS = [
+  '天下风云出我辈，一入江湖岁月催。',
+  '皇图霸业谈笑中，不胜人生一场醉。',
+  '少年，你可准备好了？',
+];
+
+export const CreateCharacterScreen = ({ navigation }: any) => {
+  const [showContent, setShowContent] = useState(false);
+  const [selectedGender, setSelectedGender] = useState<'male' | 'female' | null>(null);
+  const contentOpacity = useState(new Animated.Value(0))[0];
+
+  const { currentIndex, visibleTexts, handleComplete } =
+    useTypewriterSequence(INTRO_TEXTS, {
+      speed: 80,
+      delayBetween: 1000,
+      onAllComplete: () => {
+        setShowContent(true);
+        Animated.timing(contentOpacity, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }).start();
+      },
+    });
+
+  const handleSkip = useCallback(() => {
+    setShowContent(true);
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [contentOpacity]);
+
+  const handleContinue = useCallback(() => {
+    if (!selectedGender) {
+      return;
+    }
+    navigation.navigate('OriginSelect', { gender: selectedGender });
+  }, [selectedGender, navigation]);
+
   return (
     <LinearGradient
       colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
@@ -15,17 +64,116 @@ export const CreateCharacterScreen = () => {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>创建角色</Text>
-        <Text style={styles.subtitle}>创建角色页面（占位符）</Text>
-        <Text style={styles.hint}>
-          后续版本将展示：{'\n'}
-          - 角色名称输入{'\n'}
-          - 属性分配{'\n'}
-          - 背景故事选择{'\n'}
-          - 确认预览
-        </Text>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        {/* 打字机旁白 */}
+        {!showContent && (
+          <TouchableOpacity
+            style={styles.introContainer}
+            activeOpacity={0.9}
+            onPress={handleSkip}
+          >
+            <View style={styles.introContent}>
+              {visibleTexts.map((text, i) => (
+                <TypewriterText
+                  key={i}
+                  text={text}
+                  speed={80}
+                  delay={0}
+                  onComplete={i === currentIndex ? handleComplete : undefined}
+                  style={[
+                    styles.introText,
+                    i === visibleTexts.length - 1 && styles.introTextLast,
+                  ]}
+                  showCursor={i === currentIndex}
+                />
+              ))}
+            </View>
+            <Text style={styles.skipHint}>点击屏幕跳过</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* 性别选择 */}
+        {showContent && (
+          <Animated.View style={[styles.mainContent, { opacity: contentOpacity }]}>
+            {/* 装饰线 */}
+            <View style={styles.topDecoration}>
+              <LinearGradient
+                colors={['#8B7A5A00', '#8B7A5A40', '#8B7A5A00']}
+                style={styles.gradientLine}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+              />
+            </View>
+
+            <View style={styles.genderSection}>
+              <Text style={styles.title}>入江湖</Text>
+              <Text style={styles.subtitle}>先定阴阳，再论出身</Text>
+
+              <View style={styles.genderRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.genderCard,
+                    selectedGender === 'male' && styles.genderCardSelected,
+                  ]}
+                  onPress={() => setSelectedGender('male')}
+                >
+                  <Text style={styles.genderIcon}>侠</Text>
+                  <Text style={styles.genderLabel}>少年郎</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.genderCard,
+                    selectedGender === 'female' && styles.genderCardSelected,
+                  ]}
+                  onPress={() => setSelectedGender('female')}
+                >
+                  <Text style={styles.genderIcon}>侠</Text>
+                  <Text style={styles.genderLabel}>女侠客</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* 继续按钮 */}
+            <View style={styles.footer}>
+              <TouchableOpacity
+                onPress={handleContinue}
+                disabled={!selectedGender}
+              >
+                <LinearGradient
+                  colors={
+                    selectedGender
+                      ? ['#D5CEC0', '#C9C2B4', '#B8B0A0']
+                      : ['#E0D9CC', '#E0D9CC', '#E0D9CC']
+                  }
+                  style={styles.continueButton}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                >
+                  <Text
+                    style={[
+                      styles.continueText,
+                      !selectedGender && styles.continueTextDisabled,
+                    ]}
+                  >
+                    选定出身
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+            {/* 底部装饰 */}
+            <View style={styles.bottomDecoration}>
+              <LinearGradient
+                colors={['#8B7A5A00', '#8B7A5A40', '#8B7A5A00']}
+                style={styles.gradientLine}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+              />
+              <Text style={styles.footerText}>命由天定 · 路在脚下</Text>
+            </View>
+          </Animated.View>
+        )}
+      </SafeAreaView>
     </LinearGradient>
   );
 };
@@ -34,31 +182,133 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  safeArea: {
+    flex: 1,
+  },
+  // 打字机旁白
+  introContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 36,
+  },
+  introContent: {
+    gap: 20,
+  },
+  introText: {
+    fontSize: 18,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 32,
+    letterSpacing: 2,
+  },
+  introTextLast: {
+    color: '#3A3530',
+    fontWeight: '500',
+  },
+  skipHint: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    fontSize: 12,
+    color: '#8B7A5A60',
+    fontFamily: 'Noto Serif SC',
+  },
+  // 主内容
+  mainContent: {
+    flex: 1,
+  },
+  topDecoration: {
+    height: 60,
+    justifyContent: 'flex-end',
+  },
+  gradientLine: {
+    height: 1,
+    width: '100%',
+  },
+  genderSection: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 30,
-    gap: 16,
+    gap: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: '700',
     color: '#3A3530',
-    letterSpacing: 6,
+    letterSpacing: 8,
     fontFamily: 'Noto Serif SC',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    marginBottom: 20,
+  },
+  genderRow: {
+    flexDirection: 'row',
+    gap: 24,
+  },
+  genderCard: {
+    width: 130,
+    height: 160,
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
+    backgroundColor: '#F5F0E830',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  genderCardSelected: {
+    borderColor: '#3A3530',
+    borderWidth: 2,
+    backgroundColor: '#F5F0E860',
+  },
+  genderIcon: {
+    fontSize: 40,
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+  },
+  genderLabel: {
+    fontSize: 16,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 2,
+  },
+  // 底部
+  footer: {
+    paddingHorizontal: 30,
+    paddingVertical: 16,
+  },
+  continueButton: {
+    height: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#8B7A5A80',
+  },
+  continueText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3A3530',
+    letterSpacing: 4,
     fontFamily: 'Noto Serif SC',
   },
-  hint: {
-    fontSize: 13,
-    color: '#8B7A5A',
-    textAlign: 'center',
-    lineHeight: 22,
+  continueTextDisabled: {
+    color: '#8B7A5A60',
+  },
+  bottomDecoration: {
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#8B7A5A60',
+    letterSpacing: 2,
     fontFamily: 'Noto Serif SC',
-    marginTop: 20,
+    marginTop: 12,
   },
 });

@@ -13,6 +13,10 @@ import { wsService } from './src/services/WebSocketService';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CreateCharacterScreen } from './src/screens/CreateCharacterScreen';
+import { OriginSelectScreen } from './src/screens/OriginSelectScreen';
+import { FateRevealScreen } from './src/screens/FateRevealScreen';
+import { AttributeAllocateScreen } from './src/screens/AttributeAllocateScreen';
+import { CharacterConfirmScreen } from './src/screens/CharacterConfirmScreen';
 import { GameHomeScreen } from './src/screens/GameHomeScreen';
 
 const WS_URL = 'ws://localhost:4000';
@@ -44,6 +48,22 @@ function App(): React.JSX.Element {
             <Stack.Screen
               name="CreateCharacter"
               component={CreateCharacterScreen}
+            />
+            <Stack.Screen
+              name="OriginSelect"
+              component={OriginSelectScreen}
+            />
+            <Stack.Screen
+              name="FateReveal"
+              component={FateRevealScreen}
+            />
+            <Stack.Screen
+              name="AttributeAllocate"
+              component={AttributeAllocateScreen}
+            />
+            <Stack.Screen
+              name="CharacterConfirm"
+              component={CharacterConfirmScreen}
             />
             <Stack.Screen name="GameHome" component={GameHomeScreen} />
           </Stack.Navigator>

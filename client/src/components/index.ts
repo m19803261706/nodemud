@@ -9,3 +9,5 @@ export { GameToast } from './GameToast';
 export type { GameToastProps, ToastType } from './GameToast';
 
 export { UIProvider, useUI } from './UIProvider';
+
+export { TypewriterText, useTypewriterSequence } from './TypewriterText';
