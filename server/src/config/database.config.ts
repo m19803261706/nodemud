@@ -23,4 +23,7 @@ export const getDatabaseConfig = (configService: ConfigService): TypeOrmModuleOp
   logging: configService.get<string>('NODE_ENV') === 'development',
   charset: 'utf8mb4',
   timezone: '+08:00',
+  retryAttempts: 3, // 重试次数
+  retryDelay: 3000, // 重试延迟（毫秒）
+  autoLoadEntities: true, // 自动加载实体
 });
