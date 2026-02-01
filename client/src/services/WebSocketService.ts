@@ -25,12 +25,12 @@ class WebSocketService {
         resolve();
       };
 
-      this.ws.onerror = (error) => {
+      this.ws.onerror = error => {
         console.error('WebSocket 错误:', error);
         reject(error);
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = event => {
         this.handleMessage(event.data);
       };
 
@@ -91,7 +91,7 @@ class WebSocketService {
     // 分发消息到监听器
     const listeners = this.listeners.get(message.type);
     if (listeners) {
-      listeners.forEach((callback) => callback(message.data));
+      listeners.forEach(callback => callback(message.data));
     }
   }
 
