@@ -61,11 +61,11 @@ export const RegisterScreen = ({ navigation }: any) => {
       return;
     }
 
-    if (username.length < 6 || username.length > 10) {
+    if (username.length < 6 || username.length > 20) {
       showToast({
         type: 'warning',
         title: '提示',
-        message: '侠名长度应为 6-10 个字符',
+        message: '侠名长度应为 6-20 个字符',
       });
       return;
     }
@@ -176,11 +176,11 @@ export const RegisterScreen = ({ navigation }: any) => {
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
-                  placeholder="6-10位，需包含数字和字母"
+                  placeholder="6-20位，需包含数字和字母"
                   placeholderTextColor="#8B7A5A80"
                   value={username}
                   onChangeText={setUsername}
-                  maxLength={10}
+                  maxLength={20}
                   autoCapitalize="none"
                 />
               </View>

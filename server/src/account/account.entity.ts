@@ -22,7 +22,7 @@ export class Account {
     type: 'varchar',
     length: 50,
     unique: true,
-    comment: '用户名（唯一，3-20字符）',
+    comment: '用户名（唯一，6-20字符，需含数字和字母）',
   })
   username: string;
 
