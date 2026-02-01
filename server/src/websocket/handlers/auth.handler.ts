@@ -15,11 +15,7 @@ export class AuthHandler {
   /**
    * 处理登录
    */
-  async handleLogin(
-    client: any,
-    session: Session,
-    data: { username: string; password: string },
-  ) {
+  async handleLogin(client: any, session: Session, data: { username: string; password: string }) {
     const result = await this.accountService.login(data.username, data.password);
 
     if (result.success) {

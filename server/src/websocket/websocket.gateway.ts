@@ -16,11 +16,14 @@ import { Server } from 'ws';
 import { MessageFactory } from '@packages/core';
 import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
+import { AuthHandler } from './handlers/auth.handler';
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  constructor(private readonly authHandler: AuthHandler) {}
 
   // Session 存储（内存 Map）
   private sessions = new Map<string, Session>();
@@ -45,7 +48,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /** 监听客户端消息 */
   @SubscribeMessage('message')
-  handleMessage(@ConnectedSocket() client: any, @MessageBody() data: string) {
+  async handleMessage(@ConnectedSocket() client: any, @MessageBody() data: string) {
     const socketId = this.getSocketId(client);
     const session = this.sessions.get(socketId);
 
@@ -63,8 +66,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     console.log('收到消息:', message.type, 'from', socketId);
 
-    // TODO: 消息路由（任务 #21 实现）
-    // 暂时只记录日志
+    // 消息路由
+    switch (message.type) {
+      case 'login':
+        await this.authHandler.handleLogin(client, session, message.data as any);
+        break;
+      case 'register':
+        await this.authHandler.handleRegister(client, message.data as any);
+        break;
+      case 'ping':
+        // 心跳，无需处理
+        break;
+      default:
+        console.warn('未知消息类型:', message.type);
+    }
   }
 
   /** 获取 Socket ID */

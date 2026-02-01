@@ -4,14 +4,13 @@
  */
 
 import { Module } from '@nestjs/common';
+import { AccountModule } from '../account/account.module';
 import { GameGateway } from './websocket.gateway';
 import { AuthHandler } from './handlers/auth.handler';
-import { PingHandler } from './handlers/ping.handler';
-import { AccountModule } from '../account/account.module';
 
 @Module({
   imports: [AccountModule],
-  providers: [GameGateway, AuthHandler, PingHandler],
+  providers: [GameGateway, AuthHandler],
   exports: [GameGateway],
 })
 export class WebSocketModule {}
