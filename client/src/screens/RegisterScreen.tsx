@@ -28,7 +28,7 @@ export const RegisterScreen = ({ navigation }: any) => {
 
   React.useEffect(() => {
     // 监听注册响应
-    wsService.on('registerSuccess', (data) => {
+    wsService.on('registerSuccess', data => {
       Alert.alert('注册成功', data.message, [
         {
           text: '确定',
@@ -37,7 +37,7 @@ export const RegisterScreen = ({ navigation }: any) => {
       ]);
     });
 
-    wsService.on('registerFailed', (data) => {
+    wsService.on('registerFailed', data => {
       Alert.alert('注册失败', data.message);
     });
   }, [navigation]);
@@ -80,7 +80,9 @@ export const RegisterScreen = ({ navigation }: any) => {
     }
 
     // 发送注册消息
-    wsService.send(MessageFactory.create('register', username, password, phone));
+    wsService.send(
+      MessageFactory.create('register', username, password, phone),
+    );
   };
 
   return (
@@ -169,13 +171,17 @@ export const RegisterScreen = ({ navigation }: any) => {
                 style={styles.checkboxWrapper}
                 onPress={() => setAgreeTerms(!agreeTerms)}
               >
-                <View style={[styles.checkbox, agreeTerms && styles.checkboxChecked]} />
+                <View
+                  style={[
+                    styles.checkbox,
+                    agreeTerms && styles.checkboxChecked,
+                  ]}
+                />
               </TouchableOpacity>
               <View style={styles.agreeTextWrap}>
                 <Text style={styles.agreeText}>
                   我已阅读并同意
-                  <Text style={styles.agreeLink}> 《用户协议》 </Text>
-                  和
+                  <Text style={styles.agreeLink}> 《用户协议》 </Text>和
                   <Text style={styles.agreeLink}> 《隐私政策》</Text>
                 </Text>
               </View>

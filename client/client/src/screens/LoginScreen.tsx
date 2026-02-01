@@ -25,12 +25,12 @@ export const LoginScreen = ({ navigation }: any) => {
 
   useEffect(() => {
     // 连接 WebSocket
-    wsService.connect('ws://localhost:4001').catch((error) => {
+    wsService.connect('ws://localhost:4001').catch(error => {
       Alert.alert('连接失败', '无法连接到服务器，请检查网络');
     });
 
     // 监听登录响应
-    wsService.on('loginSuccess', (data) => {
+    wsService.on('loginSuccess', data => {
       if (data.hasCharacter) {
         navigation.navigate('GameHome', { characterId: data.characterId });
       } else {
@@ -38,7 +38,7 @@ export const LoginScreen = ({ navigation }: any) => {
       }
     });
 
-    wsService.on('loginFailed', (data) => {
+    wsService.on('loginFailed', data => {
       Alert.alert('登录失败', data.message);
     });
 
@@ -113,7 +113,12 @@ export const LoginScreen = ({ navigation }: any) => {
                 style={styles.rememberMe}
                 onPress={() => setRememberMe(!rememberMe)}
               >
-                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]} />
+                <View
+                  style={[
+                    styles.checkbox,
+                    rememberMe && styles.checkboxChecked,
+                  ]}
+                />
                 <Text style={styles.rememberText}>记住我</Text>
               </TouchableOpacity>
               <TouchableOpacity>
