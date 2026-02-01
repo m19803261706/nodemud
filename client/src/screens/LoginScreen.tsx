@@ -27,20 +27,6 @@ export const LoginScreen = ({ navigation }: any) => {
   const { showAlert, showToast } = useUI();
 
   useEffect(() => {
-    wsService.connect('ws://localhost:4001').catch(() => {
-      showAlert({
-        type: 'error',
-        title: '连接失败',
-        message: '无法连接到服务器，请检查网络',
-        buttons: [
-          {
-            text: '重试',
-            onPress: () => wsService.connect('ws://localhost:4001'),
-          },
-        ],
-      });
-    });
-
     wsService.on('loginSuccess', data => {
       if (data.hasCharacter) {
         navigation.navigate('GameHome', { characterId: data.characterId });

@@ -31,23 +31,6 @@ export const RegisterScreen = ({ navigation }: any) => {
   const { showAlert, showToast } = useUI();
 
   React.useEffect(() => {
-    // 确保 WS 连接（从登录页跳转过来时可能已连接）
-    if (!wsService.isConnected) {
-      wsService.connect('ws://localhost:4001').catch(() => {
-        showAlert({
-          type: 'error',
-          title: '连接失败',
-          message: '无法连接到服务器，请检查网络',
-          buttons: [
-            {
-              text: '重试',
-              onPress: () => wsService.connect('ws://localhost:4001'),
-            },
-          ],
-        });
-      });
-    }
-
     wsService.on('registerSuccess', data => {
       showAlert({
         type: 'success',

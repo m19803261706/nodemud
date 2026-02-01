@@ -9,19 +9,30 @@ import type { ServerMessage } from '@packages/core';
 class WebSocketService {
   private ws: WebSocket | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private listeners = new Map<string, Set<(data: any) => void>>();
+  private serverUrl: string = '';
+  private shouldReconnect: boolean = false;
+  private reconnectDelay: number = 3000;
 
   /**
    * 连接到服务器
+   * App 启动时调用一次，后续断线会自动重连
    * @param url WebSocket 服务器地址
    */
   connect(url: string): Promise<void> {
+    this.serverUrl = url;
+    this.shouldReconnect = true;
+    this.clearReconnectTimer();
+
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
         console.log('WebSocket 连接成功');
+        this.reconnectDelay = 3000; // 重置重连延迟
         this.startPing();
+        this.emit('connectionChanged', { connected: true });
         resolve();
       };
 
@@ -37,8 +48,48 @@ class WebSocketService {
       this.ws.onclose = () => {
         console.log('WebSocket 连接关闭');
         this.stopPing();
+        this.emit('connectionChanged', { connected: false });
+        this.scheduleReconnect();
       };
     });
+  }
+
+  /**
+   * 分发事件到监听器
+   */
+  private emit(type: string, data: any) {
+    const listeners = this.listeners.get(type);
+    if (listeners) {
+      listeners.forEach(callback => callback(data));
+    }
+  }
+
+  /**
+   * 计划断线重连
+   */
+  private scheduleReconnect() {
+    if (!this.shouldReconnect || !this.serverUrl) {
+      return;
+    }
+    this.clearReconnectTimer();
+    console.log(`将在 ${this.reconnectDelay / 1000}s 后尝试重连...`);
+    this.reconnectTimer = setTimeout(() => {
+      console.log('正在重连...');
+      this.connect(this.serverUrl).catch(() => {
+        // 递增延迟，上限 30 秒
+        this.reconnectDelay = Math.min(this.reconnectDelay * 1.5, 30000);
+      });
+    }, this.reconnectDelay);
+  }
+
+  /**
+   * 清除重连定时器
+   */
+  private clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
   }
 
   /**
@@ -98,10 +149,7 @@ class WebSocketService {
     }
 
     // 分发消息到监听器
-    const listeners = this.listeners.get(message.type);
-    if (listeners) {
-      listeners.forEach(callback => callback(message.data));
-    }
+    this.emit(message.type, message.data);
   }
 
   /**
@@ -124,9 +172,11 @@ class WebSocketService {
   }
 
   /**
-   * 断开连接
+   * 断开连接（主动断开，不再自动重连）
    */
   disconnect() {
+    this.shouldReconnect = false;
+    this.clearReconnectTimer();
     this.stopPing();
     if (this.ws) {
       this.ws.close();

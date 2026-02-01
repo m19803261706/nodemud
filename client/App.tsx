@@ -3,21 +3,29 @@
  * 配置路由导航和 WebSocket 连接
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UIProvider } from './src/components';
+import { wsService } from './src/services/WebSocketService';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CreateCharacterScreen } from './src/screens/CreateCharacterScreen';
 import { GameHomeScreen } from './src/screens/GameHomeScreen';
 
+const WS_URL = 'ws://localhost:4001';
 const Stack = createNativeStackNavigator();
 
 /** 应用根组件 */
 function App(): React.JSX.Element {
+  // App 启动时建立 WebSocket 连接（类似 MUD 的 telnet 连接大厅）
+  useEffect(() => {
+    wsService.connect(WS_URL);
+    return () => wsService.disconnect();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <UIProvider>
