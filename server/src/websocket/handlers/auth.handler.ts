@@ -24,32 +24,22 @@ export class AuthHandler {
       session.accountId = result.account!.id;
       session.username = result.account!.username;
 
-      // 发送成功消息
       client.send(
-        MessageFactory.serialize({
-          type: 'loginSuccess',
-          data: {
-            accountId: result.account!.id,
-            username: result.account!.username,
-            hasCharacter: result.hasCharacter,
-            characterId: result.characterId,
-            characterName: result.characterName,
-            message: result.message,
-          },
-          timestamp: Date.now(),
-        }),
+        MessageFactory.serialize(
+          MessageFactory.create(
+            'loginSuccess',
+            result.account!.id,
+            result.account!.username,
+            result.hasCharacter,
+            result.message,
+            result.characterId,
+            result.characterName,
+          )!,
+        ),
       );
     } else {
-      // 发送失败消息
       client.send(
-        MessageFactory.serialize({
-          type: 'loginFailed',
-          data: {
-            reason: result.reason!,
-            message: result.message,
-          },
-          timestamp: Date.now(),
-        }),
+        MessageFactory.serialize(MessageFactory.create('loginFailed', result.reason!, result.message)!),
       );
     }
   }
@@ -61,29 +51,14 @@ export class AuthHandler {
     const result = await this.accountService.register(data.username, data.password, data.phone);
 
     if (result.success) {
-      // 发送成功消息
       client.send(
-        MessageFactory.serialize({
-          type: 'registerSuccess',
-          data: {
-            accountId: result.accountId!,
-            username: data.username,
-            message: result.message,
-          },
-          timestamp: Date.now(),
-        }),
+        MessageFactory.serialize(
+          MessageFactory.create('registerSuccess', result.accountId!, data.username, result.message)!,
+        ),
       );
     } else {
-      // 发送失败消息
       client.send(
-        MessageFactory.serialize({
-          type: 'registerFailed',
-          data: {
-            reason: result.reason!,
-            message: result.message,
-          },
-          timestamp: Date.now(),
-        }),
+        MessageFactory.serialize(MessageFactory.create('registerFailed', result.reason!, result.message)!),
       );
     }
   }

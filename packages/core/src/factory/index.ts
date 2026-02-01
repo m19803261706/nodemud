@@ -4,9 +4,17 @@
  */
 
 // 导入所有处理器（自动注册）
+// 客户端消息
 import './handlers/login';
 import './handlers/register';
 import './handlers/ping';
+// 服务端消息
+import './handlers/loginSuccess';
+import './handlers/loginFailed';
+import './handlers/registerSuccess';
+import './handlers/registerFailed';
+import './handlers/toast';
+import './handlers/alert';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

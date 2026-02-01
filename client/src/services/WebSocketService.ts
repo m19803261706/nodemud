@@ -4,6 +4,7 @@
  */
 
 import { MessageFactory } from '@packages/core';
+import type { ServerMessage } from '@packages/core';
 
 class WebSocketService {
   private ws: WebSocket | null = null;
@@ -146,17 +147,13 @@ class WebSocketService {
    * @param data JSON 字符串
    */
   private handleMessage(raw: string) {
-    try {
-      const message = JSON.parse(raw);
-      if (!message || !message.type) {
-        console.error('无效消息:', raw);
-        return;
-      }
-      // 分发消息到监听器
-      this.emit(message.type, message.data);
-    } catch {
-      console.error('消息解析失败:', raw);
+    const message = MessageFactory.deserialize<ServerMessage>(raw);
+    if (!message) {
+      console.error('无效消息:', raw);
+      return;
     }
+    // 分发消息到监听器
+    this.emit(message.type, message.data);
   }
 
   /**

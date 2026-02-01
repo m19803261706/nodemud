@@ -8,10 +8,12 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
   useRef,
 } from 'react';
 import { GameAlert, GameAlertProps, AlertButton } from './GameAlert';
 import { GameToast, GameToastProps, ToastType } from './GameToast';
+import { wsService } from '../services/WebSocketService';
 
 /** Alert 配置 */
 interface AlertConfig {
@@ -100,6 +102,43 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleToastClose = useCallback(() => {
     setToastVisible(false);
   }, []);
+
+  /** 监听服务端推送的 toast / alert 消息 */
+  useEffect(() => {
+    const handleServerToast = (data: any) => {
+      // 服务端 level 映射到前端 ToastType
+      const typeMap: Record<string, ToastType> = {
+        success: 'success',
+        error: 'error',
+        warning: 'warning',
+        info: 'info',
+      };
+      showToast({
+        type: typeMap[data.level] || 'info',
+        title: data.level === 'error' ? '错误' : data.level === 'warning' ? '注意' : '提示',
+        message: data.message,
+        duration: data.duration,
+      });
+    };
+
+    const handleServerAlert = (data: any) => {
+      const alertType = data.level === 'error' ? 'error' : 'success';
+      showAlert({
+        type: alertType,
+        title: data.title,
+        message: data.message,
+        buttons: [{ text: '确定' }],
+      });
+    };
+
+    wsService.on('toast', handleServerToast);
+    wsService.on('alert', handleServerAlert);
+
+    return () => {
+      wsService.off('toast', handleServerToast);
+      wsService.off('alert', handleServerAlert);
+    };
+  }, [showToast, showAlert]);
 
   return (
     <UIContext.Provider value={{ showAlert, showToast, hideAlert }}>
