@@ -1,7 +1,6 @@
 /**
  * GameToast 通知组件 - 水墨风
  * 支持成功/失败/警告/信息四种类型，匹配 Pencil 设计稿
- * 使用 Modal 确保渲染在最顶层
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -85,7 +84,6 @@ export const GameToast: React.FC<GameToastProps> = ({
 
   useEffect(() => {
     if (visible) {
-      // 入场动画
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: 0,
@@ -100,16 +98,11 @@ export const GameToast: React.FC<GameToastProps> = ({
         }),
       ]).start();
 
-      // 自动消失
-      const timer = setTimeout(() => {
-        handleClose();
-      }, duration);
-
+      const timer = setTimeout(() => handleClose(), duration);
       return () => clearTimeout(timer);
     }
   }, [visible]);
 
-  /** 关闭动画 + 回调 */
   const handleClose = () => {
     Animated.parallel([
       Animated.timing(translateY, {
@@ -122,9 +115,7 @@ export const GameToast: React.FC<GameToastProps> = ({
         duration: 250,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      onClose?.();
-    });
+    ]).start(() => onClose?.());
   };
 
   if (!visible) {
@@ -133,29 +124,33 @@ export const GameToast: React.FC<GameToastProps> = ({
 
   return (
     <Modal visible transparent animationType="none" statusBarTranslucent>
-      {/* 透明背景，点击穿透 */}
       <TouchableWithoutFeedback onPress={handleClose}>
         <View style={styles.modalOverlay}>
           <Animated.View
             style={[styles.wrapper, { transform: [{ translateY }], opacity }]}
           >
-            <TouchableWithoutFeedback>
+            {/* 用 View 做布局容器，LinearGradient 只做背景 */}
+            <View style={styles.card}>
+              {/* 渐变背景 */}
               <LinearGradient
                 colors={['#F5F0E8', '#EBE5DA']}
-                style={styles.container}
+                style={StyleSheet.absoluteFill}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
-              >
-                {/* 顶部渐变色条 */}
-                <View style={styles.borderTop}>
-                  <LinearGradient
-                    colors={config.borderColors}
-                    style={styles.borderLine}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                  />
-                </View>
+              />
 
+              {/* 顶部渐变色条 */}
+              <View style={styles.borderTop}>
+                <LinearGradient
+                  colors={config.borderColors}
+                  style={{ height: 2, width: '100%' }}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                />
+              </View>
+
+              {/* 内容行 */}
+              <View style={styles.content}>
                 {/* 图标 */}
                 <View
                   style={[
@@ -173,7 +168,7 @@ export const GameToast: React.FC<GameToastProps> = ({
                   />
                 </View>
 
-                {/* 文字区域 */}
+                {/* 文字 */}
                 <View style={styles.textArea}>
                   <Text style={styles.title}>{title}</Text>
                   {message ? (
@@ -184,13 +179,12 @@ export const GameToast: React.FC<GameToastProps> = ({
                 {/* 关闭按钮 */}
                 <TouchableOpacity
                   onPress={handleClose}
-                  style={styles.closeButton}
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 >
                   <Feather name="x" size={16} color="#8B7A5A60" />
                 </TouchableOpacity>
-              </LinearGradient>
-            </TouchableWithoutFeedback>
+              </View>
+            </View>
           </Animated.View>
         </View>
       </TouchableWithoutFeedback>
@@ -205,19 +199,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   wrapper: {
-    alignItems: 'center',
+    width: '85%',
+    maxWidth: 340,
   },
-  container: {
-    width: 320,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    gap: 12,
+  card: {
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#8B7A5A30',
-    // 阴影
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -225,18 +214,14 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   borderTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    overflow: 'hidden',
-  },
-  borderLine: {
     height: 2,
     width: '100%',
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   iconCircle: {
     width: 28,
@@ -245,11 +230,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    flexShrink: 0,
+    marginRight: 12,
   },
   textArea: {
     flex: 1,
-    gap: 2,
+    marginRight: 12,
   },
   title: {
     fontSize: 14,
@@ -262,12 +247,6 @@ const styles = StyleSheet.create({
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
     lineHeight: 18,
-  },
-  closeButton: {
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
+    marginTop: 2,
   },
 });
