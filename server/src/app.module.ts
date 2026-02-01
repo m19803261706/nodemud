@@ -11,6 +11,8 @@ import { getDatabaseConfig } from './config/database.config';
 import { HealthModule } from './health/health.module';
 import { AccountModule } from './account/account.module';
 import { WebSocketModule } from './websocket/websocket.module';
+import { CharacterModule } from './character/character.module';
+import { FateModule } from './fate/fate.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { WebSocketModule } from './websocket/websocket.module';
     // 功能模块
     HealthModule,
     AccountModule,
+    CharacterModule,
+    FateModule,
     WebSocketModule,
   ],
 })
