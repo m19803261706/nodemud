@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { validate } from './config/env.validation';
 import { getDatabaseConfig } from './config/database.config';
 import { HealthModule } from './health/health.module';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { HealthModule } from './health/health.module';
 
     // 功能模块
     HealthModule,
+    AccountModule,
   ],
 })
 export class AppModule {}
