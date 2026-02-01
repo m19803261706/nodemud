@@ -1,0 +1,17 @@
+{
+  "name": "@packages/core",
+  "version": "1.0.0",
+  "description": "NodeMUD 前后端共享类型和消息工厂",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": ["nodemud", "websocket", "message-factory"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
