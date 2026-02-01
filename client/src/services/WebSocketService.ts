@@ -42,15 +42,24 @@ class WebSocketService {
   }
 
   /**
+   * 检查连接状态
+   */
+  get isConnected(): boolean {
+    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+  }
+
+  /**
    * 发送消息
    * @param message 消息对象
+   * @returns 是否发送成功
    */
-  send(message: any) {
+  send(message: any): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console.error('WebSocket 未连接');
-      return;
+      return false;
     }
     this.ws.send(MessageFactory.serialize(message));
+    return true;
   }
 
   /**

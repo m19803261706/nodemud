@@ -31,6 +31,23 @@ export const RegisterScreen = ({ navigation }: any) => {
   const { showAlert, showToast } = useUI();
 
   React.useEffect(() => {
+    // 确保 WS 连接（从登录页跳转过来时可能已连接）
+    if (!wsService.isConnected) {
+      wsService.connect('ws://localhost:4001').catch(() => {
+        showAlert({
+          type: 'error',
+          title: '连接失败',
+          message: '无法连接到服务器，请检查网络',
+          buttons: [
+            {
+              text: '重试',
+              onPress: () => wsService.connect('ws://localhost:4001'),
+            },
+          ],
+        });
+      });
+    }
+
     wsService.on('registerSuccess', data => {
       showAlert({
         type: 'success',
@@ -124,9 +141,23 @@ export const RegisterScreen = ({ navigation }: any) => {
       return;
     }
 
-    wsService.send(
-      MessageFactory.create('register', username, password, phone),
-    );
+    if (
+      !wsService.send(
+        MessageFactory.create('register', username, password, phone),
+      )
+    ) {
+      showAlert({
+        type: 'error',
+        title: '连接断开',
+        message: '与服务器的连接已断开，请重试',
+        buttons: [
+          {
+            text: '重新连接',
+            onPress: () => wsService.connect('ws://localhost:4001'),
+          },
+        ],
+      });
+    }
   };
 
   return (

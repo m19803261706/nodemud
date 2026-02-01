@@ -70,7 +70,19 @@ export const LoginScreen = ({ navigation }: any) => {
       });
       return;
     }
-    wsService.send(MessageFactory.create('login', username, password));
+    if (!wsService.send(MessageFactory.create('login', username, password))) {
+      showAlert({
+        type: 'error',
+        title: '连接断开',
+        message: '与服务器的连接已断开，请重试',
+        buttons: [
+          {
+            text: '重新连接',
+            onPress: () => wsService.connect('ws://localhost:4001'),
+          },
+        ],
+      });
+    }
   };
 
   return (
