@@ -4,4 +4,4 @@
  */
 
 export * from './types';
-export * from './factory/MessageFactory';
+export * from './factory';
