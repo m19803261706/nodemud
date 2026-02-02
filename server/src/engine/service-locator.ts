@@ -8,6 +8,8 @@ import type { ObjectManager } from './object-manager';
 import type { BlueprintRegistry } from './blueprint-registry';
 import type { BlueprintLoader } from './blueprint-loader';
 import type { BlueprintFactory } from './blueprint-factory';
+import type { CommandManager } from './command-manager';
+import type { CommandLoader } from './command-loader';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -19,6 +21,10 @@ export class ServiceLocator {
   static blueprintLoader: BlueprintLoader;
   static blueprintFactory: BlueprintFactory;
 
+  // Layer 4 服务
+  static commandManager: CommandManager;
+  static commandLoader: CommandLoader;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -28,12 +34,16 @@ export class ServiceLocator {
     blueprintRegistry?: BlueprintRegistry;
     blueprintLoader?: BlueprintLoader;
     blueprintFactory?: BlueprintFactory;
+    commandManager?: CommandManager;
+    commandLoader?: CommandLoader;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
     if (providers.blueprintRegistry) this.blueprintRegistry = providers.blueprintRegistry;
     if (providers.blueprintLoader) this.blueprintLoader = providers.blueprintLoader;
     if (providers.blueprintFactory) this.blueprintFactory = providers.blueprintFactory;
+    if (providers.commandManager) this.commandManager = providers.commandManager;
+    if (providers.commandLoader) this.commandLoader = providers.commandLoader;
     this._initialized = true;
   }
 
@@ -50,5 +60,7 @@ export class ServiceLocator {
     this.blueprintRegistry = undefined as any;
     this.blueprintLoader = undefined as any;
     this.blueprintFactory = undefined as any;
+    this.commandManager = undefined as any;
+    this.commandLoader = undefined as any;
   }
 }

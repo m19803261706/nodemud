@@ -89,10 +89,7 @@ export class CommandLoader {
         return null;
       }
 
-      const meta: CommandMeta | undefined = Reflect.getMetadata(
-        COMMAND_META_KEY,
-        CommandClass,
-      );
+      const meta: CommandMeta | undefined = Reflect.getMetadata(COMMAND_META_KEY, CommandClass);
       if (!meta) {
         this.logger.warn(`跳过无 @Command 装饰器: ${filePath}`);
         return null;
@@ -108,9 +105,7 @@ export class CommandLoader {
       this.commandManager.register(instance, directory);
       return instance;
     } catch (err) {
-      this.logger.warn(
-        `加载指令失败 ${filePath}: ${(err as Error).message}`,
-      );
+      this.logger.warn(`加载指令失败 ${filePath}: ${(err as Error).message}`);
       return null;
     }
   }

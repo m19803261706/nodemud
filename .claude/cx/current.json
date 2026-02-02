@@ -1,54 +1,81 @@
 {
-  "feature": "Layer 3: 游戏对象子类",
-  "created_at": "2026-02-02T23:30:00+08:00",
+  "feature": "Layer 4: 指令系统 + 生物/玩家基类",
+  "created_at": "2026-02-02T23:55:00+08:00",
   "project_number": 3,
   "docs": {
-    "scope": 63,
-    "prd": 64,
-    "design": 65,
+    "scope": 72,
+    "prd": 73,
+    "design": 74,
     "adr": []
   },
   "epic": {
-    "number": 66,
-    "title": "[Epic] Layer 3: 游戏对象子类"
+    "number": 75,
+    "title": "[Epic] Layer 4: 指令系统 + 生物/玩家基类"
   },
   "issues": [
     {
-      "number": 67,
-      "title": "RoomBase 房间基类 + 测试",
-      "status": "cx-done",
+      "number": 76,
+      "title": "类型定义 + LivingBase 生物基类 + 测试",
+      "status": "cx-ready",
       "phase": 1,
       "parallel_group": "p1-a"
     },
     {
-      "number": 68,
-      "title": "Area 区域管理器 + 测试",
-      "status": "cx-done",
-      "phase": 1,
-      "parallel_group": "p1-a"
-    },
-    {
-      "number": 69,
-      "title": "NpcBase NPC 基类 + 测试",
-      "status": "cx-done",
-      "phase": 1,
-      "parallel_group": "p1-a"
-    },
-    {
-      "number": 70,
-      "title": "ItemBase 物品基类 + 测试",
-      "status": "cx-done",
-      "phase": 1,
-      "parallel_group": "p1-a"
-    },
-    {
-      "number": 71,
-      "title": "game-objects/index.ts 统一导出",
-      "status": "cx-done",
+      "number": 79,
+      "title": "NpcBase 重构继承 LivingBase + 验证已有测试",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2-a",
-      "depends_on": [67, 68, 69, 70]
+      "depends_on": [76]
+    },
+    {
+      "number": 77,
+      "title": "PlayerBase 玩家基类 + 测试",
+      "status": "cx-blocked",
+      "phase": 2,
+      "parallel_group": "p2-a",
+      "depends_on": [76]
+    },
+    {
+      "number": 78,
+      "title": "CommandManager + CommandLoader 指令框架 + 测试",
+      "status": "cx-blocked",
+      "phase": 2,
+      "parallel_group": "p2-a",
+      "depends_on": [76]
+    },
+    {
+      "number": 80,
+      "title": "look 查看指令 + 测试",
+      "status": "cx-blocked",
+      "phase": 3,
+      "parallel_group": "p3-a",
+      "depends_on": [78]
+    },
+    {
+      "number": 81,
+      "title": "go 移动指令 + 测试",
+      "status": "cx-blocked",
+      "phase": 3,
+      "parallel_group": "p3-a",
+      "depends_on": [78]
+    },
+    {
+      "number": 82,
+      "title": "say 说话指令 + 测试",
+      "status": "cx-blocked",
+      "phase": 3,
+      "parallel_group": "p3-a",
+      "depends_on": [78]
+    },
+    {
+      "number": 83,
+      "title": "ServiceLocator + EngineModule + Gateway 集成",
+      "status": "cx-blocked",
+      "phase": 4,
+      "parallel_group": "p4-a",
+      "depends_on": [76, 77, 78, 79, 80, 81, 82]
     }
   ],
-  "execution_order": [67, 68, 69, 70, 71]
+  "execution_order": [76, 79, 77, 78, 80, 81, 82, 83]
 }

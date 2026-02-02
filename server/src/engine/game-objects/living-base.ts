@@ -55,10 +55,10 @@ export class LivingBase extends BaseEntity {
    * @returns 指令执行结果
    */
   executeCommand(input: string): CommandResult {
-    if (!ServiceLocator.initialized || !(ServiceLocator as any).commandManager) {
+    if (!ServiceLocator.initialized || !ServiceLocator.commandManager) {
       return { success: false, message: '指令系统未初始化' };
     }
-    return (ServiceLocator as any).commandManager.execute(this, input);
+    return ServiceLocator.commandManager.execute(this, input);
   }
 
   /** 获取权限等级 */

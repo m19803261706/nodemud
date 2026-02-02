@@ -17,9 +17,7 @@ function createMockCommand(
     aliases,
     description: `${name} 指令`,
     directory: '',
-    execute:
-      executeFn ??
-      ((_executor, _args) => ({ success: true, message: `${name} 执行成功` })),
+    execute: executeFn ?? ((_executor, _args) => ({ success: true, message: `${name} 执行成功` })),
   };
 }
 

@@ -6,10 +6,7 @@ import type { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
 
 /** 创建 mock 执行者 */
-function createMockExecutor(options?: {
-  name?: string;
-  environment?: any;
-}): LivingBase {
+function createMockExecutor(options?: { name?: string; environment?: any }): LivingBase {
   const { name = '张三', environment = null } = options ?? {};
   return {
     getName: () => name,
@@ -69,9 +66,6 @@ describe('SayCommand 说话指令', () => {
 
     // 验证 broadcast 调用参数
     expect(room.broadcast).toHaveBeenCalledTimes(1);
-    expect(room.broadcast).toHaveBeenCalledWith(
-      '杜甫说道: 「月落 乌啼 霜满天」',
-      executor,
-    );
+    expect(room.broadcast).toHaveBeenCalledWith('杜甫说道: 「月落 乌啼 霜满天」', executor);
   });
 });

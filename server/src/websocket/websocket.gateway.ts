@@ -18,6 +18,7 @@ import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
 import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
+import { CommandHandler } from './handlers/command.handler';
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -27,6 +28,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly authHandler: AuthHandler,
     private readonly characterHandler: CharacterHandler,
+    private readonly commandHandler: CommandHandler,
   ) {}
 
   // Session 存储（内存 Map）
@@ -83,6 +85,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         break;
       case 'createCharacterConfirm':
         await this.characterHandler.handleConfirm(client, session, message.data as any);
+        break;
+      case 'command':
+        await this.commandHandler.handleCommand(client, session, message.data as any);
         break;
       case 'ping':
         // 心跳，无需处理

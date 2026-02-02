@@ -26,16 +26,16 @@ const DIRECTION_ALIASES: Record<string, string> = {
   sw: 'southwest',
 
   // 中文
-  '北': 'north',
-  '南': 'south',
-  '东': 'east',
-  '西': 'west',
-  '上': 'up',
-  '下': 'down',
-  '东北': 'northeast',
-  '西北': 'northwest',
-  '东南': 'southeast',
-  '西南': 'southwest',
+  北: 'north',
+  南: 'south',
+  东: 'east',
+  西: 'west',
+  上: 'up',
+  下: 'down',
+  东北: 'northeast',
+  西北: 'northwest',
+  东南: 'southeast',
+  西南: 'southwest',
 
   // 英文全称（标准化）
   north: 'north',

@@ -10,6 +10,7 @@ export interface Session {
   authenticated: boolean; // 是否已认证
   accountId?: string; // 账号 ID（认证后）
   username?: string; // 用户名（认证后）
+  playerId?: string; // 玩家对象 ID（进入游戏后）
   lastPing?: number; // 最后心跳时间（毫秒）
   // 角色创建临时数据（Step1 生成，Confirm 消费后清除）
   pendingCharacter?: {

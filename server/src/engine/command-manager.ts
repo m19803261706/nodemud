@@ -20,10 +20,7 @@ export class CommandManager {
   private dirCommands: Map<string, Map<string, ICommand>> = new Map();
 
   /** 全局别名索引: alias -> { command, directory } */
-  private aliasIndex: Map<
-    string,
-    { command: ICommand; directory: string }
-  > = new Map();
+  private aliasIndex: Map<string, { command: ICommand; directory: string }> = new Map();
 
   /**
    * 注册指令到指定目录
