@@ -414,7 +414,7 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
                   <Text style={styles.helpSectionTitle}>规则说明</Text>
                   <Text style={styles.helpRuleText}>
                     {
-                      '· 共 18 点根基可自由分配，每项至少 1 点\n· 每项属性有天赋上限，由命格决定\n· 上限范围 4~10，上限越高潜力越大\n· 出身会额外加减属性（不占根基点）\n· 分配完成后不可更改，请谨慎决定'
+                      '· 属性天赋上限由紫薇命理推演而来\n· 共 18 点根基可自由分配，每项至少 1 点\n· 每项属性有天赋上限，由命格决定\n· 上限范围 4~10，上限越高潜力越大\n· 出身会额外加减属性（不占根基点）\n· 分配完成后不可更改，请谨慎决定'
                     }
                   </Text>
                 </View>
