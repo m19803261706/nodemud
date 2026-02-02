@@ -1,83 +1,49 @@
 {
-  "feature": "Layer 4: 指令系统 + 生物/玩家基类",
-  "created_at": "2026-02-02T23:55:00+08:00",
-  "completed_at": "2026-02-03T04:10:00+08:00",
+  "feature": "富文本协议实现",
+  "created_at": "2026-02-03T05:00:00+08:00",
   "project_number": 3,
   "docs": {
-    "scope": 72,
-    "prd": 73,
-    "design": 74,
+    "scope": 86,
+    "prd": 87,
+    "design": 88,
     "adr": []
   },
   "epic": {
-    "number": 75,
-    "title": "[Epic] Layer 4: 指令系统 + 生物/玩家基类",
-    "status": "closed"
+    "number": 89,
+    "title": "[Epic] 富文本协议实现"
   },
   "issues": [
     {
-      "number": 76,
-      "title": "类型定义 + LivingBase 生物基类 + 测试",
-      "status": "cx-done",
+      "number": 90,
+      "title": "packages/core 富文本模块 — tags/builder/types",
+      "status": "cx-ready",
       "phase": 1,
       "parallel_group": "p1-a"
     },
     {
-      "number": 79,
-      "title": "NpcBase 重构继承 LivingBase + 验证已有测试",
-      "status": "cx-done",
+      "number": 91,
+      "title": "前端 parseRichText 解析器 + RichText 组件",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2-a",
-      "depends_on": [76]
+      "depends_on": [90]
     },
     {
-      "number": 77,
-      "title": "PlayerBase 玩家基类 + 测试",
-      "status": "cx-done",
+      "number": 92,
+      "title": "后端 look/say/go 指令富文本标记输出",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2-a",
-      "depends_on": [76]
+      "depends_on": [90]
     },
     {
-      "number": 78,
-      "title": "CommandManager + CommandLoader 指令框架 + 测试",
-      "status": "cx-done",
-      "phase": 2,
-      "parallel_group": "p2-a",
-      "depends_on": [76]
-    },
-    {
-      "number": 80,
-      "title": "look 查看指令 + 测试",
-      "status": "cx-done",
+      "number": 93,
+      "title": "前端 GameHomeScreen 集成 RichText 渲染",
+      "status": "cx-blocked",
       "phase": 3,
       "parallel_group": "p3-a",
-      "depends_on": [78]
-    },
-    {
-      "number": 81,
-      "title": "go 移动指令 + 测试",
-      "status": "cx-done",
-      "phase": 3,
-      "parallel_group": "p3-a",
-      "depends_on": [78]
-    },
-    {
-      "number": 82,
-      "title": "say 说话指令 + 测试",
-      "status": "cx-done",
-      "phase": 3,
-      "parallel_group": "p3-a",
-      "depends_on": [78]
-    },
-    {
-      "number": 83,
-      "title": "ServiceLocator + EngineModule + Gateway 集成",
-      "status": "cx-done",
-      "phase": 4,
-      "parallel_group": "p4-a",
-      "depends_on": [76, 77, 78, 79, 80, 81, 82]
+      "depends_on": [91, 92]
     }
   ],
-  "execution_order": [76, 79, 77, 78, 80, 81, 82, 83]
+  "execution_order": [90, 91, 92, 93]
 }
