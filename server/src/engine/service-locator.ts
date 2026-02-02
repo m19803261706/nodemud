@@ -5,14 +5,19 @@
  */
 import type { HeartbeatManager } from './heartbeat-manager';
 import type { ObjectManager } from './object-manager';
+import type { BlueprintRegistry } from './blueprint-registry';
+import type { BlueprintLoader } from './blueprint-loader';
+import type { BlueprintFactory } from './blueprint-factory';
 
 export class ServiceLocator {
   // Layer 1 服务
   static heartbeatManager: HeartbeatManager;
   static objectManager: ObjectManager;
 
-  // Layer 2 服务（后续添加）
-  // static blueprintLoader: BlueprintLoader;
+  // Layer 2 服务
+  static blueprintRegistry: BlueprintRegistry;
+  static blueprintLoader: BlueprintLoader;
+  static blueprintFactory: BlueprintFactory;
 
   private static _initialized = false;
 
@@ -20,9 +25,15 @@ export class ServiceLocator {
   static initialize(providers: {
     heartbeatManager: HeartbeatManager;
     objectManager: ObjectManager;
+    blueprintRegistry?: BlueprintRegistry;
+    blueprintLoader?: BlueprintLoader;
+    blueprintFactory?: BlueprintFactory;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
+    if (providers.blueprintRegistry) this.blueprintRegistry = providers.blueprintRegistry;
+    if (providers.blueprintLoader) this.blueprintLoader = providers.blueprintLoader;
+    if (providers.blueprintFactory) this.blueprintFactory = providers.blueprintFactory;
     this._initialized = true;
   }
 
@@ -36,5 +47,8 @@ export class ServiceLocator {
     this._initialized = false;
     this.heartbeatManager = undefined as any;
     this.objectManager = undefined as any;
+    this.blueprintRegistry = undefined as any;
+    this.blueprintLoader = undefined as any;
+    this.blueprintFactory = undefined as any;
   }
 }
