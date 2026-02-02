@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   ScrollView,
   Animated,
+  Modal,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { CharacterAttributes } from '@packages/core';
@@ -58,6 +59,34 @@ const DANTIAN_GROUPS = [
   },
 ];
 
+/** 属性帮助说明 */
+const HELP_ITEMS = [
+  {
+    label: '慧根',
+    detail: '悟道之资。影响修炼速度、秘籍领悟和内功心法的理解能力。慧根高者，一点即通。',
+  },
+  {
+    label: '心眼',
+    detail: '洞察之明。影响战斗中的闪避、暗器命中和对敌人招式的预判。心眼利者，察秋毫于未萌。',
+  },
+  {
+    label: '气海',
+    detail: '内力之源。决定内力上限和内功威力。气海深者，一掌可开山裂石。',
+  },
+  {
+    label: '脉络',
+    detail: '经脉之通。影响内力回复速度和运功疗伤效率。脉络畅者，真气周天运转不息。',
+  },
+  {
+    label: '筋骨',
+    detail: '外功之基。决定外功伤害和负重能力。筋骨强者，拳脚之间已有千钧之力。',
+  },
+  {
+    label: '血气',
+    detail: '生机之本。决定生命上限和抗击打能力。血气旺者，刀剑加身亦可硬扛。',
+  },
+];
+
 /** 打字机旁白（原创） */
 const INTRO_TEXT =
   '老道将铜钱收好，从柜子里翻出一面铜镜。镜面昏暗，映不出人影，却隐隐有光华流转。"命格是天给的，但这副骨头是自己的。"老道把铜镜推到你面前，"人有三丹田——神、气、精。上丹田主悟性灵觉，中丹田通经脉内息，下丹田定筋骨血气。"\n他竖起一根手指："一共十八分根基。怎么分，你自己拿主意。这决定了你往后在江湖上吃饭的本事。想清楚了再落子，落子无悔。"';
@@ -68,6 +97,7 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
   const bonus = ORIGIN_BONUS[origin] || {};
 
   const [showContent, setShowContent] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const contentOpacity = useState(new Animated.Value(0))[0];
 
   // 初始化：每项 1 点（总 6 点已用），剩余 12 点
@@ -162,6 +192,13 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
           >
             {/* 顶部 */}
             <View style={styles.header}>
+              {/* 帮助按钮 */}
+              <TouchableOpacity
+                style={styles.helpBtn}
+                onPress={() => setShowHelp(true)}
+              >
+                <Text style={styles.helpBtnText}>?</Text>
+              </TouchableOpacity>
               <Text style={styles.title}>分根基</Text>
               <Text style={styles.fateHint}>
                 命格「{fateData.fateName}」决定了各属性天赋上限
@@ -282,9 +319,7 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
                               />
                             ))}
                           </View>
-                          <Text style={styles.capLabel}>
-                            上限 {cap}
-                          </Text>
+                          <Text style={styles.capLabel}>上限 {cap}</Text>
                         </View>
                       </View>
                     );
@@ -329,6 +364,72 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
             </View>
           </Animated.View>
         )}
+        {/* 帮助弹窗 */}
+        <Modal
+          visible={showHelp}
+          transparent
+          animationType="fade"
+          statusBarTranslucent
+          onRequestClose={() => setShowHelp(false)}
+        >
+          <View style={styles.helpOverlay}>
+            <View style={styles.helpCard}>
+              <LinearGradient
+                colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+              />
+              <View style={styles.helpBorder} pointerEvents="none" />
+
+              <ScrollView
+                style={styles.helpScroll}
+                contentContainerStyle={styles.helpScrollContent}
+                showsVerticalScrollIndicator={false}
+              >
+                <Text style={styles.helpTitle}>属性说明</Text>
+
+                <View style={styles.helpSection}>
+                  <Text style={styles.helpSectionTitle}>三丹田六属性</Text>
+                  {HELP_ITEMS.map(item => (
+                    <View key={item.label} style={styles.helpItem}>
+                      <Text style={styles.helpItemLabel}>{item.label}</Text>
+                      <Text style={styles.helpItemDetail}>{item.detail}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <LinearGradient
+                  colors={['#8B7A5A00', '#8B7A5A40', '#8B7A5A00']}
+                  style={styles.helpDivider}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                />
+
+                <View style={styles.helpSection}>
+                  <Text style={styles.helpSectionTitle}>规则说明</Text>
+                  <Text style={styles.helpRuleText}>
+                    {'· 共 18 点根基可自由分配，每项至少 1 点\n· 每项属性有天赋上限，由命格决定\n· 上限范围 4~10，上限越高潜力越大\n· 出身会额外加减属性（不占根基点）\n· 分配完成后不可更改，请谨慎决定'}
+                  </Text>
+                </View>
+              </ScrollView>
+
+              <TouchableOpacity
+                style={styles.helpCloseArea}
+                onPress={() => setShowHelp(false)}
+              >
+                <LinearGradient
+                  colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
+                  style={styles.helpCloseBtn}
+                  start={{ x: 0.5, y: 0 }}
+                  end={{ x: 0.5, y: 1 }}
+                >
+                  <Text style={styles.helpCloseText}>知道了</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -371,6 +472,24 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
     gap: 8,
+  },
+  helpBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 20,
+    width: 32,
+    height: 32,
+    borderWidth: 1,
+    borderColor: '#8B7A5A60',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  helpBtnText: {
+    fontSize: 16,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
   },
   title: {
     fontSize: 28,
@@ -572,5 +691,101 @@ const styles = StyleSheet.create({
   },
   continueTextDisabled: {
     color: '#8B7A5A60',
+  },
+  // 帮助弹窗
+  helpOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  helpCard: {
+    width: '85%',
+    maxHeight: '80%',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  helpBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 1,
+    borderColor: '#8B7A5A40',
+    borderRadius: 4,
+  },
+  helpScroll: {
+    maxHeight: 460,
+  },
+  helpScrollContent: {
+    padding: 24,
+    paddingBottom: 8,
+  },
+  helpTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 4,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  helpSection: {
+    gap: 10,
+  },
+  helpSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  helpItem: {
+    gap: 4,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#8B7A5A15',
+  },
+  helpItemLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 2,
+  },
+  helpItemDetail: {
+    fontSize: 12,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 20,
+  },
+  helpDivider: {
+    height: 1,
+    width: '100%',
+    marginVertical: 16,
+  },
+  helpRuleText: {
+    fontSize: 13,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 22,
+  },
+  helpCloseArea: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 20,
+  },
+  helpCloseBtn: {
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#8B7A5A80',
+    borderRadius: 2,
+  },
+  helpCloseText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 2,
   },
 });
