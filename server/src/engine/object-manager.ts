@@ -112,14 +112,8 @@ export class ObjectManager implements OnModuleDestroy {
 
   /** 显式启动三个 GC 定时器 */
   startGC(): void {
-    this.cleanUpTimer = setInterval(
-      () => this.cleanUp(),
-      this.gcConfig.cleanUpIntervalMs,
-    );
-    this.resetTimer = setInterval(
-      () => this.resetAll(),
-      this.gcConfig.resetIntervalMs,
-    );
+    this.cleanUpTimer = setInterval(() => this.cleanUp(), this.gcConfig.cleanUpIntervalMs);
+    this.resetTimer = setInterval(() => this.resetAll(), this.gcConfig.resetIntervalMs);
     this.removeDestructedTimer = setInterval(
       () => this.removeDestructed(),
       this.gcConfig.removeDestructedIntervalMs,
