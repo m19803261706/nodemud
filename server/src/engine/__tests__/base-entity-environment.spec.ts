@@ -74,9 +74,7 @@ describe('BaseEntity Environment 环境/容器系统', () => {
       player.set('name', '玩家');
       npc.set('name', '守卫');
 
-      const found = room1.findInInventory(
-        (e) => e.get('name') === '守卫',
-      );
+      const found = room1.findInInventory((e) => e.get('name') === '守卫');
       expect(found).toBe(npc);
     });
 
@@ -95,9 +93,7 @@ describe('BaseEntity Environment 环境/容器系统', () => {
       room1.on(GameEvents.PRE_LEAVE, () => events.push('pre:leave'));
       room2.on(GameEvents.PRE_RECEIVE, () => events.push('pre:receive'));
       room1.on(GameEvents.POST_LEAVE, () => events.push('post:leave'));
-      room2.on(GameEvents.POST_RECEIVE, () =>
-        events.push('post:receive'),
-      );
+      room2.on(GameEvents.POST_RECEIVE, () => events.push('post:receive'));
       player.on(GameEvents.POST_MOVE, () => events.push('post:move'));
 
       await player.moveTo(room2);
@@ -176,19 +172,12 @@ describe('BaseEntity Environment 环境/容器系统', () => {
       const events: string[] = [];
       player.on(GameEvents.PRE_MOVE, () => events.push('pre:move'));
       room1.on(GameEvents.PRE_RECEIVE, () => events.push('pre:receive'));
-      room1.on(GameEvents.POST_RECEIVE, () =>
-        events.push('post:receive'),
-      );
+      room1.on(GameEvents.POST_RECEIVE, () => events.push('post:receive'));
       player.on(GameEvents.POST_MOVE, () => events.push('post:move'));
 
       await player.moveTo(room1);
 
-      expect(events).toEqual([
-        'pre:move',
-        'pre:receive',
-        'post:receive',
-        'post:move',
-      ]);
+      expect(events).toEqual(['pre:move', 'pre:receive', 'post:receive', 'post:move']);
     });
   });
 
@@ -197,9 +186,7 @@ describe('BaseEntity Environment 环境/容器系统', () => {
       const events: string[] = [];
       player.on(GameEvents.PRE_MOVE, () => events.push('pre:move'));
       room1.on(GameEvents.PRE_RECEIVE, () => events.push('pre:receive'));
-      room1.on(GameEvents.POST_RECEIVE, () =>
-        events.push('post:receive'),
-      );
+      room1.on(GameEvents.POST_RECEIVE, () => events.push('post:receive'));
       player.on(GameEvents.POST_MOVE, () => events.push('post:move'));
 
       await player.moveTo(room1, { quiet: true });

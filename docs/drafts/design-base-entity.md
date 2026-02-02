@@ -8,13 +8,13 @@
 
 ## 基于现有代码
 
-| 模块 | 复用点 |
-|------|--------|
-| `server/src/character/character.entity.ts` | TypeORM Entity 模式（JSON 字段、命名规范） |
-| `packages/core/src/factory/MessageFactory.ts` | 装饰器自注册模式 |
-| `server/src/websocket/types/session.ts` | 运行时状态管理 |
-| `server/src/app.module.ts` | NestJS 模块注册模式 |
-| `server/tsconfig.json` | ES2021 目标，experimentalDecorators 已启用 |
+| 模块                                          | 复用点                                     |
+| --------------------------------------------- | ------------------------------------------ |
+| `server/src/character/character.entity.ts`    | TypeORM Entity 模式（JSON 字段、命名规范） |
+| `packages/core/src/factory/MessageFactory.ts` | 装饰器自注册模式                           |
+| `server/src/websocket/types/session.ts`       | 运行时状态管理                             |
+| `server/src/app.module.ts`                    | NestJS 模块注册模式                        |
+| `server/tsconfig.json`                        | ES2021 目标，experimentalDecorators 已启用 |
 
 ## 架构概览
 
@@ -125,14 +125,14 @@ export interface CancellableEvent {
 
 /** 移动事件参数 */
 export interface MoveEvent extends CancellableEvent {
-  who: BaseEntity;        // 移动的对象
+  who: BaseEntity; // 移动的对象
   source: BaseEntity | null; // 来源
-  dest: BaseEntity;       // 目标
+  dest: BaseEntity; // 目标
 }
 
 /** 容器事件参数 */
 export interface ContainerEvent extends CancellableEvent {
-  who: BaseEntity;        // 进入/离开的对象
+  who: BaseEntity; // 进入/离开的对象
   source: BaseEntity | null;
   dest: BaseEntity;
 }
@@ -161,10 +161,7 @@ export interface MoveOptions {
  * 按路径获取嵌套值
  * getNestedValue(map, ["combat", "attack"]) → map.combat.attack
  */
-export function getNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-): any | undefined {
+export function getNestedValue(data: Map<string, any>, parts: string[]): any | undefined {
   let current: any = data;
   for (const part of parts) {
     if (current instanceof Map) {
@@ -184,11 +181,7 @@ export function getNestedValue(
  * setNestedValue(map, ["combat", "attack"], 100)
  * → map.set("combat", { attack: 100 })
  */
-export function setNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-  value: any,
-): void {
+export function setNestedValue(data: Map<string, any>, parts: string[], value: any): void {
   if (parts.length === 1) {
     data.set(parts[0], value);
     return;
@@ -212,10 +205,7 @@ export function setNestedValue(
  * 按路径删除嵌套值
  * deleteNestedValue(map, ["combat", "attack"])
  */
-export function deleteNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-): boolean {
+export function deleteNestedValue(data: Map<string, any>, parts: string[]): boolean {
   if (parts.length === 1) {
     return data.delete(parts[0]);
   }
@@ -399,9 +389,7 @@ export abstract class BaseEntity extends EventEmitter {
   }
 
   /** 按条件搜索子对象 */
-  findInInventory(
-    predicate: (entity: BaseEntity) => boolean,
-  ): BaseEntity | undefined {
+  findInInventory(predicate: (entity: BaseEntity) => boolean): BaseEntity | undefined {
     for (const child of this._inventory) {
       if (predicate(child)) return child;
     }
@@ -414,10 +402,7 @@ export abstract class BaseEntity extends EventEmitter {
    * @param opts quiet=true 静默移动，不触发事件链
    * @returns 是否移动成功
    */
-  async moveTo(
-    dest: BaseEntity,
-    opts?: MoveOptions,
-  ): Promise<boolean> {
+  async moveTo(dest: BaseEntity, opts?: MoveOptions): Promise<boolean> {
     const quiet = opts?.quiet ?? false;
     const source = this._environment;
 
@@ -558,14 +543,16 @@ export abstract class BaseEntity extends EventEmitter {
   // ================================================================
 
   /** 创建可取消事件对象 */
-  private createCancellableEvent<T extends Record<string, any>>(
-    data: T,
-  ): T & CancellableEvent {
+  private createCancellableEvent<T extends Record<string, any>>(data: T): T & CancellableEvent {
     let _cancelled = false;
     return {
       ...data,
-      get cancelled() { return _cancelled; },
-      cancel() { _cancelled = true; },
+      get cancelled() {
+        return _cancelled;
+      },
+      cancel() {
+        _cancelled = true;
+      },
     };
   }
 }
@@ -638,13 +625,13 @@ BaseEntity 是纯后端模块，不涉及前端代码。前端在后续 Layer 3�
 
 本模块无前后端字段映射需求。后续 Layer 3 实现 GameCharacter（Player 子类）时，才涉及 Character Entity ↔ BaseEntity dbase 的映射：
 
-| 功能 | 数据库字段 | BaseEntity dbase path | 说明 |
-|------|-----------|----------------------|------|
-| 角色名 | `name` (varchar) | `"name"` | 固定列 |
-| 出身 | `origin` (enum) | `"origin"` | 固定列 |
-| 慧根 | `wisdom` (tinyint) | `"attrs/wisdom"` | 固定列 |
-| 战斗状态 | `dbase_json` (json) | `"combat/*"` | 动态 JSON 列 |
-| buff 列表 | `dbase_json` (json) | `"buffs"` | 动态 JSON 列 |
+| 功能      | 数据库字段          | BaseEntity dbase path | 说明         |
+| --------- | ------------------- | --------------------- | ------------ |
+| 角色名    | `name` (varchar)    | `"name"`              | 固定列       |
+| 出身      | `origin` (enum)     | `"origin"`            | 固定列       |
+| 慧根      | `wisdom` (tinyint)  | `"attrs/wisdom"`      | 固定列       |
+| 战斗状态  | `dbase_json` (json) | `"combat/*"`          | 动态 JSON 列 |
+| buff 列表 | `dbase_json` (json) | `"buffs"`             | 动态 JSON 列 |
 
 （以上映射仅为预览，具体在 Layer 3 PRD/Design 中定义）
 
@@ -668,12 +655,12 @@ BaseEntity 是纯后端模块，不涉及前端代码。前端在后续 Layer 3�
 
 ## 风险点
 
-| 风险 | 影响 | 应对方案 |
-|------|------|---------|
-| EventEmitter 内存泄漏 | 大量对象注册监听器不释放 | `destroy()` 中调用 `removeAllListeners()`；设置 `maxListeners` |
-| 心跳性能 | 大量对象各自 setInterval | Layer 1 的 HeartbeatManager 统一调度替代，BaseEntity 只提供接口 |
-| 循环引用 | A 包含 B，B 又包含 A | `moveTo()` 中检查目标不是自身或自身的子对象 |
-| dbase Map 序列化 | `JSON.stringify(Map)` 返回 `{}` | `getDbase()` 转为 Record 后再序列化 |
+| 风险                  | 影响                            | 应对方案                                                        |
+| --------------------- | ------------------------------- | --------------------------------------------------------------- |
+| EventEmitter 内存泄漏 | 大量对象注册监听器不释放        | `destroy()` 中调用 `removeAllListeners()`；设置 `maxListeners`  |
+| 心跳性能              | 大量对象各自 setInterval        | Layer 1 的 HeartbeatManager 统一调度替代，BaseEntity 只提供接口 |
+| 循环引用              | A 包含 B，B 又包含 A            | `moveTo()` 中检查目标不是自身或自身的子对象                     |
+| dbase Map 序列化      | `JSON.stringify(Map)` 返回 `{}` | `getDbase()` 转为 Record 后再序列化                             |
 
 ---
 

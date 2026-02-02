@@ -10,7 +10,14 @@
  * - 当 accumulated >= intervalMs 时触发心跳（while 循环，支持补偿）
  * - 已销毁对象自动清理，异常隔离不影响其他对象
  */
-import { Injectable, Optional, Inject, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Optional,
+  Inject,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { GameEvents } from './types/events';
 import type { BaseEntity } from './base-entity';
 

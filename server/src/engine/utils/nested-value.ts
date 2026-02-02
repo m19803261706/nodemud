@@ -7,10 +7,7 @@
  * 按路径获取嵌套值
  * 第一层是 Map，深层是普通对象
  */
-export function getNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-): any | undefined {
+export function getNestedValue(data: Map<string, any>, parts: string[]): any | undefined {
   let current: any = data;
   for (const part of parts) {
     if (current instanceof Map) {
@@ -28,11 +25,7 @@ export function getNestedValue(
 /**
  * 按路径设置嵌套值，自动创建中间层
  */
-export function setNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-  value: any,
-): void {
+export function setNestedValue(data: Map<string, any>, parts: string[], value: any): void {
   if (parts.length === 0) return;
 
   if (parts.length === 1) {
@@ -59,10 +52,7 @@ export function setNestedValue(
 /**
  * 按路径删除嵌套值
  */
-export function deleteNestedValue(
-  data: Map<string, any>,
-  parts: string[],
-): boolean {
+export function deleteNestedValue(data: Map<string, any>, parts: string[]): boolean {
   if (parts.length === 0) return false;
 
   if (parts.length === 1) {

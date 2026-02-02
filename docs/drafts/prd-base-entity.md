@@ -22,17 +22,17 @@ BaseEntity 是游戏引擎的核心基类，所有游戏运行时对象（Room�
 
 BaseEntity 不直接面向终端用户，而是为后续所有游戏系统提供底层能力：
 
-| 场景 | 依赖 BaseEntity 的能力 | 示例 |
-|------|----------------------|------|
-| 玩家在房间间移动 | Environment 系统的 `moveTo()` | `player.moveTo(room)` |
-| 查看房间描述 | Dbase 的 `get("long")` + 蓝图原型链 | 100 个房间实例共享蓝图描述 |
-| NPC 定时巡逻 | 心跳系统 `enableHeartbeat()` | NPC 每 3 秒检查是否移动 |
-| 玩家进入房间触发剧情 | Events 的 `pre:receive` 事件 | 蓝图代码中 if/else 判断 |
-| 拾取物品到背包 | Environment 的 `moveTo()` | `item.moveTo(player)` |
-| Boss 存盘 | Dbase 的 `getDbase()` 序列化 | 特殊实例持久化到 MySQL |
-| 副本销毁 | `destroy()` 方法 | 玩家移走，NPC/Item 销毁 |
-| 传送/GM操作 | 静默移动 `moveTo(dest, { quiet: true })` | 不触发事件链 |
-| 技能冷却 | 延迟调用 `callOut()` | 3 秒后恢复可用 |
+| 场景                 | 依赖 BaseEntity 的能力                   | 示例                       |
+| -------------------- | ---------------------------------------- | -------------------------- |
+| 玩家在房间间移动     | Environment 系统的 `moveTo()`            | `player.moveTo(room)`      |
+| 查看房间描述         | Dbase 的 `get("long")` + 蓝图原型链      | 100 个房间实例共享蓝图描述 |
+| NPC 定时巡逻         | 心跳系统 `enableHeartbeat()`             | NPC 每 3 秒检查是否移动    |
+| 玩家进入房间触发剧情 | Events 的 `pre:receive` 事件             | 蓝图代码中 if/else 判断    |
+| 拾取物品到背包       | Environment 的 `moveTo()`                | `item.moveTo(player)`      |
+| Boss 存盘            | Dbase 的 `getDbase()` 序列化             | 特殊实例持久化到 MySQL     |
+| 副本销毁             | `destroy()` 方法                         | 玩家移走，NPC/Item 销毁    |
+| 传送/GM操作          | 静默移动 `moveTo(dest, { quiet: true })` | 不触发事件链               |
+| 技能冷却             | 延迟调用 `callOut()`                     | 3 秒后恢复可用             |
 
 ## 详细需求
 
@@ -42,26 +42,28 @@ BaseEntity 不直接面向终端用户，而是为后续所有游戏系统提供
 
 **API:**
 
-| 方法 | 签名 | 说明 |
-|------|------|------|
-| `set` | `set(path: string, value: any): void` | 设置属性，支持 `/` 路径嵌套 |
-| `get` | `get<T>(path: string): T \| undefined` | 获取属性，本地无则回退蓝图 |
-| `add` | `add(path: string, delta: number): void` | 累加数值属性 |
-| `del` | `del(path: string): boolean` | 删除属性 |
-| `setTemp` | `setTemp(path: string, value: any): void` | 设置临时属性 |
-| `getTemp` | `getTemp<T>(path: string): T \| undefined` | 获取临时属性 |
-| `addTemp` | `addTemp(path: string, delta: number): void` | 累加临时属性 |
-| `delTemp` | `delTemp(path: string): boolean` | 删除临时属性 |
-| `getDbase` | `getDbase(): Record<string, any>` | 返回整个 dbase（序列化用） |
-| `setDbase` | `setDbase(data: Record<string, any>): void` | 批量加载 dbase（反序列化用） |
+| 方法       | 签名                                         | 说明                         |
+| ---------- | -------------------------------------------- | ---------------------------- |
+| `set`      | `set(path: string, value: any): void`        | 设置属性，支持 `/` 路径嵌套  |
+| `get`      | `get<T>(path: string): T \| undefined`       | 获取属性，本地无则回退蓝图   |
+| `add`      | `add(path: string, delta: number): void`     | 累加数值属性                 |
+| `del`      | `del(path: string): boolean`                 | 删除属性                     |
+| `setTemp`  | `setTemp(path: string, value: any): void`    | 设置临时属性                 |
+| `getTemp`  | `getTemp<T>(path: string): T \| undefined`   | 获取临时属性                 |
+| `addTemp`  | `addTemp(path: string, delta: number): void` | 累加临时属性                 |
+| `delTemp`  | `delTemp(path: string): boolean`             | 删除临时属性                 |
+| `getDbase` | `getDbase(): Record<string, any>`            | 返回整个 dbase（序列化用）   |
+| `setDbase` | `setDbase(data: Record<string, any>): void`  | 批量加载 dbase（反序列化用） |
 
 **路径式嵌套规则:**
+
 - `set("combat/attack", 100)` → `{ combat: { attack: 100 } }`
 - `get("combat/attack")` → `100`
 - `add("combat/attack", 20)` → `120`
 - 中间层自动创建
 
 **蓝图原型链规则:**
+
 - `get()` 先查自身 dbase，未找到则查 `this.blueprint` 的 dbase
 - `set()` / `add()` / `del()` 只操作自身 dbase，不修改蓝图
 - 临时属性（`setTemp/getTemp`）不走原型链
@@ -72,20 +74,20 @@ BaseEntity 不直接面向终端用户，而是为后续所有游戏系统提供
 
 **API:**
 
-| 方法 | 签名 | 说明 |
-|------|------|------|
-| `moveTo` | `moveTo(dest: BaseEntity, opts?: MoveOptions): Promise<boolean>` | 移动到目标容器 |
-| `getEnvironment` | `getEnvironment(): BaseEntity \| null` | 获取所在容器 |
-| `getInventory` | `getInventory(): BaseEntity[]` | 获取直接子对象 |
-| `getDeepInventory` | `getDeepInventory(): BaseEntity[]` | 递归获取所有子对象 |
-| `findInInventory` | `findInInventory(predicate: (e: BaseEntity) => boolean): BaseEntity \| undefined` | 按条件搜索子对象 |
-| `destroy` | `destroy(): void` | 销毁对象，清理引用 |
+| 方法               | 签名                                                                              | 说明               |
+| ------------------ | --------------------------------------------------------------------------------- | ------------------ |
+| `moveTo`           | `moveTo(dest: BaseEntity, opts?: MoveOptions): Promise<boolean>`                  | 移动到目标容器     |
+| `getEnvironment`   | `getEnvironment(): BaseEntity \| null`                                            | 获取所在容器       |
+| `getInventory`     | `getInventory(): BaseEntity[]`                                                    | 获取直接子对象     |
+| `getDeepInventory` | `getDeepInventory(): BaseEntity[]`                                                | 递归获取所有子对象 |
+| `findInInventory`  | `findInInventory(predicate: (e: BaseEntity) => boolean): BaseEntity \| undefined` | 按条件搜索子对象   |
+| `destroy`          | `destroy(): void`                                                                 | 销毁对象，清理引用 |
 
 **MoveOptions:**
 
 ```typescript
 interface MoveOptions {
-  quiet?: boolean;  // true=静默移动，不触发事件链
+  quiet?: boolean; // true=静默移动，不触发事件链
 }
 ```
 
@@ -113,6 +115,7 @@ room.on('pre:receive', (event) => {
 ```
 
 **销毁规则:**
+
 - 注销心跳、清除延迟调用、移除事件监听
 - 房间销毁时：Player 移到安全点（quiet），NPC/Item 销毁
 - 非房间容器销毁时：内容物移到上层环境
@@ -123,50 +126,50 @@ room.on('pre:receive', (event) => {
 
 **标准事件名:**
 
-| 事件 | 触发时机 | 可取消 |
-|------|---------|--------|
-| `pre:move` | 对象即将移动 | 是 |
-| `post:move` | 对象移动完成 | 否 |
-| `pre:receive` | 容器即将接收对象 | 是 |
-| `post:receive` | 容器已接收对象 | 否 |
-| `pre:leave` | 对象即将离开容器 | 是 |
-| `post:leave` | 对象已离开容器 | 否 |
-| `encounter` | 遭遇新对象 | 否 |
-| `created` | 对象创建完成 | 否 |
-| `destroyed` | 对象销毁 | 否 |
-| `heartbeat` | 心跳 tick | 否 |
-| `reset` | 重置/刷新 | 否 |
-| `look` | 被查看 | 否 |
-| `get` | 被拾取 | 否 |
-| `drop` | 被丢弃 | 否 |
-| `use` | 被使用 | 否 |
-| `message` | 收到消息 | 否 |
-| `say` | 房间内发言 | 否 |
+| 事件           | 触发时机         | 可取消 |
+| -------------- | ---------------- | ------ |
+| `pre:move`     | 对象即将移动     | 是     |
+| `post:move`    | 对象移动完成     | 否     |
+| `pre:receive`  | 容器即将接收对象 | 是     |
+| `post:receive` | 容器已接收对象   | 否     |
+| `pre:leave`    | 对象即将离开容器 | 是     |
+| `post:leave`   | 对象已离开容器   | 否     |
+| `encounter`    | 遭遇新对象       | 否     |
+| `created`      | 对象创建完成     | 否     |
+| `destroyed`    | 对象销毁         | 否     |
+| `heartbeat`    | 心跳 tick        | 否     |
+| `reset`        | 重置/刷新        | 否     |
+| `look`         | 被查看           | 否     |
+| `get`          | 被拾取           | 否     |
+| `drop`         | 被丢弃           | 否     |
+| `use`          | 被使用           | 否     |
+| `message`      | 收到消息         | 否     |
+| `say`          | 房间内发言       | 否     |
 
 **心跳 API:**
 
-| 方法 | 签名 | 说明 |
-|------|------|------|
-| `enableHeartbeat` | `enableHeartbeat(intervalMs: number): void` | 注册心跳 |
-| `disableHeartbeat` | `disableHeartbeat(): void` | 注销心跳 |
-| `onHeartbeat` | `protected onHeartbeat(): void` | 子类覆写的心跳回调 |
+| 方法               | 签名                                        | 说明               |
+| ------------------ | ------------------------------------------- | ------------------ |
+| `enableHeartbeat`  | `enableHeartbeat(intervalMs: number): void` | 注册心跳           |
+| `disableHeartbeat` | `disableHeartbeat(): void`                  | 注销心跳           |
+| `onHeartbeat`      | `protected onHeartbeat(): void`             | 子类覆写的心跳回调 |
 
 **延迟调用 API:**
 
-| 方法 | 签名 | 说明 |
-|------|------|------|
-| `callOut` | `callOut(fn: () => void, delayMs: number): string` | 延迟调用，返回 ID |
-| `removeCallOut` | `removeCallOut(id: string): void` | 取消延迟调用 |
-| `clearCallOuts` | `clearCallOuts(): void` | 清除所有延迟调用 |
+| 方法            | 签名                                               | 说明              |
+| --------------- | -------------------------------------------------- | ----------------- |
+| `callOut`       | `callOut(fn: () => void, delayMs: number): string` | 延迟调用，返回 ID |
+| `removeCallOut` | `removeCallOut(id: string): void`                  | 取消延迟调用      |
+| `clearCallOuts` | `clearCallOuts(): void`                            | 清除所有延迟调用  |
 
 ### 需求 4: ID 和基础属性
 
 **ID 策略**: 路径式 ID
 
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `id` | `string` | 唯一标识，路径式（如 `yangzhou/inn`，实例 `npc/dianxiaoer#1`） |
-| `blueprint` | `Blueprint \| null` | 蓝图引用（原型链回退用） |
+| 属性        | 类型                | 说明                                                           |
+| ----------- | ------------------- | -------------------------------------------------------------- |
+| `id`        | `string`            | 唯一标识，路径式（如 `yangzhou/inn`，实例 `npc/dianxiaoer#1`） |
+| `blueprint` | `Blueprint \| null` | 蓝图引用（原型链回退用）                                       |
 
 ### 需求 5: ServiceLocator 服务定位器
 
@@ -185,11 +188,11 @@ class ServiceLocator {
 
 **嵌套值操作工具:**
 
-| 函数 | 签名 | 说明 |
-|------|------|------|
-| `getNestedValue` | `getNestedValue(map: Map, parts: string[]): any` | 按路径获取嵌套值 |
-| `setNestedValue` | `setNestedValue(map: Map, parts: string[], value: any): void` | 按路径设置嵌套值 |
-| `deleteNestedValue` | `deleteNestedValue(map: Map, parts: string[]): boolean` | 按路径删除嵌套值 |
+| 函数                | 签名                                                          | 说明             |
+| ------------------- | ------------------------------------------------------------- | ---------------- |
+| `getNestedValue`    | `getNestedValue(map: Map, parts: string[]): any`              | 按路径获取嵌套值 |
+| `setNestedValue`    | `setNestedValue(map: Map, parts: string[], value: any): void` | 按路径设置嵌套值 |
+| `deleteNestedValue` | `deleteNestedValue(map: Map, parts: string[]): boolean`       | 按路径删除嵌套值 |
 
 ## 关联文档
 
@@ -201,19 +204,19 @@ class ServiceLocator {
 
 ## 现有代码基础
 
-| 模块 | 路径 | 可复用点 |
-|------|------|---------|
-| Character Entity | `server/src/character/` | TypeORM Entity 定义模式、JSON 字段 |
-| MessageFactory | `packages/core/src/factory/` | 装饰器自注册模式 |
-| Session | `server/src/websocket/types/session.ts` | 运行时状态管理模式 |
+| 模块             | 路径                                    | 可复用点                           |
+| ---------------- | --------------------------------------- | ---------------------------------- |
+| Character Entity | `server/src/character/`                 | TypeORM Entity 定义模式、JSON 字段 |
+| MessageFactory   | `packages/core/src/factory/`            | 装饰器自注册模式                   |
+| Session          | `server/src/websocket/types/session.ts` | 运行时状态管理模式                 |
 
 ## 代码影响范围
 
-| 层级 | 影响 |
-|------|------|
-| 后端服务 | 新建 `server/src/engine/` 模块 |
-| NestJS 模块 | 新建 `EngineModule`，注册到 `AppModule` |
-| 数据层 | 后续需要给 Character 表添加 `dbase_json` 列（本 PRD 不涉及，留给 Layer 3） |
+| 层级        | 影响                                                                       |
+| ----------- | -------------------------------------------------------------------------- |
+| 后端服务    | 新建 `server/src/engine/` 模块                                             |
+| NestJS 模块 | 新建 `EngineModule`，注册到 `AppModule`                                    |
+| 数据层      | 后续需要给 Character 表添加 `dbase_json` 列（本 PRD 不涉及，留给 Layer 3） |
 
 ## 文件结构
 

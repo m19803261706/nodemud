@@ -58,9 +58,7 @@ describe('BlueprintLoader', () => {
       await loader.scanAndLoad(FIXTURES_WORLD);
       registry.clear();
 
-      const id = loader.inferBlueprintId(
-        path.join(FIXTURES_WORLD, 'area', 'yangzhou', 'inn.js'),
-      );
+      const id = loader.inferBlueprintId(path.join(FIXTURES_WORLD, 'area', 'yangzhou', 'inn.js'));
       expect(id).toBe('area/yangzhou/inn');
     });
 
@@ -78,9 +76,7 @@ describe('BlueprintLoader', () => {
       await loader.scanAndLoad(FIXTURES_WORLD);
       registry.clear();
 
-      const id = loader.inferBlueprintId(
-        path.join(FIXTURES_WORLD, 'area', 'test-room.ts'),
-      );
+      const id = loader.inferBlueprintId(path.join(FIXTURES_WORLD, 'area', 'test-room.ts'));
       expect(id).toBe('area/test-room');
     });
   });
@@ -124,9 +120,7 @@ describe('BlueprintLoader', () => {
     });
 
     it('无 default export 且导出非函数时抛错', async () => {
-      await expect(loader.loadBlueprint(NO_DEFAULT_FILE)).rejects.toThrow(
-        '没有导出有效的类',
-      );
+      await expect(loader.loadBlueprint(NO_DEFAULT_FILE)).rejects.toThrow('没有导出有效的类');
     });
 
     it('非 BaseEntity 子类抛错', async () => {

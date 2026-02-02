@@ -12,10 +12,7 @@ class TestEntity extends BaseEntity {
 }
 
 /** 创建测试用蓝图 */
-function createBlueprint(
-  id: string,
-  data: Record<string, any>,
-): Blueprint {
+function createBlueprint(id: string, data: Record<string, any>): Blueprint {
   return {
     id,
     dbase: data,

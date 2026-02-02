@@ -1,48 +1,54 @@
 {
-  "feature": "Layer 1: HeartbeatManager + ObjectManager",
-  "created_at": "2026-02-02T18:00:00+08:00",
+  "feature": "Layer 3: 游戏对象子类",
+  "created_at": "2026-02-02T23:30:00+08:00",
   "project_number": 3,
   "docs": {
-    "scope": 46,
-    "prd": 47,
-    "design": 48,
+    "scope": 63,
+    "prd": 64,
+    "design": 65,
     "adr": []
   },
   "epic": {
-    "number": 49,
-    "title": "[Epic] Layer 1: HeartbeatManager + ObjectManager"
+    "number": 66,
+    "title": "[Epic] Layer 3: 游戏对象子类"
   },
   "issues": [
     {
-      "number": 50,
-      "title": "HeartbeatManager 全局心跳调度器 + 测试",
+      "number": 67,
+      "title": "RoomBase 房间基类 + 测试",
       "status": "cx-done",
       "phase": 1,
       "parallel_group": "p1-a"
     },
     {
-      "number": 51,
-      "title": "ObjectManager 全局对象注册表 + GC + 测试",
+      "number": 68,
+      "title": "Area 区域管理器 + 测试",
       "status": "cx-done",
       "phase": 1,
       "parallel_group": "p1-a"
     },
     {
-      "number": 52,
-      "title": "ServiceLocator + EngineModule 集成改造",
+      "number": 69,
+      "title": "NpcBase NPC 基类 + 测试",
+      "status": "cx-done",
+      "phase": 1,
+      "parallel_group": "p1-a"
+    },
+    {
+      "number": 70,
+      "title": "ItemBase 物品基类 + 测试",
+      "status": "cx-done",
+      "phase": 1,
+      "parallel_group": "p1-a"
+    },
+    {
+      "number": 71,
+      "title": "game-objects/index.ts 统一导出",
       "status": "cx-done",
       "phase": 2,
       "parallel_group": "p2-a",
-      "depends_on": [50, 51]
-    },
-    {
-      "number": 53,
-      "title": "BaseEntity 心跳/销毁改造 + 钩子 + 测试适配",
-      "status": "cx-done",
-      "phase": 3,
-      "parallel_group": "p3-a",
-      "depends_on": [52]
+      "depends_on": [67, 68, 69, 70]
     }
   ],
-  "execution_order": [50, 51, 52, 53]
+  "execution_order": [67, 68, 69, 70, 71]
 }

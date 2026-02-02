@@ -103,9 +103,7 @@ describe('BlueprintFactory', () => {
     });
 
     it('蓝图不存在抛错', () => {
-      expect(() => factory.createVirtual('room/not_exist')).toThrow(
-        '蓝图 "room/not_exist" 不存在',
-      );
+      expect(() => factory.createVirtual('room/not_exist')).toThrow('蓝图 "room/not_exist" 不存在');
     });
   });
 
@@ -159,15 +157,11 @@ describe('BlueprintFactory', () => {
     it('虚拟蓝图调用 clone 抛错', () => {
       registerVirtual('room/inn');
 
-      expect(() => factory.clone('room/inn')).toThrow(
-        '虚拟蓝图 "room/inn" 不可克隆',
-      );
+      expect(() => factory.clone('room/inn')).toThrow('虚拟蓝图 "room/inn" 不可克隆');
     });
 
     it('蓝图不存在抛错', () => {
-      expect(() => factory.clone('npc/not_exist')).toThrow(
-        '蓝图 "npc/not_exist" 不存在',
-      );
+      expect(() => factory.clone('npc/not_exist')).toThrow('蓝图 "npc/not_exist" 不存在');
     });
   });
 

@@ -29,9 +29,7 @@ export class BlueprintFactory {
       throw new Error(`BlueprintFactory: 蓝图 "${blueprintId}" 不存在`);
     }
     if (!meta.virtual) {
-      throw new Error(
-        `BlueprintFactory: 蓝图 "${blueprintId}" 非虚拟蓝图，不能创建虚拟对象`,
-      );
+      throw new Error(`BlueprintFactory: 蓝图 "${blueprintId}" 非虚拟蓝图，不能创建虚拟对象`);
     }
     const instance = new meta.blueprintClass(blueprintId);
     this.objectManager.register(instance);
@@ -50,9 +48,7 @@ export class BlueprintFactory {
       throw new Error(`BlueprintFactory: 蓝图 "${blueprintId}" 不存在`);
     }
     if (meta.virtual) {
-      throw new Error(
-        `BlueprintFactory: 虚拟蓝图 "${blueprintId}" 不可克隆`,
-      );
+      throw new Error(`BlueprintFactory: 虚拟蓝图 "${blueprintId}" 不可克隆`);
     }
     const instanceId = this.objectManager.nextInstanceId(blueprintId);
     const instance = new meta.blueprintClass(instanceId);

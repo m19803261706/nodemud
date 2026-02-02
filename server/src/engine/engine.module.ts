@@ -20,13 +20,7 @@ import { BlueprintFactory } from './blueprint-factory';
     BlueprintLoader,
     BlueprintFactory,
   ],
-  exports: [
-    HeartbeatManager,
-    ObjectManager,
-    BlueprintRegistry,
-    BlueprintLoader,
-    BlueprintFactory,
-  ],
+  exports: [HeartbeatManager, ObjectManager, BlueprintRegistry, BlueprintLoader, BlueprintFactory],
 })
 export class EngineModule implements OnModuleInit {
   private readonly logger = new Logger(EngineModule.name);

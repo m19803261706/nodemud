@@ -2,11 +2,7 @@
  * nested-value 工具函数单元测试
  * 覆盖 getNestedValue / setNestedValue / deleteNestedValue
  */
-import {
-  getNestedValue,
-  setNestedValue,
-  deleteNestedValue,
-} from '../utils/nested-value';
+import { getNestedValue, setNestedValue, deleteNestedValue } from '../utils/nested-value';
 
 describe('nested-value 工具函数', () => {
   let data: Map<string, any>;
@@ -39,9 +35,7 @@ describe('nested-value 工具函数', () => {
 
     it('中间路径不存在返回 undefined', () => {
       data.set('combat', { attack: 100 });
-      expect(
-        getNestedValue(data, ['combat', 'magic', 'fire']),
-      ).toBeUndefined();
+      expect(getNestedValue(data, ['combat', 'magic', 'fire'])).toBeUndefined();
     });
 
     it('中间路径为基本类型返回 undefined', () => {
@@ -164,15 +158,9 @@ describe('nested-value 工具函数', () => {
   describe('综合场景', () => {
     it('set -> get -> delete -> get 完整流程', () => {
       setNestedValue(data, ['player', 'inventory', 'sword'], '倚天剑');
-      expect(getNestedValue(data, ['player', 'inventory', 'sword'])).toBe(
-        '倚天剑',
-      );
-      expect(deleteNestedValue(data, ['player', 'inventory', 'sword'])).toBe(
-        true,
-      );
-      expect(
-        getNestedValue(data, ['player', 'inventory', 'sword']),
-      ).toBeUndefined();
+      expect(getNestedValue(data, ['player', 'inventory', 'sword'])).toBe('倚天剑');
+      expect(deleteNestedValue(data, ['player', 'inventory', 'sword'])).toBe(true);
+      expect(getNestedValue(data, ['player', 'inventory', 'sword'])).toBeUndefined();
     });
 
     it('多次 set 构建复杂结构', () => {
