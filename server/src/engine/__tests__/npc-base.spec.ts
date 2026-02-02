@@ -5,6 +5,7 @@
  */
 import { NpcBase } from '../game-objects/npc-base';
 import { BaseEntity } from '../base-entity';
+import { LivingBase } from '../game-objects/living-base';
 
 describe('NpcBase', () => {
   // ========== static virtual ==========
@@ -131,7 +132,12 @@ describe('NpcBase', () => {
 
   // ========== 继承验证 ==========
 
-  describe('继承 BaseEntity', () => {
+  describe('继承链验证', () => {
+    it('NpcBase 是 LivingBase 的子类', () => {
+      const npc = new NpcBase('test/npc');
+      expect(npc).toBeInstanceOf(LivingBase);
+    });
+
     it('NpcBase 是 BaseEntity 的子类', () => {
       const npc = new NpcBase('test/npc');
       expect(npc).toBeInstanceOf(BaseEntity);
