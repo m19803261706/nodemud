@@ -163,6 +163,9 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
             {/* 顶部 */}
             <View style={styles.header}>
               <Text style={styles.title}>分根基</Text>
+              <Text style={styles.fateHint}>
+                命格「{fateData.fateName}」决定了各属性天赋上限
+              </Text>
               <View style={styles.pointsRow}>
                 <Text style={styles.pointsLabel}>剩余根基点</Text>
                 <Text
@@ -173,6 +176,7 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
                 >
                   {remaining}
                 </Text>
+                <Text style={styles.pointsTotal}>/ {TOTAL_POINTS}</Text>
               </View>
             </View>
 
@@ -209,59 +213,78 @@ export const AttributeAllocateScreen = ({ navigation, route }: any) => {
 
                     return (
                       <View key={attr.key} style={styles.attrRow}>
-                        <View style={styles.attrInfo}>
-                          <Text style={styles.attrLabel}>{attr.label}</Text>
-                          <Text style={styles.attrDesc}>{attr.desc}</Text>
-                        </View>
-
-                        <View style={styles.attrControls}>
-                          <TouchableOpacity
-                            style={[
-                              styles.controlBtn,
-                              !canSub && styles.controlBtnDisabled,
-                            ]}
-                            onPress={() => handleSub(attr.key)}
-                            disabled={!canSub}
-                          >
-                            <Text
-                              style={[
-                                styles.controlBtnText,
-                                !canSub && styles.controlBtnTextDisabled,
-                              ]}
-                            >
-                              -
-                            </Text>
-                          </TouchableOpacity>
-
-                          <View style={styles.valueArea}>
-                            <Text style={styles.valueText}>{val}</Text>
-                            {bonusVal !== 0 && (
-                              <Text style={styles.bonusText}>
-                                ({bonusVal > 0 ? '+' : ''}
-                                {bonusVal})
-                              </Text>
-                            )}
+                        <View style={styles.attrTop}>
+                          <View style={styles.attrInfo}>
+                            <Text style={styles.attrLabel}>{attr.label}</Text>
+                            <Text style={styles.attrDesc}>{attr.desc}</Text>
                           </View>
 
-                          <TouchableOpacity
-                            style={[
-                              styles.controlBtn,
-                              !canAdd && styles.controlBtnDisabled,
-                            ]}
-                            onPress={() => handleAdd(attr.key)}
-                            disabled={!canAdd}
-                          >
-                            <Text
+                          <View style={styles.attrControls}>
+                            <TouchableOpacity
                               style={[
-                                styles.controlBtnText,
-                                !canAdd && styles.controlBtnTextDisabled,
+                                styles.controlBtn,
+                                !canSub && styles.controlBtnDisabled,
                               ]}
+                              onPress={() => handleSub(attr.key)}
+                              disabled={!canSub}
                             >
-                              +
-                            </Text>
-                          </TouchableOpacity>
+                              <Text
+                                style={[
+                                  styles.controlBtnText,
+                                  !canSub && styles.controlBtnTextDisabled,
+                                ]}
+                              >
+                                -
+                              </Text>
+                            </TouchableOpacity>
 
-                          <Text style={styles.capText}>/{cap}</Text>
+                            <View style={styles.valueArea}>
+                              <Text style={styles.valueText}>{val}</Text>
+                              {bonusVal !== 0 && (
+                                <Text style={styles.bonusText}>
+                                  ({bonusVal > 0 ? '+' : ''}
+                                  {bonusVal})
+                                </Text>
+                              )}
+                            </View>
+
+                            <TouchableOpacity
+                              style={[
+                                styles.controlBtn,
+                                !canAdd && styles.controlBtnDisabled,
+                              ]}
+                              onPress={() => handleAdd(attr.key)}
+                              disabled={!canAdd}
+                            >
+                              <Text
+                                style={[
+                                  styles.controlBtnText,
+                                  !canAdd && styles.controlBtnTextDisabled,
+                                ]}
+                              >
+                                +
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+
+                        {/* 刻度条：直观显示当前值与上限 */}
+                        <View style={styles.barRow}>
+                          <View style={styles.barTrack}>
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <View
+                                key={i}
+                                style={[
+                                  styles.barSegment,
+                                  i < val && styles.barSegmentFilled,
+                                  i >= cap && styles.barSegmentLocked,
+                                ]}
+                              />
+                            ))}
+                          </View>
+                          <Text style={styles.capLabel}>
+                            上限 {cap}
+                          </Text>
                         </View>
                       </View>
                     );
@@ -361,6 +384,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  fateHint: {
+    fontSize: 12,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 1,
+  },
   pointsLabel: {
     fontSize: 13,
     color: '#8B7A5A',
@@ -370,6 +399,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+  },
+  pointsTotal: {
+    fontSize: 14,
+    color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
   },
   pointsValueDone: {
@@ -404,12 +438,15 @@ const styles = StyleSheet.create({
   },
   // 属性行
   attrRow: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#8B7A5A15',
+    gap: 6,
+  },
+  attrTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#8B7A5A15',
   },
   attrInfo: {
     gap: 2,
@@ -468,11 +505,33 @@ const styles = StyleSheet.create({
     fontFamily: 'Noto Serif SC',
     marginLeft: 2,
   },
-  capText: {
-    fontSize: 13,
+  // 刻度条
+  barRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  barTrack: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 2,
+  },
+  barSegment: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#8B7A5A15',
+  },
+  barSegmentFilled: {
+    backgroundColor: '#6B5D4D',
+  },
+  barSegmentLocked: {
+    backgroundColor: '#8B7A5A08',
+  },
+  capLabel: {
+    fontSize: 11,
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
-    minWidth: 24,
+    minWidth: 40,
   },
   // 底部
   footer: {
