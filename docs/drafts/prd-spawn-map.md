@@ -38,15 +38,15 @@
 
 ### 引擎体系（全部就绪）
 
-| 组件 | 路径 | 状态 |
-|------|------|------|
-| RoomBase | `server/src/engine/game-objects/room-base.ts` | 就绪 — getShort/getLong/getExits/getExit/getCoordinates/broadcast |
-| Area | `server/src/engine/game-objects/area.ts` | 就绪 — getName/getLevelRange/getRoomIds/getSpawnRules |
-| BlueprintLoader | `server/src/engine/blueprint-loader.ts` | 就绪 — scanAndLoad 扫描 world/ 目录 |
-| BlueprintFactory | `server/src/engine/blueprint-factory.ts` | 就绪 — createVirtual/getVirtual |
-| EngineModule | `server/src/engine/engine.module.ts` | 就绪 — worldDir = `path.join(__dirname, '..', 'world')` |
-| look 指令 | `server/src/engine/commands/std/look.ts` | 就绪 — 富文本输出房间描述 |
-| go 指令 | `server/src/engine/commands/std/go.ts` | 就绪 — 八方向 + up/down 移动 |
+| 组件             | 路径                                          | 状态                                                              |
+| ---------------- | --------------------------------------------- | ----------------------------------------------------------------- |
+| RoomBase         | `server/src/engine/game-objects/room-base.ts` | 就绪 — getShort/getLong/getExits/getExit/getCoordinates/broadcast |
+| Area             | `server/src/engine/game-objects/area.ts`      | 就绪 — getName/getLevelRange/getRoomIds/getSpawnRules             |
+| BlueprintLoader  | `server/src/engine/blueprint-loader.ts`       | 就绪 — scanAndLoad 扫描 world/ 目录                               |
+| BlueprintFactory | `server/src/engine/blueprint-factory.ts`      | 就绪 — createVirtual/getVirtual                                   |
+| EngineModule     | `server/src/engine/engine.module.ts`          | 就绪 — worldDir = `path.join(__dirname, '..', 'world')`           |
+| look 指令        | `server/src/engine/commands/std/look.ts`      | 就绪 — 富文本输出房间描述                                         |
+| go 指令          | `server/src/engine/commands/std/go.ts`        | 就绪 — 八方向 + up/down 移动                                      |
 
 ### World 目录（已创建，内容为空）
 
@@ -60,6 +60,7 @@ server/src/world/
 ### 蓝图 ID 推断规则
 
 BlueprintLoader.inferBlueprintId: 取相对于 worldDir 的路径，去掉后缀。
+
 - `server/src/world/area/rift-town/square.ts` → `area/rift-town/square`
 
 ## 详细需求
@@ -67,6 +68,7 @@ BlueprintLoader.inferBlueprintId: 取相对于 worldDir 的路径，去掉后缀
 ### 1. 裂隙镇 Area 定义
 
 创建 `server/src/world/area/rift-town/area.ts`，继承 Area 基类:
+
 - name: "裂隙镇"
 - level_range: { min: 1, max: 5 }
 - rooms: 15 个房间的蓝图 ID 列表
@@ -76,6 +78,7 @@ BlueprintLoader.inferBlueprintId: 取相对于 worldDir 的路径，去掉后缀
 ### 2. 15 个房间蓝图
 
 每个房间继承 RoomBase，在 `create()` 中设置:
+
 - `short`: 房间简短名称（带富文本标记由 look 指令处理，蓝图中存纯文本）
 - `long`: 房间详细描述（纯文本，look 指令会包裹 `[rd]` 标记）
 - `exits`: 出口映射 `Record<string, string>`，value 为目标房间蓝图 ID
@@ -83,26 +86,27 @@ BlueprintLoader.inferBlueprintId: 取相对于 worldDir 的路径，去掉后缀
 
 房间列表（按 Scope #85）:
 
-| # | 蓝图 ID | short | 坐标 |
-|---|---------|-------|------|
-| 1 | area/rift-town/square | 裂隙镇·镇中广场 | (0,0,0) |
-| 2 | area/rift-town/north-street | 裂隙镇·北街 | (0,-1,0) |
-| 3 | area/rift-town/south-street | 裂隙镇·南街 | (0,1,0) |
-| 4 | area/rift-town/tavern | 裂隙镇·断崖酒馆 | (-1,0,0) |
-| 5 | area/rift-town/inn | 裂隙镇·安歇客栈 | (1,0,0) |
-| 6 | area/rift-town/herb-shop | 裂隙镇·济世堂 | (-1,-1,0) |
-| 7 | area/rift-town/smithy | 裂隙镇·老周铁匠铺 | (1,-1,0) |
-| 8 | area/rift-town/notice-board | 裂隙镇·告示牌旁 | (-1,1,0) |
-| 9 | area/rift-town/general-store | 裂隙镇·万宝杂货 | (1,1,0) |
-| 10 | area/rift-town/north-road | 裂谷北道 | (0,-2,0) |
-| 11 | area/rift-town/south-road | 裂谷南道 | (0,2,0) |
-| 12 | area/rift-town/north-gate | 裂隙镇·北门 | (0,-3,0) |
-| 13 | area/rift-town/south-gate | 裂隙镇·南门 | (0,3,0) |
-| 14 | area/rift-town/underground | 裂隙镇·地下暗道入口 | (0,0,-1) |
+| #   | 蓝图 ID                      | short               | 坐标      |
+| --- | ---------------------------- | ------------------- | --------- |
+| 1   | area/rift-town/square        | 裂隙镇·镇中广场     | (0,0,0)   |
+| 2   | area/rift-town/north-street  | 裂隙镇·北街         | (0,-1,0)  |
+| 3   | area/rift-town/south-street  | 裂隙镇·南街         | (0,1,0)   |
+| 4   | area/rift-town/tavern        | 裂隙镇·断崖酒馆     | (-1,0,0)  |
+| 5   | area/rift-town/inn           | 裂隙镇·安歇客栈     | (1,0,0)   |
+| 6   | area/rift-town/herb-shop     | 裂隙镇·济世堂       | (-1,-1,0) |
+| 7   | area/rift-town/smithy        | 裂隙镇·老周铁匠铺   | (1,-1,0)  |
+| 8   | area/rift-town/notice-board  | 裂隙镇·告示牌旁     | (-1,1,0)  |
+| 9   | area/rift-town/general-store | 裂隙镇·万宝杂货     | (1,1,0)   |
+| 10  | area/rift-town/north-road    | 裂谷北道            | (0,-2,0)  |
+| 11  | area/rift-town/south-road    | 裂谷南道            | (0,2,0)   |
+| 12  | area/rift-town/north-gate    | 裂隙镇·北门         | (0,-3,0)  |
+| 13  | area/rift-town/south-gate    | 裂隙镇·南门         | (0,3,0)   |
+| 14  | area/rift-town/underground   | 裂隙镇·地下暗道入口 | (0,0,-1)  |
 
 ### 3. 出口连接
 
 严格按照 Scope #85 出口连接总表，确保:
+
 - 规则移动方向与坐标偏移一致（north = y-1, south = y+1, east = x+1, west = x-1）
 - 特殊移动: 镇中广场 down → 地下暗道入口，地下暗道 up → 镇中广场
 - 北门/南门的北/南出口暂不设置（留给后续区域扩展）
@@ -146,6 +150,7 @@ server/src/world/area/rift-town/
 ### 测试文件 (1 个)
 
 新增集成测试验证:
+
 - 所有蓝图能正确加载
 - 出口连接双向一致性
 - 坐标与方向偏移一致性
@@ -167,4 +172,5 @@ server/src/world/area/rift-town/
 - [ ] 现有引擎代码零修改（纯新增蓝图文件）
 
 ---
+
 > CX 工作流 | PRD

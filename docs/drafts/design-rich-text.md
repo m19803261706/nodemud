@@ -9,18 +9,18 @@
 
 ## 基于现有代码
 
-| 模块 | 路径 | 复用/修改方式 |
-|------|------|-------------|
-| packages/core index | `packages/core/src/index.ts` | 修改: 新增 `rich-text` 导出 |
-| packages/core types | `packages/core/src/types/` | 复用: 参考目录结构（不修改） |
-| LookCommand | `engine/commands/std/look.ts` | 修改: 文本输出增加标记 |
-| SayCommand | `engine/commands/std/say.ts` | 修改: 文本输出增加标记 |
-| GoCommand | `engine/commands/std/go.ts` | 修改: 文本输出增加标记 |
-| RoomBase | `engine/game-objects/room-base.ts` | 复用: broadcast 方法不变 |
-| CommandResult | `engine/types/command.ts` | 复用: message 字段承载富文本标记（不修改接口） |
-| CommandHandler | `websocket/handlers/command.handler.ts` | 不修改: 透传 CommandResult |
-| GameHomeScreen | `client/src/screens/GameHomeScreen.tsx` | 修改: 消息日志区域使用 RichText |
-| components/index | `client/src/components/index.ts` | 修改: 导出 RichText |
+| 模块                | 路径                                    | 复用/修改方式                                  |
+| ------------------- | --------------------------------------- | ---------------------------------------------- |
+| packages/core index | `packages/core/src/index.ts`            | 修改: 新增 `rich-text` 导出                    |
+| packages/core types | `packages/core/src/types/`              | 复用: 参考目录结构（不修改）                   |
+| LookCommand         | `engine/commands/std/look.ts`           | 修改: 文本输出增加标记                         |
+| SayCommand          | `engine/commands/std/say.ts`            | 修改: 文本输出增加标记                         |
+| GoCommand           | `engine/commands/std/go.ts`             | 修改: 文本输出增加标记                         |
+| RoomBase            | `engine/game-objects/room-base.ts`      | 复用: broadcast 方法不变                       |
+| CommandResult       | `engine/types/command.ts`               | 复用: message 字段承载富文本标记（不修改接口） |
+| CommandHandler      | `websocket/handlers/command.handler.ts` | 不修改: 透传 CommandResult                     |
+| GameHomeScreen      | `client/src/screens/GameHomeScreen.tsx` | 修改: 消息日志区域使用 RichText                |
+| components/index    | `client/src/components/index.ts`        | 修改: 导出 RichText                            |
 
 ## 架构概览
 
@@ -85,9 +85,20 @@ packages/core/src/
 ```typescript
 /** 语义标记类型 */
 export type SemanticTag =
-  | 'rn' | 'rd' | 'exit' | 'npc' | 'player' | 'item'
-  | 'damage' | 'heal' | 'sys' | 'combat' | 'skill'
-  | 'chat' | 'emote' | 'imp';
+  | 'rn'
+  | 'rd'
+  | 'exit'
+  | 'npc'
+  | 'player'
+  | 'item'
+  | 'damage'
+  | 'heal'
+  | 'sys'
+  | 'combat'
+  | 'skill'
+  | 'chat'
+  | 'emote'
+  | 'imp';
 
 /** 样式标记类型 */
 export type StyleTag = 'b' | 'i' | 'u';
@@ -101,10 +112,10 @@ export type ThemeMode = 'light' | 'dark';
 /** 解析后的富文本节点 */
 export interface RichTextNode {
   text: string;
-  color?: string;       // 语义标记映射的色值
-  bold?: boolean;       // [b] 标记
-  italic?: boolean;     // [i] 标记
-  underline?: boolean;  // [u] 标记
+  color?: string; // 语义标记映射的色值
+  bold?: boolean; // [b] 标记
+  italic?: boolean; // [i] 标记
+  underline?: boolean; // [u] 标记
 }
 ```
 
@@ -115,27 +126,27 @@ import type { SemanticTag, StyleTag, ThemeMode } from './types';
 
 /** 语义颜色标记（14 个） */
 export const SEMANTIC_TAGS: Record<SemanticTag, SemanticTag> = {
-  rn: 'rn',           // 房间名称
-  rd: 'rd',           // 房间描述
-  exit: 'exit',       // 出口方向
-  npc: 'npc',         // NPC 名称
-  player: 'player',   // 玩家名称
-  item: 'item',       // 物品名称
-  damage: 'damage',   // 伤害
-  heal: 'heal',       // 恢复
-  sys: 'sys',         // 系统消息
-  combat: 'combat',   // 战斗动作
-  skill: 'skill',     // 技能名称
-  chat: 'chat',       // 聊天内容
-  emote: 'emote',     // 表情/动作
-  imp: 'imp',         // 重要提示
+  rn: 'rn', // 房间名称
+  rd: 'rd', // 房间描述
+  exit: 'exit', // 出口方向
+  npc: 'npc', // NPC 名称
+  player: 'player', // 玩家名称
+  item: 'item', // 物品名称
+  damage: 'damage', // 伤害
+  heal: 'heal', // 恢复
+  sys: 'sys', // 系统消息
+  combat: 'combat', // 战斗动作
+  skill: 'skill', // 技能名称
+  chat: 'chat', // 聊天内容
+  emote: 'emote', // 表情/动作
+  imp: 'imp', // 重要提示
 } as const;
 
 /** 样式标记（3 个） */
 export const STYLE_TAGS: Record<StyleTag, StyleTag> = {
-  b: 'b',   // 加粗
-  i: 'i',   // 斜体
-  u: 'u',   // 下划线
+  b: 'b', // 加粗
+  i: 'i', // 斜体
+  u: 'u', // 下划线
 } as const;
 
 /** 所有标记名称集合（供解析器使用） */
@@ -147,20 +158,20 @@ export const ALL_TAGS = new Set<string>([
 /** 主题色值表 */
 export const THEME_COLORS: Record<ThemeMode, Record<SemanticTag, string>> = {
   light: {
-    rn: '#2B5B3C',       // 深松绿
-    rd: '#3A3530',       // 深棕
-    exit: '#2E6B8A',     // 靛蓝
-    npc: '#8B6914',      // 暗金
-    player: '#5B4FA0',   // 紫蓝
-    item: '#7A5C2E',     // 棕铜
-    damage: '#A03030',   // 暗红
-    heal: '#2F7A3F',     // 翠绿
-    sys: '#8B7A5A',      // 土金
-    combat: '#8B4513',   // 鞍褐
-    skill: '#6B2F8A',    // 暗紫
-    chat: '#3A3530',     // 深色
-    emote: '#6B5D4D',    // 棕灰
-    imp: '#C04020',      // 朱红
+    rn: '#2B5B3C', // 深松绿
+    rd: '#3A3530', // 深棕
+    exit: '#2E6B8A', // 靛蓝
+    npc: '#8B6914', // 暗金
+    player: '#5B4FA0', // 紫蓝
+    item: '#7A5C2E', // 棕铜
+    damage: '#A03030', // 暗红
+    heal: '#2F7A3F', // 翠绿
+    sys: '#8B7A5A', // 土金
+    combat: '#8B4513', // 鞍褐
+    skill: '#6B2F8A', // 暗紫
+    chat: '#3A3530', // 深色
+    emote: '#6B5D4D', // 棕灰
+    imp: '#C04020', // 朱红
   },
   dark: {
     rn: '#7BC89C',
@@ -347,18 +358,14 @@ import type { ThemeMode } from '@packages/core';
 interface RichTextProps {
   text: string;
   theme?: ThemeMode;
-  style?: TextStyle;         // 外层 Text 基础样式
+  style?: TextStyle; // 外层 Text 基础样式
 }
 
 /**
  * 富文本渲染组件
  * 将带 BBCode 标记的文本解析为多色多样式 <Text> 片段
  */
-export const RichText: React.FC<RichTextProps> = ({
-  text,
-  theme = 'light',
-  style,
-}) => {
+export const RichText: React.FC<RichTextProps> = ({ text, theme = 'light', style }) => {
   const nodes = parseRichText(text, theme);
 
   return (
@@ -502,36 +509,36 @@ return {
 
 本功能不涉及数据库和新 API 字段，唯一的"映射"是标记解析：
 
-| 后端输出 | WebSocket 字段 | 前端处理 | 说明 |
-|----------|---------------|---------|------|
-| `[rn][b]裂隙镇[/b][/rn]` | `commandResult.data.message` | `parseRichText()` → `{text:'裂隙镇', color:'#2B5B3C', bold:true}` | 房间名 |
-| `[exit]出口: 北 南[/exit]` | 同上 | → `{text:'出口: 北 南', color:'#2E6B8A'}` | 出口 |
-| `[npc]老镇长[/npc]` | 同上 | → `{text:'老镇长', color:'#8B6914'}` | NPC |
-| `[player]张三[/player]` | 同上 | → `{text:'张三', color:'#5B4FA0'}` | 玩家 |
-| `[damage][b]128[/b][/damage]` | 同上 | → `{text:'128', color:'#A03030', bold:true}` | 伤害数值 |
+| 后端输出                      | WebSocket 字段               | 前端处理                                                          | 说明     |
+| ----------------------------- | ---------------------------- | ----------------------------------------------------------------- | -------- |
+| `[rn][b]裂隙镇[/b][/rn]`      | `commandResult.data.message` | `parseRichText()` → `{text:'裂隙镇', color:'#2B5B3C', bold:true}` | 房间名   |
+| `[exit]出口: 北 南[/exit]`    | 同上                         | → `{text:'出口: 北 南', color:'#2E6B8A'}`                         | 出口     |
+| `[npc]老镇长[/npc]`           | 同上                         | → `{text:'老镇长', color:'#8B6914'}`                              | NPC      |
+| `[player]张三[/player]`       | 同上                         | → `{text:'张三', color:'#5B4FA0'}`                                | 玩家     |
+| `[damage][b]128[/b][/damage]` | 同上                         | → `{text:'128', color:'#A03030', bold:true}`                      | 伤害数值 |
 
 ## 影响范围
 
 ### 新增文件（6 个）
 
-| 文件 | 说明 |
-|------|------|
-| `packages/core/src/rich-text/types.ts` | 类型定义 |
-| `packages/core/src/rich-text/tags.ts` | 标记常量 + 色值表 |
-| `packages/core/src/rich-text/builder.ts` | 拼装工具函数 |
-| `packages/core/src/rich-text/index.ts` | 统一导出 |
-| `client/src/utils/parseRichText.ts` | 解析器 |
-| `client/src/components/RichText.tsx` | 渲染组件 |
+| 文件                                     | 说明              |
+| ---------------------------------------- | ----------------- |
+| `packages/core/src/rich-text/types.ts`   | 类型定义          |
+| `packages/core/src/rich-text/tags.ts`    | 标记常量 + 色值表 |
+| `packages/core/src/rich-text/builder.ts` | 拼装工具函数      |
+| `packages/core/src/rich-text/index.ts`   | 统一导出          |
+| `client/src/utils/parseRichText.ts`      | 解析器            |
+| `client/src/components/RichText.tsx`     | 渲染组件          |
 
 ### 修改文件（5 个）
 
-| 文件 | 修改内容 |
-|------|---------|
-| `packages/core/src/index.ts` | 增加 `export * from './rich-text'` |
-| `server/src/engine/commands/std/look.ts` | 引入 rt/bold，改造输出 |
-| `server/src/engine/commands/std/say.ts` | 引入 rt，改造输出 |
-| `server/src/engine/commands/std/go.ts` | 引入 rt，改造输出 |
-| `client/src/components/index.ts` | 导出 RichText |
+| 文件                                     | 修改内容                           |
+| ---------------------------------------- | ---------------------------------- |
+| `packages/core/src/index.ts`             | 增加 `export * from './rich-text'` |
+| `server/src/engine/commands/std/look.ts` | 引入 rt/bold，改造输出             |
+| `server/src/engine/commands/std/say.ts`  | 引入 rt，改造输出                  |
+| `server/src/engine/commands/std/go.ts`   | 引入 rt，改造输出                  |
+| `client/src/components/index.ts`         | 导出 RichText                      |
 
 ### 不修改
 
@@ -546,15 +553,15 @@ return {
 
 ### packages/core 测试
 
-| 测试文件 | 覆盖内容 |
-|---------|---------|
-| `rich-text/builder.spec.ts` | rt/bold/italic/underline 输出格式，嵌套组合 |
-| `rich-text/tags.spec.ts` | ALL_TAGS 包含所有标记，THEME_COLORS 两套色值完整 |
+| 测试文件                    | 覆盖内容                                         |
+| --------------------------- | ------------------------------------------------ |
+| `rich-text/builder.spec.ts` | rt/bold/italic/underline 输出格式，嵌套组合      |
+| `rich-text/tags.spec.ts`    | ALL_TAGS 包含所有标记，THEME_COLORS 两套色值完整 |
 
 ### 前端测试
 
-| 测试文件 | 覆盖内容 |
-|---------|---------|
+| 测试文件                | 覆盖内容                                                 |
+| ----------------------- | -------------------------------------------------------- |
 | `parseRichText.spec.ts` | 单标记、嵌套标记、未闭合容错、纯文本、空字符串、嵌套超限 |
 
 ### 后端测试
@@ -563,12 +570,13 @@ return {
 
 ## 风险点
 
-| 风险 | 影响 | 应对方案 |
-|------|------|---------|
-| 解析器性能 | 长文本（如战斗日志）正则匹配可能慢 | 单条消息通常 < 500 字，正则足够；后续可做 benchmark |
-| 嵌套标记格式错误 | 开发者写错标记导致显示异常 | 容错设计 + builder 工具函数封装常用模式 |
-| core 包修改后未构建 | server/client 引用旧产物 | 使用 `pnpm dev` 自动 watch；CI 中加 build 步骤 |
-| 现有测试断言 | look/say/go 测试断言纯文本，改为富文本后断言失败 | 同步更新测试断言 |
+| 风险                | 影响                                             | 应对方案                                            |
+| ------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| 解析器性能          | 长文本（如战斗日志）正则匹配可能慢               | 单条消息通常 < 500 字，正则足够；后续可做 benchmark |
+| 嵌套标记格式错误    | 开发者写错标记导致显示异常                       | 容错设计 + builder 工具函数封装常用模式             |
+| core 包修改后未构建 | server/client 引用旧产物                         | 使用 `pnpm dev` 自动 watch；CI 中加 build 步骤      |
+| 现有测试断言        | look/say/go 测试断言纯文本，改为富文本后断言失败 | 同步更新测试断言                                    |
 
 ---
+
 > CX 工作流 | Design Doc | PRD #87

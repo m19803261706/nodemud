@@ -9,15 +9,15 @@
 
 ## 基于现有代码
 
-| 模块 | 路径 | 复用方式 |
-|------|------|---------|
-| RoomBase | `game-objects/room-base.ts` | 房间蓝图继承，使用 `set()` 设置 short/long/exits/coordinates |
-| Area | `game-objects/area.ts` | 区域蓝图继承，使用 `set()` 设置 name/level_range/rooms |
-| BlueprintLoader | `blueprint-loader.ts` | 自动扫描 `server/src/world/` 加载蓝图 |
-| BlueprintFactory | `blueprint-factory.ts` | `createVirtual()` 为 virtual=true 蓝图创建单例 |
-| EngineModule | `engine.module.ts` | `worldDir = path.join(__dirname, '..', 'world')` 已配置 |
-| look 指令 | `commands/std/look.ts` | 已用 `rt()/bold()` 富文本渲染房间信息 |
-| go 指令 | `commands/std/go.ts` | 已支持八方向 + up/down 移动 |
+| 模块             | 路径                        | 复用方式                                                     |
+| ---------------- | --------------------------- | ------------------------------------------------------------ |
+| RoomBase         | `game-objects/room-base.ts` | 房间蓝图继承，使用 `set()` 设置 short/long/exits/coordinates |
+| Area             | `game-objects/area.ts`      | 区域蓝图继承，使用 `set()` 设置 name/level_range/rooms       |
+| BlueprintLoader  | `blueprint-loader.ts`       | 自动扫描 `server/src/world/` 加载蓝图                        |
+| BlueprintFactory | `blueprint-factory.ts`      | `createVirtual()` 为 virtual=true 蓝图创建单例               |
+| EngineModule     | `engine.module.ts`          | `worldDir = path.join(__dirname, '..', 'world')` 已配置      |
+| look 指令        | `commands/std/look.ts`      | 已用 `rt()/bold()` 富文本渲染房间信息                        |
+| go 指令          | `commands/std/go.ts`        | 已支持八方向 + up/down 移动                                  |
 
 **零修改**：不改任何现有文件，纯新增蓝图文件。
 
@@ -72,12 +72,12 @@ server/src/world/area/rift-town/
 
 BlueprintLoader.inferBlueprintId 规则: 相对路径去后缀。
 
-| 文件 | 蓝图 ID |
-|------|---------|
-| `area/rift-town/area.ts` | `area/rift-town/area` |
-| `area/rift-town/square.ts` | `area/rift-town/square` |
+| 文件                             | 蓝图 ID                       |
+| -------------------------------- | ----------------------------- |
+| `area/rift-town/area.ts`         | `area/rift-town/area`         |
+| `area/rift-town/square.ts`       | `area/rift-town/square`       |
 | `area/rift-town/north-street.ts` | `area/rift-town/north-street` |
-| ... | ... |
+| ...                              | ...                           |
 
 ### 房间蓝图模板
 
@@ -149,22 +149,22 @@ export default class RiftTownArea extends Area {
 
 确保双向一致性。出口 value 为目标房间的蓝图 ID（前缀 `area/rift-town/`，下表省略）。
 
-| 房间 | 坐标 | north | south | east | west | up | down |
-|------|------|-------|-------|------|------|----|------|
-| square | (0,0,0) | north-street | south-street | inn | tavern | — | underground |
-| north-street | (0,-1,0) | north-road | square | smithy | herb-shop | — | — |
-| south-street | (0,1,0) | square | south-road | general-store | notice-board | — | — |
-| tavern | (-1,0,0) | — | — | square | — | — | — |
-| inn | (1,0,0) | — | — | — | square | — | — |
-| herb-shop | (-1,-1,0) | — | — | north-street | — | — | — |
-| smithy | (1,-1,0) | — | — | — | north-street | — | — |
-| notice-board | (-1,1,0) | — | — | south-street | — | — | — |
-| general-store | (1,1,0) | — | — | — | south-street | — | — |
-| north-road | (0,-2,0) | north-gate | north-street | — | — | — | — |
-| south-road | (0,2,0) | south-street | south-gate | — | — | — | — |
-| north-gate | (0,-3,0) | — | north-road | — | — | — | — |
-| south-gate | (0,3,0) | south-road | — | — | — | — | — |
-| underground | (0,0,-1) | — | — | — | — | square | — |
+| 房间          | 坐标      | north        | south        | east          | west         | up     | down        |
+| ------------- | --------- | ------------ | ------------ | ------------- | ------------ | ------ | ----------- |
+| square        | (0,0,0)   | north-street | south-street | inn           | tavern       | —      | underground |
+| north-street  | (0,-1,0)  | north-road   | square       | smithy        | herb-shop    | —      | —           |
+| south-street  | (0,1,0)   | square       | south-road   | general-store | notice-board | —      | —           |
+| tavern        | (-1,0,0)  | —            | —            | square        | —            | —      | —           |
+| inn           | (1,0,0)   | —            | —            | —             | square       | —      | —           |
+| herb-shop     | (-1,-1,0) | —            | —            | north-street  | —            | —      | —           |
+| smithy        | (1,-1,0)  | —            | —            | —             | north-street | —      | —           |
+| notice-board  | (-1,1,0)  | —            | —            | south-street  | —            | —      | —           |
+| general-store | (1,1,0)   | —            | —            | —             | south-street | —      | —           |
+| north-road    | (0,-2,0)  | north-gate   | north-street | —             | —            | —      | —           |
+| south-road    | (0,2,0)   | south-street | south-gate   | —             | —            | —      | —           |
+| north-gate    | (0,-3,0)  | —            | north-road   | —             | —            | —      | —           |
+| south-gate    | (0,3,0)   | south-road   | —            | —             | —            | —      | —           |
+| underground   | (0,0,-1)  | —            | —            | —             | —            | square | —           |
 
 **验证规则**: 若 A.exits[dir] = B，则 B.exits[反向] = A。反向映射: north↔south, east↔west, up↔down。
 
@@ -174,20 +174,21 @@ export default class RiftTownArea extends Area {
 
 规则移动（八方向 + up/down）的坐标偏移必须严格对应：
 
-| 方向 | dx | dy | dz |
-|------|----|----|---- |
-| north | 0 | -1 | 0 |
-| south | 0 | +1 | 0 |
-| east | +1 | 0 | 0 |
-| west | -1 | 0 | 0 |
-| up | 0 | 0 | +1 |
-| down | 0 | 0 | -1 |
+| 方向  | dx  | dy  | dz  |
+| ----- | --- | --- | --- |
+| north | 0   | -1  | 0   |
+| south | 0   | +1  | 0   |
+| east  | +1  | 0   | 0   |
+| west  | -1  | 0   | 0   |
+| up    | 0   | 0   | +1  |
+| down  | 0   | 0   | -1  |
 
 特殊移动（enter/exit/climb 等）不受坐标约束。本地图全部使用规则移动。
 
 ### 房间描述文本
 
 所有 long 描述从 Scope #85 获取，保持原文不变。蓝图中存储纯文本，富文本标记由 look 指令自动包裹:
+
 - 房间名 → `[rn][b]...[/b][/rn]`
 - 描述 → `[rd]...[/rd]`
 - 出口 → `[exit]...[/exit]`
@@ -231,4 +232,5 @@ describe('裂隙镇地图', () => {
 - **BlueprintLoader 后缀**: 默认只扫描 `.js`，开发环境编译为 `.js` 后放在 `dist/world/` 中，正常工作。测试环境需配置 `extensions: ['.js', '.ts']`。
 
 ---
+
 > CX 工作流 | Design Doc | PRD #94

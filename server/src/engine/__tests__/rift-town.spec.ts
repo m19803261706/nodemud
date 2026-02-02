@@ -75,7 +75,6 @@ describe('裂隙镇地图', () => {
 
   afterAll(() => {
     objectManager.onModuleDestroy();
-    // 清理 require.cache
     for (const key of Object.keys(require.cache)) {
       if (key.includes('world/area/rift-town')) {
         delete require.cache[key];
@@ -84,7 +83,6 @@ describe('裂隙镇地图', () => {
   });
 
   it('应加载 15 个蓝图（1 Area + 14 Room）', () => {
-    // 14 房间 + 1 Area = 15
     expect(registry.getCount()).toBe(15);
   });
 
@@ -138,9 +136,7 @@ describe('裂隙镇地图', () => {
         expect(targetRoom).toBeDefined();
 
         const targetExits = targetRoom.getExits();
-        expect(targetExits[reverseDir]).toBe(
-          roomId,
-        );
+        expect(targetExits[reverseDir]).toBe(roomId);
       }
     }
   });

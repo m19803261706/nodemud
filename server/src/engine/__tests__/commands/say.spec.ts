@@ -46,9 +46,7 @@ describe('SayCommand 说话指令', () => {
 
     expect(result.success).toBe(true);
     // 富文本标记: [sys]你说道: 「[/sys][chat]大家好[/chat][sys]」[/sys]
-    expect(result.message).toBe(
-      '[sys]你说道: 「[/sys][chat]大家好[/chat][sys]」[/sys]',
-    );
+    expect(result.message).toBe('[sys]你说道: 「[/sys][chat]大家好[/chat][sys]」[/sys]');
   });
 
   it('不在房间时返回错误提示', () => {

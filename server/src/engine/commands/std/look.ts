@@ -63,9 +63,7 @@ export class LookCommand implements ICommand {
     // 根据类型包裹富文本标记
     const taggedItems = inventory.map((e) => {
       const name =
-        typeof (e as any).getShort === 'function'
-          ? ((e as any).getShort() as string)
-          : e.id;
+        typeof (e as any).getShort === 'function' ? ((e as any).getShort() as string) : e.id;
       // LivingBase 实例用 npc 标记，其他用 item 标记
       return e instanceof LivingBase ? rt('npc', name) : rt('item', name);
     });

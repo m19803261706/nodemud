@@ -43,12 +43,20 @@ export const GameHomeScreen = ({ route }: any) => {
       </View>
 
       {/* 消息日志区域 — 富文本演示 */}
-      <ScrollView style={styles.messageLog} contentContainerStyle={styles.messageLogContent}>
+      <ScrollView
+        style={styles.messageLog}
+        contentContainerStyle={styles.messageLogContent}
+      >
         {DEMO_RICH_TEXT.map((line, i) =>
           line === '' ? (
             <View key={i} style={styles.emptyLine} />
           ) : (
-            <RichText key={i} text={line} theme="light" style={styles.richText} />
+            <RichText
+              key={i}
+              text={line}
+              theme="light"
+              style={styles.richText}
+            />
           ),
         )}
       </ScrollView>

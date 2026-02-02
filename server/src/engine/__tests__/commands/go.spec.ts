@@ -30,9 +30,7 @@ describe('GoCommand go 指令', () => {
     const result = goCmd.execute(executor, ['north']);
     expect(result.success).toBe(true);
     // 富文本标记: [sys]你向[/sys][exit]north[/exit][sys]走去。[/sys]
-    expect(result.message).toBe(
-      '[sys]你向[/sys][exit]north[/exit][sys]走去。[/sys]',
-    );
+    expect(result.message).toBe('[sys]你向[/sys][exit]north[/exit][sys]走去。[/sys]');
     expect(result.data).toEqual({ direction: 'north', targetId: 'room/target' });
   });
 

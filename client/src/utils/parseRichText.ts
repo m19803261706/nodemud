@@ -73,7 +73,10 @@ export function parseRichText(
 
       if (tagName in SEMANTIC_TAGS) {
         // 语义标记：应用主题颜色
-        currentStyle = { ...currentStyle, color: colors[tagName as SemanticTag] };
+        currentStyle = {
+          ...currentStyle,
+          color: colors[tagName as SemanticTag],
+        };
       } else if (tagName === 'b') {
         currentStyle = { ...currentStyle, bold: true };
       } else if (tagName === 'i') {
