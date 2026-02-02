@@ -44,11 +44,16 @@ describe('LookCommand', () => {
     const result = cmd.execute(player, []);
 
     expect(result.success).toBe(true);
-    expect(result.message).toContain('扬州大街');
-    expect(result.message).toContain('青石板铺就的宽阔大街');
-    expect(result.message).toContain('north');
-    expect(result.message).toContain('south');
-    expect(result.message).toContain('一名守卫');
+    // 富文本标记: 房间名用 [rn][b]...[/b][/rn]
+    expect(result.message).toContain('[rn][b]扬州大街[/b][/rn]');
+    // 房间描述用 [rd]...[/rd]
+    expect(result.message).toContain('[rd]青石板铺就的宽阔大街');
+    // 出口用 [exit]...[/exit]
+    expect(result.message).toContain('[exit]出口: north、south[/exit]');
+    // NPC 用 [npc]...[/npc]
+    expect(result.message).toContain('[npc]一名守卫[/npc]');
+    // 前缀 "这里有" 用 [sys]
+    expect(result.message).toContain('[sys]这里有: [/sys]');
     // data 结构化信息
     expect(result.data.short).toBe('扬州大街');
     expect(result.data.exits).toContain('north');
@@ -76,7 +81,8 @@ describe('LookCommand', () => {
     const result = cmd.execute(player, ['店小二']);
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe('一个机灵的小伙计，手里拿着一块抹布。');
+    // lookAtTarget 返回 [rd]...[/rd] 包裹的描述
+    expect(result.message).toBe('[rd]一个机灵的小伙计，手里拿着一块抹布。[/rd]');
     expect(result.data.target).toBe('npc/innkeeper#1');
     expect(result.data.long).toBe('一个机灵的小伙计，手里拿着一块抹布。');
   });

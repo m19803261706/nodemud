@@ -10,6 +10,7 @@ import { Command } from '../../types/command';
 import type { ICommand, CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
+import { rt } from '@packages/core';
 
 /** 方向别名映射表：缩写/中文 → 标准英文方向 */
 const DIRECTION_ALIASES: Record<string, string> = {
@@ -92,7 +93,7 @@ export class GoCommand implements ICommand {
     // 返回成功结果，由上层处理实际移动
     return {
       success: true,
-      message: `你向${direction}走去。`,
+      message: `${rt('sys', '你向')}${rt('exit', direction)}${rt('sys', '走去。')}`,
       data: { direction, targetId },
     };
   }

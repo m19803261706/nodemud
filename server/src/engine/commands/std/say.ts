@@ -9,6 +9,7 @@ import { Command } from '../../types/command';
 import type { ICommand, CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
+import { rt } from '@packages/core';
 
 @Command({ name: 'say', aliases: ['说', '聊'], description: '在房间内说话' })
 export class SayCommand implements ICommand {
@@ -38,9 +39,15 @@ export class SayCommand implements ICommand {
     const name = executor.getName();
 
     // 广播给房间内其他人（排除自己）
-    env.broadcast(`${name}说道: 「${message}」`, executor);
+    env.broadcast(
+      `${rt('player', name)}${rt('sys', '说道: 「')}${rt('chat', message)}${rt('sys', '」')}`,
+      executor,
+    );
 
     // 返回给自己的确认消息
-    return { success: true, message: `你说道: 「${message}」` };
+    return {
+      success: true,
+      message: `${rt('sys', '你说道: 「')}${rt('chat', message)}${rt('sys', '」')}`,
+    };
   }
 }

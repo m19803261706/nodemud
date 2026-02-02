@@ -45,7 +45,10 @@ describe('SayCommand 说话指令', () => {
     const result = command.execute(executor, ['大家好']);
 
     expect(result.success).toBe(true);
-    expect(result.message).toBe('你说道: 「大家好」');
+    // 富文本标记: [sys]你说道: 「[/sys][chat]大家好[/chat][sys]」[/sys]
+    expect(result.message).toBe(
+      '[sys]你说道: 「[/sys][chat]大家好[/chat][sys]」[/sys]',
+    );
   });
 
   it('不在房间时返回错误提示', () => {
@@ -66,6 +69,10 @@ describe('SayCommand 说话指令', () => {
 
     // 验证 broadcast 调用参数
     expect(room.broadcast).toHaveBeenCalledTimes(1);
-    expect(room.broadcast).toHaveBeenCalledWith('杜甫说道: 「月落 乌啼 霜满天」', executor);
+    // 富文本标记: [player]杜甫[/player][sys]说道: 「[/sys][chat]月落 乌啼 霜满天[/chat][sys]」[/sys]
+    expect(room.broadcast).toHaveBeenCalledWith(
+      '[player]杜甫[/player][sys]说道: 「[/sys][chat]月落 乌啼 霜满天[/chat][sys]」[/sys]',
+      executor,
+    );
   });
 });

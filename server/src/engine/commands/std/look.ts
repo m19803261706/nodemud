@@ -7,9 +7,10 @@
  * 对标: LPC look / 炎黄 look_cmd
  */
 import { Command, type ICommand, type CommandResult } from '../../types/command';
-import type { LivingBase } from '../../game-objects/living-base';
+import { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
+import { rt, bold } from '@packages/core';
 
 @Command({ name: 'look', aliases: ['l', '看'], description: '查看当前位置或指定对象' })
 export class LookCommand implements ICommand {
@@ -50,28 +51,36 @@ export class LookCommand implements ICommand {
     const exitNames = Object.keys(exits);
 
     // 房间内其他对象（排除自己）
-    const items = env
-      .getInventory()
-      .filter((e) => e !== executor)
-      .map((e) => {
-        // 优先使用 getShort（LivingBase），否则用 id
-        if (typeof (e as any).getShort === 'function') {
-          return (e as any).getShort() as string;
-        }
-        return e.id;
-      });
+    const inventory = env.getInventory().filter((e) => e !== executor);
+    const items = inventory.map((e) => {
+      // 优先使用 getShort（LivingBase），否则用 id
+      if (typeof (e as any).getShort === 'function') {
+        return (e as any).getShort() as string;
+      }
+      return e.id;
+    });
 
-    // 构建消息文本
+    // 根据类型包裹富文本标记
+    const taggedItems = inventory.map((e) => {
+      const name =
+        typeof (e as any).getShort === 'function'
+          ? ((e as any).getShort() as string)
+          : e.id;
+      // LivingBase 实例用 npc 标记，其他用 item 标记
+      return e instanceof LivingBase ? rt('npc', name) : rt('item', name);
+    });
+
+    // 构建消息文本（富文本标记）
     const lines: string[] = [];
-    lines.push(short);
-    if (long) lines.push(long);
+    lines.push(rt('rn', bold(short)));
+    if (long) lines.push(rt('rd', long));
     if (exitNames.length > 0) {
-      lines.push(`出口: ${exitNames.join('、')}`);
+      lines.push(rt('exit', `出口: ${exitNames.join('、')}`));
     } else {
-      lines.push('这里没有出口。');
+      lines.push(rt('sys', '这里没有出口。'));
     }
-    if (items.length > 0) {
-      lines.push(`这里有: ${items.join('、')}`);
+    if (taggedItems.length > 0) {
+      lines.push(`${rt('sys', '这里有: ')}${taggedItems.join('、')}`);
     }
 
     return {
@@ -109,7 +118,7 @@ export class LookCommand implements ICommand {
 
     return {
       success: true,
-      message: long,
+      message: rt('rd', long),
       data: { target: found.id, long },
     };
   }
