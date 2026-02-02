@@ -9,8 +9,11 @@
  * 2. resetAll  — 调用所有对象的 onReset 重置周期性状态
  * 3. removeDestructed — 从注册表中移除已销毁的对象条目
  */
-import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, Optional, Inject, OnModuleDestroy, Logger } from '@nestjs/common';
 import type { BaseEntity } from './base-entity';
+
+/** ObjectManager GC 配置注入 token */
+export const GC_CONFIG = 'GC_CONFIG';
 
 /** GC 配置 */
 export interface GCConfig {
@@ -47,7 +50,7 @@ export class ObjectManager implements OnModuleDestroy {
   private resetTimer: ReturnType<typeof setInterval> | null = null;
   private removeDestructedTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(gcConfig?: GCConfig) {
+  constructor(@Optional() @Inject(GC_CONFIG) gcConfig?: GCConfig) {
     this.gcConfig = { ...DEFAULT_GC_CONFIG, ...gcConfig };
   }
 

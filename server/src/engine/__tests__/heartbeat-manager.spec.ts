@@ -56,7 +56,7 @@ describe('HeartbeatManager', () => {
 
   describe('注册/注销', () => {
     beforeEach(() => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
     });
 
     it('注册后 isRegistered 返回 true', () => {
@@ -137,7 +137,7 @@ describe('HeartbeatManager', () => {
 
   describe('累积器调度', () => {
     it('tick=1000ms, interval=1000ms: 每 tick 触发一次', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -148,7 +148,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('tick=1000ms, interval=2000ms: 每 2 tick 触发一次', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -159,7 +159,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('tick=1000ms, interval=1500ms: 累积器精确调度（3 tick 内触发 2 次）', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -179,7 +179,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('tick=1000ms, interval=500ms: while 循环，每 tick 触发 2 次', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -201,7 +201,7 @@ describe('HeartbeatManager', () => {
 
   describe('错误隔离', () => {
     it('对象A的 onHeartbeat 抛异常，对象B 仍然正常触发', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const errorEntity = new ErrorEntity('test/error');
@@ -219,7 +219,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('异常不中断主循环', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const errorEntity = new ErrorEntity('test/error');
@@ -237,7 +237,7 @@ describe('HeartbeatManager', () => {
 
   describe('已销毁对象', () => {
     it('已销毁对象的 onHeartbeat 不被调用', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -256,7 +256,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('已销毁对象在 tick 后被自动移除（getRegisteredCount 减少）', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const a = new TestEntity('test/a');
@@ -282,7 +282,7 @@ describe('HeartbeatManager', () => {
 
   describe('updateInterval', () => {
     it('修改间隔后按新间隔调度', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -301,7 +301,7 @@ describe('HeartbeatManager', () => {
     });
 
     it('修改间隔不重置累积器', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');
@@ -326,7 +326,7 @@ describe('HeartbeatManager', () => {
 
   describe('生命周期', () => {
     it('onModuleDestroy 后 tick 停止，注册表清空', () => {
-      manager = new HeartbeatManager(1000);
+      manager = new HeartbeatManager({ tickIntervalMs: 1000 });
       manager.onModuleInit();
 
       const entity = new TestEntity('test/a');

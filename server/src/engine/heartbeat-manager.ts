@@ -10,9 +10,17 @@
  * - 当 accumulated >= intervalMs 时触发心跳（while 循环，支持补偿）
  * - 已销毁对象自动清理，异常隔离不影响其他对象
  */
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, Optional, Inject, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { GameEvents } from './types/events';
 import type { BaseEntity } from './base-entity';
+
+/** HeartbeatManager 配置注入 token */
+export const HEARTBEAT_CONFIG = 'HEARTBEAT_CONFIG';
+
+/** HeartbeatManager 配置 */
+export interface HeartbeatConfig {
+  tickIntervalMs?: number;
+}
 
 /** 心跳注册条目 */
 interface HeartbeatEntry {
@@ -37,8 +45,8 @@ export class HeartbeatManager implements OnModuleInit, OnModuleDestroy {
   /** 主循环 tick 间隔（毫秒） */
   private readonly tickIntervalMs: number;
 
-  constructor(tickIntervalMs: number = 1000) {
-    this.tickIntervalMs = tickIntervalMs;
+  constructor(@Optional() @Inject(HEARTBEAT_CONFIG) config?: HeartbeatConfig) {
+    this.tickIntervalMs = config?.tickIntervalMs ?? 1000;
   }
 
   // ================================================================

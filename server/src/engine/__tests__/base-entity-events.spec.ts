@@ -31,7 +31,7 @@ describe('BaseEntity Events 心跳与延迟调用', () => {
     jest.useFakeTimers();
 
     // 初始化 ServiceLocator，注入 HeartbeatManager + ObjectManager
-    heartbeatManager = new HeartbeatManager(1000);
+    heartbeatManager = new HeartbeatManager({ tickIntervalMs: 1000 });
     objectManager = new ObjectManager();
     ServiceLocator.initialize({ heartbeatManager, objectManager });
 
