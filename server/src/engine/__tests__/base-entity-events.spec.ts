@@ -1,7 +1,12 @@
 /**
  * BaseEntity Events 心跳与延迟调用 单元测试
+ *
+ * 心跳通过 HeartbeatManager 驱动（单一 setInterval tick → 累积器触发）
  */
 import { BaseEntity } from '../base-entity';
+import { HeartbeatManager } from '../heartbeat-manager';
+import { ObjectManager } from '../object-manager';
+import { ServiceLocator } from '../service-locator';
 import { GameEvents } from '../types/events';
 
 /** 测试用子类，覆写 onHeartbeat */
@@ -12,21 +17,34 @@ class TestEntity extends BaseEntity {
     super(id);
   }
 
-  protected onHeartbeat(): void {
+  public onHeartbeat(): void {
     this.heartbeatCount++;
   }
 }
 
 describe('BaseEntity Events 心跳与延迟调用', () => {
   let entity: TestEntity;
+  let heartbeatManager: HeartbeatManager;
+  let objectManager: ObjectManager;
 
   beforeEach(() => {
     jest.useFakeTimers();
+
+    // 初始化 ServiceLocator，注入 HeartbeatManager + ObjectManager
+    heartbeatManager = new HeartbeatManager(1000);
+    objectManager = new ObjectManager();
+    ServiceLocator.initialize({ heartbeatManager, objectManager });
+
+    // 启动 HeartbeatManager tick（onModuleInit）
+    heartbeatManager.onModuleInit();
+
     entity = new TestEntity('test/entity');
   });
 
   afterEach(() => {
     entity.destroy();
+    heartbeatManager.onModuleDestroy();
+    ServiceLocator.reset();
     jest.useRealTimers();
   });
 
@@ -42,8 +60,8 @@ describe('BaseEntity Events 心跳与延迟调用', () => {
       let eventCount = 0;
       entity.on(GameEvents.HEARTBEAT, () => eventCount++);
 
-      entity.enableHeartbeat(500);
-      jest.advanceTimersByTime(2000);
+      entity.enableHeartbeat(1000);
+      jest.advanceTimersByTime(4000);
 
       expect(eventCount).toBe(4);
     });
@@ -58,15 +76,15 @@ describe('BaseEntity Events 心跳与延迟调用', () => {
       expect(entity.heartbeatCount).toBe(2); // 不再增加
     });
 
-    it('重复 enableHeartbeat 先清除旧心跳', () => {
+    it('重复 enableHeartbeat 更新间隔', () => {
       entity.enableHeartbeat(1000);
-      jest.advanceTimersByTime(1500);
-      expect(entity.heartbeatCount).toBe(1);
+      jest.advanceTimersByTime(2000);
+      expect(entity.heartbeatCount).toBe(2);
 
-      // 重新注册，间隔改为 500ms
-      entity.enableHeartbeat(500);
-      jest.advanceTimersByTime(1000);
-      expect(entity.heartbeatCount).toBe(3); // 1 + 2
+      // 重新注册，间隔改为 2000ms
+      entity.enableHeartbeat(2000);
+      jest.advanceTimersByTime(2000);
+      expect(entity.heartbeatCount).toBe(3); // 2 + 1（2000ms 间隔触发 1 次）
     });
 
     it('getHeartbeatInterval 返回当前间隔', () => {
@@ -191,6 +209,57 @@ describe('BaseEntity Events 心跳与延迟调用', () => {
       expect(entity.listenerCount(GameEvents.HEARTBEAT)).toBe(0);
       expect(entity.listenerCount(GameEvents.MESSAGE)).toBe(0);
       expect(entity.listenerCount('custom')).toBe(0);
+    });
+
+    it('destroy 调用 ObjectManager.unregister', () => {
+      objectManager.register(entity);
+      expect(objectManager.has('test/entity')).toBe(true);
+
+      entity.destroy();
+      expect(objectManager.has('test/entity')).toBe(false);
+    });
+  });
+
+  describe('钩子方法', () => {
+    it('onReset 默认空实现', () => {
+      expect(() => entity.onReset()).not.toThrow();
+    });
+
+    it('onCleanUp 无环境返回 true', () => {
+      expect(entity.onCleanUp()).toBe(true);
+    });
+
+    it('onCleanUp 有环境返回 false', async () => {
+      const room = new TestEntity('room/test');
+      await entity.moveTo(room, { quiet: true });
+      expect(entity.onCleanUp()).toBe(false);
+      room.destroy();
+    });
+  });
+
+  describe('ServiceLocator 未初始化时的兼容性', () => {
+    it('未初始化时 enableHeartbeat 不报错', () => {
+      ServiceLocator.reset();
+      const e = new TestEntity('test/no-sl');
+      expect(() => e.enableHeartbeat(1000)).not.toThrow();
+    });
+
+    it('未初始化时 disableHeartbeat 不报错', () => {
+      ServiceLocator.reset();
+      const e = new TestEntity('test/no-sl');
+      expect(() => e.disableHeartbeat()).not.toThrow();
+    });
+
+    it('未初始化时 getHeartbeatInterval 返回 0', () => {
+      ServiceLocator.reset();
+      const e = new TestEntity('test/no-sl');
+      expect(e.getHeartbeatInterval()).toBe(0);
+    });
+
+    it('未初始化时 destroy 不报错', () => {
+      ServiceLocator.reset();
+      const e = new TestEntity('test/no-sl');
+      expect(() => e.destroy()).not.toThrow();
     });
   });
 

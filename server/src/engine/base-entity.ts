@@ -10,11 +10,8 @@
  * 对标: 炎黄 MUD dbase.c + LPC environment/inventory + RanvierMUD GameEntity
  */
 import { EventEmitter } from 'events';
-import {
-  getNestedValue,
-  setNestedValue,
-  deleteNestedValue,
-} from './utils/nested-value';
+import { getNestedValue, setNestedValue, deleteNestedValue } from './utils/nested-value';
+import { ServiceLocator } from './service-locator';
 import type { Blueprint } from './types/dbase';
 import type { MoveOptions } from './types/move-options';
 import type { CancellableEvent } from './types/events';
@@ -44,12 +41,6 @@ export abstract class BaseEntity extends EventEmitter {
   private _inventory: Set<BaseEntity> = new Set();
 
   // ========== Events 心跳 + 延迟调用 ==========
-
-  /** 心跳定时器 */
-  private _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
-
-  /** 心跳间隔（毫秒） */
-  private _heartbeatInterval: number = 0;
 
   /** 延迟调用注册表 */
   private _callOuts: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -170,9 +161,7 @@ export abstract class BaseEntity extends EventEmitter {
   }
 
   /** 按条件搜索子对象 */
-  findInInventory(
-    predicate: (entity: BaseEntity) => boolean,
-  ): BaseEntity | undefined {
+  findInInventory(predicate: (entity: BaseEntity) => boolean): BaseEntity | undefined {
     for (const child of this._inventory) {
       if (predicate(child)) return child;
     }
@@ -263,9 +252,13 @@ export abstract class BaseEntity extends EventEmitter {
       this._environment._inventory.delete(this);
       this._environment = null;
     }
-    // 5. 触发销毁事件
+    // 5. 从 ObjectManager 注销
+    if (ServiceLocator.initialized) {
+      ServiceLocator.objectManager.unregister(this);
+    }
+    // 6. 触发销毁事件
     this.emit(GameEvents.DESTROYED);
-    // 6. 清除所有监听器
+    // 7. 清除所有监听器
     this.removeAllListeners();
   }
 
@@ -286,27 +279,30 @@ export abstract class BaseEntity extends EventEmitter {
   //  Events 心跳 + 延迟调用 API
   // ================================================================
 
-  /** 注册心跳 */
+  /** 注册心跳（委托 HeartbeatManager） */
   enableHeartbeat(intervalMs: number): void {
-    this.disableHeartbeat();
-    this._heartbeatInterval = intervalMs;
-    this._heartbeatTimer = setInterval(() => {
-      this.onHeartbeat();
-      this.emit(GameEvents.HEARTBEAT);
-    }, intervalMs);
-  }
-
-  /** 注销心跳 */
-  disableHeartbeat(): void {
-    if (this._heartbeatTimer) {
-      clearInterval(this._heartbeatTimer);
-      this._heartbeatTimer = null;
-      this._heartbeatInterval = 0;
+    if (ServiceLocator.initialized) {
+      ServiceLocator.heartbeatManager.register(this, intervalMs);
     }
   }
 
-  /** 心跳回调（子类覆写） */
-  protected onHeartbeat(): void {}
+  /** 注销心跳（委托 HeartbeatManager） */
+  disableHeartbeat(): void {
+    if (ServiceLocator.initialized) {
+      ServiceLocator.heartbeatManager.unregister(this);
+    }
+  }
+
+  /** 心跳回调（子类覆写，HeartbeatManager 外部调用） */
+  public onHeartbeat(): void {}
+
+  /** 周期重置钩子（ObjectManager.resetAll 调用） */
+  public onReset(): void {}
+
+  /** 清理判断钩子（ObjectManager.cleanUp 调用），返回 true 表示允许清理 */
+  public onCleanUp(): boolean {
+    return !this.getEnvironment();
+  }
 
   /** 延迟调用 */
   callOut(fn: () => void, delayMs: number): string {
@@ -336,9 +332,12 @@ export abstract class BaseEntity extends EventEmitter {
     this._callOuts.clear();
   }
 
-  /** 获取心跳间隔 */
+  /** 获取心跳间隔（从 HeartbeatManager 查询） */
   getHeartbeatInterval(): number {
-    return this._heartbeatInterval;
+    if (ServiceLocator.initialized) {
+      return ServiceLocator.heartbeatManager.getInterval(this) ?? 0;
+    }
+    return 0;
   }
 
   // ================================================================
@@ -346,9 +345,7 @@ export abstract class BaseEntity extends EventEmitter {
   // ================================================================
 
   /** 创建可取消事件对象 */
-  private createCancellableEvent<T extends Record<string, any>>(
-    data: T,
-  ): T & CancellableEvent {
+  private createCancellableEvent<T extends Record<string, any>>(data: T): T & CancellableEvent {
     let _cancelled = false;
     return {
       ...data,
