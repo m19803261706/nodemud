@@ -3,7 +3,7 @@
  * 完全复刻 Pencil 设计稿（l3i03）
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,9 +15,13 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MessageFactory } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 import { useUI } from '../components';
+
+const STORAGE_KEY_USERNAME = '@renzai_username';
+const STORAGE_KEY_REMEMBER = '@renzai_remember';
 
 export const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
@@ -26,25 +30,70 @@ export const LoginScreen = ({ navigation }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   const { showAlert, showToast } = useUI();
 
+  // 页面加载时读取存储的用户名
   useEffect(() => {
-    wsService.on('loginSuccess', data => {
+    const loadSavedUsername = async () => {
+      try {
+        const savedRemember = await AsyncStorage.getItem(STORAGE_KEY_REMEMBER);
+        if (savedRemember === 'true') {
+          setRememberMe(true);
+          const savedUsername = await AsyncStorage.getItem(STORAGE_KEY_USERNAME);
+          if (savedUsername) {
+            setUsername(savedUsername);
+          }
+        }
+      } catch {}
+    };
+    loadSavedUsername();
+  }, []);
+
+  // 切换记住侠名时，同步存储偏好
+  const handleToggleRemember = useCallback(async () => {
+    const next = !rememberMe;
+    setRememberMe(next);
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY_REMEMBER, String(next));
+      if (!next) {
+        await AsyncStorage.removeItem(STORAGE_KEY_USERNAME);
+      }
+    } catch {}
+  }, [rememberMe]);
+
+  useEffect(() => {
+    const handleSuccess = async (data: any) => {
+      // 登录成功时保存或清除用户名
+      try {
+        if (rememberMe && username) {
+          await AsyncStorage.setItem(STORAGE_KEY_USERNAME, username);
+        } else {
+          await AsyncStorage.removeItem(STORAGE_KEY_USERNAME);
+        }
+      } catch {}
+
       if (data.hasCharacter) {
         navigation.navigate('GameHome', { characterId: data.characterId });
       } else {
         navigation.navigate('CreateCharacter');
       }
-    });
+    };
 
-    wsService.on('loginFailed', data => {
+    const handleFailed = (data: any) => {
       showAlert({
         type: 'error',
         title: '登录失败',
         message: data.message,
         buttons: [{ text: '返回' }, { text: '重试', onPress: handleLogin }],
       });
-    });
+    };
 
-  }, [navigation]);
+    wsService.on('loginSuccess', handleSuccess);
+    wsService.on('loginFailed', handleFailed);
+
+    return () => {
+      wsService.off('loginSuccess', handleSuccess);
+      wsService.off('loginFailed', handleFailed);
+    };
+  }, [navigation, rememberMe, username]);
 
   const handleLogin = () => {
     if (!username || !password) {
@@ -139,7 +188,7 @@ export const LoginScreen = ({ navigation }: any) => {
             <View style={styles.optionsRow}>
               <TouchableOpacity
                 style={styles.rememberMe}
-                onPress={() => setRememberMe(!rememberMe)}
+                onPress={handleToggleRemember}
               >
                 <View
                   style={[
