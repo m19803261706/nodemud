@@ -15,12 +15,12 @@
 
 ## 模块组织
 
-| 模块 | 路径 | 职责 |
-|------|------|------|
-| AppModule | `src/app.module.ts` | 根模块，组装所有子模块 |
-| HealthModule | `src/health/` | 健康检查 `GET /health` |
-| AccountModule | `src/account/` | 账号注册/登录，TypeORM 实体 |
-| WebSocketModule | `src/websocket/` | WebSocket Gateway，消息路由，Session 管理 |
+| 模块            | 路径                | 职责                                      |
+| --------------- | ------------------- | ----------------------------------------- |
+| AppModule       | `src/app.module.ts` | 根模块，组装所有子模块                    |
+| HealthModule    | `src/health/`       | 健康检查 `GET /health`                    |
+| AccountModule   | `src/account/`      | 账号注册/登录，TypeORM 实体               |
+| WebSocketModule | `src/websocket/`    | WebSocket Gateway，消息路由，Session 管理 |
 
 ## 对外接口
 
@@ -37,6 +37,7 @@
 ```
 
 已实现的消息类型:
+
 - `login` -> `loginSuccess` / `loginFailed`
 - `register` -> `registerSuccess` / `registerFailed`
 - `ping` (心跳)
@@ -60,15 +61,15 @@ NODE_ENV, PORT, DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE
 
 ### Account 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID v4 | 主键 |
-| username | VARCHAR(50) | 唯一，6-20字符 |
-| password | VARCHAR(255) | bcrypt 加密 |
-| phone | VARCHAR(20) | 唯一，11位 |
-| created_at | TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | 更新时间 |
-| last_login_at | TIMESTAMP | 最后登录时间（nullable） |
+| 字段          | 类型         | 说明                     |
+| ------------- | ------------ | ------------------------ |
+| id            | UUID v4      | 主键                     |
+| username      | VARCHAR(50)  | 唯一，6-20字符           |
+| password      | VARCHAR(255) | bcrypt 加密              |
+| phone         | VARCHAR(20)  | 唯一，11位               |
+| created_at    | TIMESTAMP    | 创建时间                 |
+| updated_at    | TIMESTAMP    | 更新时间                 |
+| last_login_at | TIMESTAMP    | 最后登录时间（nullable） |
 
 ## 测试与质量
 

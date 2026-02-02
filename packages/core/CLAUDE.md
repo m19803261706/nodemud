@@ -31,12 +31,12 @@ export { MessageHandler, IMessageHandler } from './factory/MessageFactory';
 
 ### MessageFactory API
 
-| 方法 | 说明 |
-|------|------|
-| `MessageFactory.create(type, ...args)` | 创建消息对象 |
-| `MessageFactory.validate(message)` | 验证消息格式 |
-| `MessageFactory.serialize(message)` | 序列化为 JSON 字符串 |
-| `MessageFactory.deserialize(json)` | 反序列化 JSON 为消息对象 |
+| 方法                                   | 说明                     |
+| -------------------------------------- | ------------------------ |
+| `MessageFactory.create(type, ...args)` | 创建消息对象             |
+| `MessageFactory.validate(message)`     | 验证消息格式             |
+| `MessageFactory.serialize(message)`    | 序列化为 JSON 字符串     |
+| `MessageFactory.deserialize(json)`     | 反序列化 JSON 为消息对象 |
 
 ### 消息格式
 
@@ -46,17 +46,22 @@ export { MessageHandler, IMessageHandler } from './factory/MessageFactory';
 
 ### 已注册消息类型
 
-| 类型 | 方向 | 说明 |
-|------|------|------|
-| `login` | Client -> Server | 登录请求 |
-| `loginSuccess` | Server -> Client | 登录成功 |
-| `loginFailed` | Server -> Client | 登录失败 |
-| `register` | Client -> Server | 注册请求 |
-| `registerSuccess` | Server -> Client | 注册成功 |
-| `registerFailed` | Server -> Client | 注册失败 |
-| `ping` | Client -> Server | 心跳 |
-| `toast` | Server -> Client | Toast 提示 |
-| `alert` | Server -> Client | 弹窗提示 |
+| 类型                     | 方向             | 说明               |
+| ------------------------ | ---------------- | ------------------ |
+| `login`                  | Client -> Server | 登录请求           |
+| `loginSuccess`           | Server -> Client | 登录成功           |
+| `loginFailed`            | Server -> Client | 登录失败           |
+| `register`               | Client -> Server | 注册请求           |
+| `registerSuccess`        | Server -> Client | 注册成功           |
+| `registerFailed`         | Server -> Client | 注册失败           |
+| `ping`                   | Client -> Server | 心跳               |
+| `toast`                  | Server -> Client | Toast 提示         |
+| `alert`                  | Server -> Client | 弹窗提示           |
+| `createCharacterStep1`   | Client -> Server | 创建角色：选择出身 |
+| `createCharacterFate`    | Server -> Client | 创建角色：返回命格 |
+| `createCharacterConfirm` | Client -> Server | 创建角色：确认创建 |
+| `createCharacterSuccess` | Server -> Client | 角色创建成功       |
+| `createCharacterFailed`  | Server -> Client | 角色创建失败       |
 
 ## 如何添加新消息类型
 
@@ -79,4 +84,5 @@ pnpm type-check    # TypeScript 类型检查（不生成文件）
 
 ## 变更记录 (Changelog)
 
+- **2026-02-02**: 新增角色创建消息类型和处理器（#31）
 - **2026-02-02**: 初始化模块文档

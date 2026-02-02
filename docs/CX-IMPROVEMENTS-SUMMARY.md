@@ -7,6 +7,7 @@
 ## 改进动机
 
 用户反馈发现的两个关键问题：
+
 1. 文档草稿使用 `/tmp/` 临时目录，不便于管理
 2. Epic 完成后文档 Issue 未关闭，不是完美闭环
 
@@ -17,6 +18,7 @@
 ### ✅ 改进 1: 文档草稿路径修正
 
 **修改前**:
+
 ```bash
 cat > /tmp/prd_issue.md << 'EOF'
 ...
@@ -25,6 +27,7 @@ gh issue create --body "$prd_body" ...
 ```
 
 **修改后**:
+
 ```bash
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 mkdir -p "$PROJECT_ROOT/docs/drafts"
@@ -34,12 +37,14 @@ gh issue create --body-file "$PROJECT_ROOT/docs/drafts/prd-${feature_name}.md" .
 ```
 
 **已修改的命令**:
+
 - ✅ `~/.claude/commands/cx/prd.md`
 - ✅ `~/.claude/commands/cx/design.md`
 - ✅ `~/.claude/commands/cx/scope.md`
 - ✅ `~/.claude/commands/cx/adr.md`
 
 **优点**:
+
 - 文档不会因系统重启丢失
 - 便于后期查看和管理
 - 可追溯文档草稿历史
@@ -50,6 +55,7 @@ gh issue create --body-file "$PROJECT_ROOT/docs/drafts/prd-${feature_name}.md" .
 ### ✅ 改进 2: 文档 Issue 完美闭环
 
 **修改前**（Epic 闭环流程）:
+
 ```bash
 if [ "$total" -eq "$done_count" ]; then
   # 1. 关闭 Epic
@@ -61,6 +67,7 @@ fi
 ```
 
 **修改后**（完整闭环）:
+
 ```bash
 if [ "$total" -eq "$done_count" ]; then
   # 1. 关闭 Epic
@@ -85,9 +92,11 @@ fi
 ```
 
 **已修改的命令**:
+
 - ✅ `~/.claude/commands/cx/exec.md`
 
 **优点**:
+
 - 完整的文档生命周期管理
 - 自动化闭环，无需手动操作
 - GitHub Project 看板干净整洁
@@ -100,6 +109,7 @@ fi
 **新增**: Epic 完成后自动运行 `code-simplifier:code-simplifier` agent
 
 **优化内容**:
+
 1. 增强类型安全（添加返回类型注解）
 2. 消除重复代码和注释
 3. 提取重复调用为变量
@@ -107,6 +117,7 @@ fi
 5. 精简冗余注释
 
 **示例优化**（Epic #4 实测）:
+
 - 后端：添加 `HealthStatus` 接口，增强类型安全
 - 后端：提取重复的 `NODE_ENV` 判断为变量
 - 前端：移除 `React.FC`，改用 `function` 关键字
@@ -114,6 +125,7 @@ fi
 - 整体：统一注释风格，保持中文注释
 
 **效果**:
+
 - 代码行数: 197 → 100（精简 49%）
 - 类型安全性: ⬆️ 提升
 - 代码可读性: ⬆️ 提升
@@ -191,6 +203,7 @@ fi
 ### Epic #4 验证（已手动完成）
 
 **文档闭环**:
+
 ```
 ✅ Scope #1  [项目蓝图] (OPEN) - 继续跟踪
 ✅ PRD #2    [需求文档] (CLOSED)
@@ -200,6 +213,7 @@ fi
 ```
 
 **代码清理**:
+
 - ✅ 优化了 12 个文件
 - ✅ 提交记录: `2905a21 refactor: 代码清理和优化`
 - ✅ 优化效果: 代码精简 49%，类型安全提升
@@ -220,6 +234,7 @@ a7e9e83 docs: CX 工作流改进建议
 ## 影响范围
 
 ### 全局配置（~/.claude/commands/cx/）
+
 - ✅ `prd.md` - 文档路径修正
 - ✅ `design.md` - 文档路径修正
 - ✅ `scope.md` - 文档路径修正
@@ -227,9 +242,11 @@ a7e9e83 docs: CX 工作流改进建议
 - ✅ `exec.md` - 文档闭环 + 代码清理
 
 ### 项目配置
+
 - ✅ `.gitignore` - docs/drafts 配置
 
 ### 新增文档
+
 - ✅ `docs/CX-WORKFLOW-IMPROVEMENTS.md` - 改进建议
 - ✅ `docs/CX-IMPROVEMENTS-APPLIED.md` - 实施记录
 - ✅ `docs/CX-IMPROVEMENTS-SUMMARY.md` - 改进总结
@@ -241,11 +258,13 @@ a7e9e83 docs: CX 工作流改进建议
 ### 前后对比
 
 **修改前**:
+
 - 文档草稿在 `/tmp/`，重启丢失 ❌
 - Epic 完成后 PRD/Design 仍 OPEN ❌
 - 无代码质量保障 ❌
 
 **修改后**:
+
 - 文档草稿在 `docs/drafts/`，可管理 ✅
 - Epic 完成后自动关闭所有文档 Issue ✅
 - 自动运行代码清理，质量保障 ✅
@@ -253,6 +272,7 @@ a7e9e83 docs: CX 工作流改进建议
 ### 下次执行验证
 
 下次运行完整流程时：
+
 1. `/cx:prd` → 草稿保存到 `docs/drafts/prd-*.md`
 2. `/cx:design` → 草稿保存到 `docs/drafts/design-*.md`
 3. `/cx:exec --all` → Epic 完成后：

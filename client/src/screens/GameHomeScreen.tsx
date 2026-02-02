@@ -20,14 +20,9 @@ export const GameHomeScreen = ({ route }: any) => {
       <View style={styles.content}>
         <Text style={styles.title}>欢迎回来，大侠</Text>
         <Text style={styles.subtitle}>游戏主页（占位符）</Text>
-        {characterId && (
-          <Text style={styles.info}>角色 ID: {characterId}</Text>
-        )}
+        {characterId && <Text style={styles.info}>角色 ID: {characterId}</Text>}
         <Text style={styles.hint}>
-          后续版本将展示：{'\n'}
-          - 角色状态{'\n'}
-          - 房间描述{'\n'}
-          - 消息日志{'\n'}
+          后续版本将展示：{'\n'}- 角色状态{'\n'}- 房间描述{'\n'}- 消息日志{'\n'}
           - 指令输入
         </Text>
       </View>

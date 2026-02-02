@@ -33,11 +33,7 @@ export interface LoginSuccessMessage extends ServerMessage {
 export interface LoginFailedMessage extends ServerMessage {
   type: 'loginFailed';
   data: {
-    reason:
-      | 'account_not_found'
-      | 'invalid_password'
-      | 'account_banned'
-      | 'server_error';
+    reason: 'account_not_found' | 'invalid_password' | 'account_banned' | 'server_error';
     message: string; // 中文错误提示
   };
 }

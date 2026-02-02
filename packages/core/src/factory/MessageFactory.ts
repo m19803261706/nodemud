@@ -20,9 +20,7 @@ const messageHandlers = new Map<string, IMessageHandler>();
 
 /** 装饰器：注册消息处理器 */
 export function MessageHandler(type: string) {
-  return function <T extends { new (...args: any[]): IMessageHandler }>(
-    constructor: T
-  ) {
+  return function <T extends { new (...args: any[]): IMessageHandler }>(constructor: T) {
     messageHandlers.set(type, new constructor());
     return constructor;
   };
@@ -33,10 +31,7 @@ export function MessageHandler(type: string) {
  */
 export class MessageFactory {
   /** 创建消息 */
-  static create<T extends ClientMessage | ServerMessage>(
-    type: string,
-    ...args: any[]
-  ): T | null {
+  static create<T extends ClientMessage | ServerMessage>(type: string, ...args: any[]): T | null {
     const handler = messageHandlers.get(type);
     if (!handler) {
       // 未注册的消息类型
@@ -50,8 +45,7 @@ export class MessageFactory {
     if (!message || typeof message !== 'object') return false;
     if (!message.type || typeof message.type !== 'string') return false;
     if (!message.data || typeof message.data !== 'object') return false;
-    if (!message.timestamp || typeof message.timestamp !== 'number')
-      return false;
+    if (!message.timestamp || typeof message.timestamp !== 'number') return false;
 
     // 调用对应类型的验证器
     const handler = messageHandlers.get(message.type);
@@ -74,4 +68,3 @@ export class MessageFactory {
     }
   }
 }
-

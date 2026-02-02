@@ -17,9 +17,7 @@
       "role": "水墨风移动端客户端（iOS/Android）",
       "claudeMd": "client/CLAUDE.md",
       "entry": "client/App.tsx",
-      "interfaces": [
-        "client/src/services/WebSocketService.ts"
-      ],
+      "interfaces": ["client/src/services/WebSocketService.ts"],
       "screens": [
         "client/src/screens/LoginScreen.tsx",
         "client/src/screens/RegisterScreen.tsx",
@@ -31,10 +29,7 @@
         "client/src/components/GameToast.tsx",
         "client/src/components/UIProvider.tsx"
       ],
-      "config": [
-        "client/metro.config.js",
-        "client/package.json"
-      ],
+      "config": ["client/metro.config.js", "client/package.json"],
       "testDir": null,
       "coverage": {
         "entry": true,
@@ -59,12 +54,8 @@
         "server/src/websocket/handlers/auth.handler.ts",
         "server/src/websocket/handlers/ping.handler.ts"
       ],
-      "entities": [
-        "server/src/account/account.entity.ts"
-      ],
-      "services": [
-        "server/src/account/account.service.ts"
-      ],
+      "entities": ["server/src/account/account.entity.ts"],
+      "services": ["server/src/account/account.service.ts"],
       "config": [
         "server/nest-cli.json",
         "server/tsconfig.json",
@@ -87,9 +78,7 @@
       "role": "前后端共享消息类型和 MessageFactory",
       "claudeMd": "packages/core/CLAUDE.md",
       "entry": "packages/core/src/index.ts",
-      "interfaces": [
-        "packages/core/src/factory/MessageFactory.ts"
-      ],
+      "interfaces": ["packages/core/src/factory/MessageFactory.ts"],
       "types": [
         "packages/core/src/types/base.ts",
         "packages/core/src/types/messages/auth.ts",
@@ -107,10 +96,7 @@
         "packages/core/src/factory/handlers/toast.ts",
         "packages/core/src/factory/handlers/alert.ts"
       ],
-      "config": [
-        "packages/core/package.json",
-        "packages/core/tsconfig.json"
-      ],
+      "config": ["packages/core/package.json", "packages/core/tsconfig.json"],
       "testDir": null,
       "coverage": {
         "entry": true,

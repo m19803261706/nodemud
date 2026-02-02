@@ -16,6 +16,11 @@ export class LoginFailedHandler implements IMessageHandler {
   }
 
   validate(data: any): boolean {
-    return !!data.reason && typeof data.reason === 'string' && !!data.message && typeof data.message === 'string';
+    return (
+      !!data.reason &&
+      typeof data.reason === 'string' &&
+      !!data.message &&
+      typeof data.message === 'string'
+    );
   }
 }

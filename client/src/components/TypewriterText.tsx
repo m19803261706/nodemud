@@ -67,11 +67,7 @@ const FadeInChar: React.FC<{
     }).start();
   }, [opacity, duration]);
 
-  return (
-    <Animated.Text style={[style, { opacity }]}>
-      {char}
-    </Animated.Text>
-  );
+  return <Animated.Text style={[style, { opacity }]}>{char}</Animated.Text>;
 });
 
 export const TypewriterText: React.FC<TypewriterTextProps> = ({

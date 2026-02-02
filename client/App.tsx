@@ -49,14 +49,8 @@ function App(): React.JSX.Element {
               name="CreateCharacter"
               component={CreateCharacterScreen}
             />
-            <Stack.Screen
-              name="OriginSelect"
-              component={OriginSelectScreen}
-            />
-            <Stack.Screen
-              name="FateReveal"
-              component={FateRevealScreen}
-            />
+            <Stack.Screen name="OriginSelect" component={OriginSelectScreen} />
+            <Stack.Screen name="FateReveal" component={FateRevealScreen} />
             <Stack.Screen
               name="AttributeAllocate"
               component={AttributeAllocateScreen}

@@ -172,7 +172,10 @@ export class CharacterHandler {
     }
 
     // 校验属性分配
-    const attrError = this.validateAttributes(data.attributes, session.pendingCharacter.attributeCaps);
+    const attrError = this.validateAttributes(
+      data.attributes,
+      session.pendingCharacter.attributeCaps,
+    );
     if (attrError) {
       this.sendFailed(client, 'invalid_attributes', attrError);
       return;
@@ -299,9 +302,7 @@ export class CharacterHandler {
   /** 发送创建失败消息 */
   private sendFailed(client: any, reason: string, message: string) {
     client.send(
-      MessageFactory.serialize(
-        MessageFactory.create('createCharacterFailed', reason, message)!,
-      ),
+      MessageFactory.serialize(MessageFactory.create('createCharacterFailed', reason, message)!),
     );
   }
 }

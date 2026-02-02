@@ -39,7 +39,9 @@ export class AuthHandler {
       );
     } else {
       client.send(
-        MessageFactory.serialize(MessageFactory.create('loginFailed', result.reason!, result.message)!),
+        MessageFactory.serialize(
+          MessageFactory.create('loginFailed', result.reason!, result.message)!,
+        ),
       );
     }
   }
@@ -53,12 +55,19 @@ export class AuthHandler {
     if (result.success) {
       client.send(
         MessageFactory.serialize(
-          MessageFactory.create('registerSuccess', result.accountId!, data.username, result.message)!,
+          MessageFactory.create(
+            'registerSuccess',
+            result.accountId!,
+            data.username,
+            result.message,
+          )!,
         ),
       );
     } else {
       client.send(
-        MessageFactory.serialize(MessageFactory.create('registerFailed', result.reason!, result.message)!),
+        MessageFactory.serialize(
+          MessageFactory.create('registerFailed', result.reason!, result.message)!,
+        ),
       );
     }
   }

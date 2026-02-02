@@ -3,10 +3,7 @@
  */
 
 import { MessageHandler, type IMessageHandler } from '../MessageFactory';
-import type {
-  CreateCharacterStep1Message,
-  CharacterOrigin,
-} from '../../types/messages/character';
+import type { CreateCharacterStep1Message, CharacterOrigin } from '../../types/messages/character';
 
 const VALID_ORIGINS: CharacterOrigin[] = [
   'noble',
@@ -19,10 +16,7 @@ const VALID_ORIGINS: CharacterOrigin[] = [
 
 @MessageHandler('createCharacterStep1')
 export class CreateCharacterStep1Handler implements IMessageHandler {
-  create(
-    origin: CharacterOrigin,
-    gender: 'male' | 'female',
-  ): CreateCharacterStep1Message {
+  create(origin: CharacterOrigin, gender: 'male' | 'female'): CreateCharacterStep1Message {
     return {
       type: 'createCharacterStep1',
       data: { origin, gender },

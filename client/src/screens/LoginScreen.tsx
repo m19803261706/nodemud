@@ -37,7 +37,8 @@ export const LoginScreen = ({ navigation }: any) => {
         const savedRemember = await AsyncStorage.getItem(STORAGE_KEY_REMEMBER);
         if (savedRemember === 'true') {
           setRememberMe(true);
-          const savedUsername = await AsyncStorage.getItem(STORAGE_KEY_USERNAME);
+          const savedUsername =
+            await AsyncStorage.getItem(STORAGE_KEY_USERNAME);
           if (savedUsername) {
             setUsername(savedUsername);
           }
