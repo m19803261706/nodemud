@@ -17,7 +17,7 @@ import type { MoveOptions } from './types/move-options';
 import type { CancellableEvent } from './types/events';
 import { GameEvents } from './types/events';
 
-export abstract class BaseEntity extends EventEmitter {
+export class BaseEntity extends EventEmitter {
   /** 唯一标识，路径式（如 "yangzhou/inn", "npc/dianxiaoer#1"） */
   readonly id: string;
 
@@ -134,6 +134,11 @@ export abstract class BaseEntity extends EventEmitter {
     for (const [key, value] of Object.entries(data)) {
       this.dbase.set(key, value);
     }
+  }
+
+  /** 清空临时属性（热更新用） */
+  clearTmpDbase(): void {
+    this.tmpDbase.clear();
   }
 
   // ================================================================
@@ -292,6 +297,9 @@ export abstract class BaseEntity extends EventEmitter {
       ServiceLocator.heartbeatManager.unregister(this);
     }
   }
+
+  /** 蓝图初始化钩子（蓝图子类覆写设置初始属性） */
+  public create(): void {}
 
   /** 心跳回调（子类覆写，HeartbeatManager 外部调用） */
   public onHeartbeat(): void {}
