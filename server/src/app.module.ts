@@ -13,6 +13,7 @@ import { AccountModule } from './account/account.module';
 import { WebSocketModule } from './websocket/websocket.module';
 import { CharacterModule } from './character/character.module';
 import { FateModule } from './fate/fate.module';
+import { EngineModule } from './engine/engine.module';
 
 @Module({
   imports: [
@@ -29,6 +30,9 @@ import { FateModule } from './fate/fate.module';
       inject: [ConfigService],
       useFactory: getDatabaseConfig,
     }),
+
+    // 游戏引擎
+    EngineModule,
 
     // 功能模块
     HealthModule,
