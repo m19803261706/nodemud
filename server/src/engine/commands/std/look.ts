@@ -8,6 +8,7 @@
  */
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import { LivingBase } from '../../game-objects/living-base';
+import { NpcBase } from '../../game-objects/npc-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold } from '@packages/core';
@@ -90,10 +91,19 @@ export class LookCommand implements ICommand {
 
   /** 查看指定对象 */
   private lookAtTarget(executor: LivingBase, env: BaseEntity, target: string): CommandResult {
-    const lowerTarget = target.toLowerCase();
+    // 优先在 NPC 中查找（模糊匹配 getName）
+    const inventory = env.getInventory().filter((e) => e !== executor);
+    const npc = inventory.find(
+      (e) => e instanceof NpcBase && (e as NpcBase).getName().includes(target),
+    );
+    if (npc) {
+      return this.lookAtNpc(npc as NpcBase);
+    }
 
-    // 在环境 inventory 中搜索（按 getName / getShort / id 匹配）
+    // 精确匹配其他对象（按 getName / getShort / id）
+    const lowerTarget = target.toLowerCase();
     const found = env.findInInventory((entity) => {
+      if (entity === executor) return false;
       if (entity.id.toLowerCase() === lowerTarget) return true;
       if (typeof (entity as any).getName === 'function') {
         if ((entity as any).getName().toLowerCase() === lowerTarget) return true;
@@ -105,7 +115,7 @@ export class LookCommand implements ICommand {
     });
 
     if (!found) {
-      return { success: false, message: `这里没有 ${target}。` };
+      return { success: false, message: '这里没有这个人。' };
     }
 
     // 获取详细描述
@@ -118,6 +128,26 @@ export class LookCommand implements ICommand {
       success: true,
       message: rt('rd', long),
       data: { target: found.id, long },
+    };
+  }
+
+  /** 查看 NPC 详细信息 */
+  private lookAtNpc(npc: NpcBase): CommandResult {
+    const name = npc.getName();
+    const title = npc.get<string>('title') || '';
+    const long = npc.getLong();
+    const gender = npc.get<string>('gender') === 'male' ? '男' : '女';
+
+    const header = title ? `${title}·${name}` : name;
+    const lines: string[] = [];
+    lines.push(rt('rn', bold(header)));
+    lines.push(title ? `「${title}」${name} [${gender}]` : `${name} [${gender}]`);
+    lines.push(rt('rd', long));
+
+    return {
+      success: true,
+      message: lines.join('\n'),
+      data: { action: 'look', target: 'npc', npcId: npc.id },
     };
   }
 }
