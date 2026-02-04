@@ -75,6 +75,12 @@ function App(): React.JSX.Element {
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('playerStats', handlePlayerStats);
+
+    return () => {
+      wsService.off('roomInfo', handleRoomInfo);
+      wsService.off('commandResult', handleCommandResult);
+      wsService.off('playerStats', handlePlayerStats);
+    };
   }, []);
 
   return (

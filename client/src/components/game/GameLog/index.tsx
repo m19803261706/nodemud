@@ -2,7 +2,7 @@
  * 游戏日志 — 日志列表 + 动作按钮栏
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
 import { LogEntry } from './LogEntry';
@@ -15,11 +15,23 @@ export const GameLog = () => {
   const gameLog = useGameStore(state => state.gameLog);
   const showMapDesc = useGameStore(state => state.showMapDesc);
   const description = useGameStore(state => state.location.description);
+  const scrollRef = useRef<ScrollView>(null);
+
+  // 新日志时自动滚动到底部
+  useEffect(() => {
+    if (gameLog.length > 0) {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+    }
+  }, [gameLog.length]);
 
   return (
     <View style={s.container}>
       {showMapDesc && <MapDescription text={description} />}
-      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
+      <ScrollView
+        ref={scrollRef}
+        style={s.scroll}
+        contentContainerStyle={s.scrollContent}
+      >
         {gameLog.map((line, i) => (
           <LogEntry key={i} text={line.text} color={line.color} />
         ))}
