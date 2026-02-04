@@ -21,6 +21,8 @@ import './handlers/registerSuccess';
 import './handlers/registerFailed';
 import './handlers/toast';
 import './handlers/alert';
+// 房间信息消息
+import './handlers/roomInfo';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';
