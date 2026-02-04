@@ -1,101 +1,79 @@
 {
-  "feature": "game-home-refactor",
+  "feature": "player-map-system",
   "created_at": "2026-02-04T00:00:00+08:00",
   "project_number": 3,
   "docs": {
-    "scope": 99
+    "scope": 112,
+    "prd": 113,
+    "design": 114
   },
   "epic": {
-    "number": 100,
-    "title": "[Epic] 游戏首页组件化重构 — Unity3D 组件模型"
+    "number": 115,
+    "title": "[Epic] 玩家上线初始地图系统"
   },
   "issues": [
     {
-      "number": 101,
-      "title": "安装 Zustand + 创建 useGameStore",
-      "status": "cx-done",
+      "number": 116,
+      "title": "[core] roomInfo 消息类型 + MessageHandler",
+      "status": "cx-ready",
       "phase": 1,
       "parallel_group": "p1"
     },
     {
-      "number": 102,
-      "title": "创建共享组件",
-      "status": "cx-done",
+      "number": 117,
+      "title": "[database] Character 实体新增 lastRoom 字段",
+      "status": "cx-ready",
       "phase": 1,
       "parallel_group": "p1"
     },
     {
-      "number": 103,
-      "title": "PlayerStats 组件拆分",
-      "status": "cx-done",
+      "number": 118,
+      "title": "[backend] room-utils + 角色创建后进场",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2",
-      "depends_on": [101, 102]
+      "depends_on": [116, 117]
     },
     {
-      "number": 104,
-      "title": "LocationHeader 组件拆分",
-      "status": "cx-done",
+      "number": 119,
+      "title": "[backend] 登录已有角色后进场",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2",
-      "depends_on": [101, 102]
+      "depends_on": [116, 117, 118]
     },
     {
-      "number": 105,
-      "title": "GameLog 组件拆分",
-      "status": "cx-done",
+      "number": 120,
+      "title": "[backend] go 命令广播 + roomInfo",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2",
-      "depends_on": [101, 102]
+      "depends_on": [116, 118]
     },
     {
-      "number": 106,
-      "title": "ChatPanel 组件拆分",
-      "status": "cx-done",
+      "number": 121,
+      "title": "[backend] 断开连接保存位置 + 下线",
+      "status": "cx-blocked",
       "phase": 2,
       "parallel_group": "p2",
-      "depends_on": [101, 102]
+      "depends_on": [117, 118]
     },
     {
-      "number": 107,
-      "title": "MapNavigation 组件拆分",
-      "status": "cx-done",
-      "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [101, 102]
-    },
-    {
-      "number": 108,
-      "title": "NpcList 组件拆分",
-      "status": "cx-done",
-      "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [101, 102]
-    },
-    {
-      "number": 109,
-      "title": "BottomNavBar 组件拆分",
-      "status": "cx-done",
-      "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [101, 102]
-    },
-    {
-      "number": 110,
-      "title": "GameHomeScreen 重构为纯布局容器",
-      "status": "cx-done",
+      "number": 122,
+      "title": "[frontend] sendCommand + roomInfo 处理",
+      "status": "cx-blocked",
       "phase": 3,
       "parallel_group": "p3",
-      "depends_on": [103, 104, 105, 106, 107, 108, 109]
+      "depends_on": [116]
     },
     {
-      "number": 111,
-      "title": "组件化视觉回归验证",
-      "status": "cx-done",
-      "phase": 3,
-      "parallel_group": "p3",
-      "depends_on": [110]
+      "number": 123,
+      "title": "[frontend] MapNavigation 方向点击 + disabled",
+      "status": "cx-blocked",
+      "phase": 4,
+      "parallel_group": "p4",
+      "depends_on": [122]
     }
   ],
-  "execution_order": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111]
+  "execution_order": [116, 117, 118, 119, 120, 121, 122, 123]
 }
