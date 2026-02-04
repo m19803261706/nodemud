@@ -138,31 +138,9 @@ const INITIAL_PLAYER: PlayerData = {
   attrs: EMPTY_ATTRS,
 };
 
-const INITIAL_LOG: LogEntry[] = [
-  { text: '你从梅道来到了冰道。', color: '#3D3935' },
-  { text: '此处乃凌霄城之冰道，寒气逼人，四周结满冰霜。', color: '#5A5550' },
-  {
-    text: '凌霄弟子道：「施主远道而来，不知有何贵干？」',
-    color: '#2B5A3A',
-  },
-  { text: '【系统】你获得了一百经验值。', color: '#8B6B14' },
-  { text: '【战斗】凌霄弟子对你发动攻击！', color: '#8B3A3A' },
-  {
-    text: '你施展「太极剑法」反击，造成二百三十伤害。',
-    color: '#3A5A6B',
-  },
-  { text: '【闲聊】逍遥剑客：有人组队下副本吗？', color: '#6B5A8B' },
-  { text: '凌霄弟子倒地不起，你获得了胜利。', color: '#3D3935' },
-  { text: '【门派】掌门人：今晚八点举行门派会议。', color: '#5A4A3A' },
-  { text: '你从凌霄弟子身上搜出纹银三十两。', color: '#7A6A14' },
-];
+const INITIAL_LOG: LogEntry[] = [];
 
-const INITIAL_CHAT: ChatMessage[] = [
-  { text: '【闲聊】逍遥剑客：有人组队下副本吗？', color: '#6B5A8B' },
-  { text: '【闲聊】冰心仙子：我来！等等我~', color: '#6B5A8B' },
-  { text: '【门派】掌门人：今晚八点举行门派大会', color: '#5A4A3A' },
-  { text: '【世界】醉仙翁：收购天山雪莲，高价！', color: '#8B6B14' },
-];
+const INITIAL_CHAT: ChatMessage[] = [];
 
 const INITIAL_DIRECTIONS: Direction[][] = [
   [

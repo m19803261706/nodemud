@@ -51,14 +51,19 @@ function App(): React.JSX.Element {
 
     const handleCommandResult = (data: any) => {
       // NPC look 结果 → 弹窗展示
-      if (data.success && data.data?.action === 'look' && data.data?.target === 'npc') {
+      if (
+        data.success &&
+        data.data?.action === 'look' &&
+        data.data?.target === 'npc'
+      ) {
         useGameStore.getState().setNpcDetail(data.data);
         return;
       }
-      // 失败消息 → 日志
-      if (!data.success && data.message) {
+      // 有消息 → 写入日志（失败红色，成功默认色）
+      if (data.message) {
         const { appendLog } = useGameStore.getState();
-        appendLog({ text: data.message, color: '#8B3A3A' });
+        const color = data.success ? '#3D3935' : '#8B3A3A';
+        appendLog({ text: data.message, color });
       }
     };
 
