@@ -264,17 +264,8 @@ export const GameHomeScreen = ({ route }: any) => {
               </ScrollView>
               {/* Chat Bottom */}
               <View style={s.chatBottom}>
-                <TouchableOpacity>
-                  <View style={s.chatBtnBorder}>
-                    <LinearGradient
-                      colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                      style={s.chatBtnGradient}
-                      start={{ x: 0.5, y: 1 }}
-                      end={{ x: 0.5, y: 0 }}
-                    >
-                      <Text style={s.chatBtnText}>聊天</Text>
-                    </LinearGradient>
-                  </View>
+                <TouchableOpacity style={s.chatBtn}>
+                  <Text style={s.chatBtnText}>聊天</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -312,57 +303,51 @@ export const GameHomeScreen = ({ route }: any) => {
           </View>
 
           {/* 右侧角色列表 */}
-          <ScrollView style={s.rightPanel}>
-            {NPC_LIST.map((npc, i) => (
-              <TouchableOpacity
-                key={i}
-                style={[s.npcCard, { borderColor: npc.borderColor }]}
-              >
-                <View style={s.npcTop}>
-                  <Text style={[s.npcName, { color: npc.nameColor }]}>
-                    {npc.name}
-                  </Text>
-                  <Text style={[s.npcGender, { color: npc.genderColor }]}>
-                    {npc.gender}
-                  </Text>
-                </View>
-                <Text style={s.npcLevel}>{npc.level}</Text>
-                <View style={s.npcHpBg}>
-                  <View
-                    style={[
-                      s.npcHpFill,
-                      {
-                        width: `${npc.hpPct}%` as any,
-                        backgroundColor: npc.hpColor,
-                      },
-                    ]}
-                  />
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={s.rightPanel}>
+            <ScrollView contentContainerStyle={s.rightPanelContent}>
+              {NPC_LIST.map((npc, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[s.npcCard, { borderColor: npc.borderColor }]}
+                >
+                  <View style={s.npcTop}>
+                    <Text style={[s.npcName, { color: npc.nameColor }]}>
+                      {npc.name}
+                    </Text>
+                    <Text style={[s.npcGender, { color: npc.genderColor }]}>
+                      {npc.gender}
+                    </Text>
+                  </View>
+                  <Text style={s.npcLevel}>{npc.level}</Text>
+                  <View style={s.npcHpBg}>
+                    <View
+                      style={[
+                        s.npcHpFill,
+                        {
+                          width: `${npc.hpPct}%` as any,
+                          backgroundColor: npc.hpColor,
+                        },
+                      ]}
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
 
         {/* ── 4. Bottom Navigation 底部导航 ── */}
         <View style={s.bottomNav}>
-          {NAV_TABS.map(tab =>
-            tab.active ? (
-              <View key={tab.label} style={s.navTab}>
-                <LinearGradient
-                  colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                  style={s.navGradientFill}
-                  start={{ x: 0.5, y: 1 }}
-                  end={{ x: 0.5, y: 0 }}
-                >
-                  <Text style={s.navLabelActive}>{tab.label}</Text>
-                </LinearGradient>
-              </View>
-            ) : (
-              <TouchableOpacity key={tab.label} style={s.navTab}>
-                <Text style={s.navLabel}>{tab.label}</Text>
-              </TouchableOpacity>
-            ),
-          )}
+          {NAV_TABS.map(tab => (
+            <TouchableOpacity
+              key={tab.label}
+              style={[s.navTab, tab.active && s.navTabActive]}
+            >
+              <Text style={tab.active ? s.navLabelActive : s.navLabel}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     </LinearGradient>
@@ -556,12 +541,10 @@ const s = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#8B7A5A20',
   },
-  chatBtnBorder: {
+  chatBtn: {
+    backgroundColor: '#C9C2B4',
     borderWidth: 1,
     borderColor: '#8B7A5A60',
-    overflow: 'hidden',
-  },
-  chatBtnGradient: {
     paddingHorizontal: 16,
     paddingVertical: 5,
     alignItems: 'center',
@@ -629,6 +612,8 @@ const s = StyleSheet.create({
     backgroundColor: '#F5F0E830',
     borderWidth: 1,
     borderColor: '#8B7A5A30',
+  },
+  rightPanelContent: {
     padding: 8,
     gap: 6,
   },
@@ -681,18 +666,13 @@ const s = StyleSheet.create({
   navTab: {
     flex: 1,
     height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#8B7A5A40',
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  navGradientFill: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
+  navTabActive: {
+    backgroundColor: '#C9C2B4',
     borderColor: '#8B7A5A80',
   },
   navLabel: {
