@@ -15,13 +15,14 @@ export const MapDescription = ({ text }: MapDescriptionProps) => (
     <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
       <Text style={s.text}>{text}</Text>
     </ScrollView>
-    <GradientDivider opacity={0.2} />
+    <GradientDivider opacity={0.5} />
   </View>
 );
 
 const s = StyleSheet.create({
   container: {
     gap: 6,
+    marginBottom: 8,
   },
   scroll: {
     maxHeight: 80,
