@@ -8,11 +8,30 @@ import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
 
-export interface StatData {
-  label: string;
-  value: string;
-  pct: number;
-  color: string;
+/** 运行时资源值（进度条用） */
+export interface ResourceValue {
+  current: number;
+  max: number;
+}
+
+/** 六维属性 */
+export interface CharacterAttrs {
+  wisdom: number;
+  perception: number;
+  spirit: number;
+  meridian: number;
+  strength: number;
+  vitality: number;
+}
+
+/** 玩家数据（来自服务端 playerStats 消息） */
+export interface PlayerData {
+  name: string;
+  level: string;
+  hp: ResourceValue;
+  mp: ResourceValue;
+  energy: ResourceValue;
+  attrs: CharacterAttrs;
 }
 
 export interface LogEntry {
@@ -44,8 +63,8 @@ export interface NpcData {
 
 export interface GameState {
   // 玩家
-  player: { name: string; level: string; stats: StatData[][] };
-  updatePlayer: (data: Partial<GameState['player']>) => void;
+  player: PlayerData;
+  updatePlayer: (data: Partial<PlayerData>) => void;
 
   // 地点
   location: { name: string; actions: string[]; description: string };
@@ -82,18 +101,24 @@ export interface GameState {
 
 /* ─── Mock 初始数据（与设计稿一致）─── */
 
-const INITIAL_STATS: StatData[][] = [
-  [
-    { label: '气血', value: '1280/1500', pct: 85, color: '#A65D5D' },
-    { label: '内力', value: '850/1000', pct: 85, color: '#4A6B6B' },
-    { label: '经验', value: '78%', pct: 78, color: '#8B7355' },
-  ],
-  [
-    { label: '潜能', value: '2450', pct: 60, color: '#6B8A5A' },
-    { label: '技能', value: '32/50', pct: 64, color: '#5A6B8A' },
-    { label: '银两', value: '12,580', pct: 45, color: '#8B7A14' },
-  ],
-];
+/** 玩家属性空初始值 */
+const EMPTY_ATTRS: CharacterAttrs = {
+  wisdom: 0,
+  perception: 0,
+  spirit: 0,
+  meridian: 0,
+  strength: 0,
+  vitality: 0,
+};
+
+const INITIAL_PLAYER: PlayerData = {
+  name: '',
+  level: '',
+  hp: { current: 0, max: 0 },
+  mp: { current: 0, max: 0 },
+  energy: { current: 0, max: 0 },
+  attrs: EMPTY_ATTRS,
+};
 
 const INITIAL_LOG: LogEntry[] = [
   { text: '你从梅道来到了冰道。', color: '#3D3935' },
@@ -196,20 +221,39 @@ const INITIAL_NPCS: NpcData[] = [
 
 /** 方向布局：3x3 网格，英文 key → 中文显示 */
 const DIR_GRID: [string, string][][] = [
-  [['northwest', '西北'], ['north', '北'], ['northeast', '东北']],
-  [['west', '西'], ['center', '中'], ['east', '东']],
-  [['southwest', '西南'], ['south', '南'], ['southeast', '东南']],
+  [
+    ['northwest', '西北'],
+    ['north', '北'],
+    ['northeast', '东北'],
+  ],
+  [
+    ['west', '西'],
+    ['center', '中'],
+    ['east', '东'],
+  ],
+  [
+    ['southwest', '西南'],
+    ['south', '南'],
+    ['southeast', '东南'],
+  ],
 ];
 
-/** 根据可走方向列表生成 Direction[][] */
-export function exitsToDirections(exits: string[]): Direction[][] {
+/** 根据可走方向列表生成 Direction[][]，中心格显示地点名，有出口的方向显示目标房间名 */
+export function exitsToDirections(
+  exits: string[],
+  locationName?: string,
+  exitNames?: Record<string, string>,
+): Direction[][] {
   const exitSet = new Set(exits);
   return DIR_GRID.map(row =>
     row.map(([key, text]) => {
       if (key === 'center') {
-        return { text, bold: true, center: true };
+        return { text: locationName || text, bold: true, center: true };
       }
-      return { text, bold: exitSet.has(key) };
+      const hasExit = exitSet.has(key);
+      // 有出口时显示目标房间名，否则显示方向中文
+      const displayText = hasExit && exitNames?.[key] ? exitNames[key] : text;
+      return { text: displayText, bold: hasExit };
     }),
   );
 }
@@ -218,9 +262,8 @@ export function exitsToDirections(exits: string[]): Direction[][] {
 
 export const useGameStore = create<GameState>(set => ({
   // 玩家
-  player: { name: '剑心侠客', level: '五十八级', stats: INITIAL_STATS },
-  updatePlayer: data =>
-    set(state => ({ player: { ...state.player, ...data } })),
+  player: INITIAL_PLAYER,
+  updatePlayer: data => set(state => ({ player: { ...state.player, ...data } })),
 
   // 地点
   location: {

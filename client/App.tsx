@@ -10,6 +10,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UIProvider } from './src/components';
 import { wsService } from './src/services/WebSocketService';
+import { useGameStore, exitsToDirections } from './src/stores/useGameStore';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CreateCharacterScreen } from './src/screens/CreateCharacterScreen';
@@ -30,6 +31,37 @@ function App(): React.JSX.Element {
     if (!wsService.isConnected) {
       wsService.connect(WS_URL);
     }
+
+    // 全局监听游戏消息（必须在连接建立时就注册，避免导航时丢消息）
+    const handleRoomInfo = (data: any) => {
+      const { setLocation, setDirections, location } = useGameStore.getState();
+      // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
+      const shortName = data.short?.includes('·')
+        ? data.short.split('·').pop()!
+        : data.short;
+      setLocation({
+        name: shortName,
+        actions: location.actions,
+        description: data.long,
+      });
+      setDirections(exitsToDirections(data.exits, shortName, data.exitNames));
+    };
+
+    const handleCommandResult = (data: any) => {
+      if (!data.success && data.message) {
+        const { appendLog } = useGameStore.getState();
+        appendLog({ text: data.message, color: '#8B3A3A' });
+      }
+    };
+
+    const handlePlayerStats = (data: any) => {
+      const { updatePlayer } = useGameStore.getState();
+      updatePlayer(data);
+    };
+
+    wsService.on('roomInfo', handleRoomInfo);
+    wsService.on('commandResult', handleCommandResult);
+    wsService.on('playerStats', handlePlayerStats);
   }, []);
 
   return (
