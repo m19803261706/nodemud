@@ -10,9 +10,9 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /* ─── Mock 数据（与设计稿一致）─── */
 
@@ -174,6 +174,8 @@ const GradientBorder = ({ opacity = 0.38 }: { opacity?: number }) => (
 /* ─── 主组件 ─── */
 
 export const GameHomeScreen = ({ route }: any) => {
+  const insets = useSafeAreaInsets();
+
   return (
     <LinearGradient
       colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
@@ -182,7 +184,7 @@ export const GameHomeScreen = ({ route }: any) => {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
-      <SafeAreaView style={s.safeArea}>
+      <View style={[s.safeArea, { paddingTop: insets.top }]}>
         {/* ── 1. Player Stats 顶部状态栏 ── */}
         <View style={s.playerStats}>
           {/* 名称行：左名字 右等级 */}
@@ -359,7 +361,7 @@ export const GameHomeScreen = ({ route }: any) => {
             ),
           )}
         </View>
-      </SafeAreaView>
+      </View>
     </LinearGradient>
   );
 };
