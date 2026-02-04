@@ -13,6 +13,7 @@ import { BlueprintLoader } from './blueprint-loader';
 import { BlueprintFactory } from './blueprint-factory';
 import { CommandManager } from './command-manager';
 import { CommandLoader } from './command-loader';
+import { SpawnManager } from './spawn-manager';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { CommandLoader } from './command-loader';
     BlueprintFactory,
     CommandManager,
     CommandLoader,
+    SpawnManager,
   ],
   exports: [
     HeartbeatManager,
@@ -32,6 +34,7 @@ import { CommandLoader } from './command-loader';
     BlueprintFactory,
     CommandManager,
     CommandLoader,
+    SpawnManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -45,6 +48,7 @@ export class EngineModule implements OnModuleInit {
     private readonly blueprintFactory: BlueprintFactory,
     private readonly commandManager: CommandManager,
     private readonly commandLoader: CommandLoader,
+    private readonly spawnManager: SpawnManager,
   ) {}
 
   async onModuleInit() {
@@ -66,6 +70,9 @@ export class EngineModule implements OnModuleInit {
     // 扫描加载指令（commands/ 目录在编译后的 dist/ 下）
     const commandsDir = path.join(__dirname, 'commands');
     this.commandLoader.scanAndLoad(commandsDir);
+
+    // 刷新 NPC（必须在蓝图和房间加载完毕后执行）
+    this.spawnManager.spawnAll();
 
     this.logger.log(
       `游戏引擎初始化完成（Layer 0-4: BaseEntity + HB/OM + Blueprint + Command, 蓝图: ${this.blueprintRegistry.getCount()} 个, 指令: ${this.commandManager.getCount()} 个）`,
