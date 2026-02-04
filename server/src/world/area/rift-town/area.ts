@@ -28,5 +28,19 @@ export default class RiftTownArea extends Area {
       'area/rift-town/south-gate',
       'area/rift-town/underground',
     ]);
+
+    // NPC 刷新规则
+    this.set('spawn_rules', [
+      { blueprintId: 'npc/rift-town/town-elder', roomId: 'area/rift-town/square', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/bartender', roomId: 'area/rift-town/tavern', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/mysterious-traveler', roomId: 'area/rift-town/tavern', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/innkeeper', roomId: 'area/rift-town/inn', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/herbalist', roomId: 'area/rift-town/herb-shop', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/blacksmith', roomId: 'area/rift-town/smithy', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/merchant', roomId: 'area/rift-town/general-store', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/old-beggar', roomId: 'area/rift-town/south-street', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/north-guard', roomId: 'area/rift-town/north-gate', count: 1, interval: 300000 },
+      { blueprintId: 'npc/rift-town/south-guard', roomId: 'area/rift-town/south-gate', count: 1, interval: 300000 },
+    ]);
   }
 }
