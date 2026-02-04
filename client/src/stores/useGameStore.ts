@@ -47,8 +47,12 @@ export interface GameState {
   updatePlayer: (data: Partial<GameState['player']>) => void;
 
   // 地点
-  location: { name: string; actions: string[] };
+  location: { name: string; actions: string[]; description: string };
   setLocation: (loc: GameState['location']) => void;
+
+  // 地图描述开关
+  showMapDesc: boolean;
+  toggleMapDesc: () => void;
 
   // 日志
   gameLog: LogEntry[];
@@ -193,8 +197,17 @@ export const useGameStore = create<GameState>(set => ({
     set(state => ({ player: { ...state.player, ...data } })),
 
   // 地点
-  location: { name: '冰 道', actions: ['回城', '飞行', '地图', '邮件'] },
+  location: {
+    name: '冰 道',
+    actions: ['回城', '飞行', '地图', '邮件'],
+    description:
+      '凌霄城冰道，四面皆是晶莹剔透的冰壁，寒气从脚下透上来，呼吸间可见白雾。道路两旁挂着数盏冰灯，幽幽蓝光映照在冰面上，折射出点点星芒。远处隐约传来风声，似有低吟浅唱，不知是风穿冰隙还是哪位前辈遗留的阵法余音。脚下的冰面光滑如镜，稍不留神便会滑倒，需得小心翼翼方能前行。',
+  },
   setLocation: loc => set({ location: loc }),
+
+  // 地图描述开关
+  showMapDesc: false,
+  toggleMapDesc: () => set(state => ({ showMapDesc: !state.showMapDesc })),
 
   // 日志
   gameLog: INITIAL_LOG,

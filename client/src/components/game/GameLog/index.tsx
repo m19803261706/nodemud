@@ -7,14 +7,18 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
 import { LogEntry } from './LogEntry';
 import { ActionButton } from './ActionButton';
+import { MapDescription } from './MapDescription';
 
 const ACTION_BUTTONS = ['拜师', '领取任务', '打坐'];
 
 export const GameLog = () => {
   const gameLog = useGameStore(state => state.gameLog);
+  const showMapDesc = useGameStore(state => state.showMapDesc);
+  const description = useGameStore(state => state.location.description);
 
   return (
     <View style={s.container}>
+      {showMapDesc && <MapDescription text={description} />}
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
         {gameLog.map((line, i) => (
           <LogEntry key={i} text={line.text} color={line.color} />
