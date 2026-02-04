@@ -1,9 +1,10 @@
 /**
- * 单条日志 — 彩色文本行
+ * 单条日志 — 支持富文本标记的彩色文本行
  */
 
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { RichText } from '../../RichText';
 
 interface LogEntryProps {
   text: string;
@@ -11,7 +12,7 @@ interface LogEntryProps {
 }
 
 export const LogEntry = ({ text, color }: LogEntryProps) => (
-  <Text style={[s.text, { color }]}>{text}</Text>
+  <RichText text={text} style={{ ...s.text, color }} />
 );
 
 const s = StyleSheet.create({
