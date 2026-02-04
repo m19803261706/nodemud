@@ -8,29 +8,36 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server } from 'ws';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleDestroy } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
 import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
+import { sendPlayerStats } from './handlers/stats.utils';
 import { CharacterService } from '../character/character.service';
 import { ObjectManager } from '../engine/object-manager';
 import type { PlayerBase } from '../engine/game-objects/player-base';
 import type { RoomBase } from '../engine/game-objects/room-base';
 
 @WebSocketGateway({ transports: ['websocket'] })
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class GameGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnModuleDestroy
+{
   private readonly logger = new Logger(GameGateway.name);
 
   @WebSocketServer()
   server: Server;
+
+  /** 1 秒定时推送 playerStats */
+  private statsInterval: NodeJS.Timeout;
 
   constructor(
     private readonly authHandler: AuthHandler,
@@ -42,6 +49,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // Session 存储（内存 Map）
   private sessions = new Map<string, Session>();
+
+  /** Gateway 初始化后启动定时推送 */
+  afterInit() {
+    this.statsInterval = setInterval(() => {
+      this.broadcastPlayerStats();
+    }, 1000);
+    this.logger.log('playerStats 定时推送已启动（1s 间隔）');
+  }
+
+  /** 模块销毁时清理定时器 */
+  onModuleDestroy() {
+    if (this.statsInterval) {
+      clearInterval(this.statsInterval);
+    }
+  }
+
+  /** 向所有已登录玩家推送 playerStats */
+  private async broadcastPlayerStats() {
+    for (const [, session] of this.sessions) {
+      if (!session.playerId || !session.characterId) continue;
+
+      const player = this.objectManager.findById(session.playerId) as PlayerBase | undefined;
+      if (!player) continue;
+
+      try {
+        const character = await this.characterService.findById(session.characterId);
+        if (character) {
+          sendPlayerStats(player, character);
+        }
+      } catch {
+        // 查询失败时静默跳过，不中断其他玩家的推送
+      }
+    }
+  }
 
   /** 客户端连接 */
   handleConnection(client: any) {
@@ -103,8 +144,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
-    // 反序列化消息
-    const message = MessageFactory.deserialize<ClientMessage>(data);
+    // 反序列化消息（优先 MessageFactory，fallback 到直接解析）
+    let message = MessageFactory.deserialize<ClientMessage>(data);
+    if (!message) {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed && parsed.type) {
+          message = parsed as ClientMessage;
+        }
+      } catch {}
+    }
     if (!message) {
       console.error('无效消息:', data);
       return;

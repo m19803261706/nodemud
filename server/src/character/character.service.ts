@@ -47,6 +47,11 @@ export class CharacterService {
     private readonly characterRepository: Repository<Character>,
   ) {}
 
+  /** 根据角色ID查找角色 */
+  async findById(id: string): Promise<Character | null> {
+    return this.characterRepository.findOne({ where: { id } });
+  }
+
   /** 根据账号ID查找角色 */
   async findByAccountId(accountId: string): Promise<Character | null> {
     return this.characterRepository.findOne({ where: { accountId } });
