@@ -4,7 +4,6 @@
 
 import React from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
-import { GradientDivider } from '../shared';
 
 interface MapDescriptionProps {
   text: string;
@@ -15,13 +14,12 @@ export const MapDescription = ({ text }: MapDescriptionProps) => (
     <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
       <Text style={s.text}>{text}</Text>
     </ScrollView>
-    <GradientDivider opacity={0.5} />
+    <View style={s.divider} />
   </View>
 );
 
 const s = StyleSheet.create({
   container: {
-    gap: 6,
     marginBottom: 8,
   },
   scroll: {
@@ -36,5 +34,10 @@ const s = StyleSheet.create({
     lineHeight: 22,
     color: '#5A5550',
     fontFamily: 'Noto Serif SC',
+  },
+  divider: {
+    height: 1,
+    marginTop: 8,
+    backgroundColor: '#8B7A5A50',
   },
 });
