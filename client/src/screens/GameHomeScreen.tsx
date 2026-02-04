@@ -264,15 +264,17 @@ export const GameHomeScreen = ({ route }: any) => {
               </ScrollView>
               {/* Chat Bottom */}
               <View style={s.chatBottom}>
-                <TouchableOpacity style={s.chatBtnWrap}>
-                  <LinearGradient
-                    colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                    style={s.chatBtnGradient}
-                    start={{ x: 0.5, y: 1 }}
-                    end={{ x: 0.5, y: 0 }}
-                  >
-                    <Text style={s.chatBtnText}>聊天</Text>
-                  </LinearGradient>
+                <TouchableOpacity>
+                  <View style={s.chatBtnBorder}>
+                    <LinearGradient
+                      colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
+                      style={s.chatBtnGradient}
+                      start={{ x: 0.5, y: 1 }}
+                      end={{ x: 0.5, y: 0 }}
+                    >
+                      <Text style={s.chatBtnText}>聊天</Text>
+                    </LinearGradient>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -345,15 +347,16 @@ export const GameHomeScreen = ({ route }: any) => {
         <View style={s.bottomNav}>
           {NAV_TABS.map(tab =>
             tab.active ? (
-              <LinearGradient
-                key={tab.label}
-                colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                style={s.navTabActive}
-                start={{ x: 0.5, y: 1 }}
-                end={{ x: 0.5, y: 0 }}
-              >
-                <Text style={s.navLabelActive}>{tab.label}</Text>
-              </LinearGradient>
+              <View key={tab.label} style={s.navTab}>
+                <LinearGradient
+                  colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
+                  style={s.navGradientFill}
+                  start={{ x: 0.5, y: 1 }}
+                  end={{ x: 0.5, y: 0 }}
+                >
+                  <Text style={s.navLabelActive}>{tab.label}</Text>
+                </LinearGradient>
+              </View>
             ) : (
               <TouchableOpacity key={tab.label} style={s.navTab}>
                 <Text style={s.navLabel}>{tab.label}</Text>
@@ -553,12 +556,14 @@ const s = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#8B7A5A20',
   },
-  chatBtnWrap: {},
+  chatBtnBorder: {
+    borderWidth: 1,
+    borderColor: '#8B7A5A60',
+    overflow: 'hidden',
+  },
   chatBtnGradient: {
     paddingHorizontal: 16,
     paddingVertical: 5,
-    borderWidth: 1,
-    borderColor: '#8B7A5A60',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -676,14 +681,15 @@ const s = StyleSheet.create({
   navTab: {
     flex: 1,
     height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#8B7A5A40',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  navTabActive: {
+  navGradientFill: {
     flex: 1,
-    height: 36,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
