@@ -7,6 +7,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
+import type { RoomBase } from '../../engine/game-objects/room-base';
+import { sendRoomInfo, getDirectionCN, getOppositeDirectionCN } from './room-utils';
 import type { Session } from '../types/session';
 
 @Injectable()
@@ -57,5 +59,34 @@ export class CommandHandler {
       timestamp: Date.now(),
     };
     client.send(JSON.stringify(resp));
+
+    // go 命令成功后：广播 + 推送 roomInfo
+    if (result.success && result.data?.direction && result.data?.targetId) {
+      try {
+        const direction = result.data.direction as string;
+        const playerName = player.getName();
+
+        // 旧房间广播离去
+        const oldRoom = player.getEnvironment() as RoomBase | null;
+
+        // 执行移动
+        const moved = await player.go(direction);
+        if (moved) {
+          // 旧房间广播（移动后 player 已不在旧房间，不需要 exclude）
+          if (oldRoom) {
+            oldRoom.broadcast(`${playerName}向${getDirectionCN(direction)}离去。`);
+          }
+
+          // 新房间广播到达
+          const newRoom = player.getEnvironment() as RoomBase | null;
+          if (newRoom) {
+            newRoom.broadcast(`${playerName}从${getOppositeDirectionCN(direction)}来到此处。`, player);
+            sendRoomInfo(player, newRoom);
+          }
+        }
+      } catch (moveError) {
+        this.logger.error('移动处理失败:', moveError);
+      }
+    }
   }
 }
