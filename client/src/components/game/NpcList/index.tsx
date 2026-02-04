@@ -6,17 +6,33 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
 import { NpcCard } from './NpcCard';
+import { NpcInfoModal } from './NpcInfoModal';
 
 export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
+  const npcDetail = useGameStore(state => state.npcDetail);
+  const setNpcDetail = useGameStore(state => state.setNpcDetail);
+  const sendCommand = useGameStore(state => state.sendCommand);
 
   return (
     <View style={s.container}>
       <ScrollView contentContainerStyle={s.content}>
-        {nearbyNpcs.map((npc, i) => (
-          <NpcCard key={npc.id} npc={npc} />
+        {nearbyNpcs.map(npc => (
+          <NpcCard
+            key={npc.id}
+            npc={npc}
+            onPress={() => sendCommand(`look ${npc.name}`)}
+          />
         ))}
       </ScrollView>
+      <NpcInfoModal
+        detail={npcDetail}
+        onClose={() => setNpcDetail(null)}
+        onChat={name => {
+          sendCommand(`ask ${name} default`);
+          setNpcDetail(null);
+        }}
+      />
     </View>
   );
 };

@@ -34,7 +34,8 @@ function App(): React.JSX.Element {
 
     // 全局监听游戏消息（必须在连接建立时就注册，避免导航时丢消息）
     const handleRoomInfo = (data: any) => {
-      const { setLocation, setDirections, setNpcs, location } = useGameStore.getState();
+      const { setLocation, setDirections, setNpcs, location } =
+        useGameStore.getState();
       // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
       const shortName = data.short?.includes('·')
         ? data.short.split('·').pop()!
@@ -49,6 +50,12 @@ function App(): React.JSX.Element {
     };
 
     const handleCommandResult = (data: any) => {
+      // NPC look 结果 → 弹窗展示
+      if (data.success && data.data?.action === 'look' && data.data?.target === 'npc') {
+        useGameStore.getState().setNpcDetail(data.data);
+        return;
+      }
+      // 失败消息 → 日志
       if (!data.success && data.message) {
         const { appendLog } = useGameStore.getState();
         appendLog({ text: data.message, color: '#8B3A3A' });

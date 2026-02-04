@@ -61,6 +61,20 @@ export interface NpcData {
   attitude: string;
 }
 
+/** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
+export interface NpcDetailData {
+  npcId: string;
+  name: string;
+  title: string;
+  gender: string;
+  faction: string;
+  level: number;
+  hpPct: number;
+  attitude: string;
+  short: string;
+  long: string;
+}
+
 export interface GameState {
   // 玩家
   player: PlayerData;
@@ -90,6 +104,10 @@ export interface GameState {
   // NPC
   nearbyNpcs: NpcData[];
   setNpcs: (npcs: NpcData[]) => void;
+
+  // NPC 详情弹窗
+  npcDetail: NpcDetailData | null;
+  setNpcDetail: (detail: NpcDetailData | null) => void;
 
   // 指令
   sendCommand: (input: string) => void;
@@ -163,7 +181,6 @@ const INITIAL_DIRECTIONS: Direction[][] = [
     { text: '东南', bold: false },
   ],
 ];
-
 
 /* ─── exits → directions 转换 ─── */
 
@@ -244,6 +261,10 @@ export const useGameStore = create<GameState>(set => ({
   // NPC
   nearbyNpcs: [],
   setNpcs: npcs => set({ nearbyNpcs: npcs }),
+
+  // NPC 详情弹窗
+  npcDetail: null,
+  setNpcDetail: detail => set({ npcDetail: detail }),
 
   // 指令
   sendCommand: (input: string) => {
