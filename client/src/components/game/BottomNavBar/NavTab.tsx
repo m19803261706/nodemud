@@ -12,10 +12,7 @@ interface NavTabProps {
 }
 
 export const NavTab = ({ label, active, onPress }: NavTabProps) => (
-  <TouchableOpacity
-    style={[s.tab, active && s.tabActive]}
-    onPress={onPress}
-  >
+  <TouchableOpacity style={[s.tab, active && s.tabActive]} onPress={onPress}>
     <Text style={active ? s.labelActive : s.label}>{label}</Text>
   </TouchableOpacity>
 );
