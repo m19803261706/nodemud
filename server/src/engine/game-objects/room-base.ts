@@ -17,8 +17,11 @@ export class RoomBase extends BaseEntity {
 
   constructor(id: string) {
     super(id);
-    // 虚拟房间不应被 GC 清理（房间没有父环境，但不是孤立对象）
-    this.set('no_clean_up', true);
+  }
+
+  /** 房间永不自毁（虚拟对象，生命周期由世界管理） */
+  public onCleanUp(): boolean {
+    return false;
   }
 
   /** 广播消息给房间内所有对象（对标 LPC tell_room） */

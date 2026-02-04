@@ -47,4 +47,9 @@ export class PlayerBase extends LivingBase {
   getPermission(): Permission {
     return this.get<number>('permission') ?? Permission.PLAYER;
   }
+
+  /** 玩家永不自毁（生命周期由连接管理） */
+  public onCleanUp(): boolean {
+    return false;
+  }
 }

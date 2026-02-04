@@ -156,45 +156,15 @@ describe('ObjectManager', () => {
   //  GC - cleanUp
   // ================================================================
 
-  describe('GC - cleanUp', () => {
-    it('无环境 + 无子对象 + onCleanUp=true -> 被清理', () => {
+  describe('GC - cleanUp（LPC 对象自治）', () => {
+    it('onCleanUp 返回 true -> 被清理', () => {
       const entity = new TestEntity('orphan');
+      entity.cleanUpResult = true;
       manager.register(entity);
 
       expect(entity.destroyed).toBe(false);
       (manager as any).cleanUp();
       expect(entity.destroyed).toBe(true);
-    });
-
-    it('有环境 -> 不清理', async () => {
-      const room = new TestEntity('room/inn');
-      const entity = new TestEntity('npc/test');
-      manager.register(room);
-      manager.register(entity);
-      await entity.moveTo(room, { quiet: true });
-
-      (manager as any).cleanUp();
-      expect(entity.destroyed).toBe(false);
-    });
-
-    it('标记 no_clean_up=true -> 不清理', () => {
-      const entity = new TestEntity('permanent');
-      entity.set('no_clean_up', true);
-      manager.register(entity);
-
-      (manager as any).cleanUp();
-      expect(entity.destroyed).toBe(false);
-    });
-
-    it('有子对象 -> 不清理', async () => {
-      const parent = new TestEntity('container');
-      const child = new TestEntity('item');
-      manager.register(parent);
-      manager.register(child);
-      await child.moveTo(parent, { quiet: true });
-
-      (manager as any).cleanUp();
-      expect(parent.destroyed).toBe(false);
     });
 
     it('onCleanUp 返回 false -> 不清理', () => {
@@ -206,6 +176,15 @@ describe('ObjectManager', () => {
       expect(entity.destroyed).toBe(false);
     });
 
+    it('已销毁对象跳过', () => {
+      const entity = new TestEntity('dead');
+      manager.register(entity);
+      entity.destroy();
+
+      // 不应重复销毁或报错
+      expect(() => (manager as any).cleanUp()).not.toThrow();
+    });
+
     it('onCleanUp 抛异常 -> 不清理（安全）', () => {
       const entity = new TestEntity('error-prone');
       entity.onCleanUp = () => {
@@ -215,6 +194,19 @@ describe('ObjectManager', () => {
 
       (manager as any).cleanUp();
       expect(entity.destroyed).toBe(false);
+    });
+
+    it('GC 不做 environment/inventory 判断，完全由对象自决', async () => {
+      // 即使有环境，只要 onCleanUp 返回 true 就清理
+      const room = new TestEntity('room/inn');
+      const entity = new TestEntity('npc/test');
+      entity.cleanUpResult = true;
+      manager.register(room);
+      manager.register(entity);
+      await entity.moveTo(room, { quiet: true });
+
+      (manager as any).cleanUp();
+      expect(entity.destroyed).toBe(true);
     });
   });
 

@@ -4,8 +4,8 @@
  * 管理所有运行时 BaseEntity 实例的注册、查询、ID 分配和 GC 清理。
  * 作为 NestJS Injectable 服务，在 EngineModule 中提供单例。
  *
- * GC 三级清理：
- * 1. cleanUp   — 清理无环境、无子对象、允许清理的孤立对象
+ * GC 三级清理（LPC 风格对象自治）：
+ * 1. cleanUp   — 询问对象 onCleanUp()，由对象自决是否销毁
  * 2. resetAll  — 调用所有对象的 onReset 重置周期性状态
  * 3. removeDestructed — 从注册表中移除已销毁的对象条目
  */
@@ -124,31 +124,21 @@ export class ObjectManager implements OnModuleDestroy {
   }
 
   /**
-   * cleanUp — 清理孤立对象
+   * cleanUp — LPC 风格对象自治清理
    *
-   * 遍历所有对象，按顺序检查：
+   * GC 只负责遍历和询问，由对象自己决定是否销毁：
    * 1. 已销毁 → 跳过
-   * 2. 有环境 → 不清理
-   * 3. 标记 no_clean_up=true → 不清理
-   * 4. 有子对象 → 不清理
-   * 5. onCleanUp() 返回 false → 不清理
-   * 6. 以上全通过 → destroy
+   * 2. 调用 onCleanUp() → 返回 true → destroy
    */
   private cleanUp(): void {
     let count = 0;
 
     for (const entity of this.objects.values()) {
       if (entity.destroyed) continue;
-      if (entity.getEnvironment()) continue;
-      if (entity.get<boolean>('no_clean_up') === true) continue;
-      if (entity.getInventory().length > 0) continue;
 
-      // 检查 onCleanUp 钩子
+      // 对象自决：onCleanUp() 返回 true 表示请求销毁
       try {
-        if (typeof (entity as any).onCleanUp === 'function') {
-          const result = (entity as any).onCleanUp();
-          if (result === false) continue;
-        }
+        if (!entity.onCleanUp()) continue;
       } catch {
         // onCleanUp 抛异常 → 保护性不清理
         continue;

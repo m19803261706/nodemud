@@ -46,6 +46,12 @@ export class NpcBase extends LivingBase {
     }
   }
 
+  /** NPC 失去环境（不在任何房间）→ 可清理 */
+  public onCleanUp(): boolean {
+    if (!this.getEnvironment()) return true;
+    return false;
+  }
+
   /** 对话接口（蓝图覆写） */
   onChat(speaker: BaseEntity, message: string): void {}
 }

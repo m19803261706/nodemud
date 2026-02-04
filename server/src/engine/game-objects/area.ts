@@ -24,8 +24,11 @@ export class Area extends BaseEntity {
 
   constructor(id: string) {
     super(id);
-    // 虚拟区域不应被 GC 清理
-    this.set('no_clean_up', true);
+  }
+
+  /** 区域永不自毁（虚拟对象，生命周期由世界管理） */
+  public onCleanUp(): boolean {
+    return false;
   }
 
   /** 获取区域名称 */

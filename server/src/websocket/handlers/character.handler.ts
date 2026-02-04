@@ -261,7 +261,6 @@ export class CharacterHandler {
         const player = new PlayerBase(playerId);
         this.objectManager.register(player);
         player.set('name', character.name);
-        player.set('no_clean_up', true);
 
         // 绑定 WebSocket 连接
         player.bindConnection((msg: any) => {

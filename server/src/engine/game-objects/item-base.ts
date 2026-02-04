@@ -44,4 +44,10 @@ export class ItemBase extends BaseEntity {
   isStackable(): boolean {
     return this.get<boolean>('stackable') ?? false;
   }
+
+  /** 物品不在任何容器中 → 可清理 */
+  public onCleanUp(): boolean {
+    if (!this.getEnvironment()) return true;
+    return false;
+  }
 }

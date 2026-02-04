@@ -307,9 +307,12 @@ export class BaseEntity extends EventEmitter {
   /** 周期重置钩子（ObjectManager.resetAll 调用） */
   public onReset(): void {}
 
-  /** 清理判断钩子（ObjectManager.cleanUp 调用），返回 true 表示允许清理 */
+  /** 清理判断钩子（ObjectManager.cleanUp 调用），返回 true 表示请求自我销毁 */
   public onCleanUp(): boolean {
-    return !this.getEnvironment();
+    // 默认策略：有环境的对象不清理；无环境且无子对象的孤立对象可清理
+    if (this.getEnvironment()) return false;
+    if (this.getInventory().length > 0) return false;
+    return true;
   }
 
   /** 延迟调用 */
