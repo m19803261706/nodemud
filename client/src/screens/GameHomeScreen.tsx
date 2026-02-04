@@ -164,11 +164,7 @@ const StatBar = ({
 /** 渐变分隔线（通过底部 stroke 实现，这里用 LinearGradient 模拟） */
 const GradientBorder = ({ opacity = 0.38 }: { opacity?: number }) => (
   <LinearGradient
-    colors={[
-      'transparent',
-      `rgba(139,122,90,${opacity})`,
-      'transparent',
-    ]}
+    colors={['transparent', `rgba(139,122,90,${opacity})`, 'transparent']}
     start={{ x: 0, y: 0.5 }}
     end={{ x: 1, y: 0.5 }}
     style={s.gradientBorder}
@@ -254,7 +250,10 @@ export const GameHomeScreen = ({ route }: any) => {
 
             {/* Chat Display Area */}
             <View style={s.chatArea}>
-              <ScrollView style={s.chatScroll} contentContainerStyle={s.chatScrollContent}>
+              <ScrollView
+                style={s.chatScroll}
+                contentContainerStyle={s.chatScrollContent}
+              >
                 {CHAT_MESSAGES.map((msg, i) => (
                   <Text key={i} style={[s.chatMsg, { color: msg.color }]}>
                     {msg.text}
@@ -481,7 +480,7 @@ const s = StyleSheet.create({
     gap: 10,
   },
   leftPanel: {
-    flex: 1,
+    flex: 17,
     gap: 10,
   },
 
@@ -619,7 +618,7 @@ const s = StyleSheet.create({
 
   /* Right Character List */
   rightPanel: {
-    width: 105,
+    flex: 7,
     backgroundColor: '#F5F0E830',
     borderWidth: 1,
     borderColor: '#8B7A5A30',
