@@ -2,7 +2,7 @@
  * 游戏主页 — 纯布局容器，组合各区域组件
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,9 +13,38 @@ import { ChatPanel } from '../components/game/ChatPanel';
 import { MapNavigation } from '../components/game/MapNavigation';
 import { NpcList } from '../components/game/NpcList';
 import { BottomNavBar } from '../components/game/BottomNavBar';
+import { wsService } from '../services/WebSocketService';
+import { useGameStore, exitsToDirections } from '../stores/useGameStore';
 
 export const GameHomeScreen = ({ route }: any) => {
   const insets = useSafeAreaInsets();
+
+  // 监听 roomInfo 消息，更新 location + directions
+  useEffect(() => {
+    const handleRoomInfo = (data: any) => {
+      const { setLocation, setDirections, location } = useGameStore.getState();
+      setLocation({
+        name: data.short,
+        actions: location.actions,
+        description: data.long,
+      });
+      setDirections(exitsToDirections(data.exits));
+    };
+
+    const handleCommandResult = (data: any) => {
+      if (!data.success && data.message) {
+        const { appendLog } = useGameStore.getState();
+        appendLog({ text: data.message, color: '#8B3A3A' });
+      }
+    };
+
+    wsService.on('roomInfo', handleRoomInfo);
+    wsService.on('commandResult', handleCommandResult);
+    return () => {
+      wsService.off('roomInfo', handleRoomInfo);
+      wsService.off('commandResult', handleCommandResult);
+    };
+  }, []);
 
   return (
     <LinearGradient

@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand';
+import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
 
@@ -70,6 +71,9 @@ export interface GameState {
   // NPC
   nearbyNpcs: NpcData[];
   setNpcs: (npcs: NpcData[]) => void;
+
+  // 指令
+  sendCommand: (input: string) => void;
 
   // 导航
   activeTab: string;
@@ -188,6 +192,28 @@ const INITIAL_NPCS: NpcData[] = [
   },
 ];
 
+/* ─── exits → directions 转换 ─── */
+
+/** 方向布局：3x3 网格，英文 key → 中文显示 */
+const DIR_GRID: [string, string][][] = [
+  [['northwest', '西北'], ['north', '北'], ['northeast', '东北']],
+  [['west', '西'], ['center', '中'], ['east', '东']],
+  [['southwest', '西南'], ['south', '南'], ['southeast', '东南']],
+];
+
+/** 根据可走方向列表生成 Direction[][] */
+export function exitsToDirections(exits: string[]): Direction[][] {
+  const exitSet = new Set(exits);
+  return DIR_GRID.map(row =>
+    row.map(([key, text]) => {
+      if (key === 'center') {
+        return { text, bold: true, center: true };
+      }
+      return { text, bold: exitSet.has(key) };
+    }),
+  );
+}
+
 /* ─── Store ─── */
 
 export const useGameStore = create<GameState>(set => ({
@@ -226,6 +252,12 @@ export const useGameStore = create<GameState>(set => ({
   // NPC
   nearbyNpcs: INITIAL_NPCS,
   setNpcs: npcs => set({ nearbyNpcs: npcs }),
+
+  // 指令
+  sendCommand: (input: string) => {
+    const msg = { type: 'command', data: { input }, timestamp: Date.now() };
+    wsService.send(msg);
+  },
 
   // 导航
   activeTab: '江湖',
