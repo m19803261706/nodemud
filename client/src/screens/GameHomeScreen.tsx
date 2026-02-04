@@ -1,5 +1,5 @@
 /**
- * 游戏主页 — 1:1 复刻设计稿
+ * 游戏主页 — 1:1 复刻 Pencil 设计稿
  * 5 个区域：顶部状态栏 / 地点标题 / 主内容区 / 底部导航
  */
 
@@ -13,122 +13,165 @@ import {
   SafeAreaView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/Feather';
 
-/* ─── Mock 数据 ─── */
+/* ─── Mock 数据（与设计稿一致）─── */
 
-/** 玩家状态栏数据 */
 const PLAYER_STATS = {
   name: '剑心侠客',
   level: '五十八级',
   row1: [
-    { label: '气血', current: 3280, max: 5000, color: '#A65D5D' },
-    { label: '内力', current: 1850, max: 3000, color: '#4A6B6B' },
-    { label: '经验', current: 45600, max: 100000, color: '#8B7355' },
+    { label: '气血', value: '1280/1500', pct: 85, color: '#A65D5D' },
+    { label: '内力', value: '850/1000', pct: 85, color: '#4A6B6B' },
+    { label: '经验', value: '78%', pct: 78, color: '#8B7355' },
   ],
   row2: [
-    { label: '潜能', current: 2400, max: 5000, color: '#6B8A5A' },
-    { label: '技能', current: 780, max: 1000, color: '#5A6B8A' },
-    { label: '银两', current: 12800, max: 99999, color: '#8B7A14' },
+    { label: '潜能', value: '2450', pct: 60, color: '#6B8A5A' },
+    { label: '技能', value: '32/50', pct: 64, color: '#5A6B8A' },
+    { label: '银两', value: '12,580', pct: 45, color: '#8B7A14' },
   ],
 };
 
-/** 地点信息 */
-const LOCATION = {
-  name: '冰　道',
-  actions: [
-    { label: '回城', icon: 'home' },
-    { label: '飞行', icon: 'send' },
-    { label: '地图', icon: 'map' },
-    { label: '邮件', icon: 'mail' },
-  ],
-};
+const LOCATION_BUTTONS = ['回城', '飞行', '地图', '邮件'];
 
-/** 游戏日志 */
 const GAME_LOG = [
-  { text: '你向北走去...', color: '#6B5D4D' },
-  { text: '冰道 - 寒风刺骨的小路', color: '#3A3530' },
-  { text: '地上铺满了厚厚的积雪，两旁古木参天。', color: '#6B5D4D' },
-  { text: '远处传来狼嚎声，令人不寒而栗。', color: '#8B7355' },
-  { text: '你发现了一个 生锈的铁剑', color: '#5A6B8A' },
-  { text: '寒冰巨狼 扑了过来！', color: '#A65D5D' },
-  { text: '你使用「落雁剑法」攻击寒冰巨狼', color: '#4A6B6B' },
-  { text: '对寒冰巨狼造成 256 点伤害', color: '#A65D5D' },
-  { text: '寒冰巨狼被击败了！', color: '#6B8A5A' },
-  { text: '你获得 1200 经验，50 银两', color: '#8B7A14' },
+  { text: '你从梅道来到了冰道。', color: '#3D3935' },
+  { text: '此处乃凌霄城之冰道，寒气逼人，四周结满冰霜。', color: '#5A5550' },
+  { text: '凌霄弟子道：「施主远道而来，不知有何贵干？」', color: '#2B5A3A' },
+  { text: '【系统】你获得了一百经验值。', color: '#8B6B14' },
+  { text: '【战斗】凌霄弟子对你发动攻击！', color: '#8B3A3A' },
+  { text: '你施展「太极剑法」反击，造成二百三十伤害。', color: '#3A5A6B' },
+  { text: '【闲聊】逍遥剑客：有人组队下副本吗？', color: '#6B5A8B' },
+  { text: '凌霄弟子倒地不起，你获得了胜利。', color: '#3D3935' },
+  { text: '【门派】掌门人：今晚八点举行门派会议。', color: '#5A4A3A' },
+  { text: '你从凌霄弟子身上搜出纹银三十两。', color: '#7A6A14' },
 ];
 
-/** 聊天消息 */
-const CHAT_MESSAGES = [
-  { sender: '逍遥子', text: '有人组队刷副本吗', color: '#4A6B6B' },
-  { sender: '醉剑仙', text: '收购寒铁矿石 500一个', color: '#8B7A14' },
-  { sender: '小龙女', text: '新手求带 QAQ', color: '#A65D5D' },
-  { sender: '系统', text: '【世界】玄冰宫活动即将开始', color: '#5A6B8A' },
-];
-
-/** 方向导航 */
-const DIRECTIONS = [
-  ['西北', '北', '东北'],
-  ['西', '', '东'],
-  ['西南', '南', '东南'],
-];
-
-/** 右侧角色列表 */
-const NPC_LIST = [
-  { name: '寒冰卫士', gender: '♂', level: 62, hp: 0.85 },
-  { name: '冰原猎手', gender: '♀', level: 55, hp: 0.6 },
-  { name: '雪域商人', gender: '♂', level: 40, hp: 1.0 },
-  { name: '流浪剑客', gender: '♂', level: 58, hp: 0.45 },
-  { name: '冰灵狐', gender: '♀', level: 35, hp: 0.7 },
-];
-
-/** 底部导航 */
-const NAV_TABS = [
-  { label: '人物', icon: 'user' },
-  { label: '技能', icon: 'zap' },
-  { label: '江湖', icon: 'compass', active: true },
-  { label: '门派', icon: 'shield' },
-  { label: '背包', icon: 'package' },
-];
-
-/** 操作按钮 */
 const ACTION_BUTTONS = ['拜师', '领取任务', '打坐'];
+
+const CHAT_MESSAGES = [
+  { text: '【闲聊】逍遥剑客：有人组队下副本吗？', color: '#6B5A8B' },
+  { text: '【闲聊】冰心仙子：我来！等等我~', color: '#6B5A8B' },
+  { text: '【门派】掌门人：今晚八点举行门派大会', color: '#5A4A3A' },
+  { text: '【世界】醉仙翁：收购天山雪莲，高价！', color: '#8B6B14' },
+];
+
+const DIRECTIONS = [
+  [
+    { text: '西北', bold: false },
+    { text: '北', bold: true },
+    { text: '东北', bold: false },
+  ],
+  [
+    { text: '西', bold: true },
+    { text: '中', bold: true, center: true },
+    { text: '东', bold: true },
+  ],
+  [
+    { text: '西南', bold: false },
+    { text: '南', bold: true },
+    { text: '东南', bold: false },
+  ],
+];
+
+const NPC_LIST = [
+  {
+    name: '凌霄弟子',
+    nameColor: '#2F5D3A',
+    gender: '♂',
+    genderColor: '#4A7A5A',
+    level: '四十六级',
+    hpPct: 70,
+    hpColor: '#5A8A6A',
+    borderColor: '#2F5D3A40',
+  },
+  {
+    name: '冰心仙子',
+    nameColor: '#2F5D3A',
+    gender: '♀',
+    genderColor: '#8A5A7A',
+    level: '五十二级',
+    hpPct: 100,
+    hpColor: '#5A8A6A',
+    borderColor: '#2F5D3A40',
+  },
+  {
+    name: '逍遥剑客',
+    nameColor: '#3A5A6B',
+    gender: '♂',
+    genderColor: '#5A7A8B',
+    level: '三十八级',
+    hpPct: 60,
+    hpColor: '#6A8A9A',
+    borderColor: '#2F4F4F40',
+  },
+  {
+    name: '云游僧',
+    nameColor: '#3A5A6B',
+    gender: '♂',
+    genderColor: '#5A7A8B',
+    level: '四十五级',
+    hpPct: 50,
+    hpColor: '#6A8A9A',
+    borderColor: '#2F4F4F40',
+  },
+  {
+    name: '醉仙翁',
+    nameColor: '#3A5A6B',
+    gender: '♂',
+    genderColor: '#5A7A8B',
+    level: '九十九级',
+    hpPct: 100,
+    hpColor: '#6A8A9A',
+    borderColor: '#2F4F4F40',
+  },
+];
+
+const NAV_TABS = [
+  { label: '人物', active: false },
+  { label: '技能', active: false },
+  { label: '江湖', active: true },
+  { label: '门派', active: false },
+  { label: '背包', active: false },
+];
 
 /* ─── 子组件 ─── */
 
-/** 进度条 */
+/** 属性条：标签+数值 横向排列，下方 4px 进度条 */
 const StatBar = ({
   label,
-  current,
-  max,
+  value,
+  pct,
   color,
 }: {
   label: string;
-  current: number;
-  max: number;
+  value: string;
+  pct: number;
   color: string;
-}) => {
-  const pct = Math.min(current / max, 1);
-  return (
-    <View style={s.statBarWrap}>
+}) => (
+  <View style={s.statBox}>
+    <View style={s.statHeader}>
       <Text style={s.statLabel}>{label}</Text>
-      <View style={s.statBarOuter}>
-        <View style={[s.statBarInner, { width: `${pct * 100}%`, backgroundColor: color }]} />
-      </View>
-      <Text style={s.statValue}>
-        {current}/{max}
-      </Text>
+      <Text style={[s.statValue, { color }]}>{value}</Text>
     </View>
-  );
-};
+    <View style={s.statBarBg}>
+      <View
+        style={[s.statBarFill, { width: `${pct}%`, backgroundColor: color }]}
+      />
+    </View>
+  </View>
+);
 
-/** 渐变分隔线 */
-const Divider = () => (
+/** 渐变分隔线（通过底部 stroke 实现，这里用 LinearGradient 模拟） */
+const GradientBorder = ({ opacity = 0.38 }: { opacity?: number }) => (
   <LinearGradient
-    colors={['transparent', '#B5A88A', 'transparent']}
+    colors={[
+      'transparent',
+      `rgba(139,122,90,${opacity})`,
+      'transparent',
+    ]}
     start={{ x: 0, y: 0.5 }}
     end={{ x: 1, y: 0.5 }}
-    style={s.divider}
+    style={s.gradientBorder}
   />
 );
 
@@ -138,100 +181,125 @@ export const GameHomeScreen = ({ route }: any) => {
   return (
     <LinearGradient
       colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
+      locations={[0, 0.3, 0.6, 1]}
       style={s.container}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
       <SafeAreaView style={s.safeArea}>
-        {/* ── 1. 顶部状态栏 ── */}
+        {/* ── 1. Player Stats 顶部状态栏 ── */}
         <View style={s.playerStats}>
-          {/* 名称行 */}
+          {/* 名称行：左名字 右等级 */}
           <View style={s.nameRow}>
             <Text style={s.playerName}>{PLAYER_STATS.name}</Text>
             <View style={s.levelBadge}>
               <Text style={s.levelText}>{PLAYER_STATS.level}</Text>
             </View>
           </View>
-          {/* Row1: 气血/内力/经验 */}
+          {/* Row1 */}
           <View style={s.statsRow}>
-            {PLAYER_STATS.row1.map((stat) => (
+            {PLAYER_STATS.row1.map(stat => (
               <StatBar key={stat.label} {...stat} />
             ))}
           </View>
-          {/* Row2: 潜能/技能/银两 */}
+          {/* Row2 */}
           <View style={s.statsRow}>
-            {PLAYER_STATS.row2.map((stat) => (
+            {PLAYER_STATS.row2.map(stat => (
               <StatBar key={stat.label} {...stat} />
             ))}
           </View>
-          <Divider />
+          <GradientBorder opacity={0.38} />
         </View>
 
-        {/* ── 2. 地点标题 ── */}
+        {/* ── 2. Location Header 地点标题 ── */}
         <View style={s.locationHeader}>
           <View style={s.locationRow}>
-            <Text style={s.locationName}>{LOCATION.name}</Text>
-            <View style={s.locationActions}>
-              {LOCATION.actions.map((a) => (
-                <TouchableOpacity key={a.label} style={s.locationBtn}>
-                  <Icon name={a.icon} size={14} color="#6B5D4D" />
-                  <Text style={s.locationBtnText}>{a.label}</Text>
+            <Text style={s.locationName}>冰 道</Text>
+            <View style={s.locationBtns}>
+              {LOCATION_BUTTONS.map(label => (
+                <TouchableOpacity key={label} style={s.locBtn}>
+                  <Text style={s.locBtnText}>{label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-          <Divider />
+          <GradientBorder opacity={0.25} />
         </View>
 
-        {/* ── 3. 主内容区 ── */}
+        {/* ── 3. Main Content Area 主内容区 ── */}
         <View style={s.mainContent}>
           {/* 左侧区域 */}
           <View style={s.leftPanel}>
-            {/* 游戏日志 */}
-            <ScrollView style={s.gameLog} contentContainerStyle={s.gameLogContent}>
-              {GAME_LOG.map((line, i) => (
-                <Text key={i} style={[s.logText, { color: line.color }]}>
-                  {line.text}
-                </Text>
-              ))}
-            </ScrollView>
-
-            {/* Action Bar */}
-            <View style={s.actionBar}>
-              {ACTION_BUTTONS.map((btn) => (
-                <TouchableOpacity key={btn} style={s.actionBtn}>
-                  <Text style={s.actionBtnText}>{btn}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* 聊天区 */}
-            <View style={s.chatArea}>
-              <ScrollView style={s.chatScroll}>
-                {CHAT_MESSAGES.map((msg, i) => (
-                  <Text key={i} style={s.chatMsg}>
-                    <Text style={[s.chatSender, { color: msg.color }]}>{msg.sender}</Text>
-                    <Text style={s.chatText}>: {msg.text}</Text>
+            {/* Game Log */}
+            <View style={s.gameLog}>
+              <ScrollView
+                style={s.logScroll}
+                contentContainerStyle={s.logScrollContent}
+              >
+                {GAME_LOG.map((line, i) => (
+                  <Text key={i} style={[s.logText, { color: line.color }]}>
+                    {line.text}
                   </Text>
                 ))}
               </ScrollView>
-              <TouchableOpacity style={s.chatBtn}>
-                <Text style={s.chatBtnText}>聊天</Text>
-              </TouchableOpacity>
+              {/* Action Bar */}
+              <View style={s.actionBar}>
+                {ACTION_BUTTONS.map(label => (
+                  <TouchableOpacity key={label} style={s.actionBtn}>
+                    <Text style={s.actionBtnText}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
-            {/* 方向导航 3x3 */}
+            {/* Chat Display Area */}
+            <View style={s.chatArea}>
+              <ScrollView style={s.chatScroll} contentContainerStyle={s.chatScrollContent}>
+                {CHAT_MESSAGES.map((msg, i) => (
+                  <Text key={i} style={[s.chatMsg, { color: msg.color }]}>
+                    {msg.text}
+                  </Text>
+                ))}
+              </ScrollView>
+              {/* Chat Bottom */}
+              <View style={s.chatBottom}>
+                <TouchableOpacity style={s.chatBtnWrap}>
+                  <LinearGradient
+                    colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
+                    style={s.chatBtnGradient}
+                    start={{ x: 0.5, y: 1 }}
+                    end={{ x: 0.5, y: 0 }}
+                  >
+                    <Text style={s.chatBtnText}>聊天</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Map Navigation 3x3 */}
             <View style={s.mapNav}>
               {DIRECTIONS.map((row, ri) => (
                 <View key={ri} style={s.dirRow}>
                   {row.map((dir, ci) => (
                     <TouchableOpacity
                       key={`${ri}-${ci}`}
-                      style={[s.dirCell, dir === '' && s.dirCellCenter]}
-                      disabled={dir === ''}
+                      style={[
+                        s.dirCell,
+                        dir.center && s.dirCellCenter,
+                        !dir.bold && !dir.center && s.dirCellDiag,
+                        dir.bold && !dir.center && s.dirCellCardinal,
+                      ]}
+                      disabled={dir.center}
                     >
-                      <Text style={[s.dirText, dir === '' && s.dirTextCenter]}>
-                        {dir || '●'}
+                      <Text
+                        style={[
+                          s.dirText,
+                          dir.bold && s.dirTextBold,
+                          dir.center && s.dirTextCenter,
+                          !dir.bold && s.dirTextDiag,
+                        ]}
+                      >
+                        {dir.text}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -243,22 +311,26 @@ export const GameHomeScreen = ({ route }: any) => {
           {/* 右侧角色列表 */}
           <ScrollView style={s.rightPanel}>
             {NPC_LIST.map((npc, i) => (
-              <TouchableOpacity key={i} style={s.npcCard}>
-                <View style={s.npcInfo}>
-                  <Text style={s.npcName} numberOfLines={1}>
+              <TouchableOpacity
+                key={i}
+                style={[s.npcCard, { borderColor: npc.borderColor }]}
+              >
+                <View style={s.npcTop}>
+                  <Text style={[s.npcName, { color: npc.nameColor }]}>
                     {npc.name}
                   </Text>
-                  <Text style={s.npcMeta}>
-                    {npc.gender} Lv.{npc.level}
+                  <Text style={[s.npcGender, { color: npc.genderColor }]}>
+                    {npc.gender}
                   </Text>
                 </View>
-                <View style={s.npcHpBar}>
+                <Text style={s.npcLevel}>{npc.level}</Text>
+                <View style={s.npcHpBg}>
                   <View
                     style={[
                       s.npcHpFill,
                       {
-                        width: `${npc.hp * 100}%`,
-                        backgroundColor: npc.hp > 0.5 ? '#6B8A5A' : '#A65D5D',
+                        width: `${npc.hpPct}%` as any,
+                        backgroundColor: npc.hpColor,
                       },
                     ]}
                   />
@@ -268,21 +340,25 @@ export const GameHomeScreen = ({ route }: any) => {
           </ScrollView>
         </View>
 
-        {/* ── 4. 底部导航 ── */}
+        {/* ── 4. Bottom Navigation 底部导航 ── */}
         <View style={s.bottomNav}>
-          {NAV_TABS.map((tab) => (
-            <TouchableOpacity key={tab.label} style={s.navTab}>
-              <Icon
-                name={tab.icon}
-                size={20}
-                color={tab.active ? '#3A3530' : '#8B7A5A'}
-              />
-              <Text style={[s.navLabel, tab.active && s.navLabelActive]}>
-                {tab.label}
-              </Text>
-              {tab.active && <View style={s.navIndicator} />}
-            </TouchableOpacity>
-          ))}
+          {NAV_TABS.map(tab =>
+            tab.active ? (
+              <LinearGradient
+                key={tab.label}
+                colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
+                style={s.navTabActive}
+                start={{ x: 0.5, y: 1 }}
+                end={{ x: 0.5, y: 0 }}
+              >
+                <Text style={s.navLabelActive}>{tab.label}</Text>
+              </LinearGradient>
+            ) : (
+              <TouchableOpacity key={tab.label} style={s.navTab}>
+                <Text style={s.navLabel}>{tab.label}</Text>
+              </TouchableOpacity>
+            ),
+          )}
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -295,68 +371,78 @@ const s = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
 
-  /* ── 顶部状态栏 ── */
-  playerStats: { paddingHorizontal: 12, paddingTop: 4 },
+  /* ── Player Stats ── */
+  playerStats: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 0,
+    gap: 10,
+  },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
-    gap: 8,
+    justifyContent: 'space-between',
   },
   playerName: {
     fontSize: 16,
     fontWeight: '700',
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
-    letterSpacing: 2,
   },
   levelBadge: {
-    backgroundColor: '#8B7A5A',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: '#8B7A5A80',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
   },
   levelText: {
     fontSize: 10,
-    color: '#F5F0E8',
-    fontFamily: 'Noto Sans SC',
-    fontWeight: '600',
+    fontWeight: '500',
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
   },
   statsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 4,
   },
-  statBarWrap: { flex: 1 },
+  statBox: {
+    flex: 1,
+    gap: 3,
+  },
+  statHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   statLabel: {
     fontSize: 10,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
-    marginBottom: 2,
   },
-  statBarOuter: {
-    height: 10,
+  statValue: {
+    fontSize: 9,
+    fontFamily: 'Noto Sans SC',
+  },
+  statBarBg: {
+    height: 4,
     backgroundColor: '#D5CEC060',
-    borderRadius: 0,
-    overflow: 'hidden',
   },
-  statBarInner: {
+  statBarFill: {
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
-    borderRadius: 0,
   },
-  statValue: {
-    fontSize: 9,
-    color: '#8B7A5A',
-    fontFamily: 'Noto Sans SC',
-    textAlign: 'right',
-    marginTop: 1,
+  gradientBorder: {
+    height: 1,
   },
-  divider: { height: 1, marginVertical: 6 },
 
-  /* ── 地点标题 ── */
-  locationHeader: { paddingHorizontal: 12 },
+  /* ── Location Header ── */
+  locationHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -369,155 +455,205 @@ const s = StyleSheet.create({
     fontFamily: 'Noto Serif SC',
     letterSpacing: 8,
   },
-  locationActions: {
+  locationBtns: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
   },
-  locationBtn: {
+  locBtn: {
+    borderWidth: 1,
+    borderColor: '#8B7A5A60',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     alignItems: 'center',
-    gap: 2,
+    justifyContent: 'center',
   },
-  locationBtnText: {
-    fontSize: 10,
+  locBtnText: {
+    fontSize: 11,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
   },
 
-  /* ── 主内容区 ── */
+  /* ── Main Content Area ── */
   mainContent: {
     flex: 1,
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    gap: 6,
+    padding: 10,
+    gap: 10,
   },
-  leftPanel: { flex: 1 },
+  leftPanel: {
+    flex: 1,
+    gap: 10,
+  },
 
-  /* 游戏日志 */
+  /* Game Log */
   gameLog: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C5BEB0',
+    backgroundColor: '#F5F0E830',
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
+    padding: 12,
   },
-  gameLogContent: { padding: 8 },
+  logScroll: {
+    flex: 1,
+  },
+  logScrollContent: {
+    gap: 6,
+  },
   logText: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 12,
+    lineHeight: 12 * 1.4,
+    fontFamily: 'Noto Serif SC',
+  },
+  actionBar: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  actionBtn: {
+    backgroundColor: '#E8E2D660',
+    borderWidth: 1,
+    borderColor: '#8B7A5A40',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionBtnText: {
+    fontSize: 11,
+    color: '#5A5048',
     fontFamily: 'Noto Serif SC',
   },
 
-  /* Action Bar */
-  actionBar: {
-    flexDirection: 'row',
-    gap: 6,
-    marginVertical: 4,
+  /* Chat Display Area */
+  chatArea: {
+    height: 100,
+    backgroundColor: '#F5F0E830',
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
   },
-  actionBtn: {
+  chatScroll: {
     flex: 1,
-    backgroundColor: 'rgba(139,122,90,0.15)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#B5A88A',
-    paddingVertical: 6,
-    alignItems: 'center',
   },
-  actionBtnText: {
-    fontSize: 12,
+  chatScrollContent: {
+    padding: 8,
+    paddingHorizontal: 10,
+    gap: 4,
+  },
+  chatMsg: {
+    fontSize: 11,
+    lineHeight: 11 * 1.3,
+    fontFamily: 'Noto Serif SC',
+  },
+  chatBottom: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#8B7A5A20',
+  },
+  chatBtnWrap: {},
+  chatBtnGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: '#8B7A5A60',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatBtnText: {
+    fontSize: 11,
+    fontWeight: '500',
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
   },
 
-  /* 聊天区 */
-  chatArea: {
-    height: 100,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C5BEB0',
-    flexDirection: 'row',
-  },
-  chatScroll: { flex: 1, padding: 6 },
-  chatMsg: { fontSize: 12, lineHeight: 18, fontFamily: 'Noto Serif SC' },
-  chatSender: { fontWeight: '600' },
-  chatText: { color: '#6B5D4D' },
-  chatBtn: {
-    width: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderLeftColor: '#C5BEB0',
-  },
-  chatBtnText: {
-    fontSize: 11,
-    color: '#6B5D4D',
-    fontFamily: 'Noto Serif SC',
-    writingDirection: 'ltr',
-  },
-
-  /* 方向导航 */
+  /* Map Navigation */
   mapNav: {
     height: 120,
-    marginTop: 4,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C5BEB0',
-    padding: 4,
-    justifyContent: 'center',
+    backgroundColor: '#F5F0E830',
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
+    padding: 8,
+    gap: 4,
   },
   dirRow: {
-    flexDirection: 'row',
     flex: 1,
+    flexDirection: 'row',
     gap: 4,
   },
   dirCell: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(139,122,90,0.1)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C5BEB080',
+    justifyContent: 'center',
+  },
+  dirCellDiag: {
+    backgroundColor: '#E8E2D850',
+  },
+  dirCellCardinal: {
+    backgroundColor: '#D5CFC540',
   },
   dirCellCenter: {
-    backgroundColor: 'rgba(139,122,90,0.2)',
+    backgroundColor: '#C5BFB560',
+    borderWidth: 1,
+    borderColor: '#8B7A5A60',
   },
   dirText: {
-    fontSize: 13,
-    color: '#3A3530',
     fontFamily: 'Noto Serif SC',
+  },
+  dirTextBold: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#5A5048',
   },
   dirTextCenter: {
-    fontSize: 10,
-    color: '#8B7A5A',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#3A3530',
+  },
+  dirTextDiag: {
+    fontSize: 13,
+    fontWeight: 'normal',
+    color: '#8B7A5A80',
   },
 
-  /* 右侧角色列表 */
+  /* Right Character List */
   rightPanel: {
     width: 105,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#C5BEB0',
+    backgroundColor: '#F5F0E830',
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
+    padding: 8,
+    gap: 6,
   },
   npcCard: {
     padding: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#C5BEB080',
+    gap: 4,
+    borderWidth: 1,
+    marginBottom: 6,
   },
-  npcInfo: { marginBottom: 4 },
+  npcTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   npcName: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#3A3530',
+    fontWeight: '500',
     fontFamily: 'Noto Serif SC',
   },
-  npcMeta: {
-    fontSize: 9,
-    color: '#8B7A5A',
+  npcGender: {
+    fontSize: 10,
     fontFamily: 'Noto Sans SC',
-    marginTop: 1,
   },
-  npcHpBar: {
+  npcLevel: {
+    fontSize: 10,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  npcHpBg: {
     height: 4,
     backgroundColor: '#D5CEC060',
-    overflow: 'hidden',
   },
   npcHpFill: {
     position: 'absolute',
@@ -526,34 +662,41 @@ const s = StyleSheet.create({
     bottom: 0,
   },
 
-  /* ── 底部导航 ── */
+  /* ── Bottom Navigation ── */
   bottomNav: {
     flexDirection: 'row',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#C5BEB0',
-    backgroundColor: 'rgba(245,240,232,0.9)',
-    paddingBottom: 2,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#8B7A5A20',
   },
   navTab: {
     flex: 1,
+    height: 36,
     alignItems: 'center',
-    paddingVertical: 8,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#8B7A5A40',
+  },
+  navTabActive: {
+    flex: 1,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#8B7A5A80',
   },
   navLabel: {
-    fontSize: 10,
-    color: '#8B7A5A',
+    fontSize: 12,
+    color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
-    marginTop: 2,
   },
   navLabelActive: {
-    color: '#3A3530',
+    fontSize: 12,
     fontWeight: '700',
-  },
-  navIndicator: {
-    position: 'absolute',
-    top: 0,
-    width: 24,
-    height: 2,
-    backgroundColor: '#3A3530',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
   },
 });

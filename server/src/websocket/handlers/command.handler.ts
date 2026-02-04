@@ -36,7 +36,7 @@ export class CommandHandler {
       return;
     }
 
-    const player = this.objectManager.get(session.playerId) as PlayerBase | undefined;
+    const player = this.objectManager.findById(session.playerId) as PlayerBase | undefined;
     if (!player) {
       this.logger.warn(`玩家对象不存在: ${session.playerId}`);
       const resp = MessageFactory.create('toast', { message: '角色数据异常', type: 'error' });
