@@ -12,7 +12,10 @@ import { PlayerNameBadge } from './PlayerNameBadge';
 import { AttrValue } from './AttrValue';
 
 /** 六维属性标签映射 */
-const ATTR_LABELS: { key: keyof ReturnType<typeof useGameStore.getState>['player']['attrs']; label: string }[] = [
+const ATTR_LABELS: {
+  key: keyof ReturnType<typeof useGameStore.getState>['player']['attrs'];
+  label: string;
+}[] = [
   { key: 'wisdom', label: '慧根' },
   { key: 'perception', label: '心眼' },
   { key: 'spirit', label: '气海' },
@@ -26,23 +29,44 @@ function resourcePct(res: ResourceValue): number {
   return res.max > 0 ? Math.round((res.current / res.max) * 100) : 0;
 }
 
-/** 资源值 → StatBar 文本 */
+/** 资源值 → StatBar 文本（max 为 0 时显示占位） */
 function resourceText(res: ResourceValue): string {
-  return `${res.current}/${res.max}`;
+  return res.max > 0 ? `${res.current}/${res.max}` : '--';
 }
 
 export const PlayerStats = () => {
   const player = useGameStore(state => state.player);
 
+  /** 数据尚未到达（服务端未推送 playerStats） */
+  const hasData = player.name.length > 0;
+
   return (
     <View style={s.container}>
-      <PlayerNameBadge name={player.name} level={player.level} />
+      <PlayerNameBadge
+        name={hasData ? player.name : '连接中…'}
+        level={hasData ? player.level : ''}
+      />
 
       {/* 第一行：气血/内力/精力 进度条 */}
       <View style={s.statsRow}>
-        <StatBar label="气血" value={resourceText(player.hp)} pct={resourcePct(player.hp)} color="#A65D5D" />
-        <StatBar label="内力" value={resourceText(player.mp)} pct={resourcePct(player.mp)} color="#4A6B6B" />
-        <StatBar label="精力" value={resourceText(player.energy)} pct={resourcePct(player.energy)} color="#8B7355" />
+        <StatBar
+          label="气血"
+          value={resourceText(player.hp)}
+          pct={resourcePct(player.hp)}
+          color="#A65D5D"
+        />
+        <StatBar
+          label="内力"
+          value={resourceText(player.mp)}
+          pct={resourcePct(player.mp)}
+          color="#4A6B6B"
+        />
+        <StatBar
+          label="精力"
+          value={resourceText(player.energy)}
+          pct={resourcePct(player.energy)}
+          color="#8B7355"
+        />
       </View>
 
       {/* 第二行：六维属性数值 */}
