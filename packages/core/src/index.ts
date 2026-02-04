@@ -6,3 +6,4 @@
 export * from './types';
 export * from './factory';
 export * from './rich-text';
+export * from './constants';
