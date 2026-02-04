@@ -44,11 +44,68 @@ Login (初始页)
 - **@react-navigation**: 路由导航
 - **react-native-linear-gradient**: 水墨风渐变背景
 - **react-native-vector-icons** (Feather): 图标
+- **zustand**: 全局状态管理（Unity3D 组件模型数据层）
 - **@packages/core**: 消息类型和 MessageFactory
 
 ### Metro 配置
 
 `metro.config.js` 配置了 monorepo `watchFolders`，使 Metro 能够解析根目录的 `packages/core`。
+
+## 前端架构模式（Unity3D 组件模型）
+
+前端采用 **Unity3D 组件挂载模型**，核心原则：
+
+### 设计哲学
+
+- **极细粒度组件** — 每个可交互/可更新的 UI 元素都是独立组件（类似 Unity Prefab）
+- **组件独立性** — 每个组件独立文件、独立样式、独立数据订阅
+- **数据驱动渲染** — 组件不持有业务数据，通过 Zustand store selector 取自己的数据切片
+- **Screen = 布局容器** — Screen 文件只负责组合子组件和整体布局（< 50 行）
+
+### 组件目录规范
+
+```
+src/components/game/
+├── shared/              # 跨区域共享的原子组件
+│   ├── GradientDivider.tsx
+│   ├── StatBar.tsx
+│   └── HpBar.tsx
+├── PlayerStats/         # 区域组件（目录 = 一个功能区域）
+│   ├── index.tsx        # 区域容器，从 store 取数据
+│   └── PlayerNameBadge.tsx  # 子组件
+├── GameLog/
+│   ├── index.tsx
+│   ├── LogEntry.tsx     # 单条日志（最小粒度）
+│   └── ActionButton.tsx
+└── ...
+```
+
+### 组件开发规则
+
+1. **一个组件一个文件** — 禁止在同一文件中定义多个导出组件
+2. **Props 类型显式声明** — 每个组件必须有明确的 Props interface
+3. **样式内聚** — 每个组件自带 `StyleSheet.create()`，不使用全局样式表
+4. **store 订阅最小化** — 用 selector 只取需要的字段，避免不必要的重渲染
+5. **区域容器负责数据** — `index.tsx` 从 store 取数据并传递给子组件，子组件通过 props 接收
+6. **NPC 卡片、方向格子、日志条目等都是独立组件** — 即使只有几行 JSX
+
+### 状态管理（Zustand）
+
+```
+WebSocketService → Zustand store → 各组件自动更新
+```
+
+- **全局 store**: `src/stores/useGameStore.ts`
+- **订阅模式**: `useGameStore(state => state.player)` — selector 取切片
+- **更新来源**: WebSocket 消息通过 bridge 写入 store
+
+### 新增游戏 UI 组件的标准流程
+
+1. 在 `src/components/game/` 下创建目录
+2. 定义 Props interface
+3. 在 `index.tsx` 中通过 `useGameStore(selector)` 取数据
+4. 拆分子组件到独立文件
+5. 在 Screen 中 import 并挂载
 
 ## UI 设计规范（水墨风）
 
@@ -80,12 +137,15 @@ A: 需要先 `cd packages/core && pnpm build`，然后 Metro bundler 会自动�
 
 - `App.tsx` - 根组件、路由、WebSocket 初始化
 - `src/services/WebSocketService.ts` - WebSocket 单例（连接/重连/心跳）
+- `src/stores/useGameStore.ts` - Zustand 游戏全局状态
 - `src/screens/LoginScreen.tsx` - 登录页面（完整实现）
 - `src/screens/RegisterScreen.tsx` - 注册页面（完整实现）
 - `src/screens/CreateCharacterScreen.tsx` - 创建角色（占位）
-- `src/screens/GameHomeScreen.tsx` - 游戏主页（占位）
-- `src/components/` - 共享 UI 组件
+- `src/screens/GameHomeScreen.tsx` - 游戏主页（布局容器）
+- `src/components/` - 共享 UI 组件（GameAlert / GameToast / UIProvider）
+- `src/components/game/` - 游戏 UI 组件（Unity3D 组件模型）
 
 ## 变更记录 (Changelog)
 
+- **2026-02-04**: 新增 Unity3D 组件模型架构规范，Zustand 状态管理
 - **2026-02-02**: 初始化模块文档

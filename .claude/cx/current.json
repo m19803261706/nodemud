@@ -1,35 +1,26 @@
 {
-  "feature": "出生地图 — 裂隙镇",
-  "created_at": "2026-02-03T07:00:00+08:00",
-  "completed_at": "2026-02-03T08:00:00+08:00",
-  "project_number": 3,
+  "feature": "game-home-refactor",
+  "created_at": "2026-02-04T00:00:00+08:00",
+  "project_number": 5,
   "docs": {
-    "scope": 85,
-    "prd": 94,
-    "design": 95,
-    "adr": []
+    "scope": 99
   },
   "epic": {
-    "number": 96,
-    "title": "[Epic] 出生地图 — 裂隙镇",
-    "status": "closed"
+    "number": 100,
+    "title": "[Epic] 游戏首页组件化重构 — Unity3D 组件模型"
   },
   "issues": [
-    {
-      "number": 97,
-      "title": "裂隙镇 Area 定义 + 14 个房间蓝图",
-      "status": "cx-done",
-      "phase": 1,
-      "parallel_group": "p1-a"
-    },
-    {
-      "number": 98,
-      "title": "裂隙镇集成测试",
-      "status": "cx-done",
-      "phase": 2,
-      "parallel_group": "p2-a",
-      "depends_on": [97]
-    }
+    {"number": 101, "title": "安装 Zustand + 创建 useGameStore", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
+    {"number": 102, "title": "创建共享组件", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
+    {"number": 103, "title": "PlayerStats 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 104, "title": "LocationHeader 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 105, "title": "GameLog 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 106, "title": "ChatPanel 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 107, "title": "MapNavigation 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 108, "title": "NpcList 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 109, "title": "BottomNavBar 组件拆分", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [101, 102]},
+    {"number": 110, "title": "GameHomeScreen 重构为纯布局容器", "status": "cx-blocked", "phase": 3, "parallel_group": "p3", "depends_on": [103, 104, 105, 106, 107, 108, 109]},
+    {"number": 111, "title": "组件化视觉回归验证", "status": "cx-blocked", "phase": 3, "parallel_group": "p3", "depends_on": [110]}
   ],
-  "execution_order": [97, 98]
+  "execution_order": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111]
 }

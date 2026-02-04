@@ -137,21 +137,34 @@ client/
 │   │   ├── LoginScreen.tsx          # 登录页（水墨风）
 │   │   ├── RegisterScreen.tsx       # 注册页
 │   │   ├── CreateCharacterScreen.tsx # 创建角色页（占位）
-│   │   └── GameHomeScreen.tsx       # 游戏主页（占位）
+│   │   └── GameHomeScreen.tsx       # 游戏主页（纯布局容器）
+│   ├── stores/
+│   │   └── useGameStore.ts          # Zustand 游戏全局状态
 │   ├── services/
 │   │   └── WebSocketService.ts      # WebSocket 服务（单例，心跳+重连）
 │   └── components/
 │       ├── GameAlert.tsx            # 水墨风弹窗
 │       ├── GameToast.tsx            # 水墨风 Toast
 │       ├── UIProvider.tsx           # UI 上下文（Alert/Toast 全局管理）
-│       └── index.ts                 # 组件导出
+│       ├── index.ts                 # 组件导出
+│       └── game/                    # 游戏 UI 组件（Unity3D 组件模型）
+│           ├── shared/              # 共享原子组件（StatBar/HpBar/GradientDivider）
+│           ├── PlayerStats/         # 玩家状态栏
+│           ├── LocationHeader/      # 地点标题
+│           ├── GameLog/             # 游戏日志
+│           ├── ChatPanel/           # 聊天面板
+│           ├── MapNavigation/       # 方向导航
+│           ├── NpcList/             # NPC 列表
+│           └── BottomNavBar/        # 底部导航
 ├── ios/                             # iOS 原生工程
 ├── android/                         # Android 原生工程
 └── metro.config.js                  # Metro 配置（monorepo watchFolders）
 ```
 
+- **前端架构**: Unity3D 组件挂载模型 — 极细粒度组件，Zustand 全局 store，Screen 纯布局容器
 - **导航**: `@react-navigation/native-stack`，路由: Login -> Register / CreateCharacter / GameHome
 - **WebSocket**: App 启动时连接 `ws://localhost:4000`，生命周期跟随进程
+- **状态管理**: Zustand — WebSocketService → store → 组件自动更新
 - **UI 风格**: 水墨风（ink-wash），配色 `#F5F0E8`/`#8B7A5A`/`#3A3530`，字体 Noto Serif SC
 
 ### Server (`server/`)
@@ -253,7 +266,12 @@ packages/core/
 - 添加新的 WebSocket 消息处理时，需要在 `websocket.gateway.ts` 的 switch 中添加路由
 - 前端新页面需要在 `client/App.tsx` 的 Stack.Navigator 中注册路由
 - 数据库新实体需要在对应模块中 `TypeOrmModule.forFeature([Entity])` 注册
+- **前端组件必须遵循 Unity3D 组件模型**：极细粒度拆分，一个组件一个文件，区域容器从 store 取数据，子组件通过 props 接收
+- **禁止在 Screen 文件中堆积业务逻辑** — Screen 只做布局组合（< 50 行）
+- **新增游戏 UI 时**：在 `components/game/` 下创建目录 → 定义 Props → index.tsx 订阅 store → 拆分子组件
+- **状态变更统一走 Zustand store** — 组件不直接调用 WebSocketService，通过 store action 发送
 
 ## 变更记录 (Changelog)
 
+- **2026-02-04**: 新增 Unity3D 组件模型前端架构规范，Zustand 状态管理
 - **2026-02-02**: 初始化项目 CLAUDE.md，记录项目架构、开发指南、编码规范
