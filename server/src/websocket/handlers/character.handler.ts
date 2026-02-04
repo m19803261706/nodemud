@@ -3,12 +3,17 @@
  * 处理 createCharacterStep1 和 createCharacterConfirm 消息
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import type { CharacterAttributes, CharacterOrigin } from '@packages/core';
 import { CharacterService } from '../../character/character.service';
 import { FateService } from '../../fate/fate.service';
 import { ORIGIN_CONFIG } from '../../fate/fate.constants';
+import { BlueprintFactory } from '../../engine/blueprint-factory';
+import { ObjectManager } from '../../engine/object-manager';
+import { PlayerBase } from '../../engine/game-objects/player-base';
+import type { RoomBase } from '../../engine/game-objects/room-base';
+import { sendRoomInfo } from './room-utils';
 import type { Session } from '../types/session';
 
 /** 临时数据超时时间（30分钟） */
@@ -37,11 +42,18 @@ const ATTR_KEYS: (keyof CharacterAttributes)[] = [
   'vitality',
 ];
 
+/** 默认出生房间 */
+const DEFAULT_ROOM = 'area/rift-town/square';
+
 @Injectable()
 export class CharacterHandler {
+  private readonly logger = new Logger(CharacterHandler.name);
+
   constructor(
     private readonly characterService: CharacterService,
     private readonly fateService: FateService,
+    private readonly blueprintFactory: BlueprintFactory,
+    private readonly objectManager: ObjectManager,
   ) {}
 
   /**
@@ -240,6 +252,38 @@ export class CharacterHandler {
           )!,
         ),
       );
+
+      // === 角色创建后自动进场 ===
+      try {
+        // 创建 PlayerBase 并注册
+        const playerId = this.objectManager.nextInstanceId('player');
+        const player = new PlayerBase(playerId);
+        this.objectManager.register(player);
+        player.set('name', character.name);
+        player.set('no_clean_up', true);
+
+        // 绑定 WebSocket 连接
+        player.bindConnection((msg: any) => {
+          const payload = typeof msg === 'string' ? msg : JSON.stringify(msg);
+          client.send(payload);
+        });
+
+        // 记录到 Session
+        session.playerId = playerId;
+        session.characterId = character.id;
+
+        // 获取出生房间并移入
+        const room = this.blueprintFactory.getVirtual(DEFAULT_ROOM) as RoomBase | undefined;
+        if (room) {
+          await player.moveTo(room, { quiet: true });
+          sendRoomInfo(player, room);
+          room.broadcast(`${character.name}来到此处。`, player);
+        } else {
+          this.logger.warn(`出生房间 ${DEFAULT_ROOM} 不存在`);
+        }
+      } catch (enterError) {
+        this.logger.error('角色进场失败:', enterError);
+      }
     } catch (error) {
       console.error('角色创建失败:', error);
       this.sendFailed(client, 'server_error', '创建角色失败，请重试');
