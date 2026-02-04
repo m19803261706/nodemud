@@ -186,36 +186,35 @@ const INITIAL_NPCS: NpcData[] = [
 
 /* ─── Store ─── */
 
-export const useGameStore = create<GameState>((set) => ({
+export const useGameStore = create<GameState>(set => ({
   // 玩家
   player: { name: '剑心侠客', level: '五十八级', stats: INITIAL_STATS },
-  updatePlayer: (data) =>
-    set((state) => ({ player: { ...state.player, ...data } })),
+  updatePlayer: data =>
+    set(state => ({ player: { ...state.player, ...data } })),
 
   // 地点
   location: { name: '冰 道', actions: ['回城', '飞行', '地图', '邮件'] },
-  setLocation: (loc) => set({ location: loc }),
+  setLocation: loc => set({ location: loc }),
 
   // 日志
   gameLog: INITIAL_LOG,
-  appendLog: (entry) =>
-    set((state) => ({ gameLog: [...state.gameLog, entry] })),
+  appendLog: entry => set(state => ({ gameLog: [...state.gameLog, entry] })),
   clearLog: () => set({ gameLog: [] }),
 
   // 聊天
   chatMessages: INITIAL_CHAT,
-  appendChat: (msg) =>
-    set((state) => ({ chatMessages: [...state.chatMessages, msg] })),
+  appendChat: msg =>
+    set(state => ({ chatMessages: [...state.chatMessages, msg] })),
 
   // 方向
   directions: INITIAL_DIRECTIONS,
-  setDirections: (dirs) => set({ directions: dirs }),
+  setDirections: dirs => set({ directions: dirs }),
 
   // NPC
   nearbyNpcs: INITIAL_NPCS,
-  setNpcs: (npcs) => set({ nearbyNpcs: npcs }),
+  setNpcs: npcs => set({ nearbyNpcs: npcs }),
 
   // 导航
   activeTab: '江湖',
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  setActiveTab: tab => set({ activeTab: tab }),
 }));
