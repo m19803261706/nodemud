@@ -10,6 +10,7 @@ import { Command } from '../../types/command';
 import type { ICommand, CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
+import { ServiceLocator } from '../../service-locator';
 import { rt } from '@packages/core';
 
 /** 方向别名映射表：缩写/中文 → 标准英文方向 */
@@ -90,10 +91,15 @@ export class GoCommand implements ICommand {
       return { success: false, message: '这个方向没有出口。' };
     }
 
+    // 获取目标房间名（优先显示中文 short name）
+    const targetRoom = ServiceLocator.objectManager.findById(targetId);
+    const targetName =
+      targetRoom instanceof RoomBase ? targetRoom.getShort() : targetId;
+
     // 返回成功结果，由上层处理实际移动
     return {
       success: true,
-      message: `${rt('sys', '你向')}${rt('exit', direction)}${rt('sys', '走去。')}`,
+      message: `${rt('sys', '你向')}${rt('exit', targetName)}${rt('sys', '走去。')}`,
       data: { direction, targetId },
     };
   }
