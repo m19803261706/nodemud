@@ -11,17 +11,23 @@ interface DirectionCellProps {
   onPress?: () => void;
 }
 
-export const DirectionCell = ({ dir, onPress }: DirectionCellProps) => (
-  <TouchableOpacity
-    style={[
-      s.cell,
-      dir.center && s.cellCenter,
-      !dir.bold && !dir.center && s.cellDiag,
-      dir.bold && !dir.center && s.cellCardinal,
-    ]}
-    onPress={onPress}
-    disabled={dir.center}
-  >
+export const DirectionCell = ({ dir, onPress }: DirectionCellProps) => {
+  /** 不可走方向或中心格禁止点击 */
+  const isDisabled = dir.center || !dir.bold;
+
+  return (
+    <TouchableOpacity
+      style={[
+        s.cell,
+        dir.center && s.cellCenter,
+        !dir.bold && !dir.center && s.cellDiag,
+        dir.bold && !dir.center && s.cellCardinal,
+        isDisabled && !dir.center && s.cellDisabled,
+      ]}
+      onPress={onPress}
+      disabled={isDisabled}
+      activeOpacity={0.6}
+    >
     <Text
       style={[
         s.text,
@@ -32,8 +38,9 @@ export const DirectionCell = ({ dir, onPress }: DirectionCellProps) => (
     >
       {dir.text}
     </Text>
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
 const s = StyleSheet.create({
   cell: {
@@ -46,6 +53,9 @@ const s = StyleSheet.create({
   },
   cellCardinal: {
     backgroundColor: '#D5CFC540',
+  },
+  cellDisabled: {
+    opacity: 0.3,
   },
   cellCenter: {
     backgroundColor: '#C5BFB560',

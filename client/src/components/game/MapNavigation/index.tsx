@@ -2,20 +2,39 @@
  * 地图导航 — 3x3 方向网格
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
 import { DirectionCell } from './DirectionCell';
 
+/** 英文方向键布局，与 directions 网格一一对应 */
+const DIR_KEYS = [
+  ['northwest', 'north', 'northeast'],
+  ['west', 'center', 'east'],
+  ['southwest', 'south', 'southeast'],
+];
+
 export const MapNavigation = () => {
   const directions = useGameStore(state => state.directions);
+  const sendCommand = useGameStore(state => state.sendCommand);
+
+  const handlePress = useCallback(
+    (dirKey: string) => {
+      sendCommand(`go ${dirKey}`);
+    },
+    [sendCommand],
+  );
 
   return (
     <View style={s.container}>
       {directions.map((row, ri) => (
         <View key={ri} style={s.row}>
           {row.map((dir, ci) => (
-            <DirectionCell key={`${ri}-${ci}`} dir={dir} />
+            <DirectionCell
+              key={`${ri}-${ci}`}
+              dir={dir}
+              onPress={() => handlePress(DIR_KEYS[ri][ci])}
+            />
           ))}
         </View>
       ))}
