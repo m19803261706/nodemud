@@ -12,6 +12,18 @@ export interface RoomCoordinates {
   z: number;
 }
 
+/** NPC 简要信息（房间列表用） */
+export interface NpcBrief {
+  id: string;
+  name: string;
+  title: string;
+  gender: string;
+  faction: string;
+  level: number;
+  hpPct: number;
+  attitude: string;
+}
+
 /** 房间信息消息（服务端 → 客户端） */
 export interface RoomInfoMessage extends ServerMessage {
   type: 'roomInfo';
@@ -19,6 +31,8 @@ export interface RoomInfoMessage extends ServerMessage {
     short: string; // 房间标题（如"镇中广场"）
     long: string; // 房间描述
     exits: string[]; // 可走方向列表（如 ['north', 'south', 'east']）
+    exitNames: Record<string, string>; // 出口目标房间名（如 { north: '北门' }）
     coordinates: RoomCoordinates; // 地图坐标（预留）
+    npcs: NpcBrief[]; // 房间内 NPC 列表
   };
 }

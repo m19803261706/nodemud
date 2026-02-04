@@ -4,8 +4,11 @@
  */
 
 import { MessageFactory } from '@packages/core';
+import type { NpcBrief } from '@packages/core';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
+import { NpcBase } from '../../engine/game-objects/npc-base';
+import type { BlueprintFactory } from '../../engine/blueprint-factory';
 
 /** 反方向映射表 */
 const OPPOSITE_DIRECTION: Record<string, string> = {
@@ -36,16 +39,65 @@ const DIRECTION_CN: Record<string, string> = {
 };
 
 /**
+ * 解析出口目标房间的简称
+ * @param exits 出口映射 { direction: roomId }
+ * @param blueprintFactory 蓝图工厂，用于查找目标房间
+ * @returns { direction: shortName }
+ */
+function resolveExitNames(
+  exits: Record<string, string>,
+  blueprintFactory?: BlueprintFactory,
+): Record<string, string> {
+  if (!blueprintFactory) return {};
+  const names: Record<string, string> = {};
+  for (const [dir, roomId] of Object.entries(exits)) {
+    const target = blueprintFactory.getVirtual(roomId) as RoomBase | undefined;
+    if (target) {
+      const short = target.getShort();
+      // 截取区域前缀后的地点名（如"裂隙镇·北门" → "北门"）
+      names[dir] = short.includes('·') ? short.split('·').pop()! : short;
+    }
+  }
+  return names;
+}
+
+/**
  * 向玩家发送当前房间信息
  */
-export function sendRoomInfo(player: PlayerBase, room: RoomBase): void {
+export function sendRoomInfo(
+  player: PlayerBase,
+  room: RoomBase,
+  blueprintFactory?: BlueprintFactory,
+): void {
   const coordinates = room.getCoordinates() ?? { x: 0, y: 0, z: 0 };
+  const exits = room.getExits();
+  const exitNames = resolveExitNames(exits, blueprintFactory);
+
+  // 收集房间内 NPC 列表
+  const npcs: NpcBrief[] = room
+    .getInventory()
+    .filter((e): e is NpcBase => e instanceof NpcBase)
+    .map((npc) => ({
+      id: npc.id,
+      name: npc.getName(),
+      title: npc.get<string>('title') || '',
+      gender: npc.get<string>('gender') || 'male',
+      faction: npc.get<string>('visible_faction') || '',
+      level: npc.get<number>('level') || 1,
+      hpPct: Math.round(
+        ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
+      ),
+      attitude: npc.get<string>('attitude') || 'neutral',
+    }));
+
   const msg = MessageFactory.create(
     'roomInfo',
     room.getShort(),
     room.getLong(),
-    Object.keys(room.getExits()),
+    Object.keys(exits),
     { x: coordinates.x, y: coordinates.y, z: coordinates.z ?? 0 },
+    exitNames,
+    npcs,
   );
   if (msg) {
     player.sendToClient(MessageFactory.serialize(msg));
