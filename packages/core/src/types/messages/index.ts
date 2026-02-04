@@ -7,3 +7,4 @@ export * from './character';
 export * from './ping';
 export * from './room';
 export * from './ui';
+export * from './playerStats';

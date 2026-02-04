@@ -23,6 +23,8 @@ import './handlers/toast';
 import './handlers/alert';
 // 房间信息消息
 import './handlers/roomInfo';
+// 玩家属性消息
+import './handlers/playerStats';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';
