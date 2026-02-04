@@ -13,15 +13,22 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server } from 'ws';
+import { Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import type { ClientMessage } from '@packages/core';
 import type { Session } from './types/session';
 import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
+import { CharacterService } from '../character/character.service';
+import { ObjectManager } from '../engine/object-manager';
+import type { PlayerBase } from '../engine/game-objects/player-base';
+import type { RoomBase } from '../engine/game-objects/room-base';
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private readonly logger = new Logger(GameGateway.name);
+
   @WebSocketServer()
   server: Server;
 
@@ -29,6 +36,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly authHandler: AuthHandler,
     private readonly characterHandler: CharacterHandler,
     private readonly commandHandler: CommandHandler,
+    private readonly characterService: CharacterService,
+    private readonly objectManager: ObjectManager,
   ) {}
 
   // Session 存储（内存 Map）
@@ -46,9 +55,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /** 客户端断开 */
-  handleDisconnect(client: any) {
+  async handleDisconnect(client: any) {
     const socketId = this.getSocketId(client);
     console.log('客户端断开:', socketId);
+
+    const session = this.sessions.get(socketId);
+    if (session?.playerId) {
+      try {
+        const player = this.objectManager.findById(session.playerId) as PlayerBase | undefined;
+        if (player) {
+          const room = player.getEnvironment() as RoomBase | null;
+
+          // 保存位置到数据库
+          if (session.characterId && room) {
+            try {
+              await this.characterService.updateLastRoom(session.characterId, room.id);
+            } catch (dbError) {
+              this.logger.error('保存位置失败:', dbError);
+            }
+          }
+
+          // 房间广播下线
+          if (room) {
+            room.broadcast(`${player.getName()}下线了。`, player);
+          }
+
+          // 解绑连接并销毁
+          player.unbindConnection();
+          this.objectManager.unregister(player);
+        }
+      } catch (error) {
+        this.logger.error('断开处理失败:', error);
+      }
+    }
+
     this.sessions.delete(socketId);
   }
 
