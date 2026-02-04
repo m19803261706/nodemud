@@ -80,7 +80,7 @@ export const GameToast: React.FC<GameToastProps> = ({
 }) => {
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
-  const config = TYPE_CONFIG[type];
+  const config = TYPE_CONFIG[type] || TYPE_CONFIG.info;
 
   useEffect(() => {
     if (visible) {
