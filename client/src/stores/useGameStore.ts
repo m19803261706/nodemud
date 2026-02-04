@@ -51,14 +51,14 @@ export interface Direction {
 }
 
 export interface NpcData {
+  id: string;
   name: string;
-  nameColor: string;
+  title: string;
   gender: string;
-  genderColor: string;
-  level: string;
+  faction: string;
+  level: number;
   hpPct: number;
-  hpColor: string;
-  borderColor: string;
+  attitude: string;
 }
 
 export interface GameState {
@@ -164,58 +164,6 @@ const INITIAL_DIRECTIONS: Direction[][] = [
   ],
 ];
 
-const INITIAL_NPCS: NpcData[] = [
-  {
-    name: '凌霄弟子',
-    nameColor: '#2F5D3A',
-    gender: '♂',
-    genderColor: '#4A7A5A',
-    level: '四十六级',
-    hpPct: 70,
-    hpColor: '#5A8A6A',
-    borderColor: '#2F5D3A40',
-  },
-  {
-    name: '冰心仙子',
-    nameColor: '#2F5D3A',
-    gender: '♀',
-    genderColor: '#8A5A7A',
-    level: '五十二级',
-    hpPct: 100,
-    hpColor: '#5A8A6A',
-    borderColor: '#2F5D3A40',
-  },
-  {
-    name: '逍遥剑客',
-    nameColor: '#3A5A6B',
-    gender: '♂',
-    genderColor: '#5A7A8B',
-    level: '三十八级',
-    hpPct: 60,
-    hpColor: '#6A8A9A',
-    borderColor: '#2F4F4F40',
-  },
-  {
-    name: '云游僧',
-    nameColor: '#3A5A6B',
-    gender: '♂',
-    genderColor: '#5A7A8B',
-    level: '四十五级',
-    hpPct: 50,
-    hpColor: '#6A8A9A',
-    borderColor: '#2F4F4F40',
-  },
-  {
-    name: '醉仙翁',
-    nameColor: '#3A5A6B',
-    gender: '♂',
-    genderColor: '#5A7A8B',
-    level: '九十九级',
-    hpPct: 100,
-    hpColor: '#6A8A9A',
-    borderColor: '#2F4F4F40',
-  },
-];
 
 /* ─── exits → directions 转换 ─── */
 
@@ -263,7 +211,8 @@ export function exitsToDirections(
 export const useGameStore = create<GameState>(set => ({
   // 玩家
   player: INITIAL_PLAYER,
-  updatePlayer: data => set(state => ({ player: { ...state.player, ...data } })),
+  updatePlayer: data =>
+    set(state => ({ player: { ...state.player, ...data } })),
 
   // 地点
   location: {
@@ -293,7 +242,7 @@ export const useGameStore = create<GameState>(set => ({
   setDirections: dirs => set({ directions: dirs }),
 
   // NPC
-  nearbyNpcs: INITIAL_NPCS,
+  nearbyNpcs: [],
   setNpcs: npcs => set({ nearbyNpcs: npcs }),
 
   // 指令

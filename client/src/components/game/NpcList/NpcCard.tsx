@@ -1,5 +1,6 @@
 /**
- * NPC 卡片 — 名字+性别+等级+血条
+ * NPC 卡片 — 名字+性别+等级+血条+势力
+ * 颜色根据 attitude 动态计算
  */
 
 import React from 'react';
@@ -7,24 +8,49 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import type { NpcData } from '../../../stores/useGameStore';
 import { HpBar } from '../shared';
 
+/** 态度 → 颜色 */
+const ATTITUDE_COLORS: Record<string, string> = {
+  friendly: '#2F5D3A',
+  neutral: '#8B7A5A',
+  aggressive: '#8B2500',
+};
+
+/** 态度 → 血条颜色 */
+const HP_COLORS: Record<string, string> = {
+  friendly: '#5A8A6A',
+  neutral: '#6A8A9A',
+  aggressive: '#8B4A4A',
+};
+
 interface NpcCardProps {
   npc: NpcData;
   onPress?: () => void;
 }
 
-export const NpcCard = ({ npc, onPress }: NpcCardProps) => (
-  <TouchableOpacity
-    style={[s.card, { borderColor: npc.borderColor }]}
-    onPress={onPress}
-  >
-    <View style={s.top}>
-      <Text style={[s.name, { color: npc.nameColor }]}>{npc.name}</Text>
-      <Text style={[s.gender, { color: npc.genderColor }]}>{npc.gender}</Text>
-    </View>
-    <Text style={s.level}>{npc.level}</Text>
-    <HpBar pct={npc.hpPct} color={npc.hpColor} />
-  </TouchableOpacity>
-);
+export const NpcCard = ({ npc, onPress }: NpcCardProps) => {
+  const mainColor = ATTITUDE_COLORS[npc.attitude] || '#8B7A5A';
+  const hpColor = HP_COLORS[npc.attitude] || '#6A8A9A';
+  const genderIcon = npc.gender === 'male' ? '♂' : '♀';
+  const genderColor = npc.gender === 'male' ? '#4A90D9' : '#D94A7A';
+  const displayName = npc.title ? `「${npc.title}」${npc.name}` : npc.name;
+
+  return (
+    <TouchableOpacity
+      style={[s.card, { borderColor: mainColor + '40' }]}
+      onPress={onPress}
+    >
+      <View style={s.top}>
+        <Text style={[s.name, { color: mainColor }]}>{displayName}</Text>
+        <Text style={[s.gender, { color: genderColor }]}>{genderIcon}</Text>
+      </View>
+      <View style={s.info}>
+        <Text style={s.level}>{npc.level}级</Text>
+        {npc.faction ? <Text style={s.faction}>{npc.faction}</Text> : null}
+      </View>
+      <HpBar pct={npc.hpPct} color={hpColor} />
+    </TouchableOpacity>
+  );
+};
 
 const s = StyleSheet.create({
   card: {
@@ -47,9 +73,19 @@ const s = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Noto Sans SC',
   },
+  info: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   level: {
     fontSize: 10,
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
+  },
+  faction: {
+    fontSize: 9,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Sans SC',
   },
 });

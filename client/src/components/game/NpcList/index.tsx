@@ -14,7 +14,7 @@ export const NpcList = () => {
     <View style={s.container}>
       <ScrollView contentContainerStyle={s.content}>
         {nearbyNpcs.map((npc, i) => (
-          <NpcCard key={i} npc={npc} />
+          <NpcCard key={npc.id} npc={npc} />
         ))}
       </ScrollView>
     </View>

@@ -34,7 +34,7 @@ function App(): React.JSX.Element {
 
     // 全局监听游戏消息（必须在连接建立时就注册，避免导航时丢消息）
     const handleRoomInfo = (data: any) => {
-      const { setLocation, setDirections, location } = useGameStore.getState();
+      const { setLocation, setDirections, setNpcs, location } = useGameStore.getState();
       // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
       const shortName = data.short?.includes('·')
         ? data.short.split('·').pop()!
@@ -45,6 +45,7 @@ function App(): React.JSX.Element {
         description: data.long,
       });
       setDirections(exitsToDirections(data.exits, shortName, data.exitNames));
+      setNpcs(data.npcs ?? []);
     };
 
     const handleCommandResult = (data: any) => {
