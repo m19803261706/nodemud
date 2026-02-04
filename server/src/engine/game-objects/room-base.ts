@@ -15,6 +15,12 @@ export class RoomBase extends BaseEntity {
   /** 房间默认单例（虚拟对象） */
   static virtual = true;
 
+  constructor(id: string) {
+    super(id);
+    // 虚拟房间不应被 GC 清理（房间没有父环境，但不是孤立对象）
+    this.set('no_clean_up', true);
+  }
+
   /** 广播消息给房间内所有对象（对标 LPC tell_room） */
   broadcast(message: string, exclude?: BaseEntity): void {
     for (const entity of this.getInventory()) {

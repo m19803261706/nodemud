@@ -22,6 +22,12 @@ export class Area extends BaseEntity {
   /** 区域默认单例（virtual = true 表示不依赖蓝图实例化） */
   static virtual = true;
 
+  constructor(id: string) {
+    super(id);
+    // 虚拟区域不应被 GC 清理
+    this.set('no_clean_up', true);
+  }
+
   /** 获取区域名称 */
   getName(): string {
     return this.get<string>('name') ?? '未知区域';
