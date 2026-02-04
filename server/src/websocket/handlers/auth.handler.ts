@@ -12,6 +12,7 @@ import { ObjectManager } from '../../engine/object-manager';
 import { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { sendRoomInfo } from './room-utils';
+import { sendPlayerStats } from './stats.utils';
 import type { Session } from '../types/session';
 
 /** 默认出生房间 */
@@ -84,7 +85,8 @@ export class AuthHandler {
 
             if (room) {
               await player.moveTo(room, { quiet: true });
-              sendRoomInfo(player, room);
+              sendRoomInfo(player, room, this.blueprintFactory);
+              sendPlayerStats(player, character);
               room.broadcast(`${character.name}上线了。`, player);
             } else {
               this.logger.warn(`房间 ${roomId} 和默认房间都不存在`);

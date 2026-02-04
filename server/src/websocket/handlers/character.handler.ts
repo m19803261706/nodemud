@@ -14,6 +14,7 @@ import { ObjectManager } from '../../engine/object-manager';
 import { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { sendRoomInfo } from './room-utils';
+import { sendPlayerStats } from './stats.utils';
 import type { Session } from '../types/session';
 
 /** 临时数据超时时间（30分钟） */
@@ -276,7 +277,8 @@ export class CharacterHandler {
         const room = this.blueprintFactory.getVirtual(DEFAULT_ROOM) as RoomBase | undefined;
         if (room) {
           await player.moveTo(room, { quiet: true });
-          sendRoomInfo(player, room);
+          sendRoomInfo(player, room, this.blueprintFactory);
+          sendPlayerStats(player, character);
           room.broadcast(`${character.name}来到此处。`, player);
         } else {
           this.logger.warn(`出生房间 ${DEFAULT_ROOM} 不存在`);
