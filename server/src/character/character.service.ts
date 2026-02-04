@@ -66,4 +66,9 @@ export class CharacterService {
     });
     return this.characterRepository.save(character);
   }
+
+  /** 更新角色最后所在房间 */
+  async updateLastRoom(id: string, roomId: string): Promise<void> {
+    await this.characterRepository.update(id, { lastRoom: roomId });
+  }
 }

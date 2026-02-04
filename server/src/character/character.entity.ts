@@ -193,6 +193,17 @@ export class Character {
   })
   shenzhuStar: string;
 
+  // ========== 位置 ==========
+
+  @Column({
+    name: 'last_room',
+    type: 'varchar',
+    length: 255,
+    default: 'area/rift-town/square',
+    comment: '最后所在房间ID',
+  })
+  lastRoom: string;
+
   // ========== 时间 ==========
 
   @CreateDateColumn({
