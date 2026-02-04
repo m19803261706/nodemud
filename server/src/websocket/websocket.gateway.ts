@@ -37,7 +37,7 @@ export class GameGateway
   server: Server;
 
   /** 1 秒定时推送 playerStats */
-  private statsInterval: NodeJS.Timeout;
+  private statsInterval: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly authHandler: AuthHandler,
