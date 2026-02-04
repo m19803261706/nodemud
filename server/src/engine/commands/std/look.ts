@@ -147,7 +147,22 @@ export class LookCommand implements ICommand {
     return {
       success: true,
       message: lines.join('\n'),
-      data: { action: 'look', target: 'npc', npcId: npc.id },
+      data: {
+        action: 'look',
+        target: 'npc',
+        npcId: npc.id,
+        name,
+        title,
+        gender: npc.get<string>('gender') || 'male',
+        faction: npc.get<string>('visible_faction') || '',
+        level: npc.get<number>('level') || 1,
+        hpPct: Math.round(
+          ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
+        ),
+        attitude: npc.get<string>('attitude') || 'neutral',
+        short: npc.getShort(),
+        long,
+      },
     };
   }
 }
