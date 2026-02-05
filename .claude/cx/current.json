@@ -1,79 +1,67 @@
 {
-  "feature": "player-map-system",
-  "created_at": "2026-02-04T00:00:00+08:00",
-  "project_number": 3,
+  "feature": "物品系统",
+  "created_at": "2026-02-05T17:00:00+08:00",
+  "completed_at": "2026-02-05T21:30:00+08:00",
+  "project_number": 6,
   "docs": {
-    "scope": 112,
-    "prd": 113,
-    "design": 114
+    "scope": 153,
+    "prd": 154,
+    "design": 155,
+    "adr": []
   },
   "epic": {
-    "number": 115,
-    "title": "[Epic] 玩家上线初始地图系统"
+    "number": 156,
+    "title": "[Epic] 物品系统 Phase 1 — 物品子类 + 基础交互 + 背包",
+    "status": "closed"
   },
   "issues": [
     {
-      "number": 116,
-      "title": "[core] roomInfo 消息类型 + MessageHandler",
-      "status": "cx-ready",
+      "number": 157,
+      "title": "[core] 物品常量定义 + 消息类型 + inventoryUpdate Handler",
+      "status": "cx-done",
       "phase": 1,
-      "parallel_group": "p1"
+      "parallel_group": "p1-core"
     },
     {
-      "number": 117,
-      "title": "[database] Character 实体新增 lastRoom 字段",
-      "status": "cx-ready",
-      "phase": 1,
-      "parallel_group": "p1"
-    },
-    {
-      "number": 118,
-      "title": "[backend] room-utils + 角色创建后进场",
-      "status": "cx-blocked",
+      "number": 158,
+      "title": "[backend] ItemBase 属性扩展 + 7 个物品子类定义",
+      "status": "cx-done",
       "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [116, 117]
+      "parallel_group": "p2-engine",
+      "depends_on": [157]
     },
     {
-      "number": 119,
-      "title": "[backend] 登录已有角色后进场",
-      "status": "cx-blocked",
+      "number": 159,
+      "title": "[backend] roomInfo 物品字段扩展 + sendInventoryUpdate 推送",
+      "status": "cx-done",
       "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [116, 117, 118]
+      "parallel_group": "p2-engine",
+      "depends_on": [157, 158]
     },
     {
-      "number": 120,
-      "title": "[backend] go 命令广播 + roomInfo",
-      "status": "cx-blocked",
-      "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [116, 118]
-    },
-    {
-      "number": 121,
-      "title": "[backend] 断开连接保存位置 + 下线",
-      "status": "cx-blocked",
-      "phase": 2,
-      "parallel_group": "p2",
-      "depends_on": [117, 118]
-    },
-    {
-      "number": 122,
-      "title": "[frontend] sendCommand + roomInfo 处理",
-      "status": "cx-blocked",
+      "number": 160,
+      "title": "[backend] get/inventory 指令 + look 物品扩展 + 推送集成",
+      "status": "cx-done",
       "phase": 3,
-      "parallel_group": "p3",
-      "depends_on": [116]
+      "parallel_group": "p3-cmd",
+      "depends_on": [158, 159]
     },
     {
-      "number": 123,
-      "title": "[frontend] MapNavigation 方向点击 + disabled",
-      "status": "cx-blocked",
+      "number": 161,
+      "title": "[backend] 裂隙镇 7 个初始物品蓝图 + Area 放置",
+      "status": "cx-done",
+      "phase": 3,
+      "parallel_group": "p3-cmd",
+      "depends_on": [158]
+    },
+    {
+      "number": 162,
+      "title": "[frontend] Store inventory 状态 + WebSocket 监听 + 背包面板",
+      "status": "cx-done",
       "phase": 4,
-      "parallel_group": "p4",
-      "depends_on": [122]
+      "parallel_group": "p4-frontend",
+      "depends_on": [159]
     }
   ],
-  "execution_order": [116, 117, 118, 119, 120, 121, 122, 123]
+  "execution_order": [157, 158, 159, 160, 161, 162]
 }
