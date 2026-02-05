@@ -10,7 +10,28 @@ import { Command, type ICommand, type CommandResult } from '../../types/command'
 import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
-import { rt, bold } from '@packages/core';
+import { ArmorBase } from '../../game-objects/armor-base';
+import { WeaponBase } from '../../game-objects/weapon-base';
+import { rt, bold, ItemQuality, QUALITY_LABEL, type SemanticTag } from '@packages/core';
+
+/** 品质 → 富文本标签映射 */
+const QUALITY_RT_TAG: Record<number, SemanticTag> = {
+  [ItemQuality.COMMON]: 'item',
+  [ItemQuality.FINE]: 'qfine',
+  [ItemQuality.RARE]: 'qrare',
+  [ItemQuality.EPIC]: 'qepic',
+  [ItemQuality.LEGENDARY]: 'qlegend',
+};
+
+/** 六维属性中文映射 */
+const ATTR_CN: Record<string, string> = {
+  wisdom: '慧根',
+  perception: '心眼',
+  spirit: '气海',
+  meridian: '脉络',
+  strength: '筋骨',
+  vitality: '血气',
+};
 
 /** 物品类型中文映射 */
 const TYPE_LABEL: Record<string, string> = {
@@ -78,27 +99,58 @@ export class ExamineCommand implements ICommand {
     const typeLabel = TYPE_LABEL[type] || type;
     const weight = item.getWeight();
     const value = item.getValue();
+    const quality = item.getQuality();
+    const qualityTag = QUALITY_RT_TAG[quality] ?? 'item';
 
     const lines: string[] = [];
-    lines.push(rt('rn', bold(name)));
+    lines.push(rt(qualityTag, bold(name)));
     lines.push(rt('rd', long));
+
+    // 品质标签（凡品以上显示）
+    if (quality > ItemQuality.COMMON) {
+      lines.push(`品质: ${rt(qualityTag, QUALITY_LABEL[quality as ItemQuality] ?? '未知')}`);
+    }
+
     lines.push(`类型: ${typeLabel}  重量: ${weight}  价值: ${value}`);
 
     // 武器：攻击力
-    const damage = item.get<string>('damage');
+    const damage = item.get<number>('damage');
     if (damage) {
       lines.push(`攻击: ${damage}`);
     }
 
     // 防具：防御力
     const defense = item.get<number>('defense');
-    if (defense !== undefined) {
+    if (defense !== undefined && defense > 0) {
       lines.push(`防御: ${defense}`);
+    }
+
+    // 属性加成（武器/防具）
+    if (item instanceof WeaponBase || item instanceof ArmorBase) {
+      const bonus = item.getAttributeBonus();
+      const bonusParts: string[] = [];
+      // 六维属性
+      if (bonus.attrs) {
+        for (const [key, val] of Object.entries(bonus.attrs)) {
+          if (val && val > 0) {
+            bonusParts.push(`${ATTR_CN[key] || key}+${val}`);
+          }
+        }
+      }
+      // 三维资源
+      if (bonus.resources) {
+        if (bonus.resources.maxHp) bonusParts.push(`气血上限+${bonus.resources.maxHp}`);
+        if (bonus.resources.maxMp) bonusParts.push(`内力上限+${bonus.resources.maxMp}`);
+        if (bonus.resources.maxEnergy) bonusParts.push(`精力上限+${bonus.resources.maxEnergy}`);
+      }
+      if (bonusParts.length > 0) {
+        lines.push(`属性加成: ${bonusParts.join(' ')}`);
+      }
     }
 
     // 药品/食物：回复量
     const heal = item.get<number>('heal');
-    if (heal !== undefined) {
+    if (heal !== undefined && heal > 0) {
       lines.push(`回复: ${heal}`);
     }
 
@@ -106,6 +158,17 @@ export class ExamineCommand implements ICommand {
     const wearPos = item.get<string>('wear_position');
     if (wearPos) {
       lines.push(`部位: ${wearPos}`);
+    }
+
+    // 双手武器标记
+    if (item instanceof WeaponBase && item.isTwoHanded()) {
+      lines.push(rt('sys', '双手武器'));
+    }
+
+    // 等级需求
+    const levelReq = item.getLevelReq();
+    if (levelReq > 0) {
+      lines.push(`需求等级: ${levelReq}`);
     }
 
     // 特殊标签
@@ -133,6 +196,7 @@ export class ExamineCommand implements ICommand {
         name,
         long,
         type,
+        quality,
         weight,
         value,
         damage: damage || null,

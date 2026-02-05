@@ -8,7 +8,7 @@
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { PlayerBase } from '../../game-objects/player-base';
-import { rt } from '@packages/core';
+import { rt, ItemQuality, type SemanticTag } from '@packages/core';
 
 /** 槽位中文名 */
 const POSITION_LABEL: Record<string, string> = {
@@ -24,6 +24,15 @@ const POSITION_LABEL: Record<string, string> = {
   wrist: '腕部',
 };
 
+/** 品质 → 富文本标签映射 */
+const QUALITY_RT_TAG: Record<number, SemanticTag> = {
+  [ItemQuality.COMMON]: 'item',
+  [ItemQuality.FINE]: 'qfine',
+  [ItemQuality.RARE]: 'qrare',
+  [ItemQuality.EPIC]: 'qepic',
+  [ItemQuality.LEGENDARY]: 'qlegend',
+};
+
 @Command({ name: 'eq', aliases: ['装备栏'], description: '查看装备列表' })
 export class EqCommand implements ICommand {
   name = 'eq';
@@ -37,10 +46,18 @@ export class EqCommand implements ICommand {
     }
 
     const lines: string[] = ['你的装备：'];
+    const seen = new Set<string>(); // 双手武器去重
     for (const [pos, item] of executor.getEquipment()) {
       const label = POSITION_LABEL[pos] || pos;
       if (item) {
-        lines.push(`  ${label}: ${rt('item', item.getName())}`);
+        // 双手武器在 weapon+offhand 是同一个对象，只显示一次
+        if (seen.has(item.id)) {
+          continue;
+        }
+        seen.add(item.id);
+        const quality = item.getQuality();
+        const tag = QUALITY_RT_TAG[quality] ?? 'item';
+        lines.push(`  ${label}: ${rt(tag, item.getName())}`);
       } else {
         lines.push(`  ${label}: 空`);
       }
