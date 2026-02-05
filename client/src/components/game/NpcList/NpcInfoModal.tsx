@@ -3,7 +3,7 @@
  * 点击 NPC 卡片后弹出，展示完整信息和交互按钮
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,9 +12,11 @@ import {
   Modal,
   ScrollView,
   TouchableWithoutFeedback,
+  FlatList,
 } from 'react-native';
 import LinearGradient from '../../LinearGradient';
 import type { NpcDetailData } from '../../../stores/useGameStore';
+import type { InventoryItem } from '@packages/core';
 import { HpBar } from '../shared';
 
 /** 装备槽位 → 叙述动词（MUD 风格） */
@@ -63,9 +65,50 @@ const HP_COLORS: Record<string, string> = {
 
 interface NpcInfoModalProps {
   detail: NpcDetailData | null;
+  inventory: InventoryItem[];
   onClose: () => void;
   onChat: (npcName: string) => void;
+  onAttack: (npcName: string) => void;
+  onGive: (itemName: string, npcName: string) => void;
 }
+
+/** 通用按钮（水墨渐变） */
+const ActionButton = ({
+  label,
+  onPress,
+  variant,
+}: {
+  label: string;
+  onPress: () => void;
+  variant?: 'danger';
+}) => (
+  <TouchableOpacity style={s.btnWrap} onPress={onPress} activeOpacity={0.7}>
+    <View
+      style={[s.btn, variant === 'danger' ? s.btnDanger : undefined]}
+    >
+      <LinearGradient
+        colors={
+          variant === 'danger'
+            ? ['#D5C0C0', '#C9B4B4', '#B8A0A0']
+            : ['#D5CEC0', '#C9C2B4', '#B8B0A0']
+        }
+        style={StyleSheet.absoluteFill}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+      <Text
+        style={[s.btnText, variant === 'danger' ? s.btnTextDanger : undefined]}
+      >
+        {label}
+      </Text>
+    </View>
+  </TouchableOpacity>
+);
+
+/** 给予列表分隔线 */
+const GiveDivider = () => (
+  <View style={s.giveDivider} />
+);
 
 /** 渐变分隔线 */
 const Divider = () => (
@@ -79,9 +122,20 @@ const Divider = () => (
 
 export const NpcInfoModal = ({
   detail,
+  inventory,
   onClose,
   onChat,
+  onAttack,
+  onGive,
 }: NpcInfoModalProps) => {
+  const [showGiveList, setShowGiveList] = useState(false);
+
+  /** 关闭时重置给予列表状态 */
+  const handleClose = () => {
+    setShowGiveList(false);
+    onClose();
+  };
+
   if (!detail) return null;
 
   const attColor = ATTITUDE_COLORS[detail.attitude] || '#8B7A5A';
@@ -99,9 +153,9 @@ export const NpcInfoModal = ({
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
+      <TouchableWithoutFeedback onPress={handleClose}>
         <View style={s.overlay}>
           <TouchableWithoutFeedback onPress={() => {}}>
             <View style={s.card}>
@@ -178,8 +232,7 @@ export const NpcInfoModal = ({
                             <Text style={s.eqVerb}>{verb}</Text>
                             <Text
                               style={{
-                                color:
-                                  QUALITY_COLORS[eq.quality] || '#6B5D4D',
+                                color: QUALITY_COLORS[eq.quality] || '#6B5D4D',
                                 fontFamily: 'Noto Serif SC',
                                 fontWeight: '500',
                               }}
@@ -196,39 +249,68 @@ export const NpcInfoModal = ({
 
                 <Divider />
 
-                {/* 按钮 */}
-                <View style={s.buttonRow}>
-                  <TouchableOpacity
-                    style={s.btnWrap}
-                    onPress={() => onChat(detail.name)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={s.btn}>
-                      <LinearGradient
-                        colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                        style={StyleSheet.absoluteFill}
-                        start={{ x: 0.5, y: 0 }}
-                        end={{ x: 0.5, y: 1 }}
-                      />
-                      <Text style={s.btnText}>对话</Text>
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={s.btnWrap}
-                    onPress={onClose}
-                    activeOpacity={0.7}
-                  >
-                    <View style={s.btn}>
-                      <LinearGradient
-                        colors={['#D5CEC0', '#C9C2B4', '#B8B0A0']}
-                        style={StyleSheet.absoluteFill}
-                        start={{ x: 0.5, y: 0 }}
-                        end={{ x: 0.5, y: 1 }}
-                      />
-                      <Text style={s.btnText}>关闭</Text>
-                    </View>
-                  </TouchableOpacity>
+                {/* 按钮（2×2 网格） */}
+                <View style={s.buttonGrid}>
+                  <View style={s.buttonRow}>
+                    <ActionButton
+                      label="对话"
+                      onPress={() => onChat(detail.name)}
+                    />
+                    <ActionButton
+                      label="攻击"
+                      variant="danger"
+                      onPress={() => {
+                        onAttack(detail.name);
+                        handleClose();
+                      }}
+                    />
+                  </View>
+                  <View style={s.buttonRow}>
+                    <ActionButton
+                      label="给予"
+                      onPress={() => setShowGiveList(true)}
+                    />
+                    <ActionButton label="关闭" onPress={handleClose} />
+                  </View>
                 </View>
+
+                {/* 给予物品选择列表 */}
+                {showGiveList && (
+                  <View style={s.giveOverlay}>
+                    <View style={s.giveHeader}>
+                      <Text style={s.giveTitle}>选择物品</Text>
+                      <TouchableOpacity
+                        onPress={() => setShowGiveList(false)}
+                      >
+                        <Text style={s.giveBack}>返回</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <GiveDivider />
+                    {inventory.length === 0 ? (
+                      <Text style={s.giveEmpty}>背包空空如也</Text>
+                    ) : (
+                      <FlatList
+                        data={inventory}
+                        keyExtractor={item => item.id}
+                        style={s.giveList}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={s.giveItem}
+                            activeOpacity={0.6}
+                            onPress={() => {
+                              onGive(item.name, detail.name);
+                              handleClose();
+                            }}
+                          >
+                            <Text style={s.giveItemName}>{item.name}</Text>
+                            <Text style={s.giveItemDesc}>{item.short}</Text>
+                          </TouchableOpacity>
+                        )}
+                        ItemSeparatorComponent={GiveDivider}
+                      />
+                    )}
+                  </View>
+                )}
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -348,16 +430,19 @@ const s = StyleSheet.create({
   eqVerb: {
     color: '#8B7A5A',
   },
+  buttonGrid: {
+    gap: 6,
+  },
   buttonRow: {
     flexDirection: 'row',
     width: '100%',
   },
   btnWrap: {
     flex: 1,
-    marginHorizontal: 6,
+    marginHorizontal: 4,
   },
   btn: {
-    height: 36,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -365,11 +450,72 @@ const s = StyleSheet.create({
     borderRadius: 2,
     overflow: 'hidden',
   },
+  btnDanger: {
+    borderColor: '#8B5A5A80',
+  },
   btnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
     letterSpacing: 2,
+  },
+  btnTextDanger: {
+    color: '#8B2500',
+  },
+  /* 给予物品选择列表 */
+  giveOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#F5F0E8',
+    paddingTop: 14,
+    paddingHorizontal: 4,
+  },
+  giveHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    marginBottom: 6,
+  },
+  giveTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+  },
+  giveBack: {
+    fontSize: 12,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  giveDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#8B7A5A40',
+  },
+  giveEmpty: {
+    textAlign: 'center',
+    marginTop: 30,
+    fontSize: 13,
+    color: '#A09888',
+    fontFamily: 'Noto Serif SC',
+  },
+  giveList: {
+    maxHeight: 260,
+  },
+  giveItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+  },
+  giveItemName: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+  },
+  giveItemDesc: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    marginTop: 2,
   },
 });

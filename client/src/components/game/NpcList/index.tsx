@@ -11,6 +11,7 @@ import { NpcInfoModal } from './NpcInfoModal';
 export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
   const npcDetail = useGameStore(state => state.npcDetail);
+  const inventory = useGameStore(state => state.inventory);
   const setNpcDetail = useGameStore(state => state.setNpcDetail);
   const sendCommand = useGameStore(state => state.sendCommand);
 
@@ -27,10 +28,17 @@ export const NpcList = () => {
       </ScrollView>
       <NpcInfoModal
         detail={npcDetail}
+        inventory={inventory}
         onClose={() => setNpcDetail(null)}
         onChat={name => {
           sendCommand(`ask ${name} default`);
           setNpcDetail(null);
+        }}
+        onAttack={name => {
+          sendCommand(`kill ${name}`);
+        }}
+        onGive={(itemName, npcName) => {
+          sendCommand(`give ${itemName} to ${npcName}`);
         }}
       />
     </View>
