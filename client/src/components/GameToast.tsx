@@ -13,7 +13,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from './LinearGradient';
 import Feather from 'react-native-vector-icons/Feather';
 
 /** Toast 类型 */

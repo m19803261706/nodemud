@@ -14,7 +14,7 @@ import {
   Animated,
   Modal,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../components/LinearGradient';
 import type { CharacterAttributes } from '@packages/core';
 import { TypewriterText } from '../components';
 

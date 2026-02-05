@@ -13,7 +13,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../../LinearGradient';
 import type { NpcDetailData } from '../../../stores/useGameStore';
 import { HpBar } from '../shared';
 
@@ -54,7 +54,11 @@ const Divider = () => (
   />
 );
 
-export const NpcInfoModal = ({ detail, onClose, onChat }: NpcInfoModalProps) => {
+export const NpcInfoModal = ({
+  detail,
+  onClose,
+  onChat,
+}: NpcInfoModalProps) => {
   if (!detail) return null;
 
   const attColor = ATTITUDE_COLORS[detail.attitude] || '#8B7A5A';
@@ -62,7 +66,9 @@ export const NpcInfoModal = ({ detail, onClose, onChat }: NpcInfoModalProps) => 
   const hpColor = HP_COLORS[detail.attitude] || '#6A8A9A';
   const genderIcon = detail.gender === 'male' ? '♂' : '♀';
   const genderColor = detail.gender === 'male' ? '#4A90D9' : '#D94A7A';
-  const header = detail.title ? `「${detail.title}」${detail.name}` : detail.name;
+  const header = detail.title
+    ? `「${detail.title}」${detail.name}`
+    : detail.name;
 
   return (
     <Modal
@@ -92,7 +98,9 @@ export const NpcInfoModal = ({ detail, onClose, onChat }: NpcInfoModalProps) => 
                 {/* 头部：名字 + 性别 */}
                 <View style={s.headerRow}>
                   <Text style={s.headerText}>{header}</Text>
-                  <Text style={[s.genderIcon, { color: genderColor }]}>{genderIcon}</Text>
+                  <Text style={[s.genderIcon, { color: genderColor }]}>
+                    {genderIcon}
+                  </Text>
                 </View>
 
                 {/* 元信息：等级 + 势力 + 态度 */}
@@ -101,8 +109,12 @@ export const NpcInfoModal = ({ detail, onClose, onChat }: NpcInfoModalProps) => 
                   {detail.faction ? (
                     <Text style={s.metaText}>{detail.faction}</Text>
                   ) : null}
-                  <View style={[s.attBadge, { backgroundColor: attColor + '20' }]}>
-                    <Text style={[s.attText, { color: attColor }]}>{attLabel}</Text>
+                  <View
+                    style={[s.attBadge, { backgroundColor: attColor + '20' }]}
+                  >
+                    <Text style={[s.attText, { color: attColor }]}>
+                      {attLabel}
+                    </Text>
                   </View>
                 </View>
 

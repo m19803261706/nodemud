@@ -12,7 +12,7 @@ import {
   SafeAreaView,
   Animated,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../components/LinearGradient';
 import { TypewriterText } from '../components';
 
 /** 打字机旁白文字（原创，模拟金庸叙事口吻） */

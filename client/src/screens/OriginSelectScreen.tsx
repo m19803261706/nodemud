@@ -13,7 +13,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../components/LinearGradient';
 import { TypewriterText } from '../components';
 
 /** 出身配置数据（与服务端 ORIGIN_CONFIG 对应） */

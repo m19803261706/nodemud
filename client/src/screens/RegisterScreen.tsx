@@ -14,7 +14,7 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../components/LinearGradient';
 import Feather from 'react-native-vector-icons/Feather';
 import { MessageFactory } from '@packages/core';
 import { wsService } from '../services/WebSocketService';

@@ -14,7 +14,7 @@ import {
   ScrollView,
   Animated,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from '../components/LinearGradient';
 import { MessageFactory } from '@packages/core';
 import type { CharacterAttributes } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
