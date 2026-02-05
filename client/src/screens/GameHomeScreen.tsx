@@ -39,8 +39,8 @@ export const GameHomeScreen = ({ route }: any) => {
             <InventoryPage />
           </View>
         ) : (
-          /* 默认左右分栏布局 */
-          <>
+          /* 默认左右分栏布局 — 用 View 包裹避免 Fragment 导致 Fabric 视图回收崩溃 */
+          <View style={s.defaultLayout}>
             <LocationHeader />
             <View style={s.mainContent}>
               <View style={s.leftPanel}>
@@ -50,7 +50,7 @@ export const GameHomeScreen = ({ route }: any) => {
               </View>
               <NpcList />
             </View>
-          </>
+          </View>
         )}
         <BottomNavBar />
       </View>
@@ -61,6 +61,9 @@ export const GameHomeScreen = ({ route }: any) => {
 const s = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
+  defaultLayout: {
+    flex: 1,
+  },
   mainContent: {
     flex: 1,
     flexDirection: 'row',

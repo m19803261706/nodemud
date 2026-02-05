@@ -127,16 +127,10 @@ export const ItemActionSheet = ({ item, onClose }: ItemActionSheetProps) => {
 
                 {/* 物品属性 */}
                 <View style={s.metaRow}>
-                  <Text style={s.metaText}>
-                    重量: {item.weight}
-                  </Text>
-                  <Text style={s.metaText}>
-                    价值: {item.value}
-                  </Text>
+                  <Text style={s.metaText}>重量: {item.weight}</Text>
+                  <Text style={s.metaText}>价值: {item.value}</Text>
                   {item.count > 1 && (
-                    <Text style={s.metaText}>
-                      数量: {item.count}
-                    </Text>
+                    <Text style={s.metaText}>数量: {item.count}</Text>
                   )}
                 </View>
 
@@ -148,7 +142,7 @@ export const ItemActionSheet = ({ item, onClose }: ItemActionSheetProps) => {
                   contentContainerStyle={s.actionsContent}
                   nestedScrollEnabled
                 >
-                  {item.actions.map(action => (
+                  {(item.actions ?? []).map(action => (
                     <TouchableOpacity
                       key={action}
                       style={s.actionBtnWrap}
