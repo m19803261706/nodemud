@@ -245,12 +245,18 @@ export const useGameStore = create<GameState>(set => ({
   // 日志
   gameLog: INITIAL_LOG,
   appendLog: entry =>
-    set(state => ({
-      gameLog: [
-        ...state.gameLog,
-        { ...entry, id: ++logIdCounter, timestamp: Date.now() },
-      ],
-    })),
+    set(state => {
+      const now = Date.now();
+      // 多行消息按 \n 拆分为独立条目（FlatList 固定行高，单行才能完整显示）
+      const lines = entry.text.split('\n').filter(l => l.length > 0);
+      const newEntries = lines.map(line => ({
+        text: line,
+        color: entry.color,
+        id: ++logIdCounter,
+        timestamp: now,
+      }));
+      return { gameLog: [...state.gameLog, ...newEntries] };
+    }),
   clearLog: () => set({ gameLog: [] }),
 
   // 聊天
@@ -276,8 +282,16 @@ export const useGameStore = create<GameState>(set => ({
 
   // 装备栏
   equipment: {
-    head: null, body: null, hands: null, feet: null, waist: null,
-    weapon: null, offhand: null, neck: null, finger: null, wrist: null,
+    head: null,
+    body: null,
+    hands: null,
+    feet: null,
+    waist: null,
+    weapon: null,
+    offhand: null,
+    neck: null,
+    finger: null,
+    wrist: null,
   },
   setEquipment: eq => set({ equipment: eq }),
 
