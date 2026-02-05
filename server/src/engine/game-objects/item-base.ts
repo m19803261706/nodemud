@@ -45,6 +45,36 @@ export class ItemBase extends BaseEntity {
     return this.get<boolean>('stackable') ?? false;
   }
 
+  /** 是否可交易 */
+  isTradeable(): boolean {
+    return this.get<boolean>('tradeable') ?? true;
+  }
+
+  /** 是否可丢弃 */
+  isDroppable(): boolean {
+    return this.get<boolean>('droppable') ?? true;
+  }
+
+  /** 是否唯一物品 */
+  isUnique(): boolean {
+    return this.get<boolean>('unique') ?? false;
+  }
+
+  /** 获取等级需求 */
+  getLevelReq(): number {
+    return this.get<number>('level_req') ?? 0;
+  }
+
+  /** 获取当前耐久度 */
+  getDurability(): number {
+    return this.get<number>('durability') ?? -1;
+  }
+
+  /** 获取最大耐久度 */
+  getMaxDurability(): number {
+    return this.get<number>('max_durability') ?? -1;
+  }
+
   /** 物品不在任何容器中 → 可清理 */
   public onCleanUp(): boolean {
     if (!this.getEnvironment()) return true;
