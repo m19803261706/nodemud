@@ -32,14 +32,19 @@ export default class NorthGuard extends NpcBase {
       '北门卫兵挺了挺胸，调整了一下站姿。',
     ]);
     this.set('inquiry', {
-      '北方':
-        '北门卫兵正色道：「北边通往裂谷深处，最近不太平。没事别往北走，要去的话，自己多加小心。」',
-      '承天朝':
+      北方: '北门卫兵正色道：「北边通往裂谷深处，最近不太平。没事别往北走，要去的话，自己多加小心。」',
+      承天朝:
         '北门卫兵挺起胸膛：「我等奉承天朝之命驻守裂隙镇，保一方平安。有什么事，可以找我们。」',
-      '裂谷':
-        '北门卫兵压低声音：「裂谷里最近有异动，上头让我们加强巡逻。具体什么情况，不方便说。」',
-      default:
-        '北门卫兵摆摆手：「我只负责守门，别的事情不归我管。」',
+      裂谷: '北门卫兵压低声音：「裂谷里最近有异动，上头让我们加强巡逻。具体什么情况，不方便说。」',
+      default: '北门卫兵摆摆手：「我只负责守门，别的事情不归我管。」',
     });
+    this.set('equipment', [
+      { blueprintId: 'rift-town/iron-helmet', position: 'head' },
+      { blueprintId: 'rift-town/guard-armor', position: 'body' },
+      { blueprintId: 'rift-town/iron-vambrace', position: 'hands' },
+      { blueprintId: 'rift-town/military-boots', position: 'feet' },
+      { blueprintId: 'rift-town/leather-belt', position: 'waist' },
+      { blueprintId: 'rift-town/guard-blade', position: 'weapon' },
+    ]);
   }
 }

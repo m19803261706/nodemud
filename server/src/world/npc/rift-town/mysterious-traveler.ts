@@ -33,10 +33,14 @@ export default class MysteriousTraveler extends NpcBase {
       '神秘旅人微微调整了一下坐姿，手始终没离开腰间。',
     ]);
     this.set('inquiry', {
-      '来历': '神秘旅人冷冷地看了你一眼：「与你无关。」',
-      '裂谷':
-        '神秘旅人沉默片刻，低声说：「裂谷深处……有些东西，最好不要去碰。」',
+      来历: '神秘旅人冷冷地看了你一眼：「与你无关。」',
+      裂谷: '神秘旅人沉默片刻，低声说：「裂谷深处……有些东西，最好不要去碰。」',
       default: '神秘旅人没有理会你，继续盯着手中的酒杯出神。',
     });
+    this.set('equipment', [
+      { blueprintId: 'rift-town/dark-robe', position: 'body' },
+      { blueprintId: 'rift-town/dark-gloves', position: 'hands' },
+      { blueprintId: 'rift-town/dark-spike', position: 'weapon' },
+    ]);
   }
 }

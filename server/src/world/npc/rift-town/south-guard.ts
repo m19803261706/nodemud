@@ -33,14 +33,16 @@ export default class SouthGuard extends NpcBase {
       '南门卫兵学着北门那位老兵的样子，努力做出严肃的表情。',
     ]);
     this.set('inquiry', {
-      '南方':
-        '南门卫兵说：「南边是通往中原的官道，还算太平。不过路上偶尔也有山贼出没，走夜路的话要小心。」',
-      '承天朝':
-        '南门卫兵认真地说：「我是今年刚从军营调过来的，能驻守裂隙镇，说明上头看重这里。」',
-      '北门':
-        '南门卫兵小声说：「北门那位张大哥是老兵了，在裂隙镇守了三年。听说北边最近有点不太平，你要是好奇就去问问他。」',
-      default:
-        '南门卫兵挠了挠头：「这个我真不太清楚，你去镇里问问别人吧。」',
+      南方: '南门卫兵说：「南边是通往中原的官道，还算太平。不过路上偶尔也有山贼出没，走夜路的话要小心。」',
+      承天朝: '南门卫兵认真地说：「我是今年刚从军营调过来的，能驻守裂隙镇，说明上头看重这里。」',
+      北门: '南门卫兵小声说：「北门那位张大哥是老兵了，在裂隙镇守了三年。听说北边最近有点不太平，你要是好奇就去问问他。」',
+      default: '南门卫兵挠了挠头：「这个我真不太清楚，你去镇里问问别人吧。」',
     });
+    this.set('equipment', [
+      { blueprintId: 'rift-town/leather-cap', position: 'head' },
+      { blueprintId: 'rift-town/guard-armor', position: 'body' },
+      { blueprintId: 'rift-town/military-boots', position: 'feet' },
+      { blueprintId: 'rift-town/short-knife', position: 'weapon' },
+    ]);
   }
 }
