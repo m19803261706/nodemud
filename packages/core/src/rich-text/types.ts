@@ -3,7 +3,7 @@
  * 前后端共享的语义标记和解析节点类型
  */
 
-/** 语义标记类型（18 个） */
+/** 语义标记类型（28 个） */
 export type SemanticTag =
   | 'rn'
   | 'rd'
@@ -22,7 +22,17 @@ export type SemanticTag =
   | 'qfine'
   | 'qrare'
   | 'qepic'
-  | 'qlegend';
+  | 'qlegend'
+  | 'eqhead'
+  | 'eqbody'
+  | 'eqhands'
+  | 'eqfeet'
+  | 'eqwaist'
+  | 'eqweapon'
+  | 'eqoffhand'
+  | 'eqneck'
+  | 'eqfinger'
+  | 'eqwrist';
 
 /** 样式标记类型（3 个） */
 export type StyleTag = 'b' | 'i' | 'u';
