@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
+import { CharacterService } from '../../character/character.service';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import {
@@ -16,6 +17,7 @@ import {
   getDirectionCN,
   getOppositeDirectionCN,
 } from './room-utils';
+import { sendPlayerStats } from './stats.utils';
 import type { Session } from '../types/session';
 
 @Injectable()
@@ -25,6 +27,7 @@ export class CommandHandler {
   constructor(
     private readonly objectManager: ObjectManager,
     private readonly blueprintFactory: BlueprintFactory,
+    private readonly characterService: CharacterService,
   ) {}
 
   /**
@@ -132,13 +135,19 @@ export class CommandHandler {
       }
     }
 
-    // wear/wield/remove 命令成功后：推送 inventoryUpdate + equipmentUpdate
-    if (
-      result.success &&
-      ['wear', 'wield', 'remove'].includes(result.data?.action)
-    ) {
+    // wear/wield/remove 命令成功后：推送 inventoryUpdate + equipmentUpdate + playerStats
+    if (result.success && ['wear', 'wield', 'remove'].includes(result.data?.action)) {
       sendInventoryUpdate(player);
       sendEquipmentUpdate(player);
+      // 穿脱装备后即时推送含装备加成的 playerStats
+      if (session.characterId) {
+        try {
+          const character = await this.characterService.findById(session.characterId);
+          if (character) sendPlayerStats(player, character);
+        } catch {
+          // 查询失败不阻塞主流程
+        }
+      }
     }
 
     // use 命令成功后（消耗品被使用）：推送 inventoryUpdate

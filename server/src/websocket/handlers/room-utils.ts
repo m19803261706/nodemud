@@ -150,7 +150,9 @@ export function sendInventoryUpdate(player: PlayerBase): void {
 export function sendEquipmentUpdate(player: PlayerBase): void {
   const equipment: Record<string, any> = {};
   for (const [pos, item] of player.getEquipment()) {
-    equipment[pos] = item ? { id: item.id, name: item.getName(), type: item.getType() } : null;
+    equipment[pos] = item
+      ? { id: item.id, name: item.getName(), type: item.getType(), quality: item.getQuality() }
+      : null;
   }
 
   const msg = MessageFactory.create('equipmentUpdate', equipment);
