@@ -77,16 +77,22 @@ function App(): React.JSX.Element {
       updatePlayer(data);
     };
 
+    const handleEquipmentUpdate = (data: any) => {
+      useGameStore.getState().setEquipment(data.equipment ?? {});
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('playerStats', handlePlayerStats);
     wsService.on('inventoryUpdate', handleInventoryUpdate);
+    wsService.on('equipmentUpdate', handleEquipmentUpdate);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
       wsService.off('commandResult', handleCommandResult);
       wsService.off('playerStats', handlePlayerStats);
       wsService.off('inventoryUpdate', handleInventoryUpdate);
+      wsService.off('equipmentUpdate', handleEquipmentUpdate);
     };
   }, []);
 

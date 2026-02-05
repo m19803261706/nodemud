@@ -1,10 +1,11 @@
 /**
  * EquipmentView -- 装备槽位展示
- * 10 个装备槽位列表，当前全显示占位（equipment store 尚未添加）
+ * 10 个装备槽位列表，从 store.equipment 读取真实数据
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useGameStore } from '../../../stores/useGameStore';
 
 /** 装备槽位定义：英文 key → 中文名 */
 const EQUIPMENT_SLOTS: { key: string; label: string }[] = [
@@ -21,18 +22,24 @@ const EQUIPMENT_SLOTS: { key: string; label: string }[] = [
 ];
 
 export const EquipmentView = () => {
+  const equipment = useGameStore(state => state.equipment);
+
   return (
     <View style={s.container}>
       <View style={s.header}>
         <Text style={s.headerText}>装备栏</Text>
       </View>
-      {EQUIPMENT_SLOTS.map(slot => (
-        <View key={slot.key} style={s.slotRow}>
-          <Text style={s.slotLabel}>{slot.label}</Text>
-          <Text style={s.slotValue}>--</Text>
-        </View>
-      ))}
-      <Text style={s.hint}>装备系统开发中...</Text>
+      {EQUIPMENT_SLOTS.map(slot => {
+        const equipped = equipment[slot.key];
+        return (
+          <View key={slot.key} style={s.slotRow}>
+            <Text style={s.slotLabel}>{slot.label}</Text>
+            <Text style={[s.slotValue, equipped && s.slotValueEquipped]}>
+              {equipped ? equipped.name : '--'}
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 };
@@ -75,12 +82,8 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
   },
-  hint: {
-    textAlign: 'center',
-    marginTop: 12,
-    fontSize: 11,
-    color: '#8B7A5A80',
-    fontFamily: 'Noto Serif SC',
-    fontStyle: 'italic',
+  slotValueEquipped: {
+    color: '#3A3530',
+    fontWeight: '600',
   },
 });

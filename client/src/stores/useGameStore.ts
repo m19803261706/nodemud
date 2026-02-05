@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { InventoryItem, ItemBrief } from '@packages/core';
+import type { InventoryItem, ItemBrief, EquipmentData } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
@@ -120,6 +120,10 @@ export interface GameState {
   // 背包
   inventory: InventoryItem[];
   setInventory: (items: InventoryItem[]) => void;
+
+  // 装备栏
+  equipment: EquipmentData;
+  setEquipment: (eq: EquipmentData) => void;
 
   // 地面物品
   groundItems: ItemBrief[];
@@ -269,6 +273,13 @@ export const useGameStore = create<GameState>(set => ({
   // 背包
   inventory: [],
   setInventory: items => set({ inventory: items }),
+
+  // 装备栏
+  equipment: {
+    head: null, body: null, hands: null, feet: null, waist: null,
+    weapon: null, offhand: null, neck: null, finger: null, wrist: null,
+  },
+  setEquipment: eq => set({ equipment: eq }),
 
   // 地面物品
   groundItems: [],

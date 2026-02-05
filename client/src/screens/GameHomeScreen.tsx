@@ -33,22 +33,24 @@ export const GameHomeScreen = ({ route }: any) => {
     >
       <View style={[s.safeArea, { paddingTop: insets.top }]}>
         <PlayerStats />
-        <LocationHeader />
         {isInventory ? (
-          /* 背包全屏布局 */
+          /* 背包全屏布局：替换 LocationHeader + mainContent */
           <View style={s.fullContent}>
             <InventoryPage />
           </View>
         ) : (
           /* 默认左右分栏布局 */
-          <View style={s.mainContent}>
-            <View style={s.leftPanel}>
-              <GameLog />
-              <ChatPanel />
-              <MapNavigation />
+          <>
+            <LocationHeader />
+            <View style={s.mainContent}>
+              <View style={s.leftPanel}>
+                <GameLog />
+                <ChatPanel />
+                <MapNavigation />
+              </View>
+              <NpcList />
             </View>
-            <NpcList />
-          </View>
+          </>
         )}
         <BottomNavBar />
       </View>
