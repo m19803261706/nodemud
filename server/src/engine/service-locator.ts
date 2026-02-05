@@ -10,6 +10,7 @@ import type { BlueprintLoader } from './blueprint-loader';
 import type { BlueprintFactory } from './blueprint-factory';
 import type { CommandManager } from './command-manager';
 import type { CommandLoader } from './command-loader';
+import type { CombatManager } from './combat/combat-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -25,6 +26,9 @@ export class ServiceLocator {
   static commandManager: CommandManager;
   static commandLoader: CommandLoader;
 
+  // Layer 5 战斗服务
+  static combatManager: CombatManager;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -36,6 +40,7 @@ export class ServiceLocator {
     blueprintFactory?: BlueprintFactory;
     commandManager?: CommandManager;
     commandLoader?: CommandLoader;
+    combatManager?: CombatManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -44,6 +49,7 @@ export class ServiceLocator {
     if (providers.blueprintFactory) this.blueprintFactory = providers.blueprintFactory;
     if (providers.commandManager) this.commandManager = providers.commandManager;
     if (providers.commandLoader) this.commandLoader = providers.commandLoader;
+    if (providers.combatManager) this.combatManager = providers.combatManager;
     this._initialized = true;
   }
 
@@ -62,5 +68,6 @@ export class ServiceLocator {
     this.blueprintFactory = undefined as any;
     this.commandManager = undefined as any;
     this.commandLoader = undefined as any;
+    this.combatManager = undefined as any;
   }
 }

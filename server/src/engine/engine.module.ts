@@ -14,6 +14,7 @@ import { BlueprintFactory } from './blueprint-factory';
 import { CommandManager } from './command-manager';
 import { CommandLoader } from './command-loader';
 import { SpawnManager } from './spawn-manager';
+import { CombatManager } from './combat/combat-manager';
 
 @Module({
   providers: [
@@ -25,6 +26,7 @@ import { SpawnManager } from './spawn-manager';
     CommandManager,
     CommandLoader,
     SpawnManager,
+    CombatManager,
   ],
   exports: [
     HeartbeatManager,
@@ -35,6 +37,7 @@ import { SpawnManager } from './spawn-manager';
     CommandManager,
     CommandLoader,
     SpawnManager,
+    CombatManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -49,6 +52,7 @@ export class EngineModule implements OnModuleInit {
     private readonly commandManager: CommandManager,
     private readonly commandLoader: CommandLoader,
     private readonly spawnManager: SpawnManager,
+    private readonly combatManager: CombatManager,
   ) {}
 
   async onModuleInit() {
@@ -60,6 +64,7 @@ export class EngineModule implements OnModuleInit {
       blueprintFactory: this.blueprintFactory,
       commandManager: this.commandManager,
       commandLoader: this.commandLoader,
+      combatManager: this.combatManager,
     });
     this.objectManager.startGC();
 
