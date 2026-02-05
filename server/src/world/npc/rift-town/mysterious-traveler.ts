@@ -38,9 +38,9 @@ export default class MysteriousTraveler extends NpcBase {
       default: '神秘旅人没有理会你，继续盯着手中的酒杯出神。',
     });
     this.set('equipment', [
-      { blueprintId: 'rift-town/dark-robe', position: 'body' },
-      { blueprintId: 'rift-town/dark-gloves', position: 'hands' },
-      { blueprintId: 'rift-town/dark-spike', position: 'weapon' },
+      { blueprintId: 'item/rift-town/dark-robe', position: 'body' },
+      { blueprintId: 'item/rift-town/dark-gloves', position: 'hands' },
+      { blueprintId: 'item/rift-town/dark-spike', position: 'weapon' },
     ]);
   }
 }

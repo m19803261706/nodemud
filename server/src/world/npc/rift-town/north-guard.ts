@@ -39,12 +39,12 @@ export default class NorthGuard extends NpcBase {
       default: '北门卫兵摆摆手：「我只负责守门，别的事情不归我管。」',
     });
     this.set('equipment', [
-      { blueprintId: 'rift-town/iron-helmet', position: 'head' },
-      { blueprintId: 'rift-town/guard-armor', position: 'body' },
-      { blueprintId: 'rift-town/iron-vambrace', position: 'hands' },
-      { blueprintId: 'rift-town/military-boots', position: 'feet' },
-      { blueprintId: 'rift-town/leather-belt', position: 'waist' },
-      { blueprintId: 'rift-town/guard-blade', position: 'weapon' },
+      { blueprintId: 'item/rift-town/iron-helmet', position: 'head' },
+      { blueprintId: 'item/rift-town/guard-armor', position: 'body' },
+      { blueprintId: 'item/rift-town/iron-vambrace', position: 'hands' },
+      { blueprintId: 'item/rift-town/military-boots', position: 'feet' },
+      { blueprintId: 'item/rift-town/leather-belt', position: 'waist' },
+      { blueprintId: 'item/rift-town/guard-blade', position: 'weapon' },
     ]);
   }
 }

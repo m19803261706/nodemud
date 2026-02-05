@@ -41,9 +41,9 @@ export default class Blacksmith extends NpcBase {
       default: '老周铁匠摆摆手：「这事儿我不懂，你去问别人吧。我就是个打铁的。」',
     });
     this.set('equipment', [
-      { blueprintId: 'rift-town/smith-apron', position: 'body' },
-      { blueprintId: 'rift-town/smith-gloves', position: 'hands' },
-      { blueprintId: 'rift-town/smith-hammer', position: 'weapon' },
+      { blueprintId: 'item/rift-town/smith-apron', position: 'body' },
+      { blueprintId: 'item/rift-town/smith-gloves', position: 'hands' },
+      { blueprintId: 'item/rift-town/smith-hammer', position: 'weapon' },
     ]);
   }
 }

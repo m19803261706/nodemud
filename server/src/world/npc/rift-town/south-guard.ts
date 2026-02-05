@@ -39,10 +39,10 @@ export default class SouthGuard extends NpcBase {
       default: '南门卫兵挠了挠头：「这个我真不太清楚，你去镇里问问别人吧。」',
     });
     this.set('equipment', [
-      { blueprintId: 'rift-town/leather-cap', position: 'head' },
-      { blueprintId: 'rift-town/guard-armor', position: 'body' },
-      { blueprintId: 'rift-town/military-boots', position: 'feet' },
-      { blueprintId: 'rift-town/short-knife', position: 'weapon' },
+      { blueprintId: 'item/rift-town/leather-cap', position: 'head' },
+      { blueprintId: 'item/rift-town/guard-armor', position: 'body' },
+      { blueprintId: 'item/rift-town/military-boots', position: 'feet' },
+      { blueprintId: 'item/rift-town/short-knife', position: 'weapon' },
     ]);
   }
 }

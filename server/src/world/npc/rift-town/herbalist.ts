@@ -40,8 +40,8 @@ export default class Herbalist extends NpcBase {
       default: '白发药师头也不抬：「没有的事，别打扰老身做药。」',
     });
     this.set('equipment', [
-      { blueprintId: 'rift-town/herb-shirt', position: 'body' },
-      { blueprintId: 'rift-town/herb-bracelet', position: 'wrist' },
+      { blueprintId: 'item/rift-town/herb-shirt', position: 'body' },
+      { blueprintId: 'item/rift-town/herb-bracelet', position: 'wrist' },
     ]);
   }
 }

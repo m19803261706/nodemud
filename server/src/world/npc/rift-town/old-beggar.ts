@@ -37,6 +37,6 @@ export default class OldBeggar extends NpcBase {
       裂谷: '老乞丐突然抬起头，眼神变得清明了一瞬：「裂谷……嘿嘿，那下面的东西，可不是你们能碰的。」随即又恢复了浑浑噩噩的模样。',
       default: '老乞丐迷迷糊糊地摇了摇头：「嗯？啥？行行好赏口饭吃……」',
     });
-    this.set('equipment', [{ blueprintId: 'rift-town/torn-rags', position: 'body' }]);
+    this.set('equipment', [{ blueprintId: 'item/rift-town/torn-rags', position: 'body' }]);
   }
 }
