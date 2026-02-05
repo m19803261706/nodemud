@@ -21,6 +21,7 @@ import { wsService } from '../services/WebSocketService';
 import { useUI } from '../components';
 
 const STORAGE_KEY_USERNAME = '@renzai_username';
+const STORAGE_KEY_PASSWORD = '@renzai_password';
 const STORAGE_KEY_REMEMBER = '@renzai_remember';
 
 export const LoginScreen = ({ navigation }: any) => {
@@ -30,22 +31,23 @@ export const LoginScreen = ({ navigation }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   const { showAlert, showToast } = useUI();
 
-  // 页面加载时读取存储的用户名
+  // 页面加载时读取存储的账号密码
   useEffect(() => {
-    const loadSavedUsername = async () => {
+    const loadSavedCredentials = async () => {
       try {
         const savedRemember = await AsyncStorage.getItem(STORAGE_KEY_REMEMBER);
         if (savedRemember === 'true') {
           setRememberMe(true);
-          const savedUsername =
-            await AsyncStorage.getItem(STORAGE_KEY_USERNAME);
-          if (savedUsername) {
-            setUsername(savedUsername);
-          }
+          const [savedUsername, savedPassword] = await Promise.all([
+            AsyncStorage.getItem(STORAGE_KEY_USERNAME),
+            AsyncStorage.getItem(STORAGE_KEY_PASSWORD),
+          ]);
+          if (savedUsername) setUsername(savedUsername);
+          if (savedPassword) setPassword(savedPassword);
         }
       } catch {}
     };
-    loadSavedUsername();
+    loadSavedCredentials();
   }, []);
 
   // 切换记住侠名时，同步存储偏好
@@ -55,19 +57,28 @@ export const LoginScreen = ({ navigation }: any) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY_REMEMBER, String(next));
       if (!next) {
-        await AsyncStorage.removeItem(STORAGE_KEY_USERNAME);
+        await AsyncStorage.multiRemove([
+          STORAGE_KEY_USERNAME,
+          STORAGE_KEY_PASSWORD,
+        ]);
       }
     } catch {}
   }, [rememberMe]);
 
   useEffect(() => {
     const handleSuccess = async (data: any) => {
-      // 登录成功时保存或清除用户名
+      // 登录成功时保存或清除账号密码
       try {
         if (rememberMe && username) {
-          await AsyncStorage.setItem(STORAGE_KEY_USERNAME, username);
+          await AsyncStorage.multiSet([
+            [STORAGE_KEY_USERNAME, username],
+            [STORAGE_KEY_PASSWORD, password],
+          ]);
         } else {
-          await AsyncStorage.removeItem(STORAGE_KEY_USERNAME);
+          await AsyncStorage.multiRemove([
+            STORAGE_KEY_USERNAME,
+            STORAGE_KEY_PASSWORD,
+          ]);
         }
       } catch {}
 
@@ -94,7 +105,7 @@ export const LoginScreen = ({ navigation }: any) => {
       wsService.off('loginSuccess', handleSuccess);
       wsService.off('loginFailed', handleFailed);
     };
-  }, [navigation, rememberMe, username]);
+  }, [navigation, rememberMe, username, password]);
 
   const handleLogin = () => {
     if (!username || !password) {
@@ -197,7 +208,7 @@ export const LoginScreen = ({ navigation }: any) => {
                     rememberMe && styles.checkboxChecked,
                   ]}
                 />
-                <Text style={styles.rememberText}>记住侠名</Text>
+                <Text style={styles.rememberText}>记住账号密码</Text>
               </TouchableOpacity>
               <TouchableOpacity>
                 <Text style={styles.forgetLink}>忘记口令？</Text>
