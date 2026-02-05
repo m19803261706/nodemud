@@ -5,7 +5,10 @@
 
 import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UIProvider } from './src/components';
@@ -19,9 +22,13 @@ import { FateRevealScreen } from './src/screens/FateRevealScreen';
 import { AttributeAllocateScreen } from './src/screens/AttributeAllocateScreen';
 import { CharacterConfirmScreen } from './src/screens/CharacterConfirmScreen';
 import { GameHomeScreen } from './src/screens/GameHomeScreen';
+import CombatScreen from './src/screens/CombatScreen';
 
 const WS_URL = 'ws://localhost:4000';
 const Stack = createNativeStackNavigator();
+
+/** 导航引用（用于 WebSocket 回调中的页面跳转） */
+const navigationRef = createNavigationContainerRef();
 
 /** 应用根组件 */
 function App(): React.JSX.Element {
@@ -81,11 +88,38 @@ function App(): React.JSX.Element {
       useGameStore.getState().setEquipment(data.equipment ?? {});
     };
 
+    /** 战斗开始 → 写入 store + 跳转战斗页 */
+    const handleCombatStart = (data: any) => {
+      useGameStore.getState().setCombatStart(data);
+      if (navigationRef.isReady()) {
+        (navigationRef as any).navigate('Combat');
+      }
+    };
+
+    /** 战斗更新 → 更新双方状态 + 追加日志 */
+    const handleCombatUpdate = (data: any) => {
+      useGameStore.getState().setCombatUpdate(data);
+    };
+
+    /** 战斗结束 → 写入结算 + 延迟返回 GameHome */
+    const handleCombatEnd = (data: any) => {
+      useGameStore.getState().setCombatEnd(data);
+      setTimeout(() => {
+        if (navigationRef.isReady()) {
+          (navigationRef as any).navigate('GameHome');
+        }
+        useGameStore.getState().clearCombat();
+      }, 2000);
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('playerStats', handlePlayerStats);
     wsService.on('inventoryUpdate', handleInventoryUpdate);
     wsService.on('equipmentUpdate', handleEquipmentUpdate);
+    wsService.on('combatStart', handleCombatStart);
+    wsService.on('combatUpdate', handleCombatUpdate);
+    wsService.on('combatEnd', handleCombatEnd);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -93,6 +127,9 @@ function App(): React.JSX.Element {
       wsService.off('playerStats', handlePlayerStats);
       wsService.off('inventoryUpdate', handleInventoryUpdate);
       wsService.off('equipmentUpdate', handleEquipmentUpdate);
+      wsService.off('combatStart', handleCombatStart);
+      wsService.off('combatUpdate', handleCombatUpdate);
+      wsService.off('combatEnd', handleCombatEnd);
     };
   }, []);
 
@@ -100,7 +137,7 @@ function App(): React.JSX.Element {
     <SafeAreaProvider>
       <UIProvider>
         <StatusBar barStyle="dark-content" />
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <Stack.Navigator
             initialRouteName="Login"
             screenOptions={{
@@ -124,6 +161,11 @@ function App(): React.JSX.Element {
               component={CharacterConfirmScreen}
             />
             <Stack.Screen name="GameHome" component={GameHomeScreen} />
+            <Stack.Screen
+              name="Combat"
+              component={CombatScreen}
+              options={{ gestureEnabled: false }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </UIProvider>

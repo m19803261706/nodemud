@@ -9,6 +9,11 @@ import type {
   ItemBrief,
   EquipmentData,
   EquipmentBonus,
+  CombatFighter,
+  CombatAction,
+  CombatStartData,
+  CombatUpdateData,
+  CombatEndData,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -152,6 +157,20 @@ export interface GameState {
 
   // 指令
   sendCommand: (input: string) => void;
+
+  // 战斗
+  combat: {
+    active: boolean;
+    combatId: string | null;
+    player: CombatFighter | null;
+    enemy: CombatFighter | null;
+    log: CombatAction[];
+    result: CombatEndData | null;
+  };
+  setCombatStart: (data: CombatStartData) => void;
+  setCombatUpdate: (data: CombatUpdateData) => void;
+  setCombatEnd: (data: CombatEndData) => void;
+  clearCombat: () => void;
 
   // 导航
   activeTab: string;
@@ -321,6 +340,59 @@ export const useGameStore = create<GameState>(set => ({
     const msg = { type: 'command', data: { input }, timestamp: Date.now() };
     wsService.send(msg);
   },
+
+  // 战斗
+  combat: {
+    active: false,
+    combatId: null,
+    player: null,
+    enemy: null,
+    log: [],
+    result: null,
+  },
+  setCombatStart: data =>
+    set({
+      combat: {
+        active: true,
+        combatId: data.combatId,
+        player: data.player,
+        enemy: data.enemy,
+        log: [],
+        result: null,
+      },
+    }),
+  setCombatUpdate: data =>
+    set(state => ({
+      combat: {
+        ...state.combat,
+        player: state.combat.player
+          ? { ...state.combat.player, ...data.player }
+          : null,
+        enemy: state.combat.enemy
+          ? { ...state.combat.enemy, ...data.enemy }
+          : null,
+        log: [...state.combat.log, ...data.actions],
+      },
+    })),
+  setCombatEnd: data =>
+    set(state => ({
+      combat: {
+        ...state.combat,
+        active: false,
+        result: data,
+      },
+    })),
+  clearCombat: () =>
+    set({
+      combat: {
+        active: false,
+        combatId: null,
+        player: null,
+        enemy: null,
+        log: [],
+        result: null,
+      },
+    }),
 
   // 导航
   activeTab: '江湖',
