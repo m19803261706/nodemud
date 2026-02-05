@@ -21,4 +21,9 @@ export class WeaponBase extends ItemBase {
   isTwoHanded(): boolean {
     return this.get<boolean>('two_handed') ?? false;
   }
+
+  /** 武器可装备 */
+  override getActions(): string[] {
+    return ['装备', ...super.getActions()];
+  }
 }

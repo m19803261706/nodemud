@@ -26,4 +26,9 @@ export class FoodBase extends ItemBase {
   getBuffDuration(): number {
     return this.get<number>('buff_duration') ?? 0;
   }
+
+  /** 食物可使用 */
+  override getActions(): string[] {
+    return ['使用', ...super.getActions()];
+  }
 }

@@ -21,4 +21,9 @@ export class ArmorBase extends ItemBase {
   getAttributeBonus(): Record<string, number> {
     return this.get<Record<string, number>>('attribute_bonus') ?? {};
   }
+
+  /** 防具可装备 */
+  override getActions(): string[] {
+    return ['装备', ...super.getActions()];
+  }
 }

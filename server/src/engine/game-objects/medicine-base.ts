@@ -26,4 +26,9 @@ export class MedicineBase extends ItemBase {
   getCooldown(): number {
     return this.get<number>('cooldown') ?? 0;
   }
+
+  /** 药品可使用 */
+  override getActions(): string[] {
+    return ['使用', ...super.getActions()];
+  }
 }

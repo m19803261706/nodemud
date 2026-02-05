@@ -21,4 +21,9 @@ export class BookBase extends ItemBase {
   getReadRequirement(): Record<string, number> {
     return this.get<Record<string, number>>('read_requirement') ?? {};
   }
+
+  /** 书籍可研读 */
+  override getActions(): string[] {
+    return ['研读', ...super.getActions()];
+  }
 }

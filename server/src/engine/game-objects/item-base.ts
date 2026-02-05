@@ -75,6 +75,16 @@ export class ItemBase extends BaseEntity {
     return this.get<number>('max_durability') ?? -1;
   }
 
+  /** 获取物品可用操作列表（子类/蓝图可 override） */
+  getActions(): string[] {
+    const actions: string[] = [];
+    actions.push('查看');
+    if (this.isDroppable()) {
+      actions.push('丢弃');
+    }
+    return actions;
+  }
+
   /** 物品不在任何容器中 → 可清理 */
   public onCleanUp(): boolean {
     if (!this.getEnvironment()) return true;
