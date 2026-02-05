@@ -5,6 +5,7 @@
 
 import { MessageHandler, type IMessageHandler } from '../MessageFactory';
 import type { RoomInfoMessage, RoomCoordinates, NpcBrief } from '../../types/messages/room';
+import type { ItemBrief } from '../../types/messages/inventory';
 
 @MessageHandler('roomInfo')
 export class RoomInfoHandler implements IMessageHandler {
@@ -15,10 +16,19 @@ export class RoomInfoHandler implements IMessageHandler {
     coordinates: RoomCoordinates,
     exitNames?: Record<string, string>,
     npcs?: NpcBrief[],
+    items?: ItemBrief[],
   ): RoomInfoMessage {
     return {
       type: 'roomInfo',
-      data: { short, long, exits, exitNames: exitNames ?? {}, coordinates, npcs: npcs ?? [] },
+      data: {
+        short,
+        long,
+        exits,
+        exitNames: exitNames ?? {},
+        coordinates,
+        npcs: npcs ?? [],
+        items: items ?? [],
+      },
       timestamp: Date.now(),
     };
   }

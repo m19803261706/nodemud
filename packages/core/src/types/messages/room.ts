@@ -4,6 +4,7 @@
  */
 
 import type { ServerMessage } from '../base';
+import type { ItemBrief } from './inventory';
 
 /** 地图坐标 */
 export interface RoomCoordinates {
@@ -34,5 +35,6 @@ export interface RoomInfoMessage extends ServerMessage {
     exitNames: Record<string, string>; // 出口目标房间名（如 { north: '北门' }）
     coordinates: RoomCoordinates; // 地图坐标（预留）
     npcs: NpcBrief[]; // 房间内 NPC 列表
+    items: ItemBrief[]; // 房间地面物品列表
   };
 }

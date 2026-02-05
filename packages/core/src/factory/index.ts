@@ -25,6 +25,8 @@ import './handlers/alert';
 import './handlers/roomInfo';
 // 玩家属性消息
 import './handlers/playerStats';
+// 物品/背包消息
+import './handlers/inventoryUpdate';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

@@ -3,3 +3,4 @@
  */
 
 export * from './factions';
+export * from './items';
