@@ -11,8 +11,8 @@ import { Command, type ICommand, type CommandResult } from '../../types/command'
 import type { LivingBase } from '../../game-objects/living-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { WeaponBase } from '../../game-objects/weapon-base';
-import { PlayerBase, WearPositions } from '../../game-objects/player-base';
-import { rt } from '@packages/core';
+import { PlayerBase } from '../../game-objects/player-base';
+import { rt, WearPositions } from '@packages/core';
 
 @Command({ name: 'wield', aliases: ['持', '装备'], description: '装备武器' })
 export class WieldCommand implements ICommand {
@@ -51,7 +51,10 @@ export class WieldCommand implements ICommand {
     if (levelReq > 0) {
       const playerLevel = executor.get<number>('level') ?? 1;
       if (playerLevel < levelReq) {
-        return { success: false, message: `你的等级不足，需要 ${levelReq} 级才能装备${item.getName()}。` };
+        return {
+          success: false,
+          message: `你的等级不足，需要 ${levelReq} 级才能装备${item.getName()}。`,
+        };
       }
     }
 

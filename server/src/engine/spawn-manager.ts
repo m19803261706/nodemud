@@ -10,6 +10,7 @@ import { BlueprintFactory } from './blueprint-factory';
 import { Area } from './game-objects/area';
 import { NpcBase } from './game-objects/npc-base';
 import { ItemBase } from './game-objects/item-base';
+import { LivingBase } from './game-objects/living-base';
 import type { SpawnRule } from './game-objects/area';
 
 /** NPC 心跳间隔（毫秒） */
@@ -62,6 +63,21 @@ export class SpawnManager {
         if (!room) {
           this.logger.warn(`刷新失败: 房间 ${rule.roomId} 不存在`);
           continue;
+        }
+
+        // 初始化 NPC 装备
+        const equipConfig = (npc as NpcBase).get<
+          { blueprintId: string; position: string }[]
+        >('equipment');
+        if (equipConfig && equipConfig.length > 0) {
+          for (const { blueprintId, position } of equipConfig) {
+            try {
+              const item = this.blueprintFactory.clone(blueprintId);
+              (npc as LivingBase).equip(item as ItemBase, position);
+            } catch (err) {
+              this.logger.warn(`NPC 装备初始化失败: ${blueprintId} → ${err}`);
+            }
+          }
         }
 
         npc.moveTo(room, { quiet: true });
