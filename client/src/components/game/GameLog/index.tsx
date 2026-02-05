@@ -2,40 +2,23 @@
  * 游戏日志 — 日志列表 + 动作按钮栏
  */
 
-import React, { useRef, useEffect } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
-import { LogEntry } from './LogEntry';
 import { ActionButton } from './ActionButton';
 import { MapDescription } from './MapDescription';
+import { LogScrollView } from '../shared/LogScrollView';
 
 const ACTION_BUTTONS = ['拜师', '领取任务', '打坐'];
 
 export const GameLog = () => {
-  const gameLog = useGameStore(state => state.gameLog);
   const showMapDesc = useGameStore(state => state.showMapDesc);
   const description = useGameStore(state => state.location.description);
-  const scrollRef = useRef<ScrollView>(null);
-
-  // 新日志时自动滚动到底部
-  useEffect(() => {
-    if (gameLog.length > 0) {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
-    }
-  }, [gameLog.length]);
 
   return (
     <View style={s.container}>
       {showMapDesc && <MapDescription text={description} />}
-      <ScrollView
-        ref={scrollRef}
-        style={s.scroll}
-        contentContainerStyle={s.scrollContent}
-      >
-        {gameLog.map((line, i) => (
-          <LogEntry key={i} text={line.text} color={line.color} />
-        ))}
-      </ScrollView>
+      <LogScrollView style={s.logArea} />
       <View style={s.actionBar}>
         {ACTION_BUTTONS.map(label => (
           <ActionButton key={label} label={label} />
@@ -53,11 +36,8 @@ const s = StyleSheet.create({
     borderColor: '#8B7A5A30',
     padding: 12,
   },
-  scroll: {
+  logArea: {
     flex: 1,
-  },
-  scrollContent: {
-    gap: 6,
   },
   actionBar: {
     flexDirection: 'row',

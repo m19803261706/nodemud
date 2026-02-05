@@ -5,3 +5,4 @@
 export { GradientDivider } from './GradientDivider';
 export { StatBar } from './StatBar';
 export { HpBar } from './HpBar';
+export { LogScrollView } from './LogScrollView';

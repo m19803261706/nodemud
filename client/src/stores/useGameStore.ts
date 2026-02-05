@@ -36,9 +36,16 @@ export interface PlayerData {
 }
 
 export interface LogEntry {
+  id: number;
   text: string;
   color: string;
+  timestamp: number;
 }
+
+/** appendLog 入参类型（id/timestamp 自动生成） */
+export type LogEntryInput = Omit<LogEntry, 'id' | 'timestamp'>;
+
+let logIdCounter = 0;
 
 export interface ChatMessage {
   text: string;
@@ -91,7 +98,7 @@ export interface GameState {
 
   // 日志
   gameLog: LogEntry[];
-  appendLog: (entry: LogEntry) => void;
+  appendLog: (entry: LogEntryInput) => void;
   clearLog: () => void;
 
   // 聊天
@@ -233,7 +240,13 @@ export const useGameStore = create<GameState>(set => ({
 
   // 日志
   gameLog: INITIAL_LOG,
-  appendLog: entry => set(state => ({ gameLog: [...state.gameLog, entry] })),
+  appendLog: entry =>
+    set(state => ({
+      gameLog: [
+        ...state.gameLog,
+        { ...entry, id: ++logIdCounter, timestamp: Date.now() },
+      ],
+    })),
   clearLog: () => set({ gameLog: [] }),
 
   // 聊天
