@@ -6,9 +6,16 @@
  *
  * 对标: LPC user.c / 炎黄 USER
  */
+import {
+  QUALITY_MULTIPLIER,
+  mergeBonus,
+  type EquipmentBonus,
+} from '@packages/core';
 import { LivingBase } from './living-base';
 import { Permission } from '../types/command';
 import type { ItemBase } from './item-base';
+import { ArmorBase } from './armor-base';
+import { WeaponBase } from './weapon-base';
 
 /** 装备槽位常量 */
 export const WearPositions = {
@@ -110,6 +117,38 @@ export class PlayerBase extends LivingBase {
       if (item && predicate(item)) return [pos, item];
     }
     return null;
+  }
+
+  /** 汇总所有装备属性加成（含品质系数） */
+  getEquipmentBonus(): EquipmentBonus {
+    const total: EquipmentBonus = {
+      attrs: {},
+      resources: { maxHp: 0, maxMp: 0, maxEnergy: 0 },
+      combat: { attack: 0, defense: 0 },
+    };
+    for (const [, item] of this._equipment) {
+      if (!item) continue;
+
+      const quality = item.getQuality();
+      const multiplier = QUALITY_MULTIPLIER[quality] ?? 1.0;
+
+      let bonus: EquipmentBonus;
+      if (item instanceof ArmorBase) {
+        bonus = item.getAttributeBonus();
+        const defense = item.getDefense();
+        if (defense > 0) {
+          bonus.combat = bonus.combat ?? {};
+          bonus.combat.defense = (bonus.combat.defense ?? 0) + defense;
+        }
+      } else if (item instanceof WeaponBase) {
+        bonus = item.getAttributeBonus();
+      } else {
+        continue;
+      }
+
+      mergeBonus(total, bonus, multiplier);
+    }
+    return total;
   }
 
   /** 玩家永不自毁（生命周期由连接管理） */

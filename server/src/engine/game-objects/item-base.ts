@@ -75,6 +75,11 @@ export class ItemBase extends BaseEntity {
     return this.get<number>('max_durability') ?? -1;
   }
 
+  /** 获取品质（默认 COMMON = 0） */
+  getQuality(): number {
+    return this.get<number>('quality') ?? 0;
+  }
+
   /** 获取物品可用操作列表（子类/蓝图可 override） */
   getActions(): string[] {
     const actions: string[] = [];

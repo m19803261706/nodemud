@@ -2,6 +2,7 @@
  * WeaponBase — 武器基类
  * 所有武器物品的基类，提供伤害、武器类型等属性访问
  */
+import { parseRawBonus, type EquipmentBonus } from '@packages/core';
 import { ItemBase } from './item-base';
 
 export class WeaponBase extends ItemBase {
@@ -20,6 +21,18 @@ export class WeaponBase extends ItemBase {
   /** 是否双手武器 */
   isTwoHanded(): boolean {
     return this.get<boolean>('two_handed') ?? false;
+  }
+
+  /** 获取属性加成（武器伤害自动进入 combat.attack） */
+  getAttributeBonus(): EquipmentBonus {
+    const raw = this.get<Record<string, number>>('attribute_bonus') ?? {};
+    const bonus = parseRawBonus(raw);
+    const damage = this.getDamage();
+    if (damage > 0) {
+      bonus.combat = bonus.combat ?? {};
+      bonus.combat.attack = (bonus.combat.attack ?? 0) + damage;
+    }
+    return bonus;
   }
 
   /** 武器可装备 */
