@@ -47,6 +47,16 @@ const LogItem = React.memo(({ item }: { item: CombatLogItem }) => (
   </View>
 ));
 
+/** FlatList 头部（标题） */
+const ListHeader = () => (
+  <Text style={s.title}>-- 战斗记录 --</Text>
+);
+
+/** FlatList 空状态 */
+const ListEmpty = () => (
+  <Text style={s.emptyText}>蓄力中...</Text>
+);
+
 export const CombatLog = ({ actions }: CombatLogProps) => {
   const flatListRef = useRef<FlatList<CombatLogItem>>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -96,12 +106,14 @@ export const CombatLog = ({ actions }: CombatLogProps) => {
 
   return (
     <View style={s.container}>
-      <Text style={s.title}>-- 战斗记录 --</Text>
       <FlatList
         ref={flatListRef}
         data={items}
         renderItem={({ item }) => <LogItem item={item} />}
         keyExtractor={keyExtractor}
+        extraData={actions.length}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={ListEmpty}
         onScroll={handleScroll}
         onContentSizeChange={handleContentSizeChange}
         scrollEventThrottle={100}
@@ -122,7 +134,6 @@ export const CombatLog = ({ actions }: CombatLogProps) => {
 const s = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
   },
   title: {
     textAlign: 'center',
@@ -134,6 +145,13 @@ const s = StyleSheet.create({
   list: {
     flex: 1,
     paddingHorizontal: 12,
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#A09888',
+    fontFamily: 'Noto Serif SC',
+    marginTop: 20,
   },
   itemContainer: {
     paddingVertical: 3,

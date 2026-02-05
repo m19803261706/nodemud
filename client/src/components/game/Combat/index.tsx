@@ -121,6 +121,7 @@ const s = StyleSheet.create({
   },
   panelsRow: {
     flexDirection: 'row',
+    flexShrink: 0,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
