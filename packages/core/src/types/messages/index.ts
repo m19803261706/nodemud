@@ -7,5 +7,6 @@ export * from './character';
 export * from './ping';
 export * from './room';
 export * from './inventory';
+export * from './equipment';
 export * from './ui';
 export * from './playerStats';

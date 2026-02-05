@@ -22,6 +22,7 @@ export interface InventoryItem {
   weight: number;
   value: number;
   count: number;
+  actions: string[];
 }
 
 /** 背包更新消息（服务端 → 客户端） */
