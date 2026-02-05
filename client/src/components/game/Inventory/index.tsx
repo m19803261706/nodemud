@@ -1,69 +1,118 @@
 /**
- * 背包面板 — 右侧面板，展示玩家背包物品列表
+ * InventoryPage -- 全屏背包页面
+ * 上下布局：物品区域(flex:3) + LogScrollView(flex:2)
+ * 包含分类 Tab 切换、物品列表/装备视图、物品操作弹窗
  */
 
-import React from 'react';
-import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import React, { useState, useCallback, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
+import type { InventoryItem } from '@packages/core';
 import { useGameStore } from '../../../stores/useGameStore';
-import { InventoryItemRow } from './InventoryItemRow';
+import { LogScrollView } from '../shared/LogScrollView';
+import { CategoryTabs, type CategoryKey } from './CategoryTabs';
+import { ItemList } from './ItemList';
+import { EquipmentView } from './EquipmentView';
+import { ItemActionSheet } from './ItemActionSheet';
 
-export const Inventory = () => {
+/** 分类过滤规则 */
+function filterByCategory(
+  items: InventoryItem[],
+  category: CategoryKey,
+): InventoryItem[] {
+  switch (category) {
+    case 'all':
+      return items;
+    case 'weapon':
+      return items.filter(it => it.type === 'weapon');
+    case 'armor':
+      return items.filter(it => it.type === 'armor');
+    case 'medicine':
+      return items.filter(it => it.type === 'medicine' || it.type === 'food');
+    case 'misc':
+      return items.filter(
+        it =>
+          it.type !== 'weapon' &&
+          it.type !== 'armor' &&
+          it.type !== 'medicine' &&
+          it.type !== 'food',
+      );
+    default:
+      return items;
+  }
+}
+
+export const InventoryPage = () => {
   const inventory = useGameStore(state => state.inventory);
+
+  /** 当前选中分类 */
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
+
+  /** 选中的物品（弹窗用） */
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+
+  /** 过滤后的物品列表 */
+  const filteredItems = useMemo(
+    () => filterByCategory(inventory, activeCategory),
+    [inventory, activeCategory],
+  );
+
+  /** 点击物品行 */
+  const handleItemPress = useCallback((item: InventoryItem) => {
+    setSelectedItem(item);
+  }, []);
+
+  /** 关闭弹窗 */
+  const handleCloseSheet = useCallback(() => {
+    setSelectedItem(null);
+  }, []);
+
+  /** 是否显示装备视图 */
+  const isEquipmentTab = activeCategory === 'equipment';
 
   return (
     <View style={s.container}>
-      <View style={s.header}>
-        <Text style={s.title}>背包</Text>
-        <Text style={s.count}>{inventory.length}件</Text>
-      </View>
-      <ScrollView contentContainerStyle={s.content}>
-        {inventory.length === 0 ? (
-          <Text style={s.empty}>背包空空如也</Text>
+      {/* 上半部分：物品区域 */}
+      <View style={s.inventoryArea}>
+        <CategoryTabs
+          activeCategory={activeCategory}
+          onSelect={setActiveCategory}
+        />
+        {isEquipmentTab ? (
+          <EquipmentView />
         ) : (
-          inventory.map(item => (
-            <InventoryItemRow key={item.id} item={item} />
-          ))
+          <ItemList items={filteredItems} onItemPress={handleItemPress} />
         )}
-      </ScrollView>
+      </View>
+
+      {/* 下半部分：日志 */}
+      <View style={s.logArea}>
+        <LogScrollView />
+      </View>
+
+      {/* 物品操作弹窗 */}
+      <ItemActionSheet item={selectedItem} onClose={handleCloseSheet} />
     </View>
   );
 };
 
+/** 保持向后兼容的导出（GameHomeScreen 可能使用旧名称） */
+export const Inventory = InventoryPage;
+
 const s = StyleSheet.create({
   container: {
-    flex: 7,
+    flex: 1,
+  },
+  inventoryArea: {
+    flex: 3,
     backgroundColor: '#F5F0E830',
     borderWidth: 1,
     borderColor: '#8B7A5A30',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#8B7A5A20',
-  },
-  title: {
-    fontSize: 12,
-    color: '#3A3530',
-    fontFamily: 'Noto Serif SC',
-    fontWeight: '600',
-  },
-  count: {
-    fontSize: 10,
-    color: '#8B7A5A',
-    fontFamily: 'Noto Sans SC',
-  },
-  content: {
-    padding: 4,
-  },
-  empty: {
-    textAlign: 'center',
-    paddingVertical: 20,
-    fontSize: 12,
-    color: '#8B7A5A',
-    fontFamily: 'Noto Serif SC',
+  logArea: {
+    flex: 2,
+    borderWidth: 1,
+    borderColor: '#8B7A5A30',
+    borderTopWidth: 0,
+    backgroundColor: '#F5F0E820',
   },
 });

@@ -1,5 +1,6 @@
 /**
- * 游戏主页 — 纯布局容器，组合各区域组件
+ * 游戏主页 -- 纯布局容器，组合各区域组件
+ * 背包 tab 时切换为全屏 InventoryPage
  */
 
 import React from 'react';
@@ -13,15 +14,14 @@ import { GameLog } from '../components/game/GameLog';
 import { ChatPanel } from '../components/game/ChatPanel';
 import { MapNavigation } from '../components/game/MapNavigation';
 import { NpcList } from '../components/game/NpcList';
-import { Inventory } from '../components/game/Inventory';
+import { InventoryPage } from '../components/game/Inventory';
 import { BottomNavBar } from '../components/game/BottomNavBar';
 
 export const GameHomeScreen = ({ route }: any) => {
   const insets = useSafeAreaInsets();
   const activeTab = useGameStore(state => state.activeTab);
 
-  /** 右侧面板：背包 tab 显示背包，其他 tab 显示 NPC 列表 */
-  const RightPanel = activeTab === '背包' ? Inventory : NpcList;
+  const isInventory = activeTab === '背包';
 
   return (
     <LinearGradient
@@ -34,14 +34,22 @@ export const GameHomeScreen = ({ route }: any) => {
       <View style={[s.safeArea, { paddingTop: insets.top }]}>
         <PlayerStats />
         <LocationHeader />
-        <View style={s.mainContent}>
-          <View style={s.leftPanel}>
-            <GameLog />
-            <ChatPanel />
-            <MapNavigation />
+        {isInventory ? (
+          /* 背包全屏布局 */
+          <View style={s.fullContent}>
+            <InventoryPage />
           </View>
-          <RightPanel />
-        </View>
+        ) : (
+          /* 默认左右分栏布局 */
+          <View style={s.mainContent}>
+            <View style={s.leftPanel}>
+              <GameLog />
+              <ChatPanel />
+              <MapNavigation />
+            </View>
+            <NpcList />
+          </View>
+        )}
         <BottomNavBar />
       </View>
     </LinearGradient>
@@ -60,5 +68,9 @@ const s = StyleSheet.create({
   leftPanel: {
     flex: 17,
     gap: 10,
+  },
+  fullContent: {
+    flex: 1,
+    padding: 10,
   },
 });
