@@ -4,10 +4,11 @@
  */
 
 import { MessageFactory } from '@packages/core';
-import type { NpcBrief } from '@packages/core';
+import type { NpcBrief, ItemBrief, InventoryItem } from '@packages/core';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { NpcBase } from '../../engine/game-objects/npc-base';
+import { ItemBase } from '../../engine/game-objects/item-base';
 import type { BlueprintFactory } from '../../engine/blueprint-factory';
 
 /** 反方向映射表 */
@@ -84,10 +85,19 @@ export function sendRoomInfo(
       gender: npc.get<string>('gender') || 'male',
       faction: npc.get<string>('visible_faction') || '',
       level: npc.get<number>('level') || 1,
-      hpPct: Math.round(
-        ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
-      ),
+      hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
       attitude: npc.get<string>('attitude') || 'neutral',
+    }));
+
+  // 收集房间内地面物品列表
+  const items: ItemBrief[] = room
+    .getInventory()
+    .filter((e): e is ItemBase => e instanceof ItemBase)
+    .map((item) => ({
+      id: item.id,
+      name: item.getName(),
+      short: item.getShort(),
+      type: item.getType(),
     }));
 
   const msg = MessageFactory.create(
@@ -98,10 +108,32 @@ export function sendRoomInfo(
     { x: coordinates.x, y: coordinates.y, z: coordinates.z ?? 0 },
     exitNames,
     npcs,
+    items,
   );
   if (msg) {
     player.sendToClient(MessageFactory.serialize(msg));
   }
+}
+
+/**
+ * 向玩家推送背包物品更新
+ */
+export function sendInventoryUpdate(player: PlayerBase): void {
+  const items: InventoryItem[] = player
+    .getInventory()
+    .filter((e): e is ItemBase => e instanceof ItemBase)
+    .map((item) => ({
+      id: item.id,
+      name: item.getName(),
+      short: item.getShort(),
+      type: item.getType(),
+      weight: item.getWeight(),
+      value: item.getValue(),
+      count: 1,
+    }));
+
+  const msg = MessageFactory.create('inventoryUpdate', items);
+  if (msg) player.sendToClient(MessageFactory.serialize(msg));
 }
 
 /**
