@@ -9,7 +9,13 @@ import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
-import { sendRoomInfo, sendInventoryUpdate, getDirectionCN, getOppositeDirectionCN } from './room-utils';
+import {
+  sendRoomInfo,
+  sendInventoryUpdate,
+  sendEquipmentUpdate,
+  getDirectionCN,
+  getOppositeDirectionCN,
+} from './room-utils';
 import type { Session } from '../types/session';
 
 @Injectable()
@@ -113,6 +119,31 @@ export class CommandHandler {
         const itemName = result.data.itemName || '物品';
         room.broadcast(`${player.getName()}捡起了${itemName}。`, player);
       }
+    }
+
+    // drop 命令成功后：推送 inventoryUpdate + roomInfo
+    if (result.success && result.data?.action === 'drop') {
+      const room = player.getEnvironment() as RoomBase | null;
+      sendInventoryUpdate(player);
+      if (room) {
+        sendRoomInfo(player, room, this.blueprintFactory);
+        const itemName = result.data.itemName || '物品';
+        room.broadcast(`${player.getName()}丢弃了${itemName}。`, player);
+      }
+    }
+
+    // wear/wield/remove 命令成功后：推送 inventoryUpdate + equipmentUpdate
+    if (
+      result.success &&
+      ['wear', 'wield', 'remove'].includes(result.data?.action)
+    ) {
+      sendInventoryUpdate(player);
+      sendEquipmentUpdate(player);
+    }
+
+    // use 命令成功后（消耗品被使用）：推送 inventoryUpdate
+    if (result.success && result.data?.action === 'use' && result.data?.consumed) {
+      sendInventoryUpdate(player);
     }
   }
 }

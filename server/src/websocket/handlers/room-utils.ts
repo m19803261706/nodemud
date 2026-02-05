@@ -138,6 +138,21 @@ export function sendInventoryUpdate(player: PlayerBase): void {
 }
 
 /**
+ * 向玩家推送装备栏更新
+ */
+export function sendEquipmentUpdate(player: PlayerBase): void {
+  const equipment: Record<string, any> = {};
+  for (const [pos, item] of player.getEquipment()) {
+    equipment[pos] = item
+      ? { id: item.id, name: item.getName(), type: item.getType() }
+      : null;
+  }
+
+  const msg = MessageFactory.create('equipmentUpdate', equipment);
+  if (msg) player.sendToClient(MessageFactory.serialize(msg));
+}
+
+/**
  * 获取方向的反方向（中文）
  */
 export function getOppositeDirectionCN(direction: string): string {
