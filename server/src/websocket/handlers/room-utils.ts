@@ -119,9 +119,16 @@ export function sendRoomInfo(
  * 向玩家推送背包物品更新
  */
 export function sendInventoryUpdate(player: PlayerBase): void {
+  // 排除已装备的物品
+  const equippedIds = new Set<string>();
+  for (const [, item] of player.getEquipment()) {
+    if (item) equippedIds.add(item.id);
+  }
+
   const items: InventoryItem[] = player
     .getInventory()
     .filter((e): e is ItemBase => e instanceof ItemBase)
+    .filter((item) => !equippedIds.has(item.id))
     .map((item) => ({
       id: item.id,
       name: item.getName(),
@@ -143,9 +150,7 @@ export function sendInventoryUpdate(player: PlayerBase): void {
 export function sendEquipmentUpdate(player: PlayerBase): void {
   const equipment: Record<string, any> = {};
   for (const [pos, item] of player.getEquipment()) {
-    equipment[pos] = item
-      ? { id: item.id, name: item.getName(), type: item.getType() }
-      : null;
+    equipment[pos] = item ? { id: item.id, name: item.getName(), type: item.getType() } : null;
   }
 
   const msg = MessageFactory.create('equipmentUpdate', equipment);
