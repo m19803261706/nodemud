@@ -9,6 +9,7 @@
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
+import { ItemBase } from '../../game-objects/item-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold } from '@packages/core';
@@ -91,7 +92,16 @@ export class LookCommand implements ICommand {
 
   /** 查看指定对象 */
   private lookAtTarget(executor: LivingBase, env: BaseEntity, target: string): CommandResult {
-    // 优先在 NPC 中查找（模糊匹配 getName）
+    // 1. 先查玩家背包中的物品
+    const bagItem = executor
+      .getInventory()
+      .filter((e): e is ItemBase => e instanceof ItemBase)
+      .find((i) => i.getName().includes(target));
+    if (bagItem) {
+      return this.lookAtItem(bagItem);
+    }
+
+    // 2. 查房间中的 NPC（模糊匹配 getName）
     const inventory = env.getInventory().filter((e) => e !== executor);
     const npc = inventory.find(
       (e) => e instanceof NpcBase && (e as NpcBase).getName().includes(target),
@@ -100,7 +110,15 @@ export class LookCommand implements ICommand {
       return this.lookAtNpc(npc as NpcBase);
     }
 
-    // 精确匹配其他对象（按 getName / getShort / id）
+    // 3. 查房间地面的物品
+    const groundItem = inventory
+      .filter((e): e is ItemBase => e instanceof ItemBase)
+      .find((i) => i.getName().includes(target));
+    if (groundItem) {
+      return this.lookAtItem(groundItem);
+    }
+
+    // 4. 精确匹配其他对象（按 getName / getShort / id）
     const lowerTarget = target.toLowerCase();
     const found = env.findInInventory((entity) => {
       if (entity === executor) return false;
@@ -115,7 +133,7 @@ export class LookCommand implements ICommand {
     });
 
     if (!found) {
-      return { success: false, message: '这里没有这个人。' };
+      return { success: false, message: '这里没有这个东西。' };
     }
 
     // 获取详细描述
@@ -128,6 +146,35 @@ export class LookCommand implements ICommand {
       success: true,
       message: rt('rd', long),
       data: { target: found.id, long },
+    };
+  }
+
+  /** 查看物品详细信息 */
+  private lookAtItem(item: ItemBase): CommandResult {
+    const name = item.getName();
+    const long = item.getLong();
+    const type = item.getType();
+    const weight = item.getWeight();
+    const value = item.getValue();
+
+    const lines: string[] = [];
+    lines.push(rt('rn', bold(name)));
+    lines.push(rt('rd', long));
+    lines.push(`类型: ${type}  重量: ${weight}  价值: ${value}`);
+
+    return {
+      success: true,
+      message: lines.join('\n'),
+      data: {
+        action: 'look',
+        target: 'item',
+        itemId: item.id,
+        name,
+        long,
+        type,
+        weight,
+        value,
+      },
     };
   }
 
@@ -156,9 +203,7 @@ export class LookCommand implements ICommand {
         gender: npc.get<string>('gender') || 'male',
         faction: npc.get<string>('visible_faction') || '',
         level: npc.get<number>('level') || 1,
-        hpPct: Math.round(
-          ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
-        ),
+        hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
         attitude: npc.get<string>('attitude') || 'neutral',
         short: npc.getShort(),
         long,

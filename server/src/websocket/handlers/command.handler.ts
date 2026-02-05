@@ -6,16 +6,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
+import { BlueprintFactory } from '../../engine/blueprint-factory';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
-import { sendRoomInfo, getDirectionCN, getOppositeDirectionCN } from './room-utils';
+import { sendRoomInfo, sendInventoryUpdate, getDirectionCN, getOppositeDirectionCN } from './room-utils';
 import type { Session } from '../types/session';
 
 @Injectable()
 export class CommandHandler {
   private readonly logger = new Logger(CommandHandler.name);
 
-  constructor(private readonly objectManager: ObjectManager) {}
+  constructor(
+    private readonly objectManager: ObjectManager,
+    private readonly blueprintFactory: BlueprintFactory,
+  ) {}
 
   /**
    * 处理指令消息
@@ -51,6 +55,9 @@ export class CommandHandler {
     if (!input) return;
 
     const result = player.executeCommand(input);
+    this.logger.log(
+      `指令执行结果: input="${input}" success=${result.success} data=${JSON.stringify(result.data)} message=${result.message}`,
+    );
 
     // 返回指令结果
     const resp = {
@@ -68,9 +75,13 @@ export class CommandHandler {
 
         // 旧房间广播离去
         const oldRoom = player.getEnvironment() as RoomBase | null;
+        this.logger.log(
+          `移动前: player=${playerName} oldRoom=${oldRoom?.id} direction=${direction} targetId=${result.data.targetId}`,
+        );
 
         // 执行移动
         const moved = await player.go(direction);
+        this.logger.log(`移动结果: moved=${moved}`);
         if (moved) {
           // 旧房间广播（移动后 player 已不在旧房间，不需要 exclude）
           if (oldRoom) {
@@ -80,12 +91,27 @@ export class CommandHandler {
           // 新房间广播到达
           const newRoom = player.getEnvironment() as RoomBase | null;
           if (newRoom) {
-            newRoom.broadcast(`${playerName}从${getOppositeDirectionCN(direction)}来到此处。`, player);
-            sendRoomInfo(player, newRoom);
+            newRoom.broadcast(
+              `${playerName}从${getOppositeDirectionCN(direction)}来到此处。`,
+              player,
+            );
+            sendRoomInfo(player, newRoom, this.blueprintFactory);
           }
         }
       } catch (moveError) {
         this.logger.error('移动处理失败:', moveError);
+      }
+    }
+
+    // get 命令成功后：推送 inventoryUpdate + roomInfo（地面物品变化）
+    if (result.success && result.data?.action === 'get') {
+      const room = player.getEnvironment() as RoomBase | null;
+      sendInventoryUpdate(player);
+      if (room) {
+        sendRoomInfo(player, room, this.blueprintFactory);
+        // 广播给房间其他人
+        const itemName = result.data.itemName || '物品';
+        room.broadcast(`${player.getName()}捡起了${itemName}。`, player);
       }
     }
   }
