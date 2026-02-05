@@ -62,7 +62,10 @@ export const LogScrollView = ({
   /** 内容变化时：在底部则自动滚动，不在底部则显示浮标 */
   const handleContentSizeChange = useCallback(() => {
     if (isAtBottom) {
-      flatListRef.current?.scrollToEnd({ animated: true });
+      // 延迟滚动：等待多行文本完成布局再滚动，避免滚动位置不足
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 80);
     } else {
       setHasNewMessage(true);
     }
