@@ -66,6 +66,11 @@ export class GoCommand implements ICommand {
    * @returns 指令结果（不实际执行移动，仅返回结果信息）
    */
   execute(executor: LivingBase, args: string[]): CommandResult {
+    // 战斗中禁止移动
+    if (executor.isInCombat()) {
+      return { success: false, message: '你正在战斗中，无法移动！' };
+    }
+
     // 无方向参数
     if (args.length === 0 || !args[0].trim()) {
       return { success: false, message: '去哪里？请指定方向。' };
@@ -93,8 +98,7 @@ export class GoCommand implements ICommand {
 
     // 获取目标房间名（优先显示中文 short name）
     const targetRoom = ServiceLocator.objectManager.findById(targetId);
-    const targetName =
-      targetRoom instanceof RoomBase ? targetRoom.getShort() : targetId;
+    const targetName = targetRoom instanceof RoomBase ? targetRoom.getShort() : targetId;
 
     // 返回成功结果，由上层处理实际移动
     return {

@@ -24,6 +24,7 @@ import { CommandHandler } from './handlers/command.handler';
 import { sendPlayerStats } from './handlers/stats.utils';
 import { CharacterService } from '../character/character.service';
 import { ObjectManager } from '../engine/object-manager';
+import { ServiceLocator } from '../engine/service-locator';
 import type { PlayerBase } from '../engine/game-objects/player-base';
 import type { RoomBase } from '../engine/game-objects/room-base';
 
@@ -105,6 +106,19 @@ export class GameGateway
       try {
         const player = this.objectManager.findById(session.playerId) as PlayerBase | undefined;
         if (player) {
+          // 断线时清理战斗：如果玩家正在战斗中，以逃跑方式结束
+          if (ServiceLocator.combatManager) {
+            const combatId = ServiceLocator.combatManager.getCombatId(player as any);
+            if (combatId) {
+              try {
+                ServiceLocator.combatManager.endCombat(combatId, 'flee');
+                this.logger.log(`玩家断线，自动结束战斗: ${combatId}`);
+              } catch (combatError) {
+                this.logger.error('断线战斗清理失败:', combatError);
+              }
+            }
+          }
+
           const room = player.getEnvironment() as RoomBase | null;
 
           // 保存位置到数据库
@@ -159,7 +173,9 @@ export class GameGateway
       return;
     }
 
-    console.log('收到消息:', message.type, 'from', socketId);
+    if (message.type !== 'ping') {
+      console.log('收到消息:', message.type, 'from', socketId);
+    }
 
     // 消息路由
     switch (message.type) {

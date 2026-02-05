@@ -66,9 +66,9 @@ export class SpawnManager {
         }
 
         // 初始化 NPC 装备
-        const equipConfig = (npc as NpcBase).get<
-          { blueprintId: string; position: string }[]
-        >('equipment');
+        const equipConfig = (npc as NpcBase).get<{ blueprintId: string; position: string }[]>(
+          'equipment',
+        );
         if (equipConfig && equipConfig.length > 0) {
           for (const { blueprintId, position } of equipConfig) {
             try {
@@ -92,6 +92,61 @@ export class SpawnManager {
     }
 
     return spawned;
+  }
+
+  /**
+   * 延迟重生 NPC
+   * NPC 死亡后调用此方法，在指定延迟后重新克隆蓝图并放入房间
+   * @param blueprintId 蓝图 ID
+   * @param roomId 目标房间 ID
+   * @param delayMs 延迟时间（毫秒）
+   */
+  scheduleRespawn(blueprintId: string, roomId: string, delayMs: number): void {
+    this.logger.log(`计划重生: ${blueprintId} → ${roomId} (${delayMs}ms 后)`);
+    setTimeout(() => {
+      this.respawnNpc(blueprintId, roomId);
+    }, delayMs);
+  }
+
+  /**
+   * 立即重生 NPC
+   * 克隆蓝图创建新 NPC 实例并放入指定房间
+   * @param blueprintId 蓝图 ID
+   * @param roomId 目标房间 ID
+   */
+  respawnNpc(blueprintId: string, roomId: string): void {
+    try {
+      const npc = this.blueprintFactory.clone(blueprintId);
+      const room = this.objectManager.findById(roomId);
+
+      if (!room) {
+        this.logger.warn(`重生失败: 房间 ${roomId} 不存在`);
+        return;
+      }
+
+      // 初始化 NPC 装备
+      const equipConfig = (npc as NpcBase).get<{ blueprintId: string; position: string }[]>(
+        'equipment',
+      );
+      if (equipConfig && equipConfig.length > 0) {
+        for (const { blueprintId: eqBlueprintId, position } of equipConfig) {
+          try {
+            const item = this.blueprintFactory.clone(eqBlueprintId);
+            (npc as LivingBase).equip(item as ItemBase, position);
+          } catch (err) {
+            this.logger.warn(`重生 NPC 装备初始化失败: ${eqBlueprintId} → ${err}`);
+          }
+        }
+      }
+
+      npc.moveTo(room, { quiet: true });
+      npc.enableHeartbeat(NPC_HEARTBEAT_INTERVAL);
+
+      const name = (npc as NpcBase).getName?.() ?? npc.id;
+      this.logger.log(`NPC 重生完成: ${name} → ${roomId}`);
+    } catch (err) {
+      this.logger.error(`NPC 重生失败 ${blueprintId}: ${err}`);
+    }
   }
 
   /** 按规则放置物品 */

@@ -27,6 +27,13 @@ export const GameEvents = {
   // 通信
   MESSAGE: 'message',
   SAY: 'say',
+
+  // 战斗事件
+  COMBAT_START: 'combat_start',
+  COMBAT_END: 'combat_end',
+  PRE_ATTACK: 'pre_attack',
+  POST_ATTACK: 'post_attack',
+  DEATH: 'death',
 } as const;
 
 /** 事件名类型 */
