@@ -7,6 +7,7 @@
  * 闲聊系统：每次心跳检查 chat_chance 概率，命中则从 chat_msg 随机选一条广播。
  */
 import { BaseEntity } from '../base-entity';
+import { ItemBase } from './item-base';
 import { LivingBase } from './living-base';
 import { RoomBase } from './room-base';
 
@@ -54,4 +55,19 @@ export class NpcBase extends LivingBase {
 
   /** 对话接口（蓝图覆写） */
   onChat(speaker: BaseEntity, message: string): void {}
+
+  /**
+   * 接收物品钩子（蓝图覆写）
+   * 默认实现拒绝所有物品，蓝图可覆写实现特定 NPC 接受特定物品。
+   * @returns accept: true 时物品移至 NPC，false 时留在玩家背包
+   */
+  onReceiveItem(
+    _giver: LivingBase,
+    _item: ItemBase,
+  ): { accept: boolean; message?: string } {
+    return {
+      accept: false,
+      message: `${this.getName()}不需要这个东西。`,
+    };
+  }
 }
