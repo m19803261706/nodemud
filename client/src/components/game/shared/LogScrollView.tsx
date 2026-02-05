@@ -26,6 +26,8 @@ const BOTTOM_THRESHOLD = 50;
 
 interface LogScrollViewProps {
   style?: ViewStyle;
+  /** FlatList 内容底部内边距（避免被同级元素遮挡） */
+  contentPaddingBottom?: number;
 }
 
 /** 单条日志渲染（React.memo 避免重渲染） */
@@ -35,7 +37,10 @@ const LogItem = React.memo(({ item }: { item: LogEntry }) => (
   </View>
 ));
 
-export const LogScrollView = ({ style }: LogScrollViewProps) => {
+export const LogScrollView = ({
+  style,
+  contentPaddingBottom,
+}: LogScrollViewProps) => {
   const gameLog = useGameStore(state => state.gameLog);
   const flatListRef = useRef<FlatList<LogEntry>>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -85,6 +90,11 @@ export const LogScrollView = ({ style }: LogScrollViewProps) => {
         initialNumToRender={20}
         maxToRenderPerBatch={10}
         windowSize={5}
+        contentContainerStyle={
+          contentPaddingBottom
+            ? { paddingBottom: contentPaddingBottom }
+            : undefined
+        }
       />
       {hasNewMessage && (
         <TouchableOpacity style={s.newMsgBadge} onPress={scrollToBottom}>

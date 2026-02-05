@@ -18,7 +18,7 @@ export const GameLog = () => {
   return (
     <View style={s.container}>
       {showMapDesc && <MapDescription text={description} />}
-      <LogScrollView style={s.logArea} />
+      <LogScrollView style={s.logArea} contentPaddingBottom={38} />
       <View style={s.actionBar}>
         {ACTION_BUTTONS.map(label => (
           <ActionButton key={label} label={label} />
