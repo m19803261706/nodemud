@@ -44,6 +44,15 @@ export class WearCommand implements ICommand {
       return { success: false, message: `${item.getName()}不是防具。` };
     }
 
+    // 等级需求检查
+    const levelReq = item.getLevelReq();
+    if (levelReq > 0) {
+      const playerLevel = executor.get<number>('level') ?? 1;
+      if (playerLevel < levelReq) {
+        return { success: false, message: `你的等级不足，需要 ${levelReq} 级才能穿戴${item.getName()}。` };
+      }
+    }
+
     const position = item.getWearPosition();
     const equipped = executor.equip(item, position);
 
