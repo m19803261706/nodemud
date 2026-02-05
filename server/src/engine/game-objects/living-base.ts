@@ -130,4 +130,68 @@ export class LivingBase extends BaseEntity {
     }
     return null;
   }
+
+  // ========== 战斗属性 ==========
+
+  /**
+   * 攻击力 = strength * 2
+   * 基础实现仅使用 dbase 中的属性值，PlayerBase 覆写添加装备加成
+   */
+  getAttack(): number {
+    const strength = this.get<number>('strength') || 0;
+    return strength * 2;
+  }
+
+  /**
+   * 防御力 = vitality * 1.5
+   * 基础实现仅使用 dbase 中的属性值，PlayerBase 覆写添加装备加成
+   */
+  getDefense(): number {
+    const vitality = this.get<number>('vitality') || 0;
+    return Math.floor(vitality * 1.5);
+  }
+
+  /**
+   * 战斗速度 = perception*3 + spirit*2 + strength*1 + meridian*1
+   * 综合反映角色的反应速度和内力流转
+   */
+  getCombatSpeed(): number {
+    const perception = this.get<number>('perception') || 0;
+    const spirit = this.get<number>('spirit') || 0;
+    const strength = this.get<number>('strength') || 0;
+    const meridian = this.get<number>('meridian') || 0;
+    return perception * 3 + spirit * 2 + strength * 1 + meridian * 1;
+  }
+
+  /**
+   * 受到伤害
+   * 扣减当前 HP，降至 0 时触发死亡
+   * @param amount 伤害值（正数）
+   */
+  receiveDamage(amount: number): void {
+    const currentHp = this.get<number>('hp') || 0;
+    const newHp = Math.max(0, currentHp - amount);
+    this.set('hp', newHp);
+    if (newHp <= 0) {
+      this.die();
+    }
+  }
+
+  /**
+   * 死亡处理（子类覆写实现具体逻辑）
+   * 基础实现：将战斗状态设为 dead
+   */
+  die(): void {
+    this.setTemp('combat/state', 'dead');
+  }
+
+  /** 检查是否在战斗中 */
+  isInCombat(): boolean {
+    return this.getTemp<string>('combat/state') === 'fighting';
+  }
+
+  /** 获取战斗状态: idle | fighting | dead */
+  getCombatState(): string {
+    return this.getTemp<string>('combat/state') || 'idle';
+  }
 }

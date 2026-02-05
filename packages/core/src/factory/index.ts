@@ -28,6 +28,10 @@ import './handlers/playerStats';
 // 物品/背包消息
 import './handlers/inventoryUpdate';
 import './handlers/equipmentUpdate';
+// 战斗消息
+import './handlers/combatStart';
+import './handlers/combatUpdate';
+import './handlers/combatEnd';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

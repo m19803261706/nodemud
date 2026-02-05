@@ -85,6 +85,41 @@ export class PlayerBase extends LivingBase {
     return total;
   }
 
+  // ========== 战斗属性覆写（含装备加成） ==========
+
+  /**
+   * 攻击力 = strength*2 + 装备攻击加成
+   * 玩家的 strength 存储在 dbase 'strength' 中（由角色创建时写入）
+   */
+  getAttack(): number {
+    const base = super.getAttack();
+    const bonus = this.getEquipmentBonus();
+    return base + (bonus.combat?.attack || 0);
+  }
+
+  /**
+   * 防御力 = vitality*1.5 + 装备防御加成
+   */
+  getDefense(): number {
+    const base = super.getDefense();
+    const bonus = this.getEquipmentBonus();
+    return base + (bonus.combat?.defense || 0);
+  }
+
+  /**
+   * 玩家死亡: 以 30% maxHp 复活，战斗状态重置为 idle
+   * 后续可扩展: 移动到复活点（广场）
+   */
+  die(): void {
+    super.die();
+    const maxHp = this.get<number>('max_hp') || 100;
+    const reviveHp = Math.floor(maxHp * 0.3);
+    this.set('hp', reviveHp);
+    this.setTemp('combat/state', 'idle');
+    // TODO: moveTo 广场 (area/rift-town/square)
+    // 需要战斗系统完善后，配合 ServiceLocator 获取房间实例
+  }
+
   /** 玩家永不自毁（生命周期由连接管理） */
   public onCleanUp(): boolean {
     return false;

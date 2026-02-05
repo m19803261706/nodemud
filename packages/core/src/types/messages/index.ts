@@ -10,3 +10,4 @@ export * from './inventory';
 export * from './equipment';
 export * from './ui';
 export * from './playerStats';
+export * from './combat';

@@ -22,11 +22,28 @@ export class NpcBase extends LivingBase {
 
   /**
    * AI 行为钩子
-   * 默认实现：闲聊系统（chat_chance + chat_msg）
+   * 默认实现：检查战斗状态，非战斗时执行闲聊
    * 蓝图可覆写扩展更多行为
    */
   protected onAI(): void {
+    // 死亡状态不执行 AI
+    if (this.getCombatState() === 'dead') return;
+
+    // 战斗中执行战斗 AI（暂未实现）
+    if (this.isInCombat()) {
+      this.doCombatAI();
+      return;
+    }
+
     this.doChat();
+  }
+
+  /**
+   * 战斗 AI 钩子（蓝图覆写实现具体战斗行为）
+   * 默认实现为空，后续由战斗系统补充
+   */
+  protected doCombatAI(): void {
+    // TODO: 战斗系统实现后补充默认战斗 AI
   }
 
   /** 闲聊：按 chat_chance 概率从 chat_msg 中随机广播一条 */
@@ -53,6 +70,21 @@ export class NpcBase extends LivingBase {
     return false;
   }
 
+  /**
+   * NPC 死亡: 从房间广播死亡消息，然后销毁自身
+   * 后续可扩展: 掉落物品、刷新计时等
+   */
+  die(): void {
+    super.die();
+    // 广播死亡消息
+    const env = this.getEnvironment();
+    if (env && env instanceof RoomBase) {
+      env.broadcast(`[npc]${this.getName()}[/npc]倒在了地上。`);
+    }
+    // 销毁 NPC 对象（从房间移除）
+    this.destroy();
+  }
+
   /** 对话接口（蓝图覆写） */
   onChat(speaker: BaseEntity, message: string): void {}
 
@@ -61,10 +93,7 @@ export class NpcBase extends LivingBase {
    * 默认实现拒绝所有物品，蓝图可覆写实现特定 NPC 接受特定物品。
    * @returns accept: true 时物品移至 NPC，false 时留在玩家背包
    */
-  onReceiveItem(
-    _giver: LivingBase,
-    _item: ItemBase,
-  ): { accept: boolean; message?: string } {
+  onReceiveItem(_giver: LivingBase, _item: ItemBase): { accept: boolean; message?: string } {
     return {
       accept: false,
       message: `${this.getName()}不需要这个东西。`,
