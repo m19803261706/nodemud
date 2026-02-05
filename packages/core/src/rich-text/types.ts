@@ -3,7 +3,7 @@
  * 前后端共享的语义标记和解析节点类型
  */
 
-/** 语义标记类型（14 个） */
+/** 语义标记类型（18 个） */
 export type SemanticTag =
   | 'rn'
   | 'rd'
@@ -18,7 +18,11 @@ export type SemanticTag =
   | 'skill'
   | 'chat'
   | 'emote'
-  | 'imp';
+  | 'imp'
+  | 'qfine'
+  | 'qrare'
+  | 'qepic'
+  | 'qlegend';
 
 /** 样式标记类型（3 个） */
 export type StyleTag = 'b' | 'i' | 'u';

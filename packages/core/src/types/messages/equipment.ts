@@ -10,6 +10,7 @@ export interface EquipmentSlot {
   id: string;
   name: string;
   type: string;
+  quality: number; // 品质等级（ItemQuality 枚举值）
 }
 
 /** 装备栏数据（10 个槽位，未装备为 null） */

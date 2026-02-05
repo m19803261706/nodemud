@@ -5,7 +5,7 @@
 
 import type { SemanticTag, StyleTag, ThemeMode } from './types';
 
-/** 语义颜色标记（14 个） */
+/** 语义颜色标记（18 个） */
 export const SEMANTIC_TAGS: Record<SemanticTag, SemanticTag> = {
   rn: 'rn', // 房间名称
   rd: 'rd', // 房间描述
@@ -21,6 +21,10 @@ export const SEMANTIC_TAGS: Record<SemanticTag, SemanticTag> = {
   chat: 'chat', // 聊天内容
   emote: 'emote', // 表情/动作
   imp: 'imp', // 重要提示
+  qfine: 'qfine', // 精良品质
+  qrare: 'qrare', // 稀有品质
+  qepic: 'qepic', // 史诗品质
+  qlegend: 'qlegend', // 传说品质
 } as const;
 
 /** 样式标记（3 个） */
@@ -53,6 +57,10 @@ export const THEME_COLORS: Record<ThemeMode, Record<SemanticTag, string>> = {
     chat: '#3A3530', // 深色
     emote: '#6B5D4D', // 棕灰
     imp: '#C04020', // 朱红
+    qfine: '#2F7A3F', // 精良绿
+    qrare: '#2E6B8A', // 稀有蓝
+    qepic: '#6B2F8A', // 史诗紫
+    qlegend: '#C04020', // 传说红
   },
   dark: {
     rn: '#7BC89C',
@@ -69,5 +77,9 @@ export const THEME_COLORS: Record<ThemeMode, Record<SemanticTag, string>> = {
     chat: '#D5CEC0',
     emote: '#B0A090',
     imp: '#FF6040',
+    qfine: '#5FBA6F', // 精良绿
+    qrare: '#6CB8D8', // 稀有蓝
+    qepic: '#A06FCA', // 史诗紫
+    qlegend: '#FF6040', // 传说红
   },
 } as const;

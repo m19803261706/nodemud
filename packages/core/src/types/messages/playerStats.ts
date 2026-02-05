@@ -4,6 +4,7 @@
  */
 
 import type { ServerMessage } from '../base';
+import type { EquipmentBonus } from '../equipment-bonus';
 
 /** 运行时资源值（进度条用） */
 export interface ResourceValue {
@@ -31,5 +32,7 @@ export interface PlayerStatsMessage extends ServerMessage {
     mp: ResourceValue; // 内力
     energy: ResourceValue; // 精力
     attrs: CharacterAttrs; // 六维属性
+    equipBonus: EquipmentBonus; // 装备加成汇总
+    combat: { attack: number; defense: number }; // 最终攻防值
   };
 }
