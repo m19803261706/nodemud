@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand';
+import type { InventoryItem, ItemBrief } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
@@ -108,6 +109,14 @@ export interface GameState {
   // NPC 详情弹窗
   npcDetail: NpcDetailData | null;
   setNpcDetail: (detail: NpcDetailData | null) => void;
+
+  // 背包
+  inventory: InventoryItem[];
+  setInventory: (items: InventoryItem[]) => void;
+
+  // 地面物品
+  groundItems: ItemBrief[];
+  setGroundItems: (items: ItemBrief[]) => void;
 
   // 指令
   sendCommand: (input: string) => void;
@@ -243,6 +252,14 @@ export const useGameStore = create<GameState>(set => ({
   // NPC 详情弹窗
   npcDetail: null,
   setNpcDetail: detail => set({ npcDetail: detail }),
+
+  // 背包
+  inventory: [],
+  setInventory: items => set({ inventory: items }),
+
+  // 地面物品
+  groundItems: [],
+  setGroundItems: items => set({ groundItems: items }),
 
   // 指令
   sendCommand: (input: string) => {
