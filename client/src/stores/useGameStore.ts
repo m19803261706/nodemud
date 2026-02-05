@@ -4,7 +4,12 @@
  */
 
 import { create } from 'zustand';
-import type { InventoryItem, ItemBrief, EquipmentData, EquipmentBonus } from '@packages/core';
+import type {
+  InventoryItem,
+  ItemBrief,
+  EquipmentData,
+  EquipmentBonus,
+} from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
@@ -77,6 +82,13 @@ export interface NpcData {
   attitude: string;
 }
 
+/** NPC 装备条目 */
+export interface NpcEquipmentItem {
+  position: string;
+  name: string;
+  quality: number;
+}
+
 /** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
 export interface NpcDetailData {
   npcId: string;
@@ -89,6 +101,7 @@ export interface NpcDetailData {
   attitude: string;
   short: string;
   long: string;
+  equipment?: NpcEquipmentItem[];
 }
 
 export interface GameState {

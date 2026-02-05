@@ -17,6 +17,29 @@ import LinearGradient from '../../LinearGradient';
 import type { NpcDetailData } from '../../../stores/useGameStore';
 import { HpBar } from '../shared';
 
+/** 装备槽位中文名 */
+const POSITION_LABEL: Record<string, string> = {
+  head: '头部',
+  body: '身体',
+  hands: '手部',
+  feet: '脚部',
+  waist: '腰部',
+  weapon: '主手',
+  offhand: '副手',
+  neck: '颈部',
+  finger: '手指',
+  wrist: '腕部',
+};
+
+/** 品质 → 颜色（凡品默认色，精良及以上高亮） */
+const QUALITY_COLORS: Record<number, string> = {
+  1: '#6B5D4D', // COMMON
+  2: '#2E8B57', // FINE
+  3: '#4169E1', // RARE
+  4: '#9932CC', // EPIC
+  5: '#FF8C00', // LEGENDARY
+};
+
 /** 态度 → 颜色 */
 const ATTITUDE_COLORS: Record<string, string> = {
   friendly: '#2F5D3A',
@@ -140,6 +163,29 @@ export const NpcInfoModal = ({
                   </View>
                   <Text style={s.hpPct}>{detail.hpPct}%</Text>
                 </View>
+
+                {/* 装备列表 */}
+                {detail.equipment && detail.equipment.length > 0 ? (
+                  <View>
+                    <Divider />
+                    <Text style={s.eqTitle}>装备</Text>
+                    {detail.equipment.map((eq, idx) => (
+                      <View key={idx} style={s.eqRow}>
+                        <Text style={s.eqPos}>
+                          {POSITION_LABEL[eq.position] || eq.position}
+                        </Text>
+                        <Text
+                          style={[
+                            s.eqName,
+                            { color: QUALITY_COLORS[eq.quality] || '#6B5D4D' },
+                          ]}
+                        >
+                          {eq.name}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
 
                 <Divider />
 
@@ -285,6 +331,29 @@ const s = StyleSheet.create({
     fontFamily: 'Noto Sans SC',
     width: 36,
     textAlign: 'right',
+  },
+  eqTitle: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    marginBottom: 4,
+  },
+  eqRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 2,
+    paddingLeft: 4,
+  },
+  eqPos: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    width: 36,
+  },
+  eqName: {
+    fontSize: 12,
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '500',
   },
   buttonRow: {
     flexDirection: 'row',

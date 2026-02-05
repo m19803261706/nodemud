@@ -207,6 +207,19 @@ export class LookCommand implements ICommand {
       lines.push(`装备: ${eqParts.join('、')}`);
     }
 
+    // 构建装备数据
+    const eqData: { position: string; name: string; quality: number }[] = [];
+    const eqSeen = new Set<string>();
+    for (const [pos, eqItem] of equipment) {
+      if (!eqItem || eqSeen.has(eqItem.id)) continue;
+      eqSeen.add(eqItem.id);
+      eqData.push({
+        position: pos,
+        name: eqItem.getName(),
+        quality: eqItem.getQuality(),
+      });
+    }
+
     return {
       success: true,
       message: lines.join('\n'),
@@ -223,6 +236,7 @@ export class LookCommand implements ICommand {
         attitude: npc.get<string>('attitude') || 'neutral',
         short: npc.getShort(),
         long,
+        equipment: eqData,
       },
     };
   }
