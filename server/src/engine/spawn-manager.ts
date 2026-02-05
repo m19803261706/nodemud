@@ -9,6 +9,7 @@ import { ObjectManager } from './object-manager';
 import { BlueprintFactory } from './blueprint-factory';
 import { Area } from './game-objects/area';
 import { NpcBase } from './game-objects/npc-base';
+import { ItemBase } from './game-objects/item-base';
 import type { SpawnRule } from './game-objects/area';
 
 /** NPC 心跳间隔（毫秒） */
@@ -26,16 +27,27 @@ export class SpawnManager {
   /** 读取所有 Area 的 spawn_rules，执行初始刷新 */
   spawnAll(): void {
     const areas = this.objectManager.findAll((e) => e instanceof Area) as Area[];
-    let totalSpawned = 0;
+    let totalNpcSpawned = 0;
+    let totalItemSpawned = 0;
 
     for (const area of areas) {
-      const rules = area.getSpawnRules();
-      for (const rule of rules) {
-        totalSpawned += this.spawnByRule(rule);
+      // NPC 刷新
+      const npcRules = area.getSpawnRules();
+      for (const rule of npcRules) {
+        totalNpcSpawned += this.spawnByRule(rule);
+      }
+
+      // 物品刷新
+      const itemRules = area.getItemSpawnRules();
+      for (const rule of itemRules) {
+        totalItemSpawned += this.spawnItemByRule(rule);
       }
     }
 
-    this.logger.log(`NPC 刷新完成，共刷新 ${totalSpawned} 个 NPC`);
+    this.logger.log(`NPC 刷新完成，共刷新 ${totalNpcSpawned} 个 NPC`);
+    if (totalItemSpawned > 0) {
+      this.logger.log(`物品刷新完成，共放置 ${totalItemSpawned} 个物品`);
+    }
   }
 
   /** 按规则刷新 NPC */
@@ -60,6 +72,33 @@ export class SpawnManager {
         spawned++;
       } catch (err) {
         this.logger.error(`刷新 NPC ${rule.blueprintId} 失败: ${err}`);
+      }
+    }
+
+    return spawned;
+  }
+
+  /** 按规则放置物品 */
+  private spawnItemByRule(rule: SpawnRule): number {
+    let spawned = 0;
+
+    for (let i = 0; i < rule.count; i++) {
+      try {
+        const item = this.blueprintFactory.clone(rule.blueprintId);
+        const room = this.objectManager.findById(rule.roomId);
+
+        if (!room) {
+          this.logger.warn(`物品放置失败: 房间 ${rule.roomId} 不存在`);
+          continue;
+        }
+
+        item.moveTo(room, { quiet: true });
+
+        const name = (item as ItemBase).getName?.() ?? item.id;
+        this.logger.log(`放置物品: ${name} → ${rule.roomId}`);
+        spawned++;
+      } catch (err) {
+        this.logger.error(`放置物品 ${rule.blueprintId} 失败: ${err}`);
       }
     }
 

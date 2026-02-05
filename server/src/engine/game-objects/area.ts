@@ -50,4 +50,9 @@ export class Area extends BaseEntity {
   getSpawnRules(): SpawnRule[] {
     return this.get('spawn_rules') ?? [];
   }
+
+  /** 获取物品刷新规则 */
+  getItemSpawnRules(): SpawnRule[] {
+    return this.get('item_spawn_rules') ?? [];
+  }
 }
