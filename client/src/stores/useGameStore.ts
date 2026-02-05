@@ -245,18 +245,12 @@ export const useGameStore = create<GameState>(set => ({
   // 日志
   gameLog: INITIAL_LOG,
   appendLog: entry =>
-    set(state => {
-      const now = Date.now();
-      // 多行消息按 \n 拆分为独立条目（FlatList 固定行高，单行才能完整显示）
-      const lines = entry.text.split('\n').filter(l => l.length > 0);
-      const newEntries = lines.map(line => ({
-        text: line,
-        color: entry.color,
-        id: ++logIdCounter,
-        timestamp: now,
-      }));
-      return { gameLog: [...state.gameLog, ...newEntries] };
-    }),
+    set(state => ({
+      gameLog: [
+        ...state.gameLog,
+        { ...entry, id: ++logIdCounter, timestamp: Date.now() },
+      ],
+    })),
   clearLog: () => set({ gameLog: [] }),
 
   // 聊天

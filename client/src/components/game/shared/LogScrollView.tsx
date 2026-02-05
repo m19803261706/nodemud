@@ -4,7 +4,7 @@
  * 替代 ScrollView 全量渲染，支持：
  * - FlatList 虚拟化（几千条无卡顿）
  * - 智能自动滚动（底部跟随 / 历史查看 / 新消息浮标）
- * - 固定行高布局优化（getItemLayout）
+ * - 自适应行高（长文本自动换行）
  */
 
 import React, { useRef, useCallback, useState } from 'react';
@@ -20,9 +20,6 @@ import {
 } from 'react-native';
 import { useGameStore, type LogEntry } from '../../../stores/useGameStore';
 import { RichText } from '../../RichText';
-
-/** 固定行高（fontSize 12 * lineHeight 1.4 + gap 6） */
-const ITEM_HEIGHT = Math.ceil(12 * 1.4) + 6;
 
 /** 底部判定容差 */
 const BOTTOM_THRESHOLD = 50;
@@ -73,16 +70,6 @@ export const LogScrollView = ({ style }: LogScrollViewProps) => {
     setHasNewMessage(false);
   }, []);
 
-  /** 固定行高布局 */
-  const getItemLayout = useCallback(
-    (_: any, index: number) => ({
-      length: ITEM_HEIGHT,
-      offset: ITEM_HEIGHT * index,
-      index,
-    }),
-    [],
-  );
-
   const keyExtractor = useCallback((item: LogEntry) => String(item.id), []);
 
   return (
@@ -92,7 +79,6 @@ export const LogScrollView = ({ style }: LogScrollViewProps) => {
         data={gameLog}
         renderItem={({ item }) => <LogItem item={item} />}
         keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
         onScroll={handleScroll}
         onContentSizeChange={handleContentSizeChange}
         scrollEventThrottle={100}
@@ -115,8 +101,7 @@ const s = StyleSheet.create({
     position: 'relative',
   },
   itemContainer: {
-    height: ITEM_HEIGHT,
-    justifyContent: 'center',
+    paddingVertical: 3,
   },
   text: {
     fontSize: 12,
