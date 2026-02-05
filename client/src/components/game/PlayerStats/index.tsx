@@ -1,6 +1,6 @@
 /**
  * 玩家状态栏 — 顶部区域
- * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 6 六维属性 + 渐变分隔线
+ * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 6 六维属性 + 攻防行 + 渐变分隔线
  */
 
 import React from 'react';
@@ -10,6 +10,7 @@ import type { ResourceValue } from '../../../stores/useGameStore';
 import { StatBar, GradientDivider } from '../shared';
 import { PlayerNameBadge } from './PlayerNameBadge';
 import { AttrValue } from './AttrValue';
+import { CombatValue } from './CombatValue';
 
 /** 六维属性标签映射 */
 const ATTR_LABELS: {
@@ -23,6 +24,16 @@ const ATTR_LABELS: {
   { key: 'strength', label: '筋骨' },
   { key: 'vitality', label: '血气' },
 ];
+
+/** 六维属性 key → equipBonus.attrs key 映射 */
+const ATTR_BONUS_KEY: Record<string, string> = {
+  wisdom: 'wisdom',
+  perception: 'perception',
+  spirit: 'spirit',
+  meridian: 'meridian',
+  strength: 'strength',
+  vitality: 'vitality',
+};
 
 /** 资源值 → StatBar 百分比 */
 function resourcePct(res: ResourceValue): number {
@@ -39,6 +50,9 @@ export const PlayerStats = () => {
 
   /** 数据尚未到达（服务端未推送 playerStats） */
   const hasData = player.name.length > 0;
+
+  /** 是否有任何攻防值 */
+  const hasCombat = player.combat.attack > 0 || player.combat.defense > 0;
 
   return (
     <View style={s.container}>
@@ -71,10 +85,22 @@ export const PlayerStats = () => {
 
       {/* 第二行：六维属性数值 */}
       <View style={s.attrRow}>
-        {ATTR_LABELS.map(({ key, label }) => (
-          <AttrValue key={key} label={label} value={player.attrs[key]} />
-        ))}
+        {ATTR_LABELS.map(({ key, label }) => {
+          const bonusKey = ATTR_BONUS_KEY[key];
+          const bonus = (player.equipBonus?.attrs as Record<string, number> | undefined)?.[bonusKey] ?? 0;
+          return (
+            <AttrValue key={key} label={label} value={player.attrs[key]} bonus={bonus} />
+          );
+        })}
       </View>
+
+      {/* 第三行：攻防数值（有装备加成时显示） */}
+      {hasCombat && (
+        <View style={s.combatRow}>
+          <CombatValue label="攻击" value={player.combat.attack} />
+          <CombatValue label="防御" value={player.combat.defense} />
+        </View>
+      )}
 
       <GradientDivider opacity={0.38} />
     </View>
@@ -95,5 +121,10 @@ const s = StyleSheet.create({
   attrRow: {
     flexDirection: 'row',
     gap: 4,
+  },
+  combatRow: {
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: 40,
   },
 });

@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import type { InventoryItem, ItemBrief, EquipmentData } from '@packages/core';
+import type { InventoryItem, ItemBrief, EquipmentData, EquipmentBonus } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
 /* ─── 类型定义 ─── */
@@ -25,6 +25,12 @@ export interface CharacterAttrs {
   vitality: number;
 }
 
+/** 攻防数值 */
+export interface CombatData {
+  attack: number;
+  defense: number;
+}
+
 /** 玩家数据（来自服务端 playerStats 消息） */
 export interface PlayerData {
   name: string;
@@ -33,6 +39,8 @@ export interface PlayerData {
   mp: ResourceValue;
   energy: ResourceValue;
   attrs: CharacterAttrs;
+  equipBonus: EquipmentBonus;
+  combat: CombatData;
 }
 
 export interface LogEntry {
@@ -156,6 +164,8 @@ const INITIAL_PLAYER: PlayerData = {
   mp: { current: 0, max: 0 },
   energy: { current: 0, max: 0 },
   attrs: EMPTY_ATTRS,
+  equipBonus: {},
+  combat: { attack: 0, defense: 0 },
 };
 
 const INITIAL_LOG: LogEntry[] = [];
