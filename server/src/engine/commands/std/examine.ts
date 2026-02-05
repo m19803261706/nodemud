@@ -12,16 +12,7 @@ import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { ArmorBase } from '../../game-objects/armor-base';
 import { WeaponBase } from '../../game-objects/weapon-base';
-import { rt, bold, ItemQuality, QUALITY_LABEL, type SemanticTag } from '@packages/core';
-
-/** 品质 → 富文本标签映射 */
-const QUALITY_RT_TAG: Record<number, SemanticTag> = {
-  [ItemQuality.COMMON]: 'item',
-  [ItemQuality.FINE]: 'qfine',
-  [ItemQuality.RARE]: 'qrare',
-  [ItemQuality.EPIC]: 'qepic',
-  [ItemQuality.LEGENDARY]: 'qlegend',
-};
+import { rt, bold, ItemQuality, QUALITY_LABEL, getEquipmentTag } from '@packages/core';
 
 /** 六维属性中文映射 */
 const ATTR_CN: Record<string, string> = {
@@ -31,6 +22,20 @@ const ATTR_CN: Record<string, string> = {
   meridian: '脉络',
   strength: '筋骨',
   vitality: '血气',
+};
+
+/** 装备槽位中文映射 */
+const POSITION_LABEL: Record<string, string> = {
+  head: '头部',
+  body: '身体',
+  hands: '手部',
+  feet: '脚部',
+  waist: '腰部',
+  weapon: '主手',
+  offhand: '副手',
+  neck: '颈部',
+  finger: '手指',
+  wrist: '腕部',
 };
 
 /** 物品类型中文映射 */
@@ -100,7 +105,8 @@ export class ExamineCommand implements ICommand {
     const weight = item.getWeight();
     const value = item.getValue();
     const quality = item.getQuality();
-    const qualityTag = QUALITY_RT_TAG[quality] ?? 'item';
+    const wearPos = item.get<string>('wear_position') ?? '';
+    const qualityTag = getEquipmentTag(wearPos, quality);
 
     const lines: string[] = [];
     lines.push(rt(qualityTag, bold(name)));
@@ -155,7 +161,6 @@ export class ExamineCommand implements ICommand {
     }
 
     // 装备部位
-    const wearPos = item.get<string>('wear_position');
     if (wearPos) {
       lines.push(`部位: ${wearPos}`);
     }
@@ -231,6 +236,24 @@ export class ExamineCommand implements ICommand {
     if (faction) lines.push(`势力: ${faction}`);
     lines.push(`等级: Lv.${level}  生命: ${hpPct}%`);
     lines.push(rt('rd', long));
+
+    // NPC 装备展示
+    const equipment = npc.getEquipment();
+    const eqLines: string[] = [];
+    const seen = new Set<string>();
+    for (const [pos, item] of equipment) {
+      if (!item || seen.has(item.id)) continue;
+      seen.add(item.id);
+      const quality = item.getQuality();
+      const eqWearPos = item.get<string>('wear_position') ?? pos;
+      const tag = getEquipmentTag(eqWearPos, quality);
+      const label = POSITION_LABEL[pos] || pos;
+      eqLines.push(`  ${label}: ${rt(tag, item.getName())}`);
+    }
+    if (eqLines.length > 0) {
+      lines.push('装备:');
+      eqLines.forEach((l) => lines.push(l));
+    }
 
     return {
       success: true,

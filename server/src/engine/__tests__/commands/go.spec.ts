@@ -6,14 +6,23 @@
 import { GoCommand } from '../../commands/std/go';
 import { RoomBase } from '../../game-objects/room-base';
 import { LivingBase } from '../../game-objects/living-base';
+import { ServiceLocator } from '../../service-locator';
+import { ObjectManager } from '../../object-manager';
 
 describe('GoCommand go 指令', () => {
   let goCmd: GoCommand;
   let executor: LivingBase;
+  let objectManager: ObjectManager;
 
   beforeEach(() => {
     goCmd = new GoCommand();
     executor = new LivingBase('test/player');
+    objectManager = new ObjectManager();
+    ServiceLocator.objectManager = objectManager;
+  });
+
+  afterEach(() => {
+    ServiceLocator.reset();
   });
 
   it('无参数时返回提示', () => {
@@ -27,10 +36,15 @@ describe('GoCommand go 指令', () => {
     room.set('exits', { north: 'room/target' });
     await executor.moveTo(room, { quiet: true });
 
+    // 注册目标房间以便 go 指令解析中文名
+    const targetRoom = new RoomBase('room/target');
+    targetRoom.set('short', '北方小路');
+    objectManager.register(targetRoom);
+
     const result = goCmd.execute(executor, ['north']);
     expect(result.success).toBe(true);
-    // 富文本标记: [sys]你向[/sys][exit]north[/exit][sys]走去。[/sys]
-    expect(result.message).toBe('[sys]你向[/sys][exit]north[/exit][sys]走去。[/sys]');
+    // 显示目标房间中文名
+    expect(result.message).toBe('[sys]你向[/sys][exit]北方小路[/exit][sys]走去。[/sys]');
     expect(result.data).toEqual({ direction: 'north', targetId: 'room/target' });
   });
 
@@ -56,6 +70,10 @@ describe('GoCommand go 指令', () => {
     room.set('exits', { north: 'room/north-target' });
     await executor.moveTo(room, { quiet: true });
 
+    const targetRoom = new RoomBase('room/north-target');
+    targetRoom.set('short', '北方');
+    objectManager.register(targetRoom);
+
     const result = goCmd.execute(executor, ['北']);
     expect(result.success).toBe(true);
     expect(result.data).toEqual({ direction: 'north', targetId: 'room/north-target' });
@@ -65,6 +83,10 @@ describe('GoCommand go 指令', () => {
     const room = new RoomBase('room/start');
     room.set('exits', { north: 'room/north-target' });
     await executor.moveTo(room, { quiet: true });
+
+    const targetRoom = new RoomBase('room/north-target');
+    targetRoom.set('short', '北方');
+    objectManager.register(targetRoom);
 
     const result = goCmd.execute(executor, ['n']);
     expect(result.success).toBe(true);

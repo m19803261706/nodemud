@@ -12,7 +12,7 @@ import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
-import { rt, bold } from '@packages/core';
+import { rt, bold, getEquipmentTag } from '@packages/core';
 
 @Command({ name: 'look', aliases: ['l', '看'], description: '查看当前位置或指定对象' })
 export class LookCommand implements ICommand {
@@ -190,6 +190,22 @@ export class LookCommand implements ICommand {
     lines.push(rt('rn', bold(header)));
     lines.push(title ? `「${title}」${name} [${gender}]` : `${name} [${gender}]`);
     lines.push(rt('rd', long));
+
+    // NPC 装备展示（逗号分隔）
+    const equipment = npc.getEquipment();
+    const eqParts: string[] = [];
+    const seen = new Set<string>();
+    for (const [pos, item] of equipment) {
+      if (!item || seen.has(item.id)) continue;
+      seen.add(item.id);
+      const quality = item.getQuality();
+      const wearPos = item.get<string>('wear_position') ?? pos;
+      const tag = getEquipmentTag(wearPos, quality);
+      eqParts.push(rt(tag, item.getName()));
+    }
+    if (eqParts.length > 0) {
+      lines.push(`装备: ${eqParts.join('、')}`);
+    }
 
     return {
       success: true,

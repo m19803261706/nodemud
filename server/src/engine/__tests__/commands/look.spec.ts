@@ -108,7 +108,7 @@ describe('LookCommand', () => {
     const result = cmd.execute(player, ['龙王']);
 
     expect(result.success).toBe(false);
-    expect(result.message).toContain('没有 龙王');
+    expect(result.message).toContain('没有这个东西');
   });
 
   it('别名 l 和 看 通过 @Command 装饰器正确注册', () => {

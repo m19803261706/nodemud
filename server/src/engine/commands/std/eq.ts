@@ -8,7 +8,7 @@
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { PlayerBase } from '../../game-objects/player-base';
-import { rt, ItemQuality, type SemanticTag } from '@packages/core';
+import { rt, getEquipmentTag } from '@packages/core';
 
 /** 槽位中文名 */
 const POSITION_LABEL: Record<string, string> = {
@@ -22,15 +22,6 @@ const POSITION_LABEL: Record<string, string> = {
   neck: '颈部',
   finger: '手指',
   wrist: '腕部',
-};
-
-/** 品质 → 富文本标签映射 */
-const QUALITY_RT_TAG: Record<number, SemanticTag> = {
-  [ItemQuality.COMMON]: 'item',
-  [ItemQuality.FINE]: 'qfine',
-  [ItemQuality.RARE]: 'qrare',
-  [ItemQuality.EPIC]: 'qepic',
-  [ItemQuality.LEGENDARY]: 'qlegend',
 };
 
 @Command({ name: 'eq', aliases: ['装备栏'], description: '查看装备列表' })
@@ -56,7 +47,8 @@ export class EqCommand implements ICommand {
         }
         seen.add(item.id);
         const quality = item.getQuality();
-        const tag = QUALITY_RT_TAG[quality] ?? 'item';
+        const wearPos = item.get<string>('wear_position') ?? pos;
+        const tag = getEquipmentTag(wearPos, quality);
         lines.push(`  ${label}: ${rt(tag, item.getName())}`);
       } else {
         lines.push(`  ${label}: 空`);
