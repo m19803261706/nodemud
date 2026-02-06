@@ -154,13 +154,16 @@ export class LivingBase extends BaseEntity {
   /**
    * 战斗速度 = perception*3 + spirit*2 + strength*1 + meridian*1
    * 综合反映角色的反应速度和内力流转
+   * 最低保底: level * 3（确保没有四维属性的 NPC 也能参与战斗）
    */
   getCombatSpeed(): number {
     const perception = this.get<number>('perception') || 0;
     const spirit = this.get<number>('spirit') || 0;
     const strength = this.get<number>('strength') || 0;
     const meridian = this.get<number>('meridian') || 0;
-    return perception * 3 + spirit * 2 + strength * 1 + meridian * 1;
+    const calculated = perception * 3 + spirit * 2 + strength * 1 + meridian * 1;
+    const level = this.get<number>('level') || 1;
+    return Math.max(calculated, level * 3);
   }
 
   /**

@@ -94,6 +94,21 @@ export interface NpcEquipmentItem {
   quality: number;
 }
 
+/** 物品详情数据（弹窗用，从 commandResult.data 获取） */
+export interface ItemDetailData {
+  containerId?: string;
+  containerName?: string;
+  isRemains?: boolean;
+  contents?: ItemBrief[];
+  // 普通物品字段
+  itemId?: string;
+  name?: string;
+  long?: string;
+  type?: string;
+  weight?: number;
+  value?: number;
+}
+
 /** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
 export interface NpcDetailData {
   npcId: string;
@@ -154,6 +169,10 @@ export interface GameState {
   // 地面物品
   groundItems: ItemBrief[];
   setGroundItems: (items: ItemBrief[]) => void;
+
+  // 物品详情弹窗（容器/普通物品）
+  itemDetail: ItemDetailData | null;
+  setItemDetail: (detail: ItemDetailData | null) => void;
 
   // 指令
   sendCommand: (input: string) => void;
@@ -334,6 +353,8 @@ export const useGameStore = create<GameState>(set => ({
   // 地面物品
   groundItems: [],
   setGroundItems: items => set({ groundItems: items }),
+  itemDetail: null,
+  setItemDetail: detail => set({ itemDetail: detail }),
 
   // 指令
   sendCommand: (input: string) => {

@@ -7,8 +7,10 @@
  * 闲聊系统：每次心跳检查 chat_chance 概率，命中则从 chat_msg 随机选一条广播。
  */
 import { BaseEntity } from '../base-entity';
+import { ServiceLocator } from '../service-locator';
 import { ItemBase } from './item-base';
 import { LivingBase } from './living-base';
+import { RemainsBase } from './remains-base';
 import { RoomBase } from './room-base';
 
 export class NpcBase extends LivingBase {
@@ -71,17 +73,40 @@ export class NpcBase extends LivingBase {
   }
 
   /**
-   * NPC 死亡: 从房间广播死亡消息，然后销毁自身
-   * 后续可扩展: 掉落物品、刷新计时等
+   * NPC 死亡: 创建残骸容器，转移装备和物品到残骸，然后销毁自身
    */
   die(): void {
     super.die();
-    // 广播死亡消息
     const env = this.getEnvironment();
-    if (env && env instanceof RoomBase) {
-      env.broadcast(`[npc]${this.getName()}[/npc]倒在了地上。`);
+
+    // 创建残骸
+    const remainsId = ServiceLocator.objectManager.nextInstanceId('remains');
+    const remains = new RemainsBase(remainsId, this.getName());
+    ServiceLocator.objectManager.register(remains);
+    remains.enableHeartbeat(1000);
+
+    // 转移装备到残骸
+    for (const [pos, item] of this.getEquipment()) {
+      if (item) {
+        this.unequip(pos);
+        item.moveTo(remains, { quiet: true });
+      }
     }
-    // 销毁 NPC 对象（从房间移除）
+
+    // 转移背包物品到残骸
+    for (const child of [...this.getInventory()]) {
+      if (child instanceof ItemBase) {
+        child.moveTo(remains, { quiet: true });
+      }
+    }
+
+    // 残骸放入房间
+    if (env && env instanceof RoomBase) {
+      remains.moveTo(env, { quiet: true });
+      env.broadcast(`[npc]${this.getName()}[/npc]倒在了地上，留下了一具残骸。`);
+    }
+
+    // 销毁 NPC（inventory 已清空，不会散落物品）
     this.destroy();
   }
 

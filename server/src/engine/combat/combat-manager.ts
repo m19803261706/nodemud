@@ -23,9 +23,12 @@ import {
 } from '@packages/core';
 import { BaseEntity } from '../base-entity';
 import { HeartbeatManager } from '../heartbeat-manager';
+import { ServiceLocator } from '../service-locator';
 import type { LivingBase } from '../game-objects/living-base';
 import { PlayerBase } from '../game-objects/player-base';
+import type { RoomBase } from '../game-objects/room-base';
 import { DamageEngine } from './damage-engine';
+import { sendRoomInfo } from '../../websocket/handlers/room-utils';
 import type { CombatInstance, CombatParticipant } from './types';
 
 /** 战斗 ID 计数器 */
@@ -116,9 +119,7 @@ export class CombatManager implements OnModuleInit {
     };
     this.sendToPlayer(player, 'combatStart', startData);
 
-    this.logger.log(
-      `战斗开始: ${player.getName()} vs ${enemy.getName()} (${combatId})`,
-    );
+    this.logger.log(`战斗开始: ${player.getName()} vs ${enemy.getName()} (${combatId})`);
 
     return combatId;
   }
@@ -128,7 +129,7 @@ export class CombatManager implements OnModuleInit {
    * @param combatId 战斗 ID
    * @param reason 结束原因
    */
-  endCombat(combatId: string, reason: CombatEndReason): void {
+  async endCombat(combatId: string, reason: CombatEndReason): Promise<void> {
     const combat = this.combats.get(combatId);
     if (!combat) return;
 
@@ -152,12 +153,20 @@ export class CombatManager implements OnModuleInit {
     const endData: CombatEndData = { combatId, reason, message };
     this.sendToPlayer(player, 'combatEnd', endData);
 
-    // 清理战斗状态
+    // 清理战斗状态（同步，确保后续 tick 不再处理此战斗）
     this.cleanupCombat(combat);
 
-    this.logger.log(
-      `战斗结束: ${player.getName()} vs ${enemy.getName()} (${reason})`,
-    );
+    // 玩家战败后：复活 + 传送广场 + 推送房间信息
+    if (reason === 'defeat' && player instanceof PlayerBase) {
+      await player.revive();
+      const room = player.getEnvironment() as RoomBase | null;
+      if (room) {
+        sendRoomInfo(player, room, ServiceLocator.blueprintFactory);
+        room.broadcast(`${player.getName()}在此处苏醒了。`, player);
+      }
+    }
+
+    this.logger.log(`战斗结束: ${player.getName()} vs ${enemy.getName()} (${reason})`);
   }
 
   /** 查询实体是否在战斗中 */
@@ -255,10 +264,7 @@ export class CombatManager implements OnModuleInit {
       while (participant.gauge >= MAX_GAUGE) {
         participant.gauge -= MAX_GAUGE;
 
-        const result = DamageEngine.calculate(
-          participant.entity,
-          participant.target,
-        );
+        const result = DamageEngine.calculate(participant.entity, participant.target);
 
         if (result.damage > 0) {
           participant.target.receiveDamage(result.damage);
@@ -275,8 +281,7 @@ export class CombatManager implements OnModuleInit {
         // 检查目标死亡
         const targetHp = participant.target.get<number>('hp') ?? 0;
         if (targetHp <= 0) {
-          const reason: CombatEndReason =
-            participant.side === 'player' ? 'victory' : 'defeat';
+          const reason: CombatEndReason = participant.side === 'player' ? 'victory' : 'defeat';
           // 先发送最后一次 update（含致命一击）
           this.sendCombatUpdate(combat, actions);
           this.endCombat(combat.id, reason);
@@ -285,10 +290,8 @@ export class CombatManager implements OnModuleInit {
       }
     }
 
-    // 仅有 action 时才推送 update
-    if (actions.length > 0) {
-      this.sendCombatUpdate(combat, actions);
-    }
+    // 每 tick 都推送 update（含 ATB 进度），即使没有攻击动作
+    this.sendCombatUpdate(combat, actions);
   }
 
   // ================================================================
@@ -296,10 +299,7 @@ export class CombatManager implements OnModuleInit {
   // ================================================================
 
   /** 推送 combatUpdate 消息 */
-  private sendCombatUpdate(
-    combat: CombatInstance,
-    actions: CombatAction[],
-  ): void {
+  private sendCombatUpdate(combat: CombatInstance, actions: CombatAction[]): void {
     const playerParticipant = combat.participants.get(combat.player.id);
     const enemyParticipant = combat.participants.get(combat.enemy.id);
     if (!playerParticipant || !enemyParticipant) return;
@@ -310,16 +310,12 @@ export class CombatManager implements OnModuleInit {
       player: {
         hp: combat.player.get<number>('hp') ?? 0,
         maxHp: combat.player.get<number>('max_hp') ?? 100,
-        atbPct: Math.floor(
-          (playerParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100,
-        ),
+        atbPct: Math.floor((playerParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
       },
       enemy: {
         hp: combat.enemy.get<number>('hp') ?? 0,
         maxHp: combat.enemy.get<number>('max_hp') ?? 100,
-        atbPct: Math.floor(
-          (enemyParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100,
-        ),
+        atbPct: Math.floor((enemyParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
       },
     };
 
@@ -331,24 +327,19 @@ export class CombatManager implements OnModuleInit {
     if (player instanceof PlayerBase) {
       const msg = MessageFactory.create(type, data);
       if (msg) {
-        player.sendToClient(msg);
+        player.sendToClient(MessageFactory.serialize(msg));
       }
     }
   }
 
   /** 构建 CombatFighter 信息 */
-  private buildFighterInfo(
-    entity: LivingBase,
-    participant: CombatParticipant,
-  ): CombatFighter {
+  private buildFighterInfo(entity: LivingBase, participant: CombatParticipant): CombatFighter {
     return {
       name: entity.getName(),
       level: entity.get<number>('level') ?? 1,
       hp: entity.get<number>('hp') ?? 0,
       maxHp: entity.get<number>('max_hp') ?? 100,
-      atbPct: Math.floor(
-        (participant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100,
-      ),
+      atbPct: Math.floor((participant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
     };
   }
 

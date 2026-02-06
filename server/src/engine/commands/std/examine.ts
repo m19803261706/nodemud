@@ -10,6 +10,7 @@ import { Command, type ICommand, type CommandResult } from '../../types/command'
 import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
+import { ContainerBase } from '../../game-objects/container-base';
 import { ArmorBase } from '../../game-objects/armor-base';
 import { WeaponBase } from '../../game-objects/weapon-base';
 import { rt, bold, ItemQuality, QUALITY_LABEL, getEquipmentTag } from '@packages/core';
@@ -174,6 +175,38 @@ export class ExamineCommand implements ICommand {
     const levelReq = item.getLevelReq();
     if (levelReq > 0) {
       lines.push(`需求等级: ${levelReq}`);
+    }
+
+    // 容器类物品：展示内容物详情
+    if (item instanceof ContainerBase) {
+      const contents = item.getContents();
+      if (contents.length > 0) {
+        lines.push('');
+        lines.push('内容物:');
+        for (const child of contents) {
+          const childQuality = child.getQuality();
+          const childWearPos = child.get<string>('wear_position') ?? '';
+          const childTag = getEquipmentTag(childWearPos, childQuality);
+          lines.push(`  ${rt(childTag, child.getName())} (${TYPE_LABEL[child.getType()] || child.getType()})`);
+        }
+      } else {
+        lines.push('');
+        lines.push(rt('sys', '空空如也。'));
+      }
+
+      const isRemains = item.getType() === 'remains';
+      return {
+        success: true,
+        message: lines.join('\n'),
+        data: {
+          action: 'examine',
+          target: 'container',
+          containerId: item.id,
+          containerName: name,
+          isRemains,
+          contents: item.getContentsBrief(),
+        },
+      };
     }
 
     // 特殊标签

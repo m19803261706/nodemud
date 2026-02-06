@@ -10,10 +10,7 @@ export default class IronSword extends WeaponBase {
   create() {
     this.set('name', '铁剑');
     this.set('short', '一把普通的铁剑');
-    this.set(
-      'long',
-      '一把铁质长剑，剑身略有锈迹，但刃口依然锋利。普通铁匠所制，适合初学者使用。',
-    );
+    this.set('long', '一把铁质长剑，剑身略有锈迹，但刃口依然锋利。普通铁匠所制，适合初学者使用。');
     this.set('type', 'weapon');
     this.set('damage', 15);
     this.set('weapon_type', 'sword');

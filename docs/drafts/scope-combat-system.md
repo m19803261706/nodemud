@@ -19,9 +19,10 @@
 - 这创造了属性养成的直接反馈感和战斗节奏的差异化
 
 参考资料：
+
 - [Final Fantasy ATB 系统](https://finalfantasy.fandom.com/wiki/Active_Time_Battle) — 伊藤裕之设计，灵感来自 F1 赛车起步后因加速度不同逐渐拉开差距
 - [ATB 系统设计教程](https://himeworks.com/2016/01/tutorial-designing-a-simple-active-battle-system/) — 基础实现参考
-- [MUD LPC 心跳战斗](https://en.wikipedia.org/wiki/LPC_(programming_language)) — 心跳驱动的服务端战斗模型
+- [MUD LPC 心跳战斗](<https://en.wikipedia.org/wiki/LPC_(programming_language)>) — 心跳驱动的服务端战斗模型
 
 ### 战斗体验
 
@@ -52,14 +53,14 @@ speed（出手速度）= perception × 3 + spirit × 2 + strength × 1 + meridia
 
 ### 2.2 六维属性 → 战斗数值映射
 
-| 属性 | 中文 | 战斗映射 | 权重说明 |
-|------|------|---------|---------|
-| **perception** | 感知 | 出手速度（主） + 命中率 | 反应速度，武侠中的"眼力/灵觉" |
-| **spirit** | 精神 | 出手速度（次） + 暴击率 | 意念驱动，武侠中的"心法/意境" |
-| **strength** | 力量 | 攻击力（主） + 出手速度（微） | 劈砍力道 |
-| **vitality** | 体质 | 最大 HP + 防御力 | 扛打能力 |
-| **meridian** | 经脉 | 出手速度（微） + 内力上限 | 经脉通畅度 |
-| **wisdom** | 悟性 | 技能效果（Phase 2+） | 留给技能系统 |
+| 属性           | 中文 | 战斗映射                      | 权重说明                      |
+| -------------- | ---- | ----------------------------- | ----------------------------- |
+| **perception** | 感知 | 出手速度（主） + 命中率       | 反应速度，武侠中的"眼力/灵觉" |
+| **spirit**     | 精神 | 出手速度（次） + 暴击率       | 意念驱动，武侠中的"心法/意境" |
+| **strength**   | 力量 | 攻击力（主） + 出手速度（微） | 劈砍力道                      |
+| **vitality**   | 体质 | 最大 HP + 防御力              | 扛打能力                      |
+| **meridian**   | 经脉 | 出手速度（微） + 内力上限     | 经脉通畅度                    |
+| **wisdom**     | 悟性 | 技能效果（Phase 2+）          | 留给技能系统                  |
 
 ### 2.3 攻防数值计算
 
@@ -197,35 +198,35 @@ SpawnManager.scheduleRespawn(spawnRule)
 
 ### 4.1 后端
 
-| 模块 | 说明 |
-|------|------|
-| **CombatManager** | 战斗创建/轮转/结束，注册到心跳 |
-| **DamageEngine** | 伤害计算（攻击力/防御力/伤害公式） |
-| **LivingBase 扩展** | `receiveDamage()` / `die()` / `getAttack()` / `getDefense()` / `getCombatSpeed()` / 战斗状态管理 |
-| **kill 指令** | `kill <target>` — 发起战斗 |
-| **flee 指令** | `flee` — 逃跑 |
-| **SpawnManager 扩展** | NPC 死亡后定时重生 |
-| **GameEvents 扩展** | PRE_ATTACK / POST_ATTACK / COMBAT_START / COMBAT_END / DEATH |
-| **WebSocket 消息** | combatStart / combatUpdate / combatEnd |
+| 模块                  | 说明                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| **CombatManager**     | 战斗创建/轮转/结束，注册到心跳                                                                   |
+| **DamageEngine**      | 伤害计算（攻击力/防御力/伤害公式）                                                               |
+| **LivingBase 扩展**   | `receiveDamage()` / `die()` / `getAttack()` / `getDefense()` / `getCombatSpeed()` / 战斗状态管理 |
+| **kill 指令**         | `kill <target>` — 发起战斗                                                                       |
+| **flee 指令**         | `flee` — 逃跑                                                                                    |
+| **SpawnManager 扩展** | NPC 死亡后定时重生                                                                               |
+| **GameEvents 扩展**   | PRE_ATTACK / POST_ATTACK / COMBAT_START / COMBAT_END / DEATH                                     |
+| **WebSocket 消息**    | combatStart / combatUpdate / combatEnd                                                           |
 
 ### 4.2 前端
 
-| 模块 | 说明 |
-|------|------|
-| **CombatScreen** | 独立战斗页面（路由注册） |
-| **CombatHeader** | 双方名字、等级 |
-| **HpBarDual** | 双方血条 |
-| **AtbGauge** | 双方 ATB 读条进度条 |
-| **CombatLog** | 战斗文字日志（复用 RichText） |
-| **CombatActions** | 逃跑按钮（MVP 只有 flee） |
-| **combatStore** | Zustand 战斗状态切片（或独立 store） |
+| 模块              | 说明                                 |
+| ----------------- | ------------------------------------ |
+| **CombatScreen**  | 独立战斗页面（路由注册）             |
+| **CombatHeader**  | 双方名字、等级                       |
+| **HpBarDual**     | 双方血条                             |
+| **AtbGauge**      | 双方 ATB 读条进度条                  |
+| **CombatLog**     | 战斗文字日志（复用 RichText）        |
+| **CombatActions** | 逃跑按钮（MVP 只有 flee）            |
+| **combatStore**   | Zustand 战斗状态切片（或独立 store） |
 
 ### 4.3 Core（共享类型）
 
-| 模块 | 说明 |
-|------|------|
+| 模块                | 说明                                                        |
+| ------------------- | ----------------------------------------------------------- |
 | **combat 消息类型** | CombatStartMessage / CombatUpdateMessage / CombatEndMessage |
-| **combat 常量** | MAX_GAUGE / SPEED_FACTOR / 伤害公式参数 |
+| **combat 常量**     | MAX_GAUGE / SPEED_FACTOR / 伤害公式参数                     |
 
 ## 五、Phase 1 — 体验优化
 
@@ -270,14 +271,15 @@ doCombat():
 
 根据伤害占最大 HP 的比例，使用不同描述词：
 
-| 伤害比例 | 描述 |
-|---------|------|
-| < 5% | "轻轻擦过" / "造成了轻微伤害" |
-| 5-15% | "砍中了" / "击中了" |
-| 15-30% | "狠狠砍中" / "重重一击" |
-| > 30% | "猛烈一击" / "重创了" |
+| 伤害比例 | 描述                          |
+| -------- | ----------------------------- |
+| < 5%     | "轻轻擦过" / "造成了轻微伤害" |
+| 5-15%    | "砍中了" / "击中了"           |
+| 15-30%   | "狠狠砍中" / "重重一击"       |
+| > 30%    | "猛烈一击" / "重创了"         |
 
 新增 SemanticTag：
+
 - `[damage]` — 伤害数字颜色
 - `[crit]` — 暴击文字颜色
 - `[heal]` — 回复文字颜色
@@ -330,8 +332,8 @@ doCombat():
 // 战斗开始
 interface CombatStartData {
   combatId: string;
-  player: { name: string; level: number; hp: number; maxHp: number; };
-  enemy: { name: string; level: number; hp: number; maxHp: number; };
+  player: { name: string; level: number; hp: number; maxHp: number };
+  enemy: { name: string; level: number; hp: number; maxHp: number };
 }
 
 // 战斗更新（每次攻击推送一次）
@@ -341,63 +343,65 @@ interface CombatUpdateData {
     attacker: 'player' | 'enemy';
     type: 'attack' | 'miss' | 'crit' | 'flee_fail';
     damage?: number;
-    description: string;   // 富文本战斗描述
+    description: string; // 富文本战斗描述
   };
-  player: { hp: number; maxHp: number; atbPct: number; };
-  enemy: { hp: number; maxHp: number; atbPct: number; };
+  player: { hp: number; maxHp: number; atbPct: number };
+  enemy: { hp: number; maxHp: number; atbPct: number };
 }
 
 // 战斗结束
 interface CombatEndData {
   combatId: string;
   reason: 'victory' | 'defeat' | 'flee';
-  message: string;         // 结算消息
+  message: string; // 结算消息
 }
 ```
 
 ## 七、与现有代码对接
 
-| 现有系统 | 对接方式 |
-|---------|---------|
-| `HeartbeatManager` (1s tick) | CombatManager 注册为心跳实体 |
-| `LivingBase.getEquipment()` | 计算战斗属性时读取装备 |
-| `PlayerBase.getEquipmentBonus()` | 直接用于攻/防数值 |
-| `WeaponBase.getDamage()` | 纳入攻击力计算 |
-| `ArmorBase.getDefense()` | 纳入防御力计算 |
-| `NpcBase.onAI()` | 扩展 doCombat() 战斗 AI |
-| `CommandManager` | 注册 kill/flee 指令 |
-| `GameEvents` + `CancellableEvent` | 新增战斗事件 |
-| `RoomBase.broadcast()` | 战斗消息广播 |
-| `tmpDbase` | 战斗临时状态 |
-| `callOut` | 技能冷却 / NPC 刷新延时 |
-| `ENCOUNTER` 事件 | NPC 被攻击后记住仇恨（Phase 1） |
-| `SpawnManager` + `SpawnRule.interval` | NPC 死亡重生 |
-| `RichText / SemanticTag` | 战斗文本标签 |
-| `@react-navigation` | CombatScreen 路由注册 |
-| `useGameStore (Zustand)` | 战斗状态切片 |
+| 现有系统                              | 对接方式                        |
+| ------------------------------------- | ------------------------------- |
+| `HeartbeatManager` (1s tick)          | CombatManager 注册为心跳实体    |
+| `LivingBase.getEquipment()`           | 计算战斗属性时读取装备          |
+| `PlayerBase.getEquipmentBonus()`      | 直接用于攻/防数值               |
+| `WeaponBase.getDamage()`              | 纳入攻击力计算                  |
+| `ArmorBase.getDefense()`              | 纳入防御力计算                  |
+| `NpcBase.onAI()`                      | 扩展 doCombat() 战斗 AI         |
+| `CommandManager`                      | 注册 kill/flee 指令             |
+| `GameEvents` + `CancellableEvent`     | 新增战斗事件                    |
+| `RoomBase.broadcast()`                | 战斗消息广播                    |
+| `tmpDbase`                            | 战斗临时状态                    |
+| `callOut`                             | 技能冷却 / NPC 刷新延时         |
+| `ENCOUNTER` 事件                      | NPC 被攻击后记住仇恨（Phase 1） |
+| `SpawnManager` + `SpawnRule.interval` | NPC 死亡重生                    |
+| `RichText / SemanticTag`              | 战斗文本标签                    |
+| `@react-navigation`                   | CombatScreen 路由注册           |
+| `useGameStore (Zustand)`              | 战斗状态切片                    |
 
 ## 八、规模评估
 
-| 维度 | 评估 |
-|------|------|
-| 影响文件数 | 20+ 个 |
-| 涉及层级 | server + client + core（全栈） |
-| 新增消息类型 | 3 个（combatStart/Update/End） |
-| 新增指令 | 2 个（kill/flee） |
-| 新增前端页面 | 1 个（CombatScreen） |
+| 维度         | 评估                               |
+| ------------ | ---------------------------------- |
+| 影响文件数   | 20+ 个                             |
+| 涉及层级     | server + client + core（全栈）     |
+| 新增消息类型 | 3 个（combatStart/Update/End）     |
+| 新增指令     | 2 个（kill/flee）                  |
+| 新增前端页面 | 1 个（CombatScreen）               |
 | 新增后端模块 | 2 个（CombatManager/DamageEngine） |
-| 架构变更 | LivingBase 扩展，SpawnManager 扩展 |
-| **总体评估** | **L（大规模）** |
+| 架构变更     | LivingBase 扩展，SpawnManager 扩展 |
+| **总体评估** | **L（大规模）**                    |
 
 ## 九、后续 Phase 展望（不在本次范围内）
 
 ### Phase 2: 技能系统
+
 - 技能框架（主动/被动）
 - 基础武侠招式（基于 weapon_type 解锁）
 - 内力/气力消耗
 - 技能冷却
 
 ### Phase 3: 高级战斗
+
 - 多人战斗（PvE 群战、PvP）
 - BOSS 机制（特殊技能、阶段转换）
 - 经验/掉落/升级
@@ -405,4 +409,5 @@ interface CombatEndData {
 - 气势系统（连击积累）
 
 ---
+
 > CX 工作流 | Scope | 战斗系统

@@ -10,6 +10,7 @@ import { Command, type ICommand, type CommandResult } from '../../types/command'
 import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
+import { ContainerBase } from '../../game-objects/container-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold, getEquipmentTag } from '@packages/core';
@@ -161,6 +162,35 @@ export class LookCommand implements ICommand {
     lines.push(rt('rn', bold(name)));
     lines.push(rt('rd', long));
     lines.push(`类型: ${type}  重量: ${weight}  价值: ${value}`);
+
+    // 容器类物品：展示内容物
+    if (item instanceof ContainerBase) {
+      const contents = item.getContents();
+      if (contents.length > 0) {
+        lines.push('');
+        lines.push('内容物:');
+        for (const child of contents) {
+          lines.push(`  ${rt('item', child.getName())}`);
+        }
+      } else {
+        lines.push('');
+        lines.push(rt('sys', '空空如也。'));
+      }
+
+      const isRemains = item.getType() === 'remains';
+      return {
+        success: true,
+        message: lines.join('\n'),
+        data: {
+          action: 'look',
+          target: 'container',
+          containerId: item.id,
+          containerName: name,
+          isRemains,
+          contents: item.getContentsBrief(),
+        },
+      };
+    }
 
     return {
       success: true,

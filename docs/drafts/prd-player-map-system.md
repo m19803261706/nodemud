@@ -170,36 +170,36 @@ WebSocketService 消息监听中新增 roomInfo 处理：
 
 ## 现有代码基础
 
-| 模块 | 可复用内容 |
-|------|-----------|
-| `RoomBase` | `getShort()` / `getLong()` / `getExits()` / `getCoordinates()` / `broadcast()` |
-| `PlayerBase` | `moveTo()` / `bindConnection()` / `unbindConnection()` / `sendToClient()` |
-| `ObjectManager` | `findById()` — 查找已加载的游戏对象 |
-| `BlueprintFactory` | `getVirtual()` — 获取房间虚拟单例 |
-| `MessageFactory` | `create()` / `serialize()` — 消息构建和序列化 |
-| `GoCommand` | 方向解析 + 出口查询逻辑 |
-| `LookCommand` | 房间信息输出格式参考 |
-| `useGameStore` | `setLocation()` / `setDirections()` 已有 setter |
-| `MapNavigation` | 3x3 网格渲染已实现 |
-| `LocationHeader` | 标题 + 描述开关已实现 |
+| 模块               | 可复用内容                                                                     |
+| ------------------ | ------------------------------------------------------------------------------ |
+| `RoomBase`         | `getShort()` / `getLong()` / `getExits()` / `getCoordinates()` / `broadcast()` |
+| `PlayerBase`       | `moveTo()` / `bindConnection()` / `unbindConnection()` / `sendToClient()`      |
+| `ObjectManager`    | `findById()` — 查找已加载的游戏对象                                            |
+| `BlueprintFactory` | `getVirtual()` — 获取房间虚拟单例                                              |
+| `MessageFactory`   | `create()` / `serialize()` — 消息构建和序列化                                  |
+| `GoCommand`        | 方向解析 + 出口查询逻辑                                                        |
+| `LookCommand`      | 房间信息输出格式参考                                                           |
+| `useGameStore`     | `setLocation()` / `setDirections()` 已有 setter                                |
+| `MapNavigation`    | 3x3 网格渲染已实现                                                             |
+| `LocationHeader`   | 标题 + 描述开关已实现                                                          |
 
 ## 代码影响范围
 
-| 层级 | 文件 | 变更类型 |
-|------|------|---------|
-| Core | `packages/core/src/types/messages/room.ts` | 新增 |
-| Core | `packages/core/src/factory/handlers/roomInfo.ts` | 新增 |
-| Core | `packages/core/src/types/messages/index.ts` | 修改（导出） |
-| Core | `packages/core/src/factory/index.ts` | 修改（注册） |
-| DB | `server/src/character/character.entity.ts` | 修改（新增字段） |
-| 后端 | `server/src/websocket/handlers/auth.handler.ts` | 修改 |
-| 后端 | `server/src/websocket/handlers/character.handler.ts` | 修改 |
-| 后端 | `server/src/websocket/handlers/command.handler.ts` | 修改 |
-| 后端 | `server/src/websocket/websocket.gateway.ts` | 修改 |
-| 前端 | `client/src/stores/useGameStore.ts` | 修改 |
-| 前端 | `client/src/services/WebSocketService.ts` | 修改（roomInfo 监听） |
-| 前端 | `client/src/components/game/MapNavigation/index.tsx` | 修改 |
-| 前端 | `client/src/components/game/MapNavigation/DirectionCell.tsx` | 修改 |
+| 层级 | 文件                                                         | 变更类型              |
+| ---- | ------------------------------------------------------------ | --------------------- |
+| Core | `packages/core/src/types/messages/room.ts`                   | 新增                  |
+| Core | `packages/core/src/factory/handlers/roomInfo.ts`             | 新增                  |
+| Core | `packages/core/src/types/messages/index.ts`                  | 修改（导出）          |
+| Core | `packages/core/src/factory/index.ts`                         | 修改（注册）          |
+| DB   | `server/src/character/character.entity.ts`                   | 修改（新增字段）      |
+| 后端 | `server/src/websocket/handlers/auth.handler.ts`              | 修改                  |
+| 后端 | `server/src/websocket/handlers/character.handler.ts`         | 修改                  |
+| 后端 | `server/src/websocket/handlers/command.handler.ts`           | 修改                  |
+| 后端 | `server/src/websocket/websocket.gateway.ts`                  | 修改                  |
+| 前端 | `client/src/stores/useGameStore.ts`                          | 修改                  |
+| 前端 | `client/src/services/WebSocketService.ts`                    | 修改（roomInfo 监听） |
+| 前端 | `client/src/components/game/MapNavigation/index.tsx`         | 修改                  |
+| 前端 | `client/src/components/game/MapNavigation/DirectionCell.tsx` | 修改                  |
 
 ## 任务拆分（初步）
 
@@ -234,5 +234,6 @@ WebSocketService 消息监听中新增 roomInfo 处理：
 - 移动动画/过渡效果
 
 ---
+
 > CX 工作流 | PRD
 > 关联 Scope: #112

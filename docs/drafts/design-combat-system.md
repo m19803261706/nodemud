@@ -11,22 +11,22 @@
 
 ### 可直接复用
 
-| 模块 | 文件 | 说明 |
-|------|------|------|
-| HeartbeatManager | `server/src/engine/heartbeat-manager.ts` | 1s tick 累积器模式，完美匹配 ATB gauge |
-| LivingBase | `server/src/engine/game-objects/living-base.ts` | 装备系统/getEquipment() |
-| PlayerBase | `server/src/engine/game-objects/player-base.ts` | getEquipmentBonus() / sendToClient() |
-| NpcBase | `server/src/engine/game-objects/npc-base.ts` | onHeartbeat→onAI() 框架 |
-| WeaponBase | `server/src/engine/game-objects/weapon-base.ts` | getDamage() / getWeaponType() |
-| ArmorBase | `server/src/engine/game-objects/armor-base.ts` | getDefense() |
-| EquipmentBonus | `packages/core/src/types/equipment-bonus.ts` | combat.attack / combat.defense |
-| CommandManager | `server/src/engine/command-loader.ts` | 注册新指令 |
-| GameEvents | `server/src/engine/types/events.ts` | 事件系统扩展 |
-| SpawnManager | `server/src/engine/spawn-manager.ts` | NPC 刷新 + SpawnRule.interval |
-| SemanticTag | `packages/core/src/rich-text/tags.ts` | 已有 damage/heal/combat/skill 标签 |
-| MessageFactory | `packages/core/src/factory/MessageFactory.ts` | @MessageHandler 注册消息 |
-| WebSocketService | `client/src/services/WebSocketService.ts` | on(type, callback) 监听模式 |
-| useGameStore | `client/src/stores/useGameStore.ts` | Zustand store + wsService 监听 |
+| 模块             | 文件                                            | 说明                                   |
+| ---------------- | ----------------------------------------------- | -------------------------------------- |
+| HeartbeatManager | `server/src/engine/heartbeat-manager.ts`        | 1s tick 累积器模式，完美匹配 ATB gauge |
+| LivingBase       | `server/src/engine/game-objects/living-base.ts` | 装备系统/getEquipment()                |
+| PlayerBase       | `server/src/engine/game-objects/player-base.ts` | getEquipmentBonus() / sendToClient()   |
+| NpcBase          | `server/src/engine/game-objects/npc-base.ts`    | onHeartbeat→onAI() 框架                |
+| WeaponBase       | `server/src/engine/game-objects/weapon-base.ts` | getDamage() / getWeaponType()          |
+| ArmorBase        | `server/src/engine/game-objects/armor-base.ts`  | getDefense()                           |
+| EquipmentBonus   | `packages/core/src/types/equipment-bonus.ts`    | combat.attack / combat.defense         |
+| CommandManager   | `server/src/engine/command-loader.ts`           | 注册新指令                             |
+| GameEvents       | `server/src/engine/types/events.ts`             | 事件系统扩展                           |
+| SpawnManager     | `server/src/engine/spawn-manager.ts`            | NPC 刷新 + SpawnRule.interval          |
+| SemanticTag      | `packages/core/src/rich-text/tags.ts`           | 已有 damage/heal/combat/skill 标签     |
+| MessageFactory   | `packages/core/src/factory/MessageFactory.ts`   | @MessageHandler 注册消息               |
+| WebSocketService | `client/src/services/WebSocketService.ts`       | on(type, callback) 监听模式            |
+| useGameStore     | `client/src/stores/useGameStore.ts`             | Zustand store + wsService 监听         |
 
 ### 关键发现
 
@@ -104,11 +104,11 @@
 
 ### 消息总览
 
-| # | 消息类型 | 方向 | 说明 |
-|---|---------|------|------|
-| 1 | `combatStart` | Server → Client | 战斗开始，前端跳转战斗页 |
-| 2 | `combatUpdate` | Server → Client | 每次攻击/闪避/暴击推送 |
-| 3 | `combatEnd` | Server → Client | 战斗结束，前端返回主页 |
+| #   | 消息类型       | 方向            | 说明                     |
+| --- | -------------- | --------------- | ------------------------ |
+| 1   | `combatStart`  | Server → Client | 战斗开始，前端跳转战斗页 |
+| 2   | `combatUpdate` | Server → Client | 每次攻击/闪避/暴击推送   |
+| 3   | `combatEnd`    | Server → Client | 战斗结束，前端返回主页   |
 
 ### 消息详情
 
@@ -177,19 +177,19 @@
 
 **action.type 枚举**：
 
-| type | 说明 | damage 字段 |
-|------|------|------------|
-| `attack` | 普通攻击 | 有 |
-| `crit` | 暴击（Phase 1） | 有 |
-| `miss` | 未命中（Phase 1） | 无 |
-| `flee_fail` | 逃跑失败 | 无 |
+| type        | 说明              | damage 字段 |
+| ----------- | ----------------- | ----------- |
+| `attack`    | 普通攻击          | 有          |
+| `crit`      | 暴击（Phase 1）   | 有          |
+| `miss`      | 未命中（Phase 1） | 无          |
+| `flee_fail` | 逃跑失败          | 无          |
 
 **action.attacker 枚举**：
 
-| attacker | 说明 |
-|---------|------|
+| attacker | 说明     |
+| -------- | -------- |
 | `player` | 玩家出手 |
-| `enemy` | 敌方出手 |
+| `enemy`  | 敌方出手 |
 
 #### 3. combatEnd（战斗结束）
 
@@ -209,11 +209,11 @@
 
 **reason 枚举**：
 
-| reason | 说明 | 后续处理 |
-|--------|------|---------|
-| `victory` | 玩家胜利 | NPC 销毁 + 定时刷新 |
-| `defeat` | 玩家战败 | 玩家复活到广场 |
-| `flee` | 逃跑成功 | 战斗双方恢复正常状态 |
+| reason    | 说明     | 后续处理             |
+| --------- | -------- | -------------------- |
+| `victory` | 玩家胜利 | NPC 销毁 + 定时刷新  |
+| `defeat`  | 玩家战败 | 玩家复活到广场       |
+| `flee`    | 逃跑成功 | 战斗双方恢复正常状态 |
 
 ---
 
@@ -221,37 +221,37 @@
 
 ### 战斗状态（CombatState）
 
-| 枚举值 | 后端 TS 常量 | 消息传输值 | 前端 TS 常量 | 说明 |
-|--------|-------------|-----------|-------------|------|
-| 空闲 | `'idle'` | 不传输 | `'idle'` | 非战斗状态 |
-| 战斗中 | `'fighting'` | 不传输 | `'fighting'` | 战斗进行中 |
-| 死亡 | `'dead'` | 不传输 | `'dead'` | HP 归零 |
+| 枚举值 | 后端 TS 常量 | 消息传输值 | 前端 TS 常量 | 说明       |
+| ------ | ------------ | ---------- | ------------ | ---------- |
+| 空闲   | `'idle'`     | 不传输     | `'idle'`     | 非战斗状态 |
+| 战斗中 | `'fighting'` | 不传输     | `'fighting'` | 战斗进行中 |
+| 死亡   | `'dead'`     | 不传输     | `'dead'`     | HP 归零    |
 
 **说明**：战斗状态存储在 `tmpDbase('combat/state')`（后端）和 Zustand store（前端），不通过专门消息传输。前端通过 `combatStart` → `fighting`、`combatEnd` → `idle` 推断状态。
 
 ### 战斗结束原因（CombatEndReason）
 
-| 枚举值 | 后端 TS | 消息传输值 | 前端 TS | 显示文本 |
-|--------|---------|-----------|---------|---------|
-| 胜利 | `'victory'` | `"victory"` | `'victory'` | "胜利" |
-| 战败 | `'defeat'` | `"defeat"` | `'defeat'` | "战败" |
-| 逃跑 | `'flee'` | `"flee"` | `'flee'` | "逃离战斗" |
+| 枚举值 | 后端 TS     | 消息传输值  | 前端 TS     | 显示文本   |
+| ------ | ----------- | ----------- | ----------- | ---------- |
+| 胜利   | `'victory'` | `"victory"` | `'victory'` | "胜利"     |
+| 战败   | `'defeat'`  | `"defeat"`  | `'defeat'`  | "战败"     |
+| 逃跑   | `'flee'`    | `"flee"`    | `'flee'`    | "逃离战斗" |
 
 ### 攻击动作类型（CombatActionType）
 
-| 枚举值 | 后端 TS | 消息传输值 | 前端 TS | 说明 |
-|--------|---------|-----------|---------|------|
-| 攻击 | `'attack'` | `"attack"` | `'attack'` | 普通攻击命中 |
-| 暴击 | `'crit'` | `"crit"` | `'crit'` | 暴击命中（Phase 1） |
-| 未命中 | `'miss'` | `"miss"` | `'miss'` | 攻击闪避（Phase 1） |
-| 逃跑失败 | `'flee_fail'` | `"flee_fail"` | `'flee_fail'` | 逃跑判定失败 |
+| 枚举值   | 后端 TS       | 消息传输值    | 前端 TS       | 说明                |
+| -------- | ------------- | ------------- | ------------- | ------------------- |
+| 攻击     | `'attack'`    | `"attack"`    | `'attack'`    | 普通攻击命中        |
+| 暴击     | `'crit'`      | `"crit"`      | `'crit'`      | 暴击命中（Phase 1） |
+| 未命中   | `'miss'`      | `"miss"`      | `'miss'`      | 攻击闪避（Phase 1） |
+| 逃跑失败 | `'flee_fail'` | `"flee_fail"` | `'flee_fail'` | 逃跑判定失败        |
 
 ### 攻击方标识（CombatSide）
 
-| 枚举值 | 后端 TS | 消息传输值 | 前端 TS |
-|--------|---------|-----------|---------|
-| 玩家 | `'player'` | `"player"` | `'player'` |
-| 敌方 | `'enemy'` | `"enemy"` | `'enemy'` |
+| 枚举值 | 后端 TS    | 消息传输值 | 前端 TS    |
+| ------ | ---------- | ---------- | ---------- |
+| 玩家   | `'player'` | `"player"` | `'player'` |
+| 敌方   | `'enemy'`  | `"enemy"`  | `'enemy'`  |
 
 ---
 
@@ -259,45 +259,45 @@
 
 ### combatStart 字段映射
 
-| # | 功能 | 后端变量 | 消息 JSON 字段 | 前端 TS 字段 | 类型 | 必填 |
-|---|------|---------|---------------|-------------|------|------|
-| 1 | 战斗 ID | combatId | combatId | combatId | string | Y |
-| 2 | 玩家名 | player.getName() | player.name | player.name | string | Y |
-| 3 | 玩家等级 | player.get('level') | player.level | player.level | number | Y |
-| 4 | 玩家当前 HP | player.get('hp') | player.hp | player.hp | number | Y |
-| 5 | 玩家最大 HP | player.get('max_hp') | player.maxHp | player.maxHp | number | Y |
-| 6 | 玩家 ATB% | 0 | player.atbPct | player.atbPct | number | Y |
-| 7 | 敌方名 | enemy.getName() | enemy.name | enemy.name | string | Y |
-| 8 | 敌方等级 | enemy.get('level') | enemy.level | enemy.level | number | Y |
-| 9 | 敌方当前 HP | enemy.get('hp') | enemy.hp | enemy.hp | number | Y |
-| 10 | 敌方最大 HP | enemy.get('max_hp') | enemy.maxHp | enemy.maxHp | number | Y |
-| 11 | 敌方 ATB% | 0 | enemy.atbPct | enemy.atbPct | number | Y |
+| #   | 功能        | 后端变量             | 消息 JSON 字段 | 前端 TS 字段  | 类型   | 必填 |
+| --- | ----------- | -------------------- | -------------- | ------------- | ------ | ---- |
+| 1   | 战斗 ID     | combatId             | combatId       | combatId      | string | Y    |
+| 2   | 玩家名      | player.getName()     | player.name    | player.name   | string | Y    |
+| 3   | 玩家等级    | player.get('level')  | player.level   | player.level  | number | Y    |
+| 4   | 玩家当前 HP | player.get('hp')     | player.hp      | player.hp     | number | Y    |
+| 5   | 玩家最大 HP | player.get('max_hp') | player.maxHp   | player.maxHp  | number | Y    |
+| 6   | 玩家 ATB%   | 0                    | player.atbPct  | player.atbPct | number | Y    |
+| 7   | 敌方名      | enemy.getName()      | enemy.name     | enemy.name    | string | Y    |
+| 8   | 敌方等级    | enemy.get('level')   | enemy.level    | enemy.level   | number | Y    |
+| 9   | 敌方当前 HP | enemy.get('hp')      | enemy.hp       | enemy.hp      | number | Y    |
+| 10  | 敌方最大 HP | enemy.get('max_hp')  | enemy.maxHp    | enemy.maxHp   | number | Y    |
+| 11  | 敌方 ATB%   | 0                    | enemy.atbPct   | enemy.atbPct  | number | Y    |
 
 ### combatUpdate 字段映射
 
-| # | 功能 | 后端变量 | 消息 JSON 字段 | 前端 TS 字段 | 类型 | 必填 |
-|---|------|---------|---------------|-------------|------|------|
-| 1 | 战斗 ID | combatId | combatId | combatId | string | Y |
-| 2 | 动作列表 | actions[] | actions | actions | CombatAction[] | Y |
-| 3 | 攻击方 | action.attacker | actions[].attacker | actions[].attacker | CombatSide | Y |
-| 4 | 动作类型 | action.type | actions[].type | actions[].type | CombatActionType | Y |
-| 5 | 伤害值 | action.damage | actions[].damage | actions[].damage | number? | N |
-| 6 | 是否暴击 | action.isCrit | actions[].isCrit | actions[].isCrit | boolean | Y |
-| 7 | 描述文本 | action.description | actions[].description | actions[].description | string | Y |
-| 8 | 玩家 HP | player.get('hp') | player.hp | player.hp | number | Y |
-| 9 | 玩家 maxHP | player.get('max_hp') | player.maxHp | player.maxHp | number | Y |
-| 10 | 玩家 ATB% | Math.floor(gauge/10) | player.atbPct | player.atbPct | number | Y |
-| 11 | 敌方 HP | enemy.get('hp') | enemy.hp | enemy.hp | number | Y |
-| 12 | 敌方 maxHP | enemy.get('max_hp') | enemy.maxHp | enemy.maxHp | number | Y |
-| 13 | 敌方 ATB% | Math.floor(gauge/10) | enemy.atbPct | enemy.atbPct | number | Y |
+| #   | 功能       | 后端变量             | 消息 JSON 字段        | 前端 TS 字段          | 类型             | 必填 |
+| --- | ---------- | -------------------- | --------------------- | --------------------- | ---------------- | ---- |
+| 1   | 战斗 ID    | combatId             | combatId              | combatId              | string           | Y    |
+| 2   | 动作列表   | actions[]            | actions               | actions               | CombatAction[]   | Y    |
+| 3   | 攻击方     | action.attacker      | actions[].attacker    | actions[].attacker    | CombatSide       | Y    |
+| 4   | 动作类型   | action.type          | actions[].type        | actions[].type        | CombatActionType | Y    |
+| 5   | 伤害值     | action.damage        | actions[].damage      | actions[].damage      | number?          | N    |
+| 6   | 是否暴击   | action.isCrit        | actions[].isCrit      | actions[].isCrit      | boolean          | Y    |
+| 7   | 描述文本   | action.description   | actions[].description | actions[].description | string           | Y    |
+| 8   | 玩家 HP    | player.get('hp')     | player.hp             | player.hp             | number           | Y    |
+| 9   | 玩家 maxHP | player.get('max_hp') | player.maxHp          | player.maxHp          | number           | Y    |
+| 10  | 玩家 ATB%  | Math.floor(gauge/10) | player.atbPct         | player.atbPct         | number           | Y    |
+| 11  | 敌方 HP    | enemy.get('hp')      | enemy.hp              | enemy.hp              | number           | Y    |
+| 12  | 敌方 maxHP | enemy.get('max_hp')  | enemy.maxHp           | enemy.maxHp           | number           | Y    |
+| 13  | 敌方 ATB%  | Math.floor(gauge/10) | enemy.atbPct          | enemy.atbPct          | number           | Y    |
 
 ### combatEnd 字段映射
 
-| # | 功能 | 后端变量 | 消息 JSON 字段 | 前端 TS 字段 | 类型 | 必填 |
-|---|------|---------|---------------|-------------|------|------|
-| 1 | 战斗 ID | combatId | combatId | combatId | string | Y |
-| 2 | 结束原因 | reason | reason | reason | CombatEndReason | Y |
-| 3 | 结算消息 | message | message | message | string | Y |
+| #   | 功能     | 后端变量 | 消息 JSON 字段 | 前端 TS 字段 | 类型            | 必填 |
+| --- | -------- | -------- | -------------- | ------------ | --------------- | ---- |
+| 1   | 战斗 ID  | combatId | combatId       | combatId     | string          | Y    |
+| 2   | 结束原因 | reason   | reason         | reason       | CombatEndReason | Y    |
+| 3   | 结算消息 | message  | message        | message      | string          | Y    |
 
 ### 命名规范确认
 
@@ -317,7 +317,7 @@ interface CombatFighter {
   level: number;
   hp: number;
   maxHp: number;
-  atbPct: number;     // 0-100 读条百分比
+  atbPct: number; // 0-100 读条百分比
 }
 
 /** 战斗动作 */
@@ -326,7 +326,7 @@ interface CombatAction {
   type: 'attack' | 'crit' | 'miss' | 'flee_fail';
   damage?: number;
   isCrit: boolean;
-  description: string;  // 富文本战斗描述
+  description: string; // 富文本战斗描述
 }
 
 /** combatStart 消息 */
@@ -385,12 +385,12 @@ interface GameState {
 
   // 战斗
   combat: {
-    active: boolean;          // 是否在战斗中
+    active: boolean; // 是否在战斗中
     combatId: string | null;
     player: CombatFighter | null;
     enemy: CombatFighter | null;
-    log: CombatAction[];      // 战斗日志
-    result: CombatEndData | null;  // 战斗结果（展示用）
+    log: CombatAction[]; // 战斗日志
+    result: CombatEndData | null; // 战斗结果（展示用）
   };
   setCombatStart: (data: CombatStartData) => void;
   setCombatUpdate: (data: CombatUpdateData) => void;
@@ -505,7 +505,10 @@ class CombatManager extends BaseEntity {
 ```typescript
 class DamageEngine {
   /** 计算一次攻击 */
-  static calculate(attacker: LivingBase, defender: LivingBase): {
+  static calculate(
+    attacker: LivingBase,
+    defender: LivingBase,
+  ): {
     type: CombatActionType;
     damage: number;
     isCrit: boolean;
@@ -537,13 +540,13 @@ class DamageEngine {
 ```typescript
 class LivingBase extends BaseEntity {
   // 新增方法:
-  getAttack(): number;           // 力量×2 + 装备攻击
-  getDefense(): number;          // 体质×1.5 + 装备防御
-  getCombatSpeed(): number;      // perception×3 + spirit×2 + strength×1 + meridian×1
-  receiveDamage(amount: number): void;  // 扣血 + 检查死亡
-  die(): void;                   // 死亡处理（子类覆写）
-  isInCombat(): boolean;         // 检查 tmpDbase combat/state
-  getCombatState(): string;      // idle | fighting | dead
+  getAttack(): number; // 力量×2 + 装备攻击
+  getDefense(): number; // 体质×1.5 + 装备防御
+  getCombatSpeed(): number; // perception×3 + spirit×2 + strength×1 + meridian×1
+  receiveDamage(amount: number): void; // 扣血 + 检查死亡
+  die(): void; // 死亡处理（子类覆写）
+  isInCombat(): boolean; // 检查 tmpDbase combat/state
+  getCombatState(): string; // idle | fighting | dead
 }
 ```
 
@@ -552,7 +555,7 @@ class LivingBase extends BaseEntity {
 ```typescript
 class SpawnManager {
   // 新增方法:
-  scheduleRespawn(rule: SpawnRule): void;  // callOut 定时重生
+  scheduleRespawn(rule: SpawnRule): void; // callOut 定时重生
 }
 ```
 
@@ -607,43 +610,43 @@ processCombat(combat: CombatInstance): void {
 
 ### 修改的已有文件
 
-| 文件 | 修改内容 |
-|------|---------|
-| `server/src/engine/game-objects/living-base.ts` | 新增 getAttack/getDefense/getCombatSpeed/receiveDamage/die |
-| `server/src/engine/game-objects/npc-base.ts` | onAI() 扩展 doCombat，die() 覆写 |
-| `server/src/engine/game-objects/player-base.ts` | die() 覆写（复活逻辑），getAttack/getDefense 使用 getEquipmentBonus |
-| `server/src/engine/types/events.ts` | 新增 COMBAT_START/COMBAT_END/PRE_ATTACK/POST_ATTACK/DEATH |
-| `server/src/engine/spawn-manager.ts` | 新增 scheduleRespawn() |
-| `server/src/engine/command-loader.ts` | 注册 kill/flee 指令 |
-| `server/src/engine/commands/std/go.ts` | 战斗状态检查 |
-| `server/src/engine/engine.module.ts` | 注册 CombatManager provider |
-| `server/src/websocket/handlers/command.handler.ts` | kill 指令后的战斗消息路由 |
-| `packages/core/src/factory/index.ts` | 导入 combat handler |
-| `packages/core/src/index.ts` | 导出 combat 类型和常量 |
-| `client/App.tsx` | 注册 CombatScreen 路由 + combat 消息监听 |
-| `client/src/stores/useGameStore.ts` | 新增 combat 状态切片 |
+| 文件                                               | 修改内容                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------- |
+| `server/src/engine/game-objects/living-base.ts`    | 新增 getAttack/getDefense/getCombatSpeed/receiveDamage/die          |
+| `server/src/engine/game-objects/npc-base.ts`       | onAI() 扩展 doCombat，die() 覆写                                    |
+| `server/src/engine/game-objects/player-base.ts`    | die() 覆写（复活逻辑），getAttack/getDefense 使用 getEquipmentBonus |
+| `server/src/engine/types/events.ts`                | 新增 COMBAT_START/COMBAT_END/PRE_ATTACK/POST_ATTACK/DEATH           |
+| `server/src/engine/spawn-manager.ts`               | 新增 scheduleRespawn()                                              |
+| `server/src/engine/command-loader.ts`              | 注册 kill/flee 指令                                                 |
+| `server/src/engine/commands/std/go.ts`             | 战斗状态检查                                                        |
+| `server/src/engine/engine.module.ts`               | 注册 CombatManager provider                                         |
+| `server/src/websocket/handlers/command.handler.ts` | kill 指令后的战斗消息路由                                           |
+| `packages/core/src/factory/index.ts`               | 导入 combat handler                                                 |
+| `packages/core/src/index.ts`                       | 导出 combat 类型和常量                                              |
+| `client/App.tsx`                                   | 注册 CombatScreen 路由 + combat 消息监听                            |
+| `client/src/stores/useGameStore.ts`                | 新增 combat 状态切片                                                |
 
 ### 新增的文件
 
-| 文件 | 说明 |
-|------|------|
-| `server/src/engine/combat/combat-manager.ts` | 战斗调度器 |
-| `server/src/engine/combat/damage-engine.ts` | 伤害计算引擎 |
-| `server/src/engine/combat/types.ts` | 战斗类型定义 |
-| `server/src/engine/commands/std/kill.ts` | kill 指令 |
-| `server/src/engine/commands/std/flee.ts` | flee 指令 |
-| `packages/core/src/types/messages/combat.ts` | 战斗消息类型 |
-| `packages/core/src/types/combat-constants.ts` | 战斗常量 |
-| `packages/core/src/factory/handlers/combatStart.ts` | MessageHandler |
+| 文件                                                 | 说明           |
+| ---------------------------------------------------- | -------------- |
+| `server/src/engine/combat/combat-manager.ts`         | 战斗调度器     |
+| `server/src/engine/combat/damage-engine.ts`          | 伤害计算引擎   |
+| `server/src/engine/combat/types.ts`                  | 战斗类型定义   |
+| `server/src/engine/commands/std/kill.ts`             | kill 指令      |
+| `server/src/engine/commands/std/flee.ts`             | flee 指令      |
+| `packages/core/src/types/messages/combat.ts`         | 战斗消息类型   |
+| `packages/core/src/types/combat-constants.ts`        | 战斗常量       |
+| `packages/core/src/factory/handlers/combatStart.ts`  | MessageHandler |
 | `packages/core/src/factory/handlers/combatUpdate.ts` | MessageHandler |
-| `packages/core/src/factory/handlers/combatEnd.ts` | MessageHandler |
-| `client/src/screens/CombatScreen.tsx` | 战斗页面 |
-| `client/src/components/game/Combat/index.tsx` | 战斗容器组件 |
-| `client/src/components/game/Combat/CombatHeader.tsx` | 双方信息 |
-| `client/src/components/game/Combat/FighterPanel.tsx` | 战斗者面板 |
-| `client/src/components/game/Combat/AtbGauge.tsx` | ATB 读条 |
-| `client/src/components/game/Combat/CombatLog.tsx` | 战斗日志 |
-| `client/src/components/game/Combat/FleeButton.tsx` | 逃跑按钮 |
+| `packages/core/src/factory/handlers/combatEnd.ts`    | MessageHandler |
+| `client/src/screens/CombatScreen.tsx`                | 战斗页面       |
+| `client/src/components/game/Combat/index.tsx`        | 战斗容器组件   |
+| `client/src/components/game/Combat/CombatHeader.tsx` | 双方信息       |
+| `client/src/components/game/Combat/FighterPanel.tsx` | 战斗者面板     |
+| `client/src/components/game/Combat/AtbGauge.tsx`     | ATB 读条       |
+| `client/src/components/game/Combat/CombatLog.tsx`    | 战斗日志       |
+| `client/src/components/game/Combat/FleeButton.tsx`   | 逃跑按钮       |
 
 ### 潜在冲突
 
@@ -652,14 +655,15 @@ processCombat(combat: CombatInstance): void {
 
 ## 风险点
 
-| 风险 | 应对方案 |
-|------|---------|
-| ATB 频率过快导致消息洪流 | combatUpdate 合并同一 tick 内所有 actions 为一条消息 |
-| CombatManager 心跳异常影响其他对象 | HeartbeatManager 已有异常隔离（try-catch） |
-| 前端导航竞态（战斗结束时正在跳转） | combatEnd 使用 setTimeout 延迟返回 |
-| NPC 在战斗中被销毁（超时清理） | 战斗中的 NPC 标记 tmpDbase 防止 onCleanUp |
-| 玩家断线时的战斗处理 | handleDisconnect 中检查并结束战斗 |
-| SpawnManager 重生时房间不存在 | 重生前校验房间存在性 |
+| 风险                               | 应对方案                                             |
+| ---------------------------------- | ---------------------------------------------------- |
+| ATB 频率过快导致消息洪流           | combatUpdate 合并同一 tick 内所有 actions 为一条消息 |
+| CombatManager 心跳异常影响其他对象 | HeartbeatManager 已有异常隔离（try-catch）           |
+| 前端导航竞态（战斗结束时正在跳转） | combatEnd 使用 setTimeout 延迟返回                   |
+| NPC 在战斗中被销毁（超时清理）     | 战斗中的 NPC 标记 tmpDbase 防止 onCleanUp            |
+| 玩家断线时的战斗处理               | handleDisconnect 中检查并结束战斗                    |
+| SpawnManager 重生时房间不存在      | 重生前校验房间存在性                                 |
 
 ---
+
 > CX 工作流 | Design Doc | PRD #197 | Scope #196

@@ -11,7 +11,10 @@ interface DescToggleButtonProps {
   onPress: () => void;
 }
 
-export const DescToggleButton = ({ active, onPress }: DescToggleButtonProps) => (
+export const DescToggleButton = ({
+  active,
+  onPress,
+}: DescToggleButtonProps) => (
   <TouchableOpacity style={[s.btn, active && s.btnActive]} onPress={onPress}>
     <Text style={[s.text, active && s.textActive]}>描述</Text>
   </TouchableOpacity>

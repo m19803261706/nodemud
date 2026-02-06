@@ -50,13 +50,9 @@ export class GiveCommand implements ICommand {
     }
 
     // 1. 从背包查找物品
-    const items = executor
-      .getInventory()
-      .filter((e): e is ItemBase => e instanceof ItemBase);
+    const items = executor.getInventory().filter((e): e is ItemBase => e instanceof ItemBase);
     const item = items.find(
-      (i) =>
-        i.getName().includes(itemName) ||
-        i.getName().toLowerCase() === itemName.toLowerCase(),
+      (i) => i.getName().includes(itemName) || i.getName().toLowerCase() === itemName.toLowerCase(),
     );
     if (!item) {
       return { success: false, message: '你没有这个东西。' };
@@ -73,8 +69,7 @@ export class GiveCommand implements ICommand {
     // 3. 在房间中查找 NPC
     const inventory = env.getInventory().filter((e) => e !== executor);
     const npc = inventory.find(
-      (e) =>
-        e instanceof NpcBase && (e as NpcBase).getName().includes(npcName),
+      (e) => e instanceof NpcBase && (e as NpcBase).getName().includes(npcName),
     ) as NpcBase | undefined;
     if (!npc) {
       return { success: false, message: '这里没有这个人。' };

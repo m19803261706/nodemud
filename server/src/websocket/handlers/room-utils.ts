@@ -9,6 +9,8 @@ import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { NpcBase } from '../../engine/game-objects/npc-base';
 import { ItemBase } from '../../engine/game-objects/item-base';
+import { ContainerBase } from '../../engine/game-objects/container-base';
+import { RemainsBase } from '../../engine/game-objects/remains-base';
 import type { BlueprintFactory } from '../../engine/blueprint-factory';
 
 /** 反方向映射表 */
@@ -93,12 +95,22 @@ export function sendRoomInfo(
   const items: ItemBrief[] = room
     .getInventory()
     .filter((e): e is ItemBase => e instanceof ItemBase)
-    .map((item) => ({
-      id: item.id,
-      name: item.getName(),
-      short: item.getShort(),
-      type: item.getType(),
-    }));
+    .map((item) => {
+      const brief: ItemBrief = {
+        id: item.id,
+        name: item.getName(),
+        short: item.getShort(),
+        type: item.getType(),
+      };
+      if (item instanceof ContainerBase) {
+        brief.isContainer = true;
+        brief.contentCount = item.getContents().length;
+      }
+      if (item instanceof RemainsBase) {
+        brief.isRemains = true;
+      }
+      return brief;
+    });
 
   const msg = MessageFactory.create(
     'roomInfo',

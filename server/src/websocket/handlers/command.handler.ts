@@ -154,5 +154,19 @@ export class CommandHandler {
     if (result.success && result.data?.action === 'use' && result.data?.consumed) {
       sendInventoryUpdate(player);
     }
+
+    // get_from 成功后：推送 inventoryUpdate + roomInfo
+    if (result.success && result.data?.action === 'get_from') {
+      const room = player.getEnvironment() as RoomBase | null;
+      sendInventoryUpdate(player);
+      if (room) sendRoomInfo(player, room, this.blueprintFactory);
+    }
+
+    // put 成功后：推送 inventoryUpdate + roomInfo
+    if (result.success && result.data?.action === 'put') {
+      const room = player.getEnvironment() as RoomBase | null;
+      sendInventoryUpdate(player);
+      if (room) sendRoomInfo(player, room, this.blueprintFactory);
+    }
   }
 }

@@ -36,7 +36,10 @@ interface CategoryTabsProps {
   onSelect: (category: CategoryKey) => void;
 }
 
-export const CategoryTabs = ({ activeCategory, onSelect }: CategoryTabsProps) => {
+export const CategoryTabs = ({
+  activeCategory,
+  onSelect,
+}: CategoryTabsProps) => {
   return (
     <View style={s.container}>
       {CATEGORIES.map(cat => {

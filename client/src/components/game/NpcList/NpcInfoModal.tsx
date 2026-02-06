@@ -83,9 +83,7 @@ const ActionButton = ({
   variant?: 'danger';
 }) => (
   <TouchableOpacity style={s.btnWrap} onPress={onPress} activeOpacity={0.7}>
-    <View
-      style={[s.btn, variant === 'danger' ? s.btnDanger : undefined]}
-    >
+    <View style={[s.btn, variant === 'danger' ? s.btnDanger : undefined]}>
       <LinearGradient
         colors={
           variant === 'danger'
@@ -106,9 +104,7 @@ const ActionButton = ({
 );
 
 /** 给予列表分隔线 */
-const GiveDivider = () => (
-  <View style={s.giveDivider} />
-);
+const GiveDivider = () => <View style={s.giveDivider} />;
 
 /** 渐变分隔线 */
 const Divider = () => (
@@ -279,9 +275,7 @@ export const NpcInfoModal = ({
                   <View style={s.giveOverlay}>
                     <View style={s.giveHeader}>
                       <Text style={s.giveTitle}>选择物品</Text>
-                      <TouchableOpacity
-                        onPress={() => setShowGiveList(false)}
-                      >
+                      <TouchableOpacity onPress={() => setShowGiveList(false)}>
                         <Text style={s.giveBack}>返回</Text>
                       </TouchableOpacity>
                     </View>

@@ -49,7 +49,10 @@ export class WearCommand implements ICommand {
     if (levelReq > 0) {
       const playerLevel = executor.get<number>('level') ?? 1;
       if (playerLevel < levelReq) {
-        return { success: false, message: `你的等级不足，需要 ${levelReq} 级才能穿戴${item.getName()}。` };
+        return {
+          success: false,
+          message: `你的等级不足，需要 ${levelReq} 级才能穿戴${item.getName()}。`,
+        };
       }
     }
 

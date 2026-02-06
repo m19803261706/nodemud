@@ -87,9 +87,17 @@ export const PlayerStats = () => {
       <View style={s.attrRow}>
         {ATTR_LABELS.map(({ key, label }) => {
           const bonusKey = ATTR_BONUS_KEY[key];
-          const bonus = (player.equipBonus?.attrs as Record<string, number> | undefined)?.[bonusKey] ?? 0;
+          const bonus =
+            (player.equipBonus?.attrs as Record<string, number> | undefined)?.[
+              bonusKey
+            ] ?? 0;
           return (
-            <AttrValue key={key} label={label} value={player.attrs[key]} bonus={bonus} />
+            <AttrValue
+              key={key}
+              label={label}
+              value={player.attrs[key]}
+              bonus={bonus}
+            />
           );
         })}
       </View>

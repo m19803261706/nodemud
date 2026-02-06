@@ -68,7 +68,11 @@ export class AskCommand implements ICommand {
     const inquiry = npc.get<Record<string, string>>('inquiry');
     const name = npc.getName();
 
-    const prefix = `你向${rt('npc', name)}打听${rt('sys', keyword)}。\n`;
+    // "default" 是内部保留关键词，不显示在日志中
+    const isDefault = keyword === 'default';
+    const prefix = isDefault
+      ? `你向${rt('npc', name)}搭话。\n`
+      : `你向${rt('npc', name)}打听${rt('sys', keyword)}。\n`;
 
     if (!inquiry) {
       return {

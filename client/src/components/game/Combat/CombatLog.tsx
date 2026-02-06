@@ -48,14 +48,10 @@ const LogItem = React.memo(({ item }: { item: CombatLogItem }) => (
 ));
 
 /** FlatList 头部（标题） */
-const ListHeader = () => (
-  <Text style={s.title}>-- 战斗记录 --</Text>
-);
+const ListHeader = () => <Text style={s.title}>-- 战斗记录 --</Text>;
 
 /** FlatList 空状态 */
-const ListEmpty = () => (
-  <Text style={s.emptyText}>蓄力中...</Text>
-);
+const ListEmpty = () => <Text style={s.emptyText}>蓄力中...</Text>;
 
 export const CombatLog = ({ actions }: CombatLogProps) => {
   const flatListRef = useRef<FlatList<CombatLogItem>>(null);

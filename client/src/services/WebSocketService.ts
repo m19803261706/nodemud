@@ -149,6 +149,14 @@ class WebSocketService {
   private handleMessage(raw: string) {
     const message = MessageFactory.deserialize<ServerMessage>(raw);
     if (!message) {
+      // 尝试直接 JSON 解析（部分消息未走 MessageFactory）
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.type) {
+          this.emit(parsed.type, parsed.data);
+          return;
+        }
+      } catch {}
       console.error('无效消息:', raw);
       return;
     }

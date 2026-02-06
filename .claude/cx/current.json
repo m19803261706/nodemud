@@ -1,71 +1,24 @@
 {
-  "feature": "combat-system",
-  "created_at": "2026-02-06T16:30:00+08:00",
+  "feature": "remains-system",
+  "created_at": "2026-02-06T05:30:00+08:00",
   "project_number": 6,
   "docs": {
-    "scope": 196,
-    "prd": 197,
-    "design": 198,
+    "scope": 207,
+    "prd": 208,
+    "design": 209,
     "adr": []
   },
   "epic": {
-    "number": 199,
-    "title": "[Epic] 战斗系统（ATB 读条出手机制）"
+    "number": 210,
+    "title": "[Epic] 残骸系统 — 死亡掉落 + 容器指令 + 地面物品展示"
   },
   "issues": [
-    {
-      "number": 200,
-      "title": "[core] 战斗消息类型 + 常量 + MessageHandler",
-      "status": "cx-ready",
-      "phase": 1,
-      "parallel_group": "p1-core"
-    },
-    {
-      "number": 201,
-      "title": "[backend] LivingBase 战斗属性扩展",
-      "status": "cx-ready",
-      "phase": 2,
-      "parallel_group": "p2-engine"
-    },
-    {
-      "number": 202,
-      "title": "[backend] DamageEngine 伤害计算引擎",
-      "status": "cx-ready",
-      "phase": 2,
-      "parallel_group": "p2-engine"
-    },
-    {
-      "number": 203,
-      "title": "[backend] CombatManager 战斗调度器",
-      "status": "cx-blocked",
-      "phase": 3,
-      "parallel_group": "p3-combat",
-      "depends_on": [200, 201, 202]
-    },
-    {
-      "number": 204,
-      "title": "[backend] kill/flee 指令 + go 战斗检查 + SpawnManager 重生",
-      "status": "cx-blocked",
-      "phase": 4,
-      "parallel_group": "p4-commands",
-      "depends_on": [203]
-    },
-    {
-      "number": 205,
-      "title": "[backend] GameEvents 战斗事件 + WebSocket 断线战斗清理",
-      "status": "cx-blocked",
-      "phase": 4,
-      "parallel_group": "p4-commands",
-      "depends_on": [203]
-    },
-    {
-      "number": 206,
-      "title": "[client] CombatScreen 战斗页面 + 组件 + Store 切片 + 消息监听",
-      "status": "cx-blocked",
-      "phase": 5,
-      "parallel_group": "p5-client",
-      "depends_on": [200, 205]
-    }
+    {"number": 211, "title": "ContainerBase + RemainsBase + ItemBrief", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
+    {"number": 212, "title": "get from 指令扩展", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
+    {"number": 213, "title": "put in 新增指令", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
+    {"number": 214, "title": "NPC 死亡创建残骸", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [211]},
+    {"number": 215, "title": "玩家死亡创建空残骸", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [211]},
+    {"number": 216, "title": "look/examine + 前端展示", "status": "cx-blocked", "phase": 3, "parallel_group": "p3", "depends_on": [211, 212, 213, 214]}
   ],
-  "execution_order": [200, 201, 202, 203, 204, 205, 206]
+  "execution_order": [211, 212, 213, 214, 215, 216]
 }

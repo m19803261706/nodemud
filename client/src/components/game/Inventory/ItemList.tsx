@@ -17,7 +17,10 @@ export const ItemList = ({ items, onItemPress }: ItemListProps) => {
   /** 底部统计：物品数 + 总重量 */
   const stats = useMemo(() => {
     const totalCount = items.reduce((sum, it) => sum + it.count, 0);
-    const totalWeight = items.reduce((sum, it) => sum + it.weight * it.count, 0);
+    const totalWeight = items.reduce(
+      (sum, it) => sum + it.weight * it.count,
+      0,
+    );
     return { totalCount, totalWeight };
   }, [items]);
 
@@ -43,12 +46,8 @@ export const ItemList = ({ items, onItemPress }: ItemListProps) => {
     () =>
       items.length > 0 ? (
         <View style={s.footer}>
-          <Text style={s.footerText}>
-            共 {stats.totalCount} 件
-          </Text>
-          <Text style={s.footerText}>
-            总重 {stats.totalWeight}
-          </Text>
+          <Text style={s.footerText}>共 {stats.totalCount} 件</Text>
+          <Text style={s.footerText}>总重 {stats.totalWeight}</Text>
         </View>
       ) : null,
     [items.length, stats],

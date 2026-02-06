@@ -8,9 +8,15 @@
  */
 import { QUALITY_MULTIPLIER, mergeBonus, type EquipmentBonus } from '@packages/core';
 import { LivingBase } from './living-base';
+import { RemainsBase } from './remains-base';
+import { RoomBase } from './room-base';
+import { ServiceLocator } from '../service-locator';
 import { Permission } from '../types/command';
 import { ArmorBase } from './armor-base';
 import { WeaponBase } from './weapon-base';
+
+/** 复活地点 */
+const REVIVE_ROOM = 'area/rift-town/square';
 
 export class PlayerBase extends LivingBase {
   /** 玩家可克隆（非虚拟对象） */
@@ -107,17 +113,42 @@ export class PlayerBase extends LivingBase {
   }
 
   /**
-   * 玩家死亡: 以 30% maxHp 复活，战斗状态重置为 idle
-   * 后续可扩展: 移动到复活点（广场）
+   * 玩家死亡：标记死亡状态 + 创建空残骸
+   * 不立即复活 — 由 CombatManager.endCombat() 在战斗结束后调用 revive()
    */
   die(): void {
     super.die();
+    const env = this.getEnvironment();
+
+    // 创建空残骸（不转移物品，后续版本再定）
+    const remainsId = ServiceLocator.objectManager.nextInstanceId('remains');
+    const remains = new RemainsBase(remainsId, this.getName());
+    ServiceLocator.objectManager.register(remains);
+    remains.enableHeartbeat(1000);
+
+    // 残骸放入当前房间（在 revive 传送之前）
+    if (env && env instanceof RoomBase) {
+      remains.moveTo(env, { quiet: true });
+    }
+  }
+
+  /**
+   * 复活：以 30% maxHp 复活，传送到新手村广场
+   * 由 CombatManager 在战败结算后调用
+   */
+  async revive(): Promise<void> {
     const maxHp = this.get<number>('max_hp') || 100;
     const reviveHp = Math.floor(maxHp * 0.3);
     this.set('hp', reviveHp);
     this.setTemp('combat/state', 'idle');
-    // TODO: moveTo 广场 (area/rift-town/square)
-    // 需要战斗系统完善后，配合 ServiceLocator 获取房间实例
+
+    // 传送到复活点
+    if (ServiceLocator.initialized && ServiceLocator.blueprintFactory) {
+      const room = ServiceLocator.blueprintFactory.getVirtual(REVIVE_ROOM);
+      if (room) {
+        await this.moveTo(room, { quiet: true });
+      }
+    }
   }
 
   /** 玩家永不自毁（生命周期由连接管理） */

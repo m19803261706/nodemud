@@ -30,9 +30,7 @@ export class InventoryCommand implements ICommand {
   directory = 'std';
 
   execute(executor: LivingBase, _args: string[]): CommandResult {
-    const items = executor
-      .getInventory()
-      .filter((e): e is ItemBase => e instanceof ItemBase);
+    const items = executor.getInventory().filter((e): e is ItemBase => e instanceof ItemBase);
 
     if (items.length === 0) {
       return {

@@ -132,31 +132,31 @@ NPC 被玩家攻击过后记住仇恨状态。如果该 NPC 未被击杀也未�
 
 ### 可直接复用
 
-| 模块 | 文件 | 复用方式 |
-|------|------|---------|
-| HeartbeatManager | `server/src/engine/heartbeat-manager.ts` | CombatManager 注册心跳 |
-| LivingBase 装备系统 | `server/src/engine/game-objects/living-base.ts` | 读取装备计算攻防 |
-| EquipmentBonus | `packages/core/src/types/equipment-bonus.ts` | combat.attack/defense |
-| WeaponBase.getDamage() | `server/src/engine/game-objects/weapon-base.ts` | 武器伤害 |
-| ArmorBase.getDefense() | `server/src/engine/game-objects/armor-base.ts` | 防具防御 |
-| NpcBase.onAI() | `server/src/engine/game-objects/npc-base.ts` | 扩展战斗 AI |
-| CommandManager | `server/src/engine/command-loader.ts` | 注册 kill/flee |
-| GameEvents | `server/src/engine/types/events.ts` | 扩展战斗事件 |
-| SpawnManager | `server/src/engine/spawn-manager.ts` | NPC 死亡重生 |
-| RichText/SemanticTag | `packages/core/src/types/rich-text.ts` | 战斗标签 |
-| LogScrollView | `client/src/components/game/shared/LogScrollView.tsx` | 战斗日志 |
-| PlayerBase.getEquipmentBonus() | `server/src/engine/game-objects/player-base.ts` | 装备加成汇总 |
+| 模块                           | 文件                                                  | 复用方式               |
+| ------------------------------ | ----------------------------------------------------- | ---------------------- |
+| HeartbeatManager               | `server/src/engine/heartbeat-manager.ts`              | CombatManager 注册心跳 |
+| LivingBase 装备系统            | `server/src/engine/game-objects/living-base.ts`       | 读取装备计算攻防       |
+| EquipmentBonus                 | `packages/core/src/types/equipment-bonus.ts`          | combat.attack/defense  |
+| WeaponBase.getDamage()         | `server/src/engine/game-objects/weapon-base.ts`       | 武器伤害               |
+| ArmorBase.getDefense()         | `server/src/engine/game-objects/armor-base.ts`        | 防具防御               |
+| NpcBase.onAI()                 | `server/src/engine/game-objects/npc-base.ts`          | 扩展战斗 AI            |
+| CommandManager                 | `server/src/engine/command-loader.ts`                 | 注册 kill/flee         |
+| GameEvents                     | `server/src/engine/types/events.ts`                   | 扩展战斗事件           |
+| SpawnManager                   | `server/src/engine/spawn-manager.ts`                  | NPC 死亡重生           |
+| RichText/SemanticTag           | `packages/core/src/types/rich-text.ts`                | 战斗标签               |
+| LogScrollView                  | `client/src/components/game/shared/LogScrollView.tsx` | 战斗日志               |
+| PlayerBase.getEquipmentBonus() | `server/src/engine/game-objects/player-base.ts`       | 装备加成汇总           |
 
 ### 需要扩展
 
-| 模块 | 扩展内容 |
-|------|---------|
-| LivingBase | receiveDamage/die/getAttack/getDefense/getCombatSpeed/战斗状态 |
-| NpcBase | doCombat() + 仇恨系统 |
-| SpawnManager | scheduleRespawn() 定时重生 |
-| GameEvents | PRE_ATTACK/POST_ATTACK/COMBAT_START/COMBAT_END/DEATH |
-| MessageFactory | combatStart/combatUpdate/combatEnd 消息处理器 |
-| useGameStore | 战斗状态切片 |
+| 模块           | 扩展内容                                                       |
+| -------------- | -------------------------------------------------------------- |
+| LivingBase     | receiveDamage/die/getAttack/getDefense/getCombatSpeed/战斗状态 |
+| NpcBase        | doCombat() + 仇恨系统                                          |
+| SpawnManager   | scheduleRespawn() 定时重生                                     |
+| GameEvents     | PRE_ATTACK/POST_ATTACK/COMBAT_START/COMBAT_END/DEATH           |
+| MessageFactory | combatStart/combatUpdate/combatEnd 消息处理器                  |
+| useGameStore   | 战斗状态切片                                                   |
 
 ## 代码影响范围
 
@@ -217,4 +217,5 @@ NPC 被玩家攻击过后记住仇恨状态。如果该 NPC 未被击杀也未�
 - [ ] 战斗描述根据伤害比例使用不同文学描述词
 
 ---
+
 > CX 工作流 | PRD | Scope #196

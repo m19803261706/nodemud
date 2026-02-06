@@ -31,8 +31,7 @@ export class RemoveCommand implements ICommand {
     // 查找已装备的物品
     const found = executor.findEquipped(
       (item) =>
-        item.getName().includes(target) ||
-        item.getName().toLowerCase() === target.toLowerCase(),
+        item.getName().includes(target) || item.getName().toLowerCase() === target.toLowerCase(),
     );
 
     if (!found) {

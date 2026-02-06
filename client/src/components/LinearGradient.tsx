@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { View, type ViewProps, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  View,
+  type ViewProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 interface LinearGradientProps extends ViewProps {
   colors: readonly string[];
@@ -54,10 +59,7 @@ const LinearGradient: React.FC<LinearGradientProps> = ({
   const gradient = toGradientCSS(colors, start, end, locations);
 
   return (
-    <View
-      {...rest}
-      style={[style, { experimental_backgroundImage: gradient }]}
-    >
+    <View {...rest} style={[style, { experimental_backgroundImage: gradient }]}>
       {children}
     </View>
   );

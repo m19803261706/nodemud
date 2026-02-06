@@ -12,6 +12,7 @@ export { ArmorBase } from './armor-base';
 export { MedicineBase } from './medicine-base';
 export { BookBase } from './book-base';
 export { ContainerBase } from './container-base';
+export { RemainsBase } from './remains-base';
 export { FoodBase } from './food-base';
 export { KeyBase } from './key-base';
 export { LivingBase } from './living-base';

@@ -24,7 +24,12 @@ export interface EquipmentBonus {
 
 /** 六维属性 key 集合 */
 const ATTR_KEYS = new Set<string>([
-  'wisdom', 'perception', 'spirit', 'meridian', 'strength', 'vitality',
+  'wisdom',
+  'perception',
+  'spirit',
+  'meridian',
+  'strength',
+  'vitality',
 ]);
 
 /** 三维资源 key 映射 */

@@ -81,8 +81,16 @@ export class CommandLoader {
   loadCommand(filePath: string, directory: string): ICommand | null {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const module = require(filePath);
-      const CommandClass = module.default || module;
+      const mod = require(filePath);
+
+      // 支持多种导出形式: default export / named export / module.exports = Class
+      let CommandClass: any = mod.default || mod;
+      if (typeof CommandClass !== 'function') {
+        // 尝试从命名导出中找到带 @Command 装饰器的类
+        CommandClass = Object.values(mod).find(
+          (v) => typeof v === 'function' && Reflect.getMetadata(COMMAND_META_KEY, v),
+        );
+      }
 
       if (typeof CommandClass !== 'function') {
         this.logger.warn(`跳过非类导出: ${filePath}`);

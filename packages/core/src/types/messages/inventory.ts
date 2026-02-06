@@ -11,6 +11,12 @@ export interface ItemBrief {
   name: string;
   short: string;
   type: string;
+  /** 是否为容器 */
+  isContainer?: boolean;
+  /** 是否为残骸（前端特殊样式） */
+  isRemains?: boolean;
+  /** 内容物数量（仅容器有值） */
+  contentCount?: number;
 }
 
 /** 背包物品完整信息 */

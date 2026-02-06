@@ -14,7 +14,7 @@ import { ObjectManager } from '../../engine/object-manager';
 import { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { sendRoomInfo } from './room-utils';
-import { sendPlayerStats } from './stats.utils';
+import { loadCharacterToPlayer, sendPlayerStats } from './stats.utils';
 import type { Session } from '../types/session';
 
 /** 临时数据超时时间（30分钟） */
@@ -261,6 +261,7 @@ export class CharacterHandler {
         const player = new PlayerBase(playerId);
         this.objectManager.register(player);
         player.set('name', character.name);
+        loadCharacterToPlayer(player, character);
 
         // 绑定 WebSocket 连接
         player.bindConnection((msg: any) => {

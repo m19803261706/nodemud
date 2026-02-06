@@ -28,16 +28,16 @@ export const DirectionCell = ({ dir, onPress }: DirectionCellProps) => {
       disabled={isDisabled}
       activeOpacity={0.6}
     >
-    <Text
-      style={[
-        s.text,
-        dir.bold && s.textBold,
-        dir.center && s.textCenter,
-        !dir.bold && s.textDiag,
-      ]}
-    >
-      {dir.text}
-    </Text>
+      <Text
+        style={[
+          s.text,
+          dir.bold && s.textBold,
+          dir.center && s.textCenter,
+          !dir.bold && s.textDiag,
+        ]}
+      >
+        {dir.text}
+      </Text>
     </TouchableOpacity>
   );
 };

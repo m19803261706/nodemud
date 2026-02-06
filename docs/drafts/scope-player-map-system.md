@@ -12,14 +12,14 @@
 
 ## 6 个子功能
 
-| # | 子功能 | 后端 | 前端 | Core |
-|---|--------|------|------|------|
-| 1 | 新角色进入初始地图 | 创建成功后 moveTo 广场 + 推送 roomInfo | 收到 roomInfo 更新 store | roomInfo 消息类型 |
-| 2 | 登录已有角色进入地图 | 登录成功后加载角色 + moveTo lastRoom + 推送 roomInfo | 同上 | 同上 |
-| 3 | 下线记录位置 | 断开连接时保存 lastRoom 到 Character 表 | 无 | 无 |
-| 4 | roomInfo 消息协议 | 服务端构建并发送 | 前端解析并更新 UI | 类型定义 + MessageHandler |
-| 5 | 九宫格移动 | go 命令执行移动 + 推送新房间 roomInfo | 点击方向格 → sendCommand → 更新 UI | command 消息已有 |
-| 6 | 进出房间广播 | broadcast 富文本日志给房间内其他玩家 | appendLog 显示 | 复用 gameLog 机制 |
+| #   | 子功能               | 后端                                                 | 前端                               | Core                      |
+| --- | -------------------- | ---------------------------------------------------- | ---------------------------------- | ------------------------- |
+| 1   | 新角色进入初始地图   | 创建成功后 moveTo 广场 + 推送 roomInfo               | 收到 roomInfo 更新 store           | roomInfo 消息类型         |
+| 2   | 登录已有角色进入地图 | 登录成功后加载角色 + moveTo lastRoom + 推送 roomInfo | 同上                               | 同上                      |
+| 3   | 下线记录位置         | 断开连接时保存 lastRoom 到 Character 表              | 无                                 | 无                        |
+| 4   | roomInfo 消息协议    | 服务端构建并发送                                     | 前端解析并更新 UI                  | 类型定义 + MessageHandler |
+| 5   | 九宫格移动           | go 命令执行移动 + 推送新房间 roomInfo                | 点击方向格 → sendCommand → 更新 UI | command 消息已有          |
+| 6   | 进出房间广播         | broadcast 富文本日志给房间内其他玩家                 | appendLog 显示                     | 复用 gameLog 机制         |
 
 ## 用户流程
 
@@ -74,6 +74,7 @@ data: {
 ```
 
 **设计决策**：
+
 - `exits` 传 `string[]` 而非 `Record<string, string>`，前端不需要知道目标房间 ID，只需知道哪些方向可走
 - `coordinates` 预留给后续小地图功能
 - 本次不包含 NPC/物品列表，后续可扩展
@@ -81,6 +82,7 @@ data: {
 ### 数据库变更
 
 Character 表新增字段：
+
 ```sql
 last_room VARCHAR(255) DEFAULT 'area/rift-town/square' COMMENT '最后所在房间ID'
 ```
@@ -108,12 +110,12 @@ last_room VARCHAR(255) DEFAULT 'area/rift-town/square' COMMENT '最后所在房�
 
 ### 考虑过的替代方案
 
-| 方案 | 优点 | 缺点 | 结论 |
-|------|------|------|------|
-| exits 传完整 Record | 前端可预加载相邻房间 | 泄露服务端内部ID，过度设计 | 放弃 |
-| 不可走方向允许点击 | MUD 传统体验 | 增加无效网络请求 | 放弃，选择置灰禁止 |
+| 方案                    | 优点                     | 缺点                       | 结论                 |
+| ----------------------- | ------------------------ | -------------------------- | -------------------- |
+| exits 传完整 Record     | 前端可预加载相邻房间     | 泄露服务端内部ID，过度设计 | 放弃                 |
+| 不可走方向允许点击      | MUD 传统体验             | 增加无效网络请求           | 放弃，选择置灰禁止   |
 | 专门的 enter/leave 消息 | 类型安全，前端可差异处理 | 过度设计，目前只需日志文本 | 放弃，复用 broadcast |
-| Session 内存存 lastRoom | 无数据库写入 | 服务崩溃丢失位置 | 放弃，写 DB 更可靠 |
+| Session 内存存 lastRoom | 无数据库写入             | 服务崩溃丢失位置           | 放弃，写 DB 更可靠   |
 
 ## 与现有功能的关系
 
@@ -127,16 +129,16 @@ last_room VARCHAR(255) DEFAULT 'area/rift-town/square' COMMENT '最后所在房�
 
 ### 影响（需修改的模块）
 
-| 模块 | 修改内容 |
-|------|----------|
-| `packages/core` | 新增 roomInfo 消息类型 + MessageHandler |
-| `server/character` | Character 实体新增 last_room 字段 |
-| `server/websocket/handlers/auth` | 登录成功后加载角色进入房间 |
-| `server/websocket/handlers/character` | 创建成功后角色进入初始房间 |
-| `server/websocket/handlers/command` | go 命令成功后推送 roomInfo + 广播 |
-| `server/websocket/gateway` | 断开连接时保存 last_room |
-| `client/stores/useGameStore` | 新增 sendCommand action、roomInfo 处理 |
-| `client/components/game/MapNavigation` | 方向格点击事件、可走/不可走样式 |
+| 模块                                   | 修改内容                                |
+| -------------------------------------- | --------------------------------------- |
+| `packages/core`                        | 新增 roomInfo 消息类型 + MessageHandler |
+| `server/character`                     | Character 实体新增 last_room 字段       |
+| `server/websocket/handlers/auth`       | 登录成功后加载角色进入房间              |
+| `server/websocket/handlers/character`  | 创建成功后角色进入初始房间              |
+| `server/websocket/handlers/command`    | go 命令成功后推送 roomInfo + 广播       |
+| `server/websocket/gateway`             | 断开连接时保存 last_room                |
+| `client/stores/useGameStore`           | 新增 sendCommand action、roomInfo 处理  |
+| `client/components/game/MapNavigation` | 方向格点击事件、可走/不可走样式         |
 
 ### 复用
 
@@ -170,4 +172,5 @@ last_room VARCHAR(255) DEFAULT 'area/rift-town/square' COMMENT '最后所在房�
 5. **store 发送命令**: 通过 store action 发送，遵循项目规范"组件不直接调用 WebSocketService"
 
 ---
+
 > CX 工作流 | 功能探讨

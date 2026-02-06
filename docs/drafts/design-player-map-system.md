@@ -9,22 +9,22 @@
 
 ## 基于现有代码
 
-| 模块 | 现状 | 本次扩展 |
-|------|------|---------|
-| `PlayerBase` | 已有 `bindConnection` / `sendToClient` / `moveTo` | 无需修改 |
-| `LivingBase.go()` | 已有完整移动逻辑（事件链 pre:move → post:move → encounter） | 无需修改 |
-| `RoomBase` | 已有 `broadcast()` / `getShort()` / `getLong()` / `getExits()` / `getCoordinates()` | 无需修改 |
-| `GoCommand` | 已有方向解析 + 出口查询，返回 `{ direction, targetId }` | 无需修改 |
-| `ObjectManager` | 已有 `register()` / `findById()` / `unregister()` | 无需修改 |
-| `BlueprintFactory` | 已有 `getVirtual()` / `clone()` | 无需修改 |
-| `CommandHandler` | 已有 `handleCommand()`，执行命令并返回结果 | 扩展：go 成功后推送 roomInfo + 广播 |
-| `AuthHandler` | 已有登录/注册处理 | 扩展：登录已有角色后加载进场 |
-| `CharacterHandler` | 已有创建角色 4 步流程 | 扩展：创建成功后加载进场 |
-| `GameGateway` | 已有连接/断开/消息路由 | 扩展：断开时保存位置 |
-| `Character 实体` | 已有完整属性字段 | 新增 `lastRoom` 字段 |
-| `MessageFactory` | 已有装饰器注册机制 | 新增 roomInfo handler |
-| `WebSocketService` | 已有消息监听 `addListener` / `send` | 新增 roomInfo 监听 |
-| `useGameStore` | 已有 `setLocation` / `setDirections` / `appendLog` | 新增 `sendCommand` action |
+| 模块               | 现状                                                                                | 本次扩展                            |
+| ------------------ | ----------------------------------------------------------------------------------- | ----------------------------------- |
+| `PlayerBase`       | 已有 `bindConnection` / `sendToClient` / `moveTo`                                   | 无需修改                            |
+| `LivingBase.go()`  | 已有完整移动逻辑（事件链 pre:move → post:move → encounter）                         | 无需修改                            |
+| `RoomBase`         | 已有 `broadcast()` / `getShort()` / `getLong()` / `getExits()` / `getCoordinates()` | 无需修改                            |
+| `GoCommand`        | 已有方向解析 + 出口查询，返回 `{ direction, targetId }`                             | 无需修改                            |
+| `ObjectManager`    | 已有 `register()` / `findById()` / `unregister()`                                   | 无需修改                            |
+| `BlueprintFactory` | 已有 `getVirtual()` / `clone()`                                                     | 无需修改                            |
+| `CommandHandler`   | 已有 `handleCommand()`，执行命令并返回结果                                          | 扩展：go 成功后推送 roomInfo + 广播 |
+| `AuthHandler`      | 已有登录/注册处理                                                                   | 扩展：登录已有角色后加载进场        |
+| `CharacterHandler` | 已有创建角色 4 步流程                                                               | 扩展：创建成功后加载进场            |
+| `GameGateway`      | 已有连接/断开/消息路由                                                              | 扩展：断开时保存位置                |
+| `Character 实体`   | 已有完整属性字段                                                                    | 新增 `lastRoom` 字段                |
+| `MessageFactory`   | 已有装饰器注册机制                                                                  | 新增 roomInfo handler               |
+| `WebSocketService` | 已有消息监听 `addListener` / `send`                                                 | 新增 roomInfo 监听                  |
+| `useGameStore`     | 已有 `setLocation` / `setDirections` / `appendLog`                                  | 新增 `sendCommand` action           |
 
 ## 架构概览
 
@@ -96,8 +96,8 @@ lastRoom: string;
 
 ### 字段说明
 
-| 字段 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| 字段        | 类型         | 默认值                    | 说明                                           |
+| ----------- | ------------ | ------------------------- | ---------------------------------------------- |
 | `last_room` | VARCHAR(255) | `'area/rift-town/square'` | 存储蓝图 ID 格式（如 `area/rift-town/square`） |
 
 ---
@@ -108,12 +108,13 @@ lastRoom: string;
 
 ### 消息总览
 
-| # | 方向 | type | 说明 | 触发时机 |
-|---|------|------|------|---------|
-| 1 | S→C | `roomInfo` | 房间信息推送 | 进场/移动后 |
-| 2 | S→C | `gameLog` | 游戏日志推送 | 广播消息（进出/上下线） |
+| #   | 方向 | type       | 说明         | 触发时机                |
+| --- | ---- | ---------- | ------------ | ----------------------- |
+| 1   | S→C  | `roomInfo` | 房间信息推送 | 进场/移动后             |
+| 2   | S→C  | `gameLog`  | 游戏日志推送 | 广播消息（进出/上下线） |
 
 **设计决策**：
+
 - **不新增 enterGame 请求消息** — 登录成功/创建成功时服务端自动进场，无需客户端额外发送
 - **不新增 playerEntered/playerLeft 消息** — 复用 `gameLog` 富文本广播，与 look/say 保持一致
 - **roomInfo 的 exits 传 string[]** — 前端只需知道可走方向，不暴露目标房间 ID
@@ -139,12 +140,12 @@ lastRoom: string;
 
 **字段说明**：
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `short` | string | ✅ | 房间标题，来自 `room.getShort()` |
-| `long` | string | ✅ | 房间描述，来自 `room.getLong()` |
-| `exits` | string[] | ✅ | 可走方向列表，来自 `Object.keys(room.getExits())` |
-| `coordinates` | `{x,y,z}` | ✅ | 地图坐标，来自 `room.getCoordinates()` |
+| 字段          | 类型      | 必填 | 说明                                              |
+| ------------- | --------- | ---- | ------------------------------------------------- |
+| `short`       | string    | ✅   | 房间标题，来自 `room.getShort()`                  |
+| `long`        | string    | ✅   | 房间描述，来自 `room.getLong()`                   |
+| `exits`       | string[]  | ✅   | 可走方向列表，来自 `Object.keys(room.getExits())` |
+| `coordinates` | `{x,y,z}` | ✅   | 地图坐标，来自 `room.getCoordinates()`            |
 
 #### 2. gameLog（服务端 → 客户端）
 
@@ -163,18 +164,18 @@ lastRoom: string;
 
 **反方向映射**：
 
-| 移动方向 | 反方向（广播用） |
-|---------|----------------|
-| north | 南方 |
-| south | 北方 |
-| east | 西方 |
-| west | 东方 |
-| up | 下方 |
-| down | 上方 |
-| northeast | 西南方 |
-| northwest | 东南方 |
-| southeast | 西北方 |
-| southwest | 东北方 |
+| 移动方向  | 反方向（广播用） |
+| --------- | ---------------- |
+| north     | 南方             |
+| south     | 北方             |
+| east      | 西方             |
+| west      | 东方             |
+| up        | 下方             |
+| down      | 上方             |
+| northeast | 西南方           |
+| northwest | 东南方           |
+| southeast | 西北方           |
+| southwest | 东北方           |
 
 ---
 
@@ -182,12 +183,12 @@ lastRoom: string;
 
 ### roomInfo 字段映射
 
-| # | 来源 | 服务端取值 | 消息字段 | 前端 store 字段 | 前端 UI 组件 |
-|---|------|-----------|---------|----------------|-------------|
-| 1 | RoomBase | `room.getShort()` | `data.short` | `location.name` | LocationHeader → LocationTitle |
-| 2 | RoomBase | `room.getLong()` | `data.long` | `location.description` | GameLog → MapDescription |
-| 3 | RoomBase | `Object.keys(room.getExits())` | `data.exits` | `directions[][]` (计算) | MapNavigation → DirectionCell |
-| 4 | RoomBase | `room.getCoordinates()` | `data.coordinates` | （预留） | （预留） |
+| #   | 来源     | 服务端取值                     | 消息字段           | 前端 store 字段         | 前端 UI 组件                   |
+| --- | -------- | ------------------------------ | ------------------ | ----------------------- | ------------------------------ |
+| 1   | RoomBase | `room.getShort()`              | `data.short`       | `location.name`         | LocationHeader → LocationTitle |
+| 2   | RoomBase | `room.getLong()`               | `data.long`        | `location.description`  | GameLog → MapDescription       |
+| 3   | RoomBase | `Object.keys(room.getExits())` | `data.exits`       | `directions[][]` (计算) | MapNavigation → DirectionCell  |
+| 4   | RoomBase | `room.getCoordinates()`        | `data.coordinates` | （预留）                | （预留）                       |
 
 ### exits → directions 计算逻辑
 
@@ -196,37 +197,44 @@ lastRoom: string;
 ```typescript
 const ALL_DIRS = [
   ['northwest', 'north', 'northeast'],
-  ['west',      'center', 'east'],
+  ['west', 'center', 'east'],
   ['southwest', 'south', 'southeast'],
 ];
 
 const DIR_LABELS: Record<string, string> = {
-  northwest: '西北', north: '北', northeast: '东北',
-  west: '西', center: '中', east: '东',
-  southwest: '西南', south: '南', southeast: '东南',
+  northwest: '西北',
+  north: '北',
+  northeast: '东北',
+  west: '西',
+  center: '中',
+  east: '东',
+  southwest: '西南',
+  south: '南',
+  southeast: '东南',
 };
 
 function exitsToDirections(exits: string[]): Direction[][] {
-  return ALL_DIRS.map(row =>
-    row.map(dir => ({
+  return ALL_DIRS.map((row) =>
+    row.map((dir) => ({
       text: DIR_LABELS[dir],
       bold: dir === 'center' || exits.includes(dir),
       center: dir === 'center',
-    }))
+    })),
   );
 }
 ```
 
 **关键**：`bold: true` 表示可走方向（或中心格），`bold: false` 表示不可走方向。DirectionCell 根据 `bold` + `center` 判断：
+
 - `center=true` → 不可点击，深色背景
 - `bold=true, center=false` → 可点击，正常样式
 - `bold=false` → 不可点击，置灰样式（disabled）
 
 ### Character 表字段映射
 
-| # | 数据库字段 | TypeORM 字段 | 类型 | 默认值 | 说明 |
-|---|-----------|-------------|------|--------|------|
-| 1 | `last_room` | `lastRoom` | VARCHAR(255) | `'area/rift-town/square'` | 蓝图 ID 格式 |
+| #   | 数据库字段  | TypeORM 字段 | 类型         | 默认值                    | 说明         |
+| --- | ----------- | ------------ | ------------ | ------------------------- | ------------ |
+| 1   | `last_room` | `lastRoom`   | VARCHAR(255) | `'area/rift-town/square'` | 蓝图 ID 格式 |
 
 ---
 
@@ -457,11 +465,11 @@ if (session.playerId) {
 
 ### 新增文件
 
-| 文件 | 说明 |
-|------|------|
-| `packages/core/src/types/messages/room.ts` | roomInfo 消息类型定义 |
-| `packages/core/src/factory/handlers/roomInfo.ts` | roomInfo MessageHandler |
-| `server/src/websocket/handlers/room-utils.ts` | sendRoomInfo 辅助函数 + 方向映射 |
+| 文件                                             | 说明                             |
+| ------------------------------------------------ | -------------------------------- |
+| `packages/core/src/types/messages/room.ts`       | roomInfo 消息类型定义            |
+| `packages/core/src/factory/handlers/roomInfo.ts` | roomInfo MessageHandler          |
+| `server/src/websocket/handlers/room-utils.ts`    | sendRoomInfo 辅助函数 + 方向映射 |
 
 ### 代码路径
 
@@ -504,12 +512,13 @@ client/src/
 
 ## 风险点
 
-| 风险 | 影响 | 应对方案 |
-|------|------|---------|
-| BlueprintFactory.getVirtual(lastRoom) 返回 null | 玩家进场失败 | fallback 到默认广场 `area/rift-town/square` |
-| 多设备同时登录同一账号 | 重复创建 PlayerBase | Session 检查：已有 playerId 时先销毁旧对象 |
-| 断开连接时数据库写入失败 | lastRoom 丢失 | try-catch 保护，日志告警，不影响断开流程 |
-| go 命令与 roomInfo 推送非原子 | 竞态条件 | go 命令在同一个 await 链中完成，无并发问题 |
+| 风险                                            | 影响                | 应对方案                                    |
+| ----------------------------------------------- | ------------------- | ------------------------------------------- |
+| BlueprintFactory.getVirtual(lastRoom) 返回 null | 玩家进场失败        | fallback 到默认广场 `area/rift-town/square` |
+| 多设备同时登录同一账号                          | 重复创建 PlayerBase | Session 检查：已有 playerId 时先销毁旧对象  |
+| 断开连接时数据库写入失败                        | lastRoom 丢失       | try-catch 保护，日志告警，不影响断开流程    |
+| go 命令与 roomInfo 推送非原子                   | 竞态条件            | go 命令在同一个 await 链中完成，无并发问题  |
 
 ---
+
 > CX 工作流 | Design Doc | PRD #113

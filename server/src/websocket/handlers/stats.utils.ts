@@ -48,6 +48,32 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   };
 }
 
+/**
+ * 将 Character 实体的属性加载到 PlayerBase 的 dbase
+ * 登录 / 创建角色进场时必须调用，确保战斗系统能读取到四维属性和 HP
+ */
+export function loadCharacterToPlayer(player: PlayerBase, character: Character): void {
+  // 六维属性
+  player.set('wisdom', character.wisdom);
+  player.set('perception', character.perception);
+  player.set('spirit', character.spirit);
+  player.set('meridian', character.meridian);
+  player.set('strength', character.strength);
+  player.set('vitality', character.vitality);
+
+  // 等级（当前固定 1）
+  player.set('level', 1);
+
+  // HP 上限 = 血气 * 100 + 装备加成
+  const equipBonus = player.getEquipmentBonus();
+  const maxHp = character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0);
+  player.set('max_hp', maxHp);
+  // 登录时满血（若已有当前 HP 则保留）
+  if (player.get<number>('hp') == null) {
+    player.set('hp', maxHp);
+  }
+}
+
 /** 推送 playerStats 到客户端 */
 export function sendPlayerStats(player: PlayerBase, character: Character): void {
   const data = derivePlayerStats(character, player);

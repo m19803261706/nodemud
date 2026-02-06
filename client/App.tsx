@@ -71,6 +71,15 @@ function App(): React.JSX.Element {
         useGameStore.getState().setNpcDetail(data.data);
         return;
       }
+      // 容器/物品 look 结果 → 物品详情弹窗
+      if (
+        data.success &&
+        data.data?.action === 'look' &&
+        (data.data?.target === 'container' || data.data?.target === 'item')
+      ) {
+        useGameStore.getState().setItemDetail(data.data);
+        return;
+      }
       // 有消息 → 写入日志（失败红色，成功默认色）
       if (data.message) {
         const { appendLog } = useGameStore.getState();
@@ -101,9 +110,21 @@ function App(): React.JSX.Element {
       useGameStore.getState().setCombatUpdate(data);
     };
 
-    /** 战斗结束 → 写入结算 + 延迟返回 GameHome */
+    /** 战斗结束 → 写入结算 + 写入首页日志 + 延迟返回 GameHome */
     const handleCombatEnd = (data: any) => {
       useGameStore.getState().setCombatEnd(data);
+      // 战斗结果写入首页日志
+      if (data.message) {
+        const colorMap: Record<string, string> = {
+          victory: '#4A6B4A',
+          defeat: '#8B3A3A',
+          flee: '#8B7A5A',
+        };
+        useGameStore.getState().appendLog({
+          text: data.message,
+          color: colorMap[data.reason] || '#3D3935',
+        });
+      }
       setTimeout(() => {
         if (navigationRef.isReady()) {
           (navigationRef as any).navigate('GameHome');

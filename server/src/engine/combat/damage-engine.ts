@@ -54,13 +54,7 @@ export class DamageEngine {
     // if (isCrit) damage = Math.floor(damage * 1.5);
 
     const defenderMaxHp = defender.get<number>('max_hp') || 100;
-    const description = this.generateDescription(
-      attacker,
-      defender,
-      damage,
-      isCrit,
-      defenderMaxHp,
-    );
+    const description = this.generateDescription(attacker, defender, damage, isCrit, defenderMaxHp);
 
     return {
       type: isCrit ? 'crit' : 'attack',
