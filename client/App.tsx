@@ -25,6 +25,7 @@ import { CharacterConfirmScreen } from './src/screens/CharacterConfirmScreen';
 import { GameHomeScreen } from './src/screens/GameHomeScreen';
 import CombatScreen from './src/screens/CombatScreen';
 
+/** Android 统一用 localhost，通过 adb reverse 转发到宿主机（兼容模拟器和真机） */
 const WS_URL = 'ws://localhost:4000';
 const Stack = createNativeStackNavigator();
 
