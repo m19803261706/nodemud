@@ -43,9 +43,7 @@ export class RemainsBase extends ContainerBase {
       // 延迟引入避免循环依赖
       const { RoomBase } = require('./room-base');
       if (env instanceof RoomBase) {
-        (env as any).broadcast(
-          `[item]${this.getName()}[/item]化为尘土，消散了。`,
-        );
+        (env as any).broadcast(`[item]${this.getName()}[/item]化为尘土，消散了。`);
       }
     }
     this.destroy();

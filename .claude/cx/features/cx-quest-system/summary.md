@@ -2,16 +2,16 @@
 
 ## 完成概览
 
-| 项 | 内容 |
-|---|---|
-| 功能 | 任务系统 + 经验升级体系 |
-| 规模 | L（大） |
-| 完成时间 | 2026-02-10 |
-| 总任务数 | 10 |
-| 提交数 | 10 |
-| 新增文件 | 20 |
-| 修改文件 | 31 |
-| 新增代码行 | 3588 |
+| 项         | 内容                    |
+| ---------- | ----------------------- |
+| 功能       | 任务系统 + 经验升级体系 |
+| 规模       | L（大）                 |
+| 完成时间   | 2026-02-10              |
+| 总任务数   | 10                      |
+| 提交数     | 10                      |
+| 新增文件   | 20                      |
+| 修改文件   | 31                      |
+| 新增代码行 | 3588                    |
 
 ## 相关文档
 
@@ -23,6 +23,7 @@
 ## 功能描述
 
 为人在江湖 MUD 游戏实现完整的任务系统和经验升级体系。包含：
+
 - **任务系统**：固定任务 v1，支持 deliver（送信）、capture（剿灭）、collect（收集）、dialogue（打探）四种类型
 - **经验升级**：三种成长货币（exp 经验 / potential 潜能 / score 阅历），立方根升级公式
 - **属性点分配**：升级获得自由属性点，玩家可自行分配到六维属性
@@ -91,18 +92,19 @@
 
 ## WebSocket 消息清单
 
-| 消息类型 | 方向 | 说明 |
-|----------|------|------|
-| questAccept | Client→Server | 接受任务（questId + npcId） |
-| questAbandon | Client→Server | 放弃任务（questId） |
-| questComplete | Client→Server | 完成交付任务（questId + npcId） |
-| questUpdate | Server→Client | 推送任务列表（active + completed） |
-| allocatePoints | Client→Server | 分配属性点（allocations） |
-| playerStats | Server→Client | 扩展：level(number) + levelTitle + exp + expToNextLevel + potential + score + freePoints |
+| 消息类型       | 方向          | 说明                                                                                     |
+| -------------- | ------------- | ---------------------------------------------------------------------------------------- |
+| questAccept    | Client→Server | 接受任务（questId + npcId）                                                              |
+| questAbandon   | Client→Server | 放弃任务（questId）                                                                      |
+| questComplete  | Client→Server | 完成交付任务（questId + npcId）                                                          |
+| questUpdate    | Server→Client | 推送任务列表（active + completed）                                                       |
+| allocatePoints | Client→Server | 分配属性点（allocations）                                                                |
+| playerStats    | Server→Client | 扩展：level(number) + levelTitle + exp + expToNextLevel + potential + score + freePoints |
 
 ## 新增文件清单
 
 ### packages/core (6 文件)
+
 - `src/types/messages/quest.ts` — 任务消息类型定义
 - `src/factory/handlers/questAccept.ts` — 接受任务 Handler
 - `src/factory/handlers/questAbandon.ts` — 放弃任务 Handler
@@ -111,6 +113,7 @@
 - `src/factory/handlers/allocatePoints.ts` — 属性分配 Handler
 
 ### server (8 文件)
+
 - `src/engine/quest/exp-manager.ts` — 经验管理器（440 行）
 - `src/engine/quest/quest-manager.ts` — 任务管理器（697 行）
 - `src/engine/quest/quest-definition.ts` — 任务类型定义
@@ -121,6 +124,7 @@
 - `src/world/npc/rift-town/bandit.ts` — 裂谷盗匪 NPC
 
 ### client (6 文件)
+
 - `src/components/game/QuestListModal/index.tsx` — 任务列表弹窗容器
 - `src/components/game/QuestListModal/ExpInfoBar.tsx` — 经验信息栏
 - `src/components/game/QuestListModal/ActiveQuestCard.tsx` — 进行中任务卡片
@@ -140,12 +144,14 @@
 ## 示例任务
 
 ### rift-town-001: 药师的来信 (deliver)
+
 - 发起 NPC: 老周铁匠
 - 交付 NPC: 白发药师
 - 目标: 将铁匠的信交给白发药师
 - 奖励: exp 100, score 5
 
 ### rift-town-002: 裂谷盗匪 (capture)
+
 - 发起 NPC: 镇长
 - 前置任务: rift-town-001
 - 目标: 击杀裂谷北道的盗匪

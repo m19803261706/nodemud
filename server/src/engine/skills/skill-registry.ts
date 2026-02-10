@@ -27,9 +27,7 @@ export class SkillRegistry {
    */
   register(skill: SkillBase): void {
     if (this.skills.has(skill.skillId)) {
-      this.logger.warn(
-        `技能 ${skill.skillId}(${skill.skillName}) 已存在，将被覆盖`,
-      );
+      this.logger.warn(`技能 ${skill.skillId}(${skill.skillName}) 已存在，将被覆盖`);
     }
     this.skills.set(skill.skillId, skill);
     this.logger.debug(`注册技能: ${skill.skillId}(${skill.skillName})`);

@@ -88,7 +88,9 @@ export class PracticeManager {
     }
 
     // 4. 校验玩家是否已学会该技能（通过 skillManager）
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === skillId);
     if (!skillData) {
       return '你还没有学会这个技能。';
     }
@@ -133,7 +135,9 @@ export class PracticeManager {
 
     // 获取技能信息用于推送
     const skillDef = this.skillRegistry.get(session.skillId);
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === session.skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === session.skillId);
 
     // 推送最终 practiceUpdate（stopped=true）
     this.sendPracticeUpdate(player, {
@@ -198,13 +202,16 @@ export class PracticeManager {
     // 提升技能经验
     // dazuo 模式使用 weakMode（效率低但消耗少）
     const weakMode = session.mode === PracticeMode.DAZUO;
-    const didLevelUp = this.getSkillManager(player)?.improveSkill(session.skillId, 1, weakMode) ?? false;
+    const didLevelUp =
+      this.getSkillManager(player)?.improveSkill(session.skillId, 1, weakMode) ?? false;
 
     // tickCount++
     session.tickCount++;
 
     // 获取最新技能数据
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === session.skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === session.skillId);
     const currentLevel = skillData?.level ?? 0;
     const learned = skillData?.learned ?? 0;
     const learnedMax = Math.pow(currentLevel + 1, 2);
@@ -264,7 +271,9 @@ export class PracticeManager {
     const didLevelUp = this.getSkillManager(player)?.improveSkill(skillId, 1) ?? false;
 
     // 获取最新技能数据
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === skillId);
     const currentLevel = skillData?.level ?? 0;
     const learned = skillData?.learned ?? 0;
     const learnedMax = Math.pow(currentLevel + 1, 2);
@@ -297,8 +306,7 @@ export class PracticeManager {
     });
 
     this.logger.debug(
-      `玩家 ${player.getName()} 单次练习 ${skillDef.skillName}` +
-        `（升级: ${didLevelUp}）`,
+      `玩家 ${player.getName()} 单次练习 ${skillDef.skillName}` + `（升级: ${didLevelUp}）`,
     );
 
     return true;
@@ -332,7 +340,9 @@ export class PracticeManager {
     this.activeSessions.set(player.id, session);
 
     // 获取技能数据用于首次推送
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === skillId);
     const currentLevel = skillData?.level ?? 0;
     const learned = skillData?.learned ?? 0;
     const learnedMax = Math.pow(currentLevel + 1, 2);
@@ -357,9 +367,7 @@ export class PracticeManager {
       stopped: false,
     });
 
-    this.logger.debug(
-      `玩家 ${player.getName()} 开始${modeText}修炼 ${skillDef.skillName}`,
-    );
+    this.logger.debug(`玩家 ${player.getName()} 开始${modeText}修炼 ${skillDef.skillName}`);
 
     return true;
   }
@@ -382,7 +390,9 @@ export class PracticeManager {
     this.activeSessions.delete(player.id);
 
     // 获取最新技能数据
-    const skillData = this.getSkillManager(player)?.getAllSkills().find((s) => s.skillId === session.skillId);
+    const skillData = this.getSkillManager(player)
+      ?.getAllSkills()
+      .find((s) => s.skillId === session.skillId);
     const currentLevel = skillData?.level ?? 0;
     const learned = skillData?.learned ?? 0;
     const learnedMax = Math.pow(currentLevel + 1, 2);

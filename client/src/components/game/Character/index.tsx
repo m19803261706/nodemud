@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useGameStore, type ResourceValue } from '../../../stores/useGameStore';
 import { GradientDivider, StatBar } from '../shared';
 
@@ -41,13 +47,16 @@ function resourceText(res: ResourceValue): string {
 }
 
 export const CharacterPage = () => {
-  const player = useGameStore((state) => state.player);
-  const equipment = useGameStore((state) => state.equipment);
-  const setActiveTab = useGameStore((state) => state.setActiveTab);
+  const player = useGameStore(state => state.player);
+  const equipment = useGameStore(state => state.equipment);
+  const setActiveTab = useGameStore(state => state.setActiveTab);
 
   return (
     <View style={s.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.content}
+      >
         <View style={s.panel}>
           <View style={s.nameRow}>
             <Text style={s.nameText}>{player.name || '无名侠客'}</Text>
@@ -58,7 +67,9 @@ export const CharacterPage = () => {
 
           {player.freePoints > 0 ? (
             <View style={s.freePointBadge}>
-              <Text style={s.freePointText}>可分配属性点 {player.freePoints}</Text>
+              <Text style={s.freePointText}>
+                可分配属性点 {player.freePoints}
+              </Text>
             </View>
           ) : null}
 
@@ -119,16 +130,20 @@ export const CharacterPage = () => {
         <View style={s.panel}>
           <Text style={s.sectionTitle}>六维属性</Text>
           <View style={s.attrGrid}>
-            {ATTR_CONFIG.map((attr) => {
+            {ATTR_CONFIG.map(attr => {
               const base = player.attrs[attr.key];
               const bonus =
-                (player.equipBonus.attrs as Record<string, number> | undefined)?.[attr.key] ?? 0;
+                (
+                  player.equipBonus.attrs as Record<string, number> | undefined
+                )?.[attr.key] ?? 0;
               return (
                 <View key={attr.key} style={s.attrCell}>
                   <Text style={s.attrLabel}>{attr.label}</Text>
                   <View style={s.attrValueRow}>
                     <Text style={s.attrValue}>{base}</Text>
-                    {bonus > 0 ? <Text style={s.attrBonus}>+{bonus}</Text> : null}
+                    {bonus > 0 ? (
+                      <Text style={s.attrBonus}>+{bonus}</Text>
+                    ) : null}
                   </View>
                 </View>
               );
@@ -139,12 +154,17 @@ export const CharacterPage = () => {
         <View style={s.panel}>
           <Text style={s.sectionTitle}>装备摘要</Text>
           <View style={s.equipmentList}>
-            {EQUIPMENT_SLOTS.map((slot) => {
+            {EQUIPMENT_SLOTS.map(slot => {
               const equipped = equipment[slot.key];
               return (
                 <View key={slot.key} style={s.equipmentRow}>
                   <Text style={s.equipmentLabel}>{slot.label}</Text>
-                  <Text style={[s.equipmentValue, equipped ? s.equipmentValueOn : null]}>
+                  <Text
+                    style={[
+                      s.equipmentValue,
+                      equipped ? s.equipmentValueOn : null,
+                    ]}
+                  >
                     {equipped ? equipped.name : '--'}
                   </Text>
                 </View>

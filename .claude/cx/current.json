@@ -13,12 +13,51 @@
     "title": "[Epic] 残骸系统 — 死亡掉落 + 容器指令 + 地面物品展示"
   },
   "issues": [
-    {"number": 211, "title": "ContainerBase + RemainsBase + ItemBrief", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
-    {"number": 212, "title": "get from 指令扩展", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
-    {"number": 213, "title": "put in 新增指令", "status": "cx-ready", "phase": 1, "parallel_group": "p1"},
-    {"number": 214, "title": "NPC 死亡创建残骸", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [211]},
-    {"number": 215, "title": "玩家死亡创建空残骸", "status": "cx-blocked", "phase": 2, "parallel_group": "p2", "depends_on": [211]},
-    {"number": 216, "title": "look/examine + 前端展示", "status": "cx-blocked", "phase": 3, "parallel_group": "p3", "depends_on": [211, 212, 213, 214]}
+    {
+      "number": 211,
+      "title": "ContainerBase + RemainsBase + ItemBrief",
+      "status": "cx-ready",
+      "phase": 1,
+      "parallel_group": "p1"
+    },
+    {
+      "number": 212,
+      "title": "get from 指令扩展",
+      "status": "cx-ready",
+      "phase": 1,
+      "parallel_group": "p1"
+    },
+    {
+      "number": 213,
+      "title": "put in 新增指令",
+      "status": "cx-ready",
+      "phase": 1,
+      "parallel_group": "p1"
+    },
+    {
+      "number": 214,
+      "title": "NPC 死亡创建残骸",
+      "status": "cx-blocked",
+      "phase": 2,
+      "parallel_group": "p2",
+      "depends_on": [211]
+    },
+    {
+      "number": 215,
+      "title": "玩家死亡创建空残骸",
+      "status": "cx-blocked",
+      "phase": 2,
+      "parallel_group": "p2",
+      "depends_on": [211]
+    },
+    {
+      "number": 216,
+      "title": "look/examine + 前端展示",
+      "status": "cx-blocked",
+      "phase": 3,
+      "parallel_group": "p3",
+      "depends_on": [211, 212, 213, 214]
+    }
   ],
   "execution_order": [211, 212, 213, 214, 215, 216]
 }

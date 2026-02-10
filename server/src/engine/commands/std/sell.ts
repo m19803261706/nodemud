@@ -63,7 +63,10 @@ export class SellCommand implements ICommand {
     const toIdx = this.findKeywordIndex(args, ['to', '给', '向']);
     if (toIdx > 0) {
       const itemName = args.slice(0, toIdx).join(' ').trim();
-      const merchantName = args.slice(toIdx + 1).join(' ').trim();
+      const merchantName = args
+        .slice(toIdx + 1)
+        .join(' ')
+        .trim();
       return {
         itemName,
         merchantName: merchantName || undefined,
@@ -81,7 +84,9 @@ export class SellCommand implements ICommand {
 
   private findItemInInventory(executor: LivingBase, itemName: string): ItemBase | null {
     const lowered = itemName.toLowerCase();
-    const items = executor.getInventory().filter((entity): entity is ItemBase => entity instanceof ItemBase);
+    const items = executor
+      .getInventory()
+      .filter((entity): entity is ItemBase => entity instanceof ItemBase);
     return (
       items.find(
         (item) => item.getName().includes(itemName) || item.getName().toLowerCase() === lowered,

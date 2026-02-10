@@ -155,6 +155,8 @@ client/
 │           ├── ChatPanel/           # 聊天面板
 │           ├── MapNavigation/       # 方向导航
 │           ├── NpcList/             # NPC 列表
+│           ├── CombatActions/       # 战斗快捷栏（招式选择）
+│           ├── SkillPanel/          # 技能面板（装配/详情）
 │           └── BottomNavBar/        # 底部导航
 ├── ios/                             # iOS 原生工程
 ├── android/                         # Android 原生工程
@@ -263,7 +265,7 @@ packages/core/
 
 - 修改 `packages/core/` 下的类型或工厂后，提醒用户需要 `pnpm build`
 - 添加新消息类型时，需要在 `packages/core/src/factory/handlers/` 添加处理器并用 `@MessageHandler` 装饰器注册
-- 添加新的 WebSocket 消息处理时，需要在 `websocket.gateway.ts` 的 switch 中添加路由（当前已有: login, register, createCharacterStep1, createCharacterConfirm, command, questAccept, questAbandon, questComplete, allocatePoints, ping）
+- 添加新的 WebSocket 消息处理时，需要在 `websocket.gateway.ts` 的 switch 中添加路由（当前已有: login, register, createCharacterStep1, createCharacterConfirm, command, questAccept, questAbandon, questComplete, allocatePoints, skillUse, skillMapRequest, skillPanelRequest, skillLearnRequest, practiceStart, practiceEnd, ping）
 - 前端新页面需要在 `client/App.tsx` 的 Stack.Navigator 中注册路由
 - 数据库新实体需要在对应模块中 `TypeOrmModule.forFeature([Entity])` 注册
 - **前端组件必须遵循 Unity3D 组件模型**：极细粒度拆分，一个组件一个文件，区域容器从 store 取数据，子组件通过 props 接收
@@ -277,6 +279,7 @@ packages/core/
 
 ## 变更记录 (Changelog)
 
+- **2026-02-10**: 天衍技能系统完成（Epic #225，11 个任务 + 代码审查，6406 行新增代码）
 - **2026-02-10**: 任务系统 + 经验升级体系完成（Epic #220，10 个任务，3588 行新增代码）
 - **2026-02-04**: 新增 Unity3D 组件模型前端架构规范，Zustand 状态管理
 - **2026-02-02**: 初始化项目 CLAUDE.md，记录项目架构、开发指南、编码规范

@@ -205,7 +205,8 @@ export class MerchantBase extends NpcBase {
       if (!input || typeof input !== 'object' || Array.isArray(input)) return undefined;
       const result: Record<string, number> = {};
       for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
-        if (typeof key !== 'string' || typeof value !== 'number' || !Number.isFinite(value)) continue;
+        if (typeof key !== 'string' || typeof value !== 'number' || !Number.isFinite(value))
+          continue;
         result[key] = Math.max(0, Math.floor(value));
       }
       return Object.keys(result).length > 0 ? result : undefined;
@@ -219,7 +220,8 @@ export class MerchantBase extends NpcBase {
       deniedBlueprints: normalizeList(raw.deniedBlueprints),
       priceRate: typeof raw.priceRate === 'number' ? Math.max(0, raw.priceRate) : 0.5,
       minPrice: typeof raw.minPrice === 'number' ? Math.max(0, Math.floor(raw.minPrice)) : 1,
-      maxPrice: typeof raw.maxPrice === 'number' ? Math.max(0, Math.floor(raw.maxPrice)) : undefined,
+      maxPrice:
+        typeof raw.maxPrice === 'number' ? Math.max(0, Math.floor(raw.maxPrice)) : undefined,
       explicitPrices: normalizeExplicitPrices(raw.explicitPrices),
       rejectionMessage: typeof raw.rejectionMessage === 'string' ? raw.rejectionMessage : undefined,
     };
@@ -361,7 +363,11 @@ export class MerchantBase extends NpcBase {
   }
 
   /** 计算回收价 */
-  private resolveRecyclePrice(item: ItemBase, blueprintId: string, rule: ShopRecycleConfig): number {
+  private resolveRecyclePrice(
+    item: ItemBase,
+    blueprintId: string,
+    rule: ShopRecycleConfig,
+  ): number {
     const explicit = rule.explicitPrices?.[blueprintId];
     if (typeof explicit === 'number') {
       return Math.max(0, Math.floor(explicit));

@@ -14,6 +14,7 @@
 ## 用户场景
 
 ### 场景 1: 击杀 NPC 后搜刮残骸
+
 1. 玩家击败 NPC（战斗系统结束，reason='victory'）
 2. NPC 死亡，房间出现"北门卫兵的残骸"
 3. 日志显示："北门卫兵倒下了，留下了一具残骸。"
@@ -27,6 +28,7 @@
 7. 或玩家点击 [拾取残骸] → 发送 `get 残骸` → 整个残骸（含剩余物品）进入背包
 
 ### 场景 2: 玩家死亡留下残骸
+
 1. 玩家被 NPC 击败（reason='defeat'）
 2. 玩家原所在房间出现"泡泡的残骸"（空，不掉落物品）
 3. 玩家复活传送到广场
@@ -34,6 +36,7 @@
 5. 10 分钟后残骸消失
 
 ### 场景 3: 文本指令交互残骸/容器
+
 1. `look 残骸` → 显示残骸描述 + 内容物列表
 2. `examine 残骸` → 显示残骸详细信息 + 内容物详情
 3. `get 铁剑 from 残骸` → 从残骸中取出铁剑到背包
@@ -42,12 +45,14 @@
 6. 以上指令适用于所有 ContainerBase 子类，不仅限残骸
 
 ### 场景 4: 残骸腐烂
+
 1. 残骸创建后 10 分钟（600 秒）内未被完全清空或拾取
 2. 残骸自动销毁，连同内容物一起消失
 3. 房间日志显示："北门卫兵的残骸化为尘土，消散了。"
 4. 房间物品列表自动更新（前端移除卡片）
 
 ### 场景 5: 地面普通物品交互
+
 1. 房间地面有物品（散落的铁剑、药品等）
 2. 物品以卡片形式展示（与 NPC 卡片同一区域，样式区分）
 3. 点击物品卡片 → 弹窗展示物品详情 + 交互按钮（[拾取] [鉴定]）
@@ -57,17 +62,17 @@
 
 ### R1: RemainsBase 残骸类
 
-| 属性 | 说明 |
-|------|------|
-| name | "XXX的残骸" |
-| short | "XXX的残骸" |
-| long | "XXX的残骸，散发着余温。" |
-| type | `'remains'` |
-| sourceName | 来源实体名称 |
-| decayTime | 腐烂时间 600s（10 分钟） |
-| droppable | true（可丢弃/拾取） |
-| tradeable | false（不可交易） |
-| stackable | false（不可堆叠） |
+| 属性       | 说明                      |
+| ---------- | ------------------------- |
+| name       | "XXX的残骸"               |
+| short      | "XXX的残骸"               |
+| long       | "XXX的残骸，散发着余温。" |
+| type       | `'remains'`               |
+| sourceName | 来源实体名称              |
+| decayTime  | 腐烂时间 600s（10 分钟）  |
+| droppable  | true（可丢弃/拾取）       |
+| tradeable  | false（不可交易）         |
+| stackable  | false（不可堆叠）         |
 
 - 继承 ContainerBase（继承 ItemBase）
 - 创建时注册心跳，每 tick 递减腐烂倒计时
@@ -167,28 +172,28 @@
 
 ## 现有代码基础
 
-| 模块 | 文件 | 可复用点 |
-|------|------|----------|
-| ContainerBase | `server/src/engine/game-objects/container-base.ts` | 已有基类，需完善 |
-| BaseEntity inventory | `server/src/engine/base-entity.ts` | `_inventory` Set + moveTo/getInventory |
-| ItemBase | `server/src/engine/game-objects/item-base.ts` | 物品属性体系 |
-| NpcBase.die() | `server/src/engine/game-objects/npc-base.ts` | 当前死亡流程 |
-| PlayerBase.die()/revive() | `server/src/engine/game-objects/player-base.ts` | 当前死亡+复活 |
-| SpawnManager | `server/src/engine/spawn-manager.ts` | NPC 重生调度 |
-| HeartbeatManager | `server/src/engine/heartbeat-manager.ts` | 心跳注册 |
-| get 指令 | `server/src/engine/commands/std/get.ts` | 扩展 from 语法 |
-| look/examine | `server/src/engine/commands/std/look.ts` / `examine.ts` | 容器内容展示 |
-| NpcInfoModal | `client/src/components/game/NpcList/NpcInfoModal.tsx` | 弹窗模板 |
-| NpcList | `client/src/components/game/NpcList/` | 卡片列表模板 |
-| ItemBrief 类型 | `packages/core/src/types/` | 扩展字段 |
+| 模块                      | 文件                                                    | 可复用点                               |
+| ------------------------- | ------------------------------------------------------- | -------------------------------------- |
+| ContainerBase             | `server/src/engine/game-objects/container-base.ts`      | 已有基类，需完善                       |
+| BaseEntity inventory      | `server/src/engine/base-entity.ts`                      | `_inventory` Set + moveTo/getInventory |
+| ItemBase                  | `server/src/engine/game-objects/item-base.ts`           | 物品属性体系                           |
+| NpcBase.die()             | `server/src/engine/game-objects/npc-base.ts`            | 当前死亡流程                           |
+| PlayerBase.die()/revive() | `server/src/engine/game-objects/player-base.ts`         | 当前死亡+复活                          |
+| SpawnManager              | `server/src/engine/spawn-manager.ts`                    | NPC 重生调度                           |
+| HeartbeatManager          | `server/src/engine/heartbeat-manager.ts`                | 心跳注册                               |
+| get 指令                  | `server/src/engine/commands/std/get.ts`                 | 扩展 from 语法                         |
+| look/examine              | `server/src/engine/commands/std/look.ts` / `examine.ts` | 容器内容展示                           |
+| NpcInfoModal              | `client/src/components/game/NpcList/NpcInfoModal.tsx`   | 弹窗模板                               |
+| NpcList                   | `client/src/components/game/NpcList/`                   | 卡片列表模板                           |
+| ItemBrief 类型            | `packages/core/src/types/`                              | 扩展字段                               |
 
 ## 代码影响范围
 
-| 层级 | 影响模块 |
-|------|----------|
-| core | ItemBrief 类型扩展、新增容器相关消息类型 |
-| backend | RemainsBase 新类、ContainerBase 完善、NpcBase/PlayerBase 死亡改造、get/put 指令、look/examine 容器支持、roomInfo 适配 |
-| frontend | 地面物品卡片组件、ItemInfoModal 弹窗、store 物品交互 action |
+| 层级     | 影响模块                                                                                                              |
+| -------- | --------------------------------------------------------------------------------------------------------------------- |
+| core     | ItemBrief 类型扩展、新增容器相关消息类型                                                                              |
+| backend  | RemainsBase 新类、ContainerBase 完善、NpcBase/PlayerBase 死亡改造、get/put 指令、look/examine 容器支持、roomInfo 适配 |
+| frontend | 地面物品卡片组件、ItemInfoModal 弹窗、store 物品交互 action                                                           |
 
 ## 任务拆分（初步）
 
@@ -215,4 +220,5 @@
 - [ ] 所有容器指令适用于任意 ContainerBase 子类
 
 ---
+
 > CX 工作流 | PRD

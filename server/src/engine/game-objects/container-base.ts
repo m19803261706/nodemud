@@ -28,9 +28,7 @@ export class ContainerBase extends ItemBase {
 
   /** 获取内容物列表（仅 ItemBase 子类） */
   getContents(): ItemBase[] {
-    return this.getInventory().filter(
-      (e): e is ItemBase => e instanceof ItemBase,
-    );
+    return this.getInventory().filter((e): e is ItemBase => e instanceof ItemBase);
   }
 
   /** 获取内容物简要信息（用于网络传输） */

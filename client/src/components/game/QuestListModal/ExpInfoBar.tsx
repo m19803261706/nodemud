@@ -24,7 +24,8 @@ export const ExpInfoBar = ({
   potential,
   score,
 }: ExpInfoBarProps) => {
-  const expPct = expToNextLevel > 0 ? Math.min((exp / expToNextLevel) * 100, 100) : 0;
+  const expPct =
+    expToNextLevel > 0 ? Math.min((exp / expToNextLevel) * 100, 100) : 0;
 
   return (
     <View style={s.container}>

@@ -77,15 +77,22 @@ export class GetCommand implements ICommand {
   }
 
   /** 从容器中取出物品 */
-  private getFromContainer(executor: LivingBase, itemName: string, containerName: string): CommandResult {
+  private getFromContainer(
+    executor: LivingBase,
+    itemName: string,
+    containerName: string,
+  ): CommandResult {
     const container = this.findContainer(executor, containerName);
     if (!container) {
       return { success: false, message: `这里没有${containerName}。` };
     }
 
-    const item = container.getContents().find(
-      (i) => i.getName().includes(itemName) || i.getName().toLowerCase() === itemName.toLowerCase(),
-    );
+    const item = container
+      .getContents()
+      .find(
+        (i) =>
+          i.getName().includes(itemName) || i.getName().toLowerCase() === itemName.toLowerCase(),
+      );
     if (!item) {
       return { success: false, message: `${container.getName()}中没有${itemName}。` };
     }
@@ -110,13 +117,17 @@ export class GetCommand implements ICommand {
     const env = executor.getEnvironment();
     // 先搜房间地面
     if (env) {
-      const ground = env.getInventory()
+      const ground = env
+        .getInventory()
         .filter((e): e is ContainerBase => e instanceof ContainerBase)
-        .find((c) => c.getName().includes(name) || c.getName().toLowerCase() === name.toLowerCase());
+        .find(
+          (c) => c.getName().includes(name) || c.getName().toLowerCase() === name.toLowerCase(),
+        );
       if (ground) return ground;
     }
     // 再搜背包
-    return executor.getInventory()
+    return executor
+      .getInventory()
       .filter((e): e is ContainerBase => e instanceof ContainerBase)
       .find((c) => c.getName().includes(name) || c.getName().toLowerCase() === name.toLowerCase());
   }

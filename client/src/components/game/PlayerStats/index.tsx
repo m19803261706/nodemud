@@ -1,15 +1,14 @@
 /**
  * 玩家状态栏 — 顶部区域
- * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 关键信息行 + 渐变分隔线
+ * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 单行关键信息 + 渐变分隔线
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
 import type { ResourceValue } from '../../../stores/useGameStore';
 import { StatBar, GradientDivider } from '../shared';
 import { PlayerNameBadge } from './PlayerNameBadge';
-import { CombatValue } from './CombatValue';
 
 /** 资源值 → StatBar 百分比 */
 function resourcePct(res: ResourceValue): number {
@@ -26,10 +25,6 @@ export const PlayerStats = () => {
 
   /** 数据尚未到达（服务端未推送 playerStats） */
   const hasData = player.name.length > 0;
-
-  /** 是否有任何攻防值 */
-  const hasCombat = player.combat.attack > 0 || player.combat.defense > 0;
-  const showMeta = hasCombat || player.silver > 0;
 
   return (
     <View style={s.container}>
@@ -60,18 +55,21 @@ export const PlayerStats = () => {
         />
       </View>
 
-      {/* 第二行：银两 + 攻防数值 */}
-      {showMeta && (
-        <View style={s.combatRow}>
-          <CombatValue label="银两" value={player.silver} />
-          {hasCombat ? (
-            <CombatValue label="攻击" value={player.combat.attack} />
-          ) : null}
-          {hasCombat ? (
-            <CombatValue label="防御" value={player.combat.defense} />
-          ) : null}
+      {/* 第二行：单行关键信息（左到右） */}
+      <View style={s.metaRow}>
+        <View style={s.metaItem}>
+          <Text style={s.metaLabel}>银两</Text>
+          <Text style={s.metaValue}>{player.silver}</Text>
         </View>
-      )}
+        <View style={s.metaItem}>
+          <Text style={s.metaLabel}>经验</Text>
+          <Text style={s.metaValue}>{player.exp}</Text>
+        </View>
+        <View style={s.metaItem}>
+          <Text style={s.metaLabel}>潜能</Text>
+          <Text style={s.metaValue}>{player.potential}</Text>
+        </View>
+      </View>
 
       <GradientDivider opacity={0.38} />
     </View>
@@ -81,17 +79,36 @@ export const PlayerStats = () => {
 const s = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 10,
     paddingBottom: 0,
-    gap: 10,
+    gap: 8,
   },
   statsRow: {
     flexDirection: 'row',
     gap: 8,
   },
-  combatRow: {
+  metaRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  metaItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
-    paddingHorizontal: 40,
+  },
+  metaLabel: {
+    fontSize: 10,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+  },
+  metaValue: {
+    fontSize: 11,
+    color: '#8B4513',
+    fontFamily: 'Noto Sans SC',
+    fontWeight: '700',
   },
 });

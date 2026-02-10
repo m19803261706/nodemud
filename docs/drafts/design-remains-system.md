@@ -13,21 +13,21 @@
 
 ### 可直接复用
 
-| 模块 | 文件 | 说明 |
-|------|------|------|
-| ContainerBase | `server/src/engine/game-objects/container-base.ts` | 容器基类（仅 19 行，需完善） |
-| BaseEntity inventory | `server/src/engine/base-entity.ts` | `_inventory: Set` + `moveTo` + `getInventory` |
-| handleInventoryOnDestroy | `server/src/engine/base-entity.ts:275-281` | 销毁时内容物移至上层（残骸需覆写为空操作） |
-| HeartbeatManager | `server/src/engine/heartbeat-manager.ts` | 心跳注册，驱动衰腐倒计时 |
-| ItemBase | `server/src/engine/game-objects/item-base.ts` | 物品属性体系（name/type/weight/quality 等） |
-| NpcBase.die() | `server/src/engine/game-objects/npc-base.ts:77-86` | 当前：super.die → 广播 → destroy |
-| SpawnManager | `server/src/engine/spawn-manager.ts` | scheduleRespawn（死亡改造后无需改动） |
-| get 指令 | `server/src/engine/commands/std/get.ts` | 支持 `get all` / `get 物品名`，扩展 from |
-| look 指令 | `server/src/engine/commands/std/look.ts` | 搜索顺序：背包→NPC→地面物品 |
-| examine 指令 | `server/src/engine/commands/std/examine.ts` | 返回 ItemExamineData |
-| NpcInfoModal | `client/src/components/game/NpcList/NpcInfoModal.tsx` | 弹窗结构参考 |
-| NpcList | `client/src/components/game/NpcList/index.tsx` | 卡片列表参考 |
-| roomInfo handler | `packages/core/src/factory/handlers/roomInfo.ts` | 房间信息消息格式 |
+| 模块                     | 文件                                                  | 说明                                          |
+| ------------------------ | ----------------------------------------------------- | --------------------------------------------- |
+| ContainerBase            | `server/src/engine/game-objects/container-base.ts`    | 容器基类（仅 19 行，需完善）                  |
+| BaseEntity inventory     | `server/src/engine/base-entity.ts`                    | `_inventory: Set` + `moveTo` + `getInventory` |
+| handleInventoryOnDestroy | `server/src/engine/base-entity.ts:275-281`            | 销毁时内容物移至上层（残骸需覆写为空操作）    |
+| HeartbeatManager         | `server/src/engine/heartbeat-manager.ts`              | 心跳注册，驱动衰腐倒计时                      |
+| ItemBase                 | `server/src/engine/game-objects/item-base.ts`         | 物品属性体系（name/type/weight/quality 等）   |
+| NpcBase.die()            | `server/src/engine/game-objects/npc-base.ts:77-86`    | 当前：super.die → 广播 → destroy              |
+| SpawnManager             | `server/src/engine/spawn-manager.ts`                  | scheduleRespawn（死亡改造后无需改动）         |
+| get 指令                 | `server/src/engine/commands/std/get.ts`               | 支持 `get all` / `get 物品名`，扩展 from      |
+| look 指令                | `server/src/engine/commands/std/look.ts`              | 搜索顺序：背包→NPC→地面物品                   |
+| examine 指令             | `server/src/engine/commands/std/examine.ts`           | 返回 ItemExamineData                          |
+| NpcInfoModal             | `client/src/components/game/NpcList/NpcInfoModal.tsx` | 弹窗结构参考                                  |
+| NpcList                  | `client/src/components/game/NpcList/index.tsx`        | 卡片列表参考                                  |
+| roomInfo handler         | `packages/core/src/factory/handlers/roomInfo.ts`      | 房间信息消息格式                              |
 
 ### 关键发现
 
@@ -109,17 +109,18 @@
 
 ### 消息总览
 
-| # | 消息类型 | 方向 | 说明 | 变更类型 |
-|---|----------|------|------|----------|
-| 1 | `roomInfo` | S→C | 房间信息（items 字段扩展） | 修改 |
-| 2 | `commandResult` | S→C | 指令结果（新增 get_from/put/look_container） | 扩展 |
-| 3 | `inventoryUpdate` | S→C | 背包更新（已有，无需改动） | 不变 |
+| #   | 消息类型          | 方向 | 说明                                         | 变更类型 |
+| --- | ----------------- | ---- | -------------------------------------------- | -------- |
+| 1   | `roomInfo`        | S→C  | 房间信息（items 字段扩展）                   | 修改     |
+| 2   | `commandResult`   | S→C  | 指令结果（新增 get_from/put/look_container） | 扩展     |
+| 3   | `inventoryUpdate` | S→C  | 背包更新（已有，无需改动）                   | 不变     |
 
 ### 消息详情
 
 #### 1. roomInfo（修改：items 字段扩展）
 
 **当前 ItemBrief**:
+
 ```typescript
 interface ItemBrief {
   id: string;
@@ -130,6 +131,7 @@ interface ItemBrief {
 ```
 
 **扩展后 ItemBrief**:
+
 ```typescript
 interface ItemBrief {
   id: string;
@@ -137,9 +139,9 @@ interface ItemBrief {
   short: string;
   type: string;
   // ---- 新增字段 ----
-  isContainer?: boolean;       // 是否为容器
-  isRemains?: boolean;         // 是否为残骸（前端特殊样式）
-  contentCount?: number;       // 内容物数量（仅容器有值）
+  isContainer?: boolean; // 是否为容器
+  isRemains?: boolean; // 是否为残骸（前端特殊样式）
+  contentCount?: number; // 内容物数量（仅容器有值）
 }
 ```
 
@@ -212,26 +214,26 @@ interface ItemBrief {
 
 ### ItemBrief 扩展字段
 
-| # | 字段 | 类型 | 必填 | 说明 | 前端用途 |
-|---|------|------|------|------|----------|
-| 1 | id | string | ✅ | 物品实例 ID | 唯一标识 |
-| 2 | name | string | ✅ | 物品名称 | 卡片标题 |
-| 3 | short | string | ✅ | 简短描述 | 卡片副标题 |
-| 4 | type | string | ✅ | 物品类型 | 类型标签 |
-| 5 | isContainer | boolean | ❌ | 是否为容器 | 弹窗展示内容物 |
-| 6 | isRemains | boolean | ❌ | 是否为残骸 | 特殊卡片样式 |
-| 7 | contentCount | number | ❌ | 内容物数量 | 卡片角标 |
+| #   | 字段         | 类型    | 必填 | 说明        | 前端用途       |
+| --- | ------------ | ------- | ---- | ----------- | -------------- |
+| 1   | id           | string  | ✅   | 物品实例 ID | 唯一标识       |
+| 2   | name         | string  | ✅   | 物品名称    | 卡片标题       |
+| 3   | short        | string  | ✅   | 简短描述    | 卡片副标题     |
+| 4   | type         | string  | ✅   | 物品类型    | 类型标签       |
+| 5   | isContainer  | boolean | ❌   | 是否为容器  | 弹窗展示内容物 |
+| 6   | isRemains    | boolean | ❌   | 是否为残骸  | 特殊卡片样式   |
+| 7   | contentCount | number  | ❌   | 内容物数量  | 卡片角标       |
 
 ### ContainerLookData（容器查看数据）
 
-| # | 字段 | 类型 | 必填 | 说明 |
-|---|------|------|------|------|
-| 1 | action | `'look'` | ✅ | 动作标识 |
-| 2 | target | `'container'` | ✅ | 目标类型 |
-| 3 | containerId | string | ✅ | 容器实例 ID |
-| 4 | containerName | string | ✅ | 容器名称 |
-| 5 | isRemains | boolean | ✅ | 是否为残骸 |
-| 6 | contents | ItemBrief[] | ✅ | 内容物列表 |
+| #   | 字段          | 类型          | 必填 | 说明        |
+| --- | ------------- | ------------- | ---- | ----------- |
+| 1   | action        | `'look'`      | ✅   | 动作标识    |
+| 2   | target        | `'container'` | ✅   | 目标类型    |
+| 3   | containerId   | string        | ✅   | 容器实例 ID |
+| 4   | containerName | string        | ✅   | 容器名称    |
+| 5   | isRemains     | boolean       | ✅   | 是否为残骸  |
+| 6   | contents      | ItemBrief[]   | ✅   | 内容物列表  |
 
 ### 前端 TypeScript 类型定义
 
@@ -303,8 +305,8 @@ export class RemainsBase extends ContainerBase {
     this.set('droppable', true);
     this.set('tradeable', false);
     this.set('stackable', false);
-    this.set('capacity', 50);        // 足够容纳 NPC 全部物品
-    this.decayRemaining = 600;       // 10 分钟
+    this.set('capacity', 50); // 足够容纳 NPC 全部物品
+    this.decayRemaining = 600; // 10 分钟
   }
 
   /** 心跳：衰腐倒计时 */
@@ -366,14 +368,12 @@ export class ContainerBase extends ItemBase {
 
   /** 获取内容物列表 */
   getContents(): ItemBase[] {
-    return this.getInventory().filter(
-      (e): e is ItemBase => e instanceof ItemBase
-    );
+    return this.getInventory().filter((e): e is ItemBase => e instanceof ItemBase);
   }
 
   /** 获取内容物简要信息（用于网络传输） */
   getContentsBrief(): { id: string; name: string; short: string; type: string }[] {
-    return this.getContents().map(item => ({
+    return this.getContents().map((item) => ({
       id: item.id,
       name: item.getName(),
       short: item.getShort(),
@@ -471,16 +471,17 @@ private getFromContainer(executor: LivingBase, itemName: string, containerName: 
 export class PutCommand implements ICommand {
   execute(executor: LivingBase, args: string[]): CommandResult {
     // 检测 in / 进 / 里 关键词
-    const inIdx = args.findIndex(a => ['in', '进', '里'].includes(a));
+    const inIdx = args.findIndex((a) => ['in', '进', '里'].includes(a));
     if (inIdx <= 0) return { success: false, message: '用法：put <物品> in <容器>' };
 
     const itemName = args.slice(0, inIdx).join(' ');
     const containerName = args.slice(inIdx + 1).join(' ');
 
     // 查找物品：玩家背包
-    const item = executor.getInventory()
+    const item = executor
+      .getInventory()
       .filter((e): e is ItemBase => e instanceof ItemBase)
-      .find(i => i.getName().includes(itemName));
+      .find((i) => i.getName().includes(itemName));
     if (!item) return { success: false, message: `你没有${itemName}。` };
 
     // 查找容器：房间地面 → 背包
@@ -497,8 +498,13 @@ export class PutCommand implements ICommand {
     return {
       success: true,
       message: `你把[item]${item.getName()}[/item]放入了[item]${container.getName()}[/item]。`,
-      data: { action: 'put', itemId: item.id, itemName: item.getName(),
-              containerId: container.id, containerName: container.getName() },
+      data: {
+        action: 'put',
+        itemId: item.id,
+        itemName: item.getName(),
+        containerId: container.id,
+        containerName: container.getName(),
+      },
     };
   }
 }
@@ -552,9 +558,9 @@ interface ItemCardProps {
 interface ItemInfoModalProps {
   detail: ItemDetailData | null;
   onClose: () => void;
-  onGet: (itemName: string) => void;               // 拾取
-  onGetFrom: (itemName: string, containerName: string) => void;  // 从容器取出
-  onExamine: (itemName: string) => void;            // 鉴定
+  onGet: (itemName: string) => void; // 拾取
+  onGetFrom: (itemName: string, containerName: string) => void; // 从容器取出
+  onExamine: (itemName: string) => void; // 鉴定
 }
 ```
 
@@ -613,30 +619,30 @@ if (result.success && result.data?.action === 'put') {
 
 ### 修改的已有文件
 
-| 文件 | 变更内容 |
-|------|----------|
-| `packages/core/src/types/messages/inventory.ts` | ItemBrief 新增 3 个可选字段 |
-| `packages/core/src/factory/handlers/roomInfo.ts` | validate 适配新字段 |
+| 文件                                               | 变更内容                                    |
+| -------------------------------------------------- | ------------------------------------------- |
+| `packages/core/src/types/messages/inventory.ts`    | ItemBrief 新增 3 个可选字段                 |
+| `packages/core/src/factory/handlers/roomInfo.ts`   | validate 适配新字段                         |
 | `server/src/engine/game-objects/container-base.ts` | 新增 canAccept/getContents/getContentsBrief |
-| `server/src/engine/game-objects/npc-base.ts` | die() 创建残骸 |
-| `server/src/engine/game-objects/player-base.ts` | die() 创建空残骸 |
-| `server/src/engine/commands/std/get.ts` | from 语法 |
-| `server/src/engine/commands/std/look.ts` | 容器内容展示 |
-| `server/src/engine/commands/std/examine.ts` | 容器内容展示 |
-| `server/src/websocket/handlers/room-utils.ts` | sendRoomInfo 适配新字段 |
-| `server/src/websocket/handlers/command.handler.ts` | get_from/put 推送 |
-| `server/src/engine/command-loader.ts` | 注册 put 指令 |
-| `client/src/components/game/NpcList/index.tsx` | 物品卡片渲染 |
-| `client/src/stores/useGameStore.ts` | itemDetail 状态 |
-| `client/App.tsx` | commandResult 容器处理 |
+| `server/src/engine/game-objects/npc-base.ts`       | die() 创建残骸                              |
+| `server/src/engine/game-objects/player-base.ts`    | die() 创建空残骸                            |
+| `server/src/engine/commands/std/get.ts`            | from 语法                                   |
+| `server/src/engine/commands/std/look.ts`           | 容器内容展示                                |
+| `server/src/engine/commands/std/examine.ts`        | 容器内容展示                                |
+| `server/src/websocket/handlers/room-utils.ts`      | sendRoomInfo 适配新字段                     |
+| `server/src/websocket/handlers/command.handler.ts` | get_from/put 推送                           |
+| `server/src/engine/command-loader.ts`              | 注册 put 指令                               |
+| `client/src/components/game/NpcList/index.tsx`     | 物品卡片渲染                                |
+| `client/src/stores/useGameStore.ts`                | itemDetail 状态                             |
+| `client/App.tsx`                                   | commandResult 容器处理                      |
 
 ### 新增的文件
 
-| 文件 | 说明 |
-|------|------|
-| `server/src/engine/game-objects/remains-base.ts` | 残骸类 |
-| `server/src/engine/commands/std/put.ts` | put 指令 |
-| `client/src/components/game/NpcList/ItemCard.tsx` | 物品卡片 |
+| 文件                                                   | 说明     |
+| ------------------------------------------------------ | -------- |
+| `server/src/engine/game-objects/remains-base.ts`       | 残骸类   |
+| `server/src/engine/commands/std/put.ts`                | put 指令 |
+| `client/src/components/game/NpcList/ItemCard.tsx`      | 物品卡片 |
 | `client/src/components/game/NpcList/ItemInfoModal.tsx` | 物品弹窗 |
 
 ## 风险点
@@ -646,4 +652,5 @@ if (result.success && result.data?.action === 'put') {
 - **from/in 关键词冲突**：如果物品名含 "from" 或 "in"（如 "来自远方的信"） → 应对：从右往左搜索关键词，优先取最后一个 from/in
 
 ---
+
 > CX 工作流 | Design Doc | PRD #208

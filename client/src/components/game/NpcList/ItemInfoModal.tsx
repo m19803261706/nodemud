@@ -113,7 +113,8 @@ export const ItemInfoModal = ({
       : '容器'
     : TYPE_LABEL[detail.type || ''] || detail.type || '';
   const isInInventory = isContainer
-    ? !!detail.containerId && inventory.some(item => item.id === detail.containerId)
+    ? !!detail.containerId &&
+      inventory.some(item => item.id === detail.containerId)
     : !!detail.itemId && inventory.some(item => item.id === detail.itemId);
 
   return (

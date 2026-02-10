@@ -187,7 +187,9 @@ export class ExamineCommand implements ICommand {
           const childQuality = child.getQuality();
           const childWearPos = child.get<string>('wear_position') ?? '';
           const childTag = getEquipmentTag(childWearPos, childQuality);
-          lines.push(`  ${rt(childTag, child.getName())} (${TYPE_LABEL[child.getType()] || child.getType()})`);
+          lines.push(
+            `  ${rt(childTag, child.getName())} (${TYPE_LABEL[child.getType()] || child.getType()})`,
+          );
         }
       } else {
         lines.push('');

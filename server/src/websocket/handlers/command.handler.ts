@@ -231,7 +231,11 @@ export class CommandHandler {
         const npc = this.objectManager.findById(npcId);
         const item = this.objectManager.findById(itemId);
         if (npc instanceof NpcBase && item instanceof ItemBase) {
-          const autoCompleteResults = ServiceLocator.questManager.onItemDelivered(npc, player, item);
+          const autoCompleteResults = ServiceLocator.questManager.onItemDelivered(
+            npc,
+            player,
+            item,
+          );
 
           for (const autoCompleteResult of autoCompleteResults) {
             if (autoCompleteResult.message) {

@@ -115,8 +115,8 @@ interface AllocatePointsData {
 ```typescript
 interface PlayerStatsData {
   name: string;
-  level: number;             // ← 改为 number
-  levelTitle: string;        // ← 新增
+  level: number; // ← 改为 number
+  levelTitle: string; // ← 新增
   silver: number;
   hp: ResourceValue;
   mp: ResourceValue;
@@ -124,11 +124,11 @@ interface PlayerStatsData {
   attrs: CharacterAttrs;
   equipBonus: EquipmentBonus;
   combat: CombatData;
-  exp: number;               // ← 新增
-  expToNextLevel: number;    // ← 新增
-  potential: number;         // ← 新增
-  score: number;             // ← 新增
-  freePoints: number;        // ← 新增
+  exp: number; // ← 新增
+  expToNextLevel: number; // ← 新增
+  potential: number; // ← 新增
+  score: number; // ← 新增
+  freePoints: number; // ← 新增
 }
 ```
 

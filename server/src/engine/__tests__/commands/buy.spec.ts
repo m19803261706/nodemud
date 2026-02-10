@@ -83,7 +83,9 @@ describe('商店指令', () => {
     });
     expect(player.getSilver()).toBe(70);
 
-    const inventory = player.getInventory().filter((entity): entity is ItemBase => entity instanceof ItemBase);
+    const inventory = player
+      .getInventory()
+      .filter((entity): entity is ItemBase => entity instanceof ItemBase);
     expect(inventory.some((item) => item.getName() === '止血散')).toBe(true);
   });
 
@@ -95,7 +97,9 @@ describe('商店指令', () => {
     expect(result.success).toBe(false);
     expect(result.message).toContain('银两不够');
     expect(player.getSilver()).toBe(10);
-    const inventory = player.getInventory().filter((entity): entity is ItemBase => entity instanceof ItemBase);
+    const inventory = player
+      .getInventory()
+      .filter((entity): entity is ItemBase => entity instanceof ItemBase);
     expect(inventory.length).toBe(0);
   });
 

@@ -21,10 +21,7 @@ export const ObjectiveProgress = ({ objective }: ObjectiveProgressProps) => {
       </View>
 
       {/* 描述 */}
-      <Text
-        style={[s.desc, done ? s.descDone : undefined]}
-        numberOfLines={1}
-      >
+      <Text style={[s.desc, done ? s.descDone : undefined]} numberOfLines={1}>
         {objective.description}
       </Text>
 

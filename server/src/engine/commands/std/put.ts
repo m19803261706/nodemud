@@ -43,8 +43,7 @@ export class PutCommand implements ICommand {
       .filter((e): e is ItemBase => e instanceof ItemBase)
       .find(
         (i) =>
-          i.getName().includes(itemName) ||
-          i.getName().toLowerCase() === itemName.toLowerCase(),
+          i.getName().includes(itemName) || i.getName().toLowerCase() === itemName.toLowerCase(),
       );
     if (!item) {
       return { success: false, message: `你没有${itemName}。` };
@@ -92,9 +91,7 @@ export class PutCommand implements ICommand {
         .getInventory()
         .filter((e): e is ContainerBase => e instanceof ContainerBase)
         .find(
-          (c) =>
-            c.getName().includes(name) ||
-            c.getName().toLowerCase() === name.toLowerCase(),
+          (c) => c.getName().includes(name) || c.getName().toLowerCase() === name.toLowerCase(),
         );
       if (ground) return ground;
     }
@@ -102,11 +99,7 @@ export class PutCommand implements ICommand {
     return executor
       .getInventory()
       .filter((e): e is ContainerBase => e instanceof ContainerBase)
-      .find(
-        (c) =>
-          c.getName().includes(name) ||
-          c.getName().toLowerCase() === name.toLowerCase(),
-      );
+      .find((c) => c.getName().includes(name) || c.getName().toLowerCase() === name.toLowerCase());
   }
 
   /** 从右往左查找关键词索引 */

@@ -159,7 +159,9 @@ export const useSkillStore = create<SkillState>((set, get) => ({
       const skills = state.skills.map(s => {
         if (mappedSkillIds.has(s.skillId)) {
           // 该技能在映射表中，找到对应的槽位
-          const slot = Object.entries(skillMap).find(([, id]) => id === s.skillId);
+          const slot = Object.entries(skillMap).find(
+            ([, id]) => id === s.skillId,
+          );
           return { ...s, isMapped: true, mappedSlot: slot ? slot[0] : null };
         }
         // 该技能不在映射表中，如果之前是映射的则清除

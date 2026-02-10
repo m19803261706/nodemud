@@ -39,8 +39,12 @@ export const ItemCard = ({ item, onPress }: ItemCardProps) => {
       activeOpacity={0.7}
     >
       <View style={s.top}>
-        <Text style={s.name} numberOfLines={1}>{item.name}</Text>
-        {isRemains && item.contentCount !== undefined && item.contentCount > 0 ? (
+        <Text style={s.name} numberOfLines={1}>
+          {item.name}
+        </Text>
+        {isRemains &&
+        item.contentCount !== undefined &&
+        item.contentCount > 0 ? (
           <View style={s.badge}>
             <Text style={s.badgeText}>{item.contentCount}</Text>
           </View>

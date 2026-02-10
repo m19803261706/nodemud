@@ -23,9 +23,7 @@ export const CompletedQuestList = ({ quests }: CompletedQuestListProps) => {
         onPress={() => setExpanded(prev => !prev)}
         activeOpacity={0.7}
       >
-        <Text style={s.headerText}>
-          已完成 ({quests.length})
-        </Text>
+        <Text style={s.headerText}>已完成 ({quests.length})</Text>
         <Text style={s.arrow}>{expanded ? '\u25B2' : '\u25BC'}</Text>
       </TouchableOpacity>
 

@@ -11,10 +11,7 @@
  * skillType = COGNIZE
  * category = COGNIZE
  */
-import {
-  SkillSlotType,
-  SkillCategory,
-} from '@packages/core';
+import { SkillSlotType, SkillCategory } from '@packages/core';
 import { SkillBase } from './skill-base';
 import type { LivingBase } from '../game-objects/living-base';
 

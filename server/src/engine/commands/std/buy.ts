@@ -52,7 +52,10 @@ export class BuyCommand implements ICommand {
     const fromIdx = this.findKeywordIndex(args, ['from', '从']);
     if (fromIdx > 0) {
       const selector = args.slice(0, fromIdx).join(' ').trim();
-      const merchantName = args.slice(fromIdx + 1).join(' ').trim();
+      const merchantName = args
+        .slice(fromIdx + 1)
+        .join(' ')
+        .trim();
       return {
         selector,
         merchantName: merchantName || undefined,

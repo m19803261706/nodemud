@@ -1,0 +1,160 @@
+{
+  "feature": "天衍技能系统",
+  "slug": "skill-system",
+  "created_at": "2026-02-10T15:10:00+08:00",
+  "last_updated": "2026-02-10T19:15:00+08:00",
+  "status": "completed",
+  "scope_status": "completed",
+  "mode": "feature",
+  "github_issue": 222,
+  "epic": 225,
+  "docs": {
+    "scope": 222,
+    "prd": 223,
+    "design": 224
+  },
+  "phases": [
+    {
+      "number": 1,
+      "name": "基础层",
+      "parallel_group": "p1",
+      "status": "completed",
+      "tasks": [1, 2]
+    },
+    {
+      "number": 2,
+      "name": "引擎核心",
+      "parallel_group": "p2",
+      "status": "completed",
+      "tasks": [3, 4],
+      "depends_on": [1]
+    },
+    {
+      "number": 3,
+      "name": "引擎扩展",
+      "parallel_group": "p3",
+      "status": "completed",
+      "tasks": [5, 6, 7],
+      "depends_on": [2]
+    },
+    {
+      "number": 4,
+      "name": "后端路由",
+      "parallel_group": "p4",
+      "status": "completed",
+      "tasks": [8],
+      "depends_on": [3]
+    },
+    {
+      "number": 5,
+      "name": "前端",
+      "parallel_group": "p5",
+      "status": "completed",
+      "tasks": [9, 10, 11],
+      "depends_on": [1]
+    }
+  ],
+  "tasks": [
+    {
+      "number": 1,
+      "title": "Core 共享类型定义",
+      "phase": 1,
+      "parallel": true,
+      "depends_on": [],
+      "parallel_group": "p1",
+      "status": "completed"
+    },
+    {
+      "number": 2,
+      "title": "数据库实体 + SkillService + SkillModule",
+      "phase": 1,
+      "parallel": true,
+      "depends_on": [],
+      "parallel_group": "p1",
+      "status": "completed"
+    },
+    {
+      "number": 3,
+      "title": "技能基类体系 + SkillRegistry",
+      "phase": 2,
+      "parallel": false,
+      "depends_on": [1],
+      "parallel_group": "p2",
+      "status": "completed"
+    },
+    {
+      "number": 4,
+      "title": "SkillManager 技能管理器",
+      "phase": 2,
+      "parallel": false,
+      "depends_on": [2, 3],
+      "parallel_group": "p2",
+      "status": "completed"
+    },
+    {
+      "number": 5,
+      "title": "PracticeManager 练功管理器",
+      "phase": 3,
+      "parallel": true,
+      "depends_on": [4],
+      "parallel_group": "p3",
+      "status": "completed"
+    },
+    {
+      "number": 6,
+      "title": "CombatManager 改造 + DamageEngine 扩展",
+      "phase": 3,
+      "parallel": true,
+      "depends_on": [4],
+      "parallel_group": "p3",
+      "status": "completed"
+    },
+    {
+      "number": 7,
+      "title": "PlayerBase 集成",
+      "phase": 3,
+      "parallel": true,
+      "depends_on": [4],
+      "parallel_group": "p3",
+      "status": "completed"
+    },
+    {
+      "number": 8,
+      "title": "WebSocket Handler + Gateway 路由",
+      "phase": 4,
+      "parallel": false,
+      "depends_on": [5, 6, 7],
+      "parallel_group": "p4",
+      "status": "completed"
+    },
+    {
+      "number": 9,
+      "title": "前端 Store + 消息订阅",
+      "phase": 5,
+      "parallel": false,
+      "depends_on": [1],
+      "parallel_group": "p5",
+      "status": "completed"
+    },
+    {
+      "number": 10,
+      "title": "CombatActions 战斗快捷栏组件",
+      "phase": 5,
+      "parallel": true,
+      "depends_on": [9],
+      "parallel_group": "p5",
+      "status": "completed"
+    },
+    {
+      "number": 11,
+      "title": "SkillPanel 技能面板组件",
+      "phase": 5,
+      "parallel": true,
+      "depends_on": [9],
+      "parallel_group": "p5",
+      "status": "completed"
+    }
+  ],
+  "execution_order": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "completed": 11
+}
