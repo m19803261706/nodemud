@@ -17,6 +17,11 @@ export default class SongyangArea extends Area {
       'area/songyang/gate',
       'area/songyang/drill-ground',
       'area/songyang/hall',
+      'area/songyang/disciples-yard',
+      'area/songyang/scripture-pavilion',
+      'area/songyang/deacon-court',
+      'area/songyang/meditation-room',
+      'area/songyang/armory',
     ]);
 
     this.set('spawn_rules', [
@@ -28,7 +33,7 @@ export default class SongyangArea extends Area {
       },
       {
         blueprintId: 'npc/songyang/deacon-zhao',
-        roomId: 'area/songyang/hall',
+        roomId: 'area/songyang/deacon-court',
         count: 1,
         interval: 300000,
       },
@@ -36,6 +41,30 @@ export default class SongyangArea extends Area {
         blueprintId: 'npc/songyang/sparring-disciple',
         roomId: 'area/songyang/drill-ground',
         count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/elder-xu',
+        roomId: 'area/songyang/meditation-room',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/discipline-elder-lu',
+        roomId: 'area/songyang/disciples-yard',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/senior-disciple-lin',
+        roomId: 'area/songyang/drill-ground',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/gate-disciple',
+        roomId: 'area/songyang/gate',
+        count: 2,
         interval: 300000,
       },
     ]);

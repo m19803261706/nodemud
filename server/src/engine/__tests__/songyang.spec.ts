@@ -22,6 +22,11 @@ const ROOM_IDS = [
   'area/songyang/gate',
   'area/songyang/drill-ground',
   'area/songyang/hall',
+  'area/songyang/disciples-yard',
+  'area/songyang/scripture-pavilion',
+  'area/songyang/deacon-court',
+  'area/songyang/meditation-room',
+  'area/songyang/armory',
 ];
 
 describe('嵩阳宗地图', () => {
@@ -61,21 +66,25 @@ describe('嵩阳宗地图', () => {
     }
   });
 
-  it('Area 应包含 4 个房间与 3 条 NPC 刷新规则', () => {
+  it('Area 应包含 9 个房间与 7 条 NPC 刷新规则', () => {
     const area = objectManager.findById('area/songyang/area') as Area;
     const roomIds = area.getRoomIds();
-    expect(roomIds).toHaveLength(4);
+    expect(roomIds).toHaveLength(9);
     for (const roomId of ROOM_IDS) {
       expect(roomIds).toContain(roomId);
     }
 
     const spawnRules = area.getSpawnRules();
-    expect(spawnRules).toHaveLength(3);
+    expect(spawnRules).toHaveLength(7);
     expect(spawnRules.map((x) => x.blueprintId)).toEqual(
       expect.arrayContaining([
         'npc/songyang/master-li',
         'npc/songyang/deacon-zhao',
         'npc/songyang/sparring-disciple',
+        'npc/songyang/elder-xu',
+        'npc/songyang/discipline-elder-lu',
+        'npc/songyang/senior-disciple-lin',
+        'npc/songyang/gate-disciple',
       ]),
     );
   });
@@ -93,12 +102,22 @@ describe('嵩阳宗地图', () => {
     const gate = objectManager.findById('area/songyang/gate') as RoomBase;
     const hall = objectManager.findById('area/songyang/hall') as RoomBase;
     const drillGround = objectManager.findById('area/songyang/drill-ground') as RoomBase;
+    const disciplesYard = objectManager.findById('area/songyang/disciples-yard') as RoomBase;
+    const scripturePavilion = objectManager.findById('area/songyang/scripture-pavilion') as RoomBase;
+    const deaconCourt = objectManager.findById('area/songyang/deacon-court') as RoomBase;
+    const meditationRoom = objectManager.findById('area/songyang/meditation-room') as RoomBase;
+    const armory = objectManager.findById('area/songyang/armory') as RoomBase;
     const northGate = objectManager.findById('area/rift-town/north-gate') as RoomBase;
 
     expect(gate.getCoordinates()).toEqual({ x: 0, y: -5, z: 0 });
     expect(mountainPath.getCoordinates()).toEqual({ x: 0, y: -4, z: 0 });
     expect(hall.getCoordinates()).toEqual({ x: 0, y: -6, z: 0 });
     expect(drillGround.getCoordinates()).toEqual({ x: 1, y: -5, z: 0 });
+    expect(disciplesYard.getCoordinates()).toEqual({ x: -1, y: -5, z: 0 });
+    expect(scripturePavilion.getCoordinates()).toEqual({ x: -1, y: -6, z: 0 });
+    expect(deaconCourt.getCoordinates()).toEqual({ x: 1, y: -6, z: 0 });
+    expect(meditationRoom.getCoordinates()).toEqual({ x: 0, y: -7, z: 0 });
+    expect(armory.getCoordinates()).toEqual({ x: 2, y: -5, z: 0 });
 
     expect(mountainPath.getExit('north')).toBe('area/songyang/gate');
     expect(gate.getExit('south')).toBe('area/songyang/mountain-path');
@@ -108,6 +127,24 @@ describe('嵩阳宗地图', () => {
 
     expect(gate.getExit('east')).toBe('area/songyang/drill-ground');
     expect(drillGround.getExit('west')).toBe('area/songyang/gate');
+
+    expect(gate.getExit('west')).toBe('area/songyang/disciples-yard');
+    expect(disciplesYard.getExit('east')).toBe('area/songyang/gate');
+
+    expect(disciplesYard.getExit('north')).toBe('area/songyang/scripture-pavilion');
+    expect(scripturePavilion.getExit('south')).toBe('area/songyang/disciples-yard');
+
+    expect(scripturePavilion.getExit('east')).toBe('area/songyang/hall');
+    expect(hall.getExit('west')).toBe('area/songyang/scripture-pavilion');
+
+    expect(hall.getExit('east')).toBe('area/songyang/deacon-court');
+    expect(deaconCourt.getExit('west')).toBe('area/songyang/hall');
+
+    expect(hall.getExit('north')).toBe('area/songyang/meditation-room');
+    expect(meditationRoom.getExit('south')).toBe('area/songyang/hall');
+
+    expect(drillGround.getExit('east')).toBe('area/songyang/armory');
+    expect(armory.getExit('west')).toBe('area/songyang/drill-ground');
 
     expect(northGate.getCoordinates()).toEqual({ x: 0, y: -3, z: 0 });
     expect(mountainPath.getCoordinates()).toEqual({ x: 0, y: -4, z: 0 });

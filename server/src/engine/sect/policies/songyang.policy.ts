@@ -24,9 +24,12 @@ export class SongyangPolicy implements SectPolicy {
   readonly ranks: SectRankThreshold[] = [
     { rank: '外门弟子', minContribution: 0 },
     { rank: '内门弟子', minContribution: 300 },
-    { rank: '执事弟子', minContribution: 1200 },
+    { rank: '执礼弟子', minContribution: 1200 },
     { rank: '亲传弟子', minContribution: 3000 },
-    { rank: '护法弟子', minContribution: 8000 },
+    { rank: '嵩阳执事', minContribution: 8000 },
+    { rank: '嵩阳长老', minContribution: 16000 },
+    { rank: '首座长老', minContribution: 32000 },
+    { rank: '副掌门', minContribution: 64000 },
   ];
 
   canApprentice(player: PlayerBase, _master: NpcBase, _data: PlayerSectData): true | string {

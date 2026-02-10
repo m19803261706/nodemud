@@ -16,6 +16,9 @@ export default class SongyangHall extends RoomBase {
     this.set('coordinates', { x: 0, y: -6, z: 0 });
     this.set('exits', {
       south: 'area/songyang/gate',
+      west: 'area/songyang/scripture-pavilion',
+      east: 'area/songyang/deacon-court',
+      north: 'area/songyang/meditation-room',
     });
   }
 }

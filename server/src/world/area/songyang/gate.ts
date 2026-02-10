@@ -18,6 +18,7 @@ export default class SongyangGate extends RoomBase {
       south: 'area/songyang/mountain-path',
       east: 'area/songyang/drill-ground',
       north: 'area/songyang/hall',
+      west: 'area/songyang/disciples-yard',
     });
   }
 }

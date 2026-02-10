@@ -16,6 +16,7 @@ export default class SongyangDrillGround extends RoomBase {
     this.set('coordinates', { x: 1, y: -5, z: 0 });
     this.set('exits', {
       west: 'area/songyang/gate',
+      east: 'area/songyang/armory',
     });
   }
 }
