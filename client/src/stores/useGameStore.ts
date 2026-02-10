@@ -15,6 +15,8 @@ import type {
   CombatUpdateData,
   CombatEndData,
   QuestObjectiveProgress,
+  CombatActionOption,
+  CombatAwaitActionData,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -272,11 +274,21 @@ export interface GameState {
     enemy: CombatFighter | null;
     log: CombatAction[];
     result: CombatEndData | null;
+    /** 是否正在等待玩家选择行动 */
+    awaitingAction: boolean;
+    /** 可选行动列表 */
+    availableActions: CombatActionOption[];
+    /** 行动超时时间（ms） */
+    actionTimeout: number;
   };
   setCombatStart: (data: CombatStartData) => void;
   setCombatUpdate: (data: CombatUpdateData) => void;
   setCombatEnd: (data: CombatEndData) => void;
   clearCombat: () => void;
+  /** 设置战斗等待行动状态（技能选招） */
+  setCombatAwaitAction: (data: CombatAwaitActionData) => void;
+  /** 清除战斗等待行动状态 */
+  clearCombatAwaitAction: () => void;
 
   // 导航
   activeTab: string;
@@ -500,6 +512,9 @@ export const useGameStore = create<GameState>(set => ({
     enemy: null,
     log: [],
     result: null,
+    awaitingAction: false,
+    availableActions: [],
+    actionTimeout: 0,
   },
   setCombatStart: data =>
     set({
@@ -510,6 +525,9 @@ export const useGameStore = create<GameState>(set => ({
         enemy: data.enemy,
         log: [],
         result: null,
+        awaitingAction: false,
+        availableActions: [],
+        actionTimeout: 0,
       },
     }),
   setCombatUpdate: data =>
@@ -523,6 +541,10 @@ export const useGameStore = create<GameState>(set => ({
           ? { ...state.combat.enemy, ...data.enemy }
           : null,
         log: [...state.combat.log, ...data.actions],
+        // 收到战斗更新时清除等待行动状态（本轮行动已执行）
+        awaitingAction: false,
+        availableActions: [],
+        actionTimeout: 0,
       },
     })),
   setCombatEnd: data =>
@@ -531,6 +553,9 @@ export const useGameStore = create<GameState>(set => ({
         ...state.combat,
         active: false,
         result: data,
+        awaitingAction: false,
+        availableActions: [],
+        actionTimeout: 0,
       },
     })),
   clearCombat: () =>
@@ -542,8 +567,29 @@ export const useGameStore = create<GameState>(set => ({
         enemy: null,
         log: [],
         result: null,
+        awaitingAction: false,
+        availableActions: [],
+        actionTimeout: 0,
       },
     }),
+  setCombatAwaitAction: data =>
+    set(state => ({
+      combat: {
+        ...state.combat,
+        awaitingAction: true,
+        availableActions: data.availableActions,
+        actionTimeout: data.timeoutMs,
+      },
+    })),
+  clearCombatAwaitAction: () =>
+    set(state => ({
+      combat: {
+        ...state.combat,
+        awaitingAction: false,
+        availableActions: [],
+        actionTimeout: 0,
+      },
+    })),
 
   // 导航
   activeTab: '江湖',

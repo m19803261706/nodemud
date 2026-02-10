@@ -14,6 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UIProvider } from './src/components';
 import { wsService } from './src/services/WebSocketService';
 import { useGameStore, exitsToDirections } from './src/stores/useGameStore';
+import { useSkillStore } from './src/stores/useSkillStore';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { RegisterScreen } from './src/screens/RegisterScreen';
 import { CreateCharacterScreen } from './src/screens/CreateCharacterScreen';
@@ -191,6 +192,65 @@ function App(): React.JSX.Element {
       });
     };
 
+    // ─── 技能系统消息处理 ───
+
+    /** 技能列表全量推送 → 写入 skillStore */
+    const handleSkillList = (data: any) => {
+      useSkillStore.getState().setSkillList(data);
+    };
+
+    /** 单技能增量更新 → 更新 skillStore */
+    const handleSkillUpdate = (data: any) => {
+      useSkillStore.getState().updateSkill(data);
+    };
+
+    /** 学会新技能 → 添加到 skillStore + 写入日志提示 */
+    const handleSkillLearn = (data: any) => {
+      useSkillStore.getState().addSkill(data);
+      if (data.message) {
+        useGameStore
+          .getState()
+          .appendLog({ text: data.message, color: '#4A6B4A' });
+      }
+    };
+
+    /** 战斗等待行动 → 设置 combat 选招状态 */
+    const handleCombatAwaitAction = (data: any) => {
+      useGameStore.getState().setCombatAwaitAction(data);
+    };
+
+    /** 技能装配结果 → 更新映射 + 写入日志 */
+    const handleSkillMapResult = (data: any) => {
+      useSkillStore.getState().setSkillMap(data);
+      if (data.message) {
+        const color = data.success ? '#4A6B4A' : '#8B3A3A';
+        useGameStore.getState().appendLog({ text: data.message, color });
+      }
+    };
+
+    /** 技能面板完整数据 → 写入 skillStore */
+    const handleSkillPanelData = (data: any) => {
+      useSkillStore.getState().setSkillPanelData(data);
+    };
+
+    /** 修炼进度更新 → 更新 skillStore + 写入日志 */
+    const handlePracticeUpdate = (data: any) => {
+      useSkillStore.getState().updatePractice(data);
+      if (data.message) {
+        const color = data.levelUp ? '#4A6B4A' : '#5A5048';
+        useGameStore.getState().appendLog({ text: data.message, color });
+      }
+    };
+
+    /** NPC 学艺结果 → 更新 skillStore + 写入日志 */
+    const handleSkillLearnResult = (data: any) => {
+      useSkillStore.getState().applyLearnResult(data);
+      if (data.message) {
+        const color = data.success ? '#4A6B4A' : '#8B3A3A';
+        useGameStore.getState().appendLog({ text: data.message, color });
+      }
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -201,6 +261,14 @@ function App(): React.JSX.Element {
     wsService.on('combatUpdate', handleCombatUpdate);
     wsService.on('combatEnd', handleCombatEnd);
     wsService.on('questUpdate', handleQuestUpdate);
+    wsService.on('skillList', handleSkillList);
+    wsService.on('skillUpdate', handleSkillUpdate);
+    wsService.on('skillLearn', handleSkillLearn);
+    wsService.on('combatAwaitAction', handleCombatAwaitAction);
+    wsService.on('skillMapResult', handleSkillMapResult);
+    wsService.on('skillPanelData', handleSkillPanelData);
+    wsService.on('practiceUpdate', handlePracticeUpdate);
+    wsService.on('skillLearnResult', handleSkillLearnResult);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -213,6 +281,14 @@ function App(): React.JSX.Element {
       wsService.off('combatUpdate', handleCombatUpdate);
       wsService.off('combatEnd', handleCombatEnd);
       wsService.off('questUpdate', handleQuestUpdate);
+      wsService.off('skillList', handleSkillList);
+      wsService.off('skillUpdate', handleSkillUpdate);
+      wsService.off('skillLearn', handleSkillLearn);
+      wsService.off('combatAwaitAction', handleCombatAwaitAction);
+      wsService.off('skillMapResult', handleSkillMapResult);
+      wsService.off('skillPanelData', handleSkillPanelData);
+      wsService.off('practiceUpdate', handlePracticeUpdate);
+      wsService.off('skillLearnResult', handleSkillLearnResult);
     };
   }, []);
 
