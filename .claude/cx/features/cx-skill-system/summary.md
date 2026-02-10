@@ -2,13 +2,13 @@
 
 ## 完成概览
 
-| 项 | 内容 |
-|---|---|
-| 功能 | 天衍技能系统 |
-| 规模 | L（大型） |
-| 完成时间 | 2026-02-10 |
+| 项       | 内容               |
+| -------- | ------------------ |
+| 功能     | 天衍技能系统       |
+| 规模     | L（大型）          |
+| 完成时间 | 2026-02-10         |
 | 总任务数 | 11 + 1（代码审查） |
-| 提交数 | 12 |
+| 提交数   | 12                 |
 
 ## 相关文档
 
@@ -24,6 +24,7 @@
 ## 实现清单
 
 ### Phase 1: 基础层
+
 - [x] Task 1: Core 共享类型定义 (`87ad90a`)
   - 7 枚举 + SKILL_CONSTANTS + 14 消息类型 + 14 MessageFactory Handler
   - 变更文件: 19 个，新增 877 行
@@ -33,6 +34,7 @@
   - 变更文件: 4 个，新增 154 行
 
 ### Phase 2: 引擎核心
+
 - [x] Task 3: 技能基类体系 + SkillRegistry (`f957801`)
   - 27 文件: SkillBase → MartialSkillBase/InternalSkillBase/SupportSkillBase → 各槽位基类
   - 变更文件: 27 个，新增 867 行
@@ -42,6 +44,7 @@
   - 变更文件: 5 个，新增 1561 行（含 CombatActions UI 4 文件）
 
 ### Phase 3: 引擎扩展
+
 - [x] Task 5: PracticeManager 练功管理器 (`2d958e9`)
   - 三种修炼模式: practice(单次) / dazuo(打坐) / jingzuo(静坐)
   - 变更文件: 1 个，新增 456 行
@@ -55,11 +58,13 @@
   - 变更文件: 6 个，新增 164 行
 
 ### Phase 4: 后端路由
+
 - [x] Task 8: WebSocket Handler + Gateway 路由 (`c2314c1`)
   - 6 个消息处理器: skillUse/skillMapRequest/skillPanelRequest/skillLearnRequest/practiceStart/practiceEnd
   - 变更文件: 4 个，新增 476 行
 
 ### Phase 5: 前端
+
 - [x] Task 9: 前端 Store + 消息订阅 (`4d04fce`)
   - 独立 useSkillStore (Zustand) + 8 个消息订阅 + gameStore 战斗扩展
   - 变更文件: 3 个，新增 353 行
@@ -73,6 +78,7 @@
   - 变更文件: 9 个，新增 992 行
 
 ### 代码审查 + Bug 修复 (`aac851b`)
+
 - 修复 6 Critical + 3 Warning 问题
 - 变更文件: 6 个
 
@@ -88,22 +94,22 @@
 
 ## WebSocket 消息清单
 
-| 方向 | 消息类型 | 说明 |
-|------|----------|------|
-| C→S | skillUse | 战斗中选择招式 |
-| C→S | skillMapRequest | 装配/卸下技能 |
-| C→S | skillPanelRequest | 请求面板数据 |
-| C→S | skillLearnRequest | NPC 学艺 |
-| C→S | practiceStart | 开始修炼 |
-| C→S | practiceEnd | 结束修炼 |
-| S→C | skillList | 全量技能列表 |
-| S→C | skillUpdate | 单个技能变更 |
-| S→C | skillLearn | 学会新技能 |
-| S→C | skillLearnResult | 学艺结果 |
-| S→C | skillMapResult | 装配结果 |
-| S→C | skillPanelData | 面板完整数据 |
-| S→C | practiceUpdate | 修炼进度 |
-| S→C | combatAwaitAction | 等待选招 |
+| 方向 | 消息类型          | 说明           |
+| ---- | ----------------- | -------------- |
+| C→S  | skillUse          | 战斗中选择招式 |
+| C→S  | skillMapRequest   | 装配/卸下技能  |
+| C→S  | skillPanelRequest | 请求面板数据   |
+| C→S  | skillLearnRequest | NPC 学艺       |
+| C→S  | practiceStart     | 开始修炼       |
+| C→S  | practiceEnd       | 结束修炼       |
+| S→C  | skillList         | 全量技能列表   |
+| S→C  | skillUpdate       | 单个技能变更   |
+| S→C  | skillLearn        | 学会新技能     |
+| S→C  | skillLearnResult  | 学艺结果       |
+| S→C  | skillMapResult    | 装配结果       |
+| S→C  | skillPanelData    | 面板完整数据   |
+| S→C  | practiceUpdate    | 修炼进度       |
+| S→C  | combatAwaitAction | 等待选招       |
 
 ## 变更统计
 
