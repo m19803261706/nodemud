@@ -9,8 +9,6 @@ import { ActionButton } from './ActionButton';
 import { MapDescription } from './MapDescription';
 import { LogScrollView } from '../shared/LogScrollView';
 
-const ACTION_BUTTONS = ['拜师', '领取任务', '打坐'];
-
 export const GameLog = () => {
   const showMapDesc = useGameStore(state => state.showMapDesc);
   const description = useGameStore(state => state.location.description);
@@ -22,23 +20,22 @@ export const GameLog = () => {
     <View style={s.container}>
       {showMapDesc && <MapDescription text={description} />}
       <LogScrollView style={s.logArea} contentPaddingBottom={38} />
-      <View style={s.actionBar}>
-        {ACTION_BUTTONS.map(label => (
-          <ActionButton key={label} label={label} />
-        ))}
-        {logQuickActions.map(action => (
-          <ActionButton
-            key={action.id}
-            label={action.label}
-            onPress={() => {
-              sendCommand(action.command);
-              if (action.consumeOnPress !== false) {
-                removeLogQuickAction(action.id);
-              }
-            }}
-          />
-        ))}
-      </View>
+      {logQuickActions.length > 0 ? (
+        <View style={s.actionBar}>
+          {logQuickActions.map(action => (
+            <ActionButton
+              key={action.id}
+              label={action.label}
+              onPress={() => {
+                sendCommand(action.command);
+                if (action.consumeOnPress !== false) {
+                  removeLogQuickAction(action.id);
+                }
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 };

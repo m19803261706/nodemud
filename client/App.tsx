@@ -64,9 +64,7 @@ function App(): React.JSX.Element {
 
       if (
         plain.includes('守山弟子') &&
-        (plain.includes('报上来意') ||
-          plain.includes('先把来意说明白') ||
-          plain.includes('ask 守山弟子 about 来意'))
+        (plain.includes('报上来意') || plain.includes('先把来意说明白'))
       ) {
         upsertLogQuickAction({
           id: SONGYANG_GATE_INTENT_ACTION_ID,

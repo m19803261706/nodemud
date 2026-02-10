@@ -57,7 +57,7 @@ export default class SongyangMountainPath extends RoomBase {
       return;
     }
 
-    mover.receiveMessage('守山弟子横剑拦住去路：「报上来意。可先 ask 守山弟子 about 来意。」');
+    mover.receiveMessage('守山弟子横剑拦住去路：「报上来意。」');
     event.cancel();
   }
 
