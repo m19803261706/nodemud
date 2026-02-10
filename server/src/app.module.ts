@@ -14,6 +14,7 @@ import { WebSocketModule } from './websocket/websocket.module';
 import { CharacterModule } from './character/character.module';
 import { FateModule } from './fate/fate.module';
 import { EngineModule } from './engine/engine.module';
+import { SkillModule } from './skill/skill.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EngineModule } from './engine/engine.module';
     AccountModule,
     CharacterModule,
     FateModule,
+    SkillModule,
     WebSocketModule,
   ],
 })
