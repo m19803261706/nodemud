@@ -89,7 +89,10 @@ export class SectManager {
 
     const role = this.getNpcSectRole(master);
     if (role !== 'mentor') {
-      return { success: false, message: `${master.getName()}道：「收徒之事，先去弟子院找何教习。」` };
+      return {
+        success: false,
+        message: `${master.getName()}道：「收徒之事，先去弟子院找何教习。」`,
+      };
     }
 
     const data = this.getPlayerSectData(player);
@@ -176,7 +179,10 @@ export class SectManager {
     data.current.rank = policy.resolveRankByContribution(data.current.contribution);
     this.savePlayerSectData(player, data);
 
-    const rankUpText = data.current.rank !== oldRank ? `\n${rt('imp', `你的门中身份提升为：${data.current.rank}`)}` : '';
+    const rankUpText =
+      data.current.rank !== oldRank
+        ? `\n${rt('imp', `你的门中身份提升为：${data.current.rank}`)}`
+        : '';
 
     return {
       success: true,
@@ -237,8 +243,7 @@ export class SectManager {
     data.current.rank = policy.resolveRankByContribution(data.current.contribution);
     this.savePlayerSectData(player, data);
 
-    const rankText =
-      data.current.rank !== oldRank ? ` 当前身份升为${data.current.rank}。` : '';
+    const rankText = data.current.rank !== oldRank ? ` 当前身份升为${data.current.rank}。` : '';
     player.receiveMessage(
       `${rt('sys', `演武结算：门派贡献 +${reward.contribution}`)}\n${reward.summary}${rankText}`,
     );

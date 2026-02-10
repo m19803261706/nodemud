@@ -62,7 +62,9 @@ export function clonePlayerSectData(data: PlayerSectData): PlayerSectData {
     },
     daily: {
       dateKey: data.daily.dateKey ?? '',
-      sparCount: Number.isFinite(data.daily.sparCount) ? Math.max(0, Math.floor(data.daily.sparCount)) : 0,
+      sparCount: Number.isFinite(data.daily.sparCount)
+        ? Math.max(0, Math.floor(data.daily.sparCount))
+        : 0,
     },
   };
 }
@@ -104,7 +106,9 @@ export function normalizePlayerSectData(raw: unknown): PlayerSectData {
       : null;
 
   const bannedSectIds = Array.isArray(restrictionsInput?.bannedSectIds)
-    ? restrictionsInput.bannedSectIds.filter((id: unknown): id is string => typeof id === 'string' && id.length > 0)
+    ? restrictionsInput.bannedSectIds.filter(
+        (id: unknown): id is string => typeof id === 'string' && id.length > 0,
+      )
     : [];
 
   return {
@@ -112,7 +116,8 @@ export function normalizePlayerSectData(raw: unknown): PlayerSectData {
     restrictions: {
       bannedSectIds,
       cooldownUntil:
-        typeof restrictionsInput?.cooldownUntil === 'number' && Number.isFinite(restrictionsInput.cooldownUntil)
+        typeof restrictionsInput?.cooldownUntil === 'number' &&
+        Number.isFinite(restrictionsInput.cooldownUntil)
           ? Math.floor(restrictionsInput.cooldownUntil)
           : null,
     },

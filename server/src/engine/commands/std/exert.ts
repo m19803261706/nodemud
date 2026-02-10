@@ -141,9 +141,7 @@ export class ExertCommand implements ICommand {
 
     // 通用效果
     for (const e of universals) {
-      lines.push(
-        `  ${rt('imp', bold(e.name))} (${e.displayName}) — ${e.getDescription()}`,
-      );
+      lines.push(`  ${rt('imp', bold(e.name))} (${e.displayName}) — ${e.getDescription()}`);
     }
 
     // 当前内功支持的特殊效果
@@ -152,9 +150,7 @@ export class ExertCommand implements ICommand {
       for (const name of supportedSpecials) {
         const e = allEffects.find((ef) => ef.name === name);
         if (e && !e.isUniversal) {
-          lines.push(
-            `  ${rt('imp', bold(e.name))} (${e.displayName}) — ${e.getDescription()}`,
-          );
+          lines.push(`  ${rt('imp', bold(e.name))} (${e.displayName}) — ${e.getDescription()}`);
         }
       }
     }
@@ -200,10 +196,7 @@ export class ExertCommand implements ICommand {
   }
 
   /** 获取内功定义（安全类型转换） */
-  private getForceDefinition(
-    skillManager: any,
-    forceId: string,
-  ): InternalSkillBase | null {
+  private getForceDefinition(skillManager: any, forceId: string): InternalSkillBase | null {
     try {
       const skillRegistry = skillManager.skillRegistry ?? skillManager['skillRegistry'];
       if (!skillRegistry) return null;

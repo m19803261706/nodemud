@@ -70,9 +70,11 @@ export class LearnCommand implements ICommand {
       return { success: false, message: '你不在任何房间中。' };
     }
 
-    const npc = env.getInventory().find(
-      (e) => e instanceof NpcBase && (e as NpcBase).getName().includes(npcName),
-    ) as NpcBase | undefined;
+    const npc = env
+      .getInventory()
+      .find((e) => e instanceof NpcBase && (e as NpcBase).getName().includes(npcName)) as
+      | NpcBase
+      | undefined;
 
     if (!npc) {
       return { success: false, message: '这里没有这个人。' };

@@ -17,11 +17,7 @@ export class HealEffect extends ExertEffectBase {
   readonly isUniversal = true;
   readonly canUseInCombat = false;
 
-  execute(
-    player: PlayerBase,
-    forceSkillId: string,
-    forceLevel: number,
-  ): ExertExecuteResult {
+  execute(player: PlayerBase, forceSkillId: string, forceLevel: number): ExertExecuteResult {
     // 已在疗伤中
     if (player.getTemp<boolean>('exert/healing')) {
       return {
@@ -85,10 +81,7 @@ export class HealEffect extends ExertEffectBase {
         effectName: 'heal',
         displayName: '运功疗伤',
         success: true,
-        message: rt(
-          'sys',
-          `你运功疗伤，恢复了 ${bold(String(actualHeal))} 点气血。`,
-        ),
+        message: rt('sys', `你运功疗伤，恢复了 ${bold(String(actualHeal))} 点气血。`),
         resourceChanged: true,
       });
       if (tickMsg) {

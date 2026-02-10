@@ -18,11 +18,7 @@ export class ShieldEffect extends ExertEffectBase {
   readonly isUniversal = false;
   readonly canUseInCombat = false;
 
-  execute(
-    player: PlayerBase,
-    forceSkillId: string,
-    forceLevel: number,
-  ): ExertExecuteResult {
+  execute(player: PlayerBase, forceSkillId: string, forceLevel: number): ExertExecuteResult {
     const mp = player.get<number>('mp') ?? 0;
 
     // 前置检查：内力 >= 100

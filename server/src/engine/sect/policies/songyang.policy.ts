@@ -81,13 +81,15 @@ export class SongyangPolicy implements SectPolicy {
     const contribution = victory ? 120 : 60;
     return {
       contribution,
-      summary: victory
-        ? '你在演武中稳住架势，赢得满场喝彩。'
-        : '你虽落下风，仍守住了门中章法。',
+      summary: victory ? '你在演武中稳住架势，赢得满场喝彩。' : '你虽落下风，仍守住了门中章法。',
     };
   }
 
-  applyBetrayalPenalty(_player: PlayerBase, _witness: NpcBase, _data: PlayerSectData): SectBetrayPenalty {
+  applyBetrayalPenalty(
+    _player: PlayerBase,
+    _witness: NpcBase,
+    _data: PlayerSectData,
+  ): SectBetrayPenalty {
     return {
       removeFactionSkills: true,
       banForever: true,

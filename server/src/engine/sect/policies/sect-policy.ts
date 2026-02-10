@@ -48,5 +48,9 @@ export interface SectPolicy {
 
   resolveSparReward(player: PlayerBase, opponent: LivingBase, victory: boolean): SectSparReward;
 
-  applyBetrayalPenalty(player: PlayerBase, witness: NpcBase, data: PlayerSectData): SectBetrayPenalty;
+  applyBetrayalPenalty(
+    player: PlayerBase,
+    witness: NpcBase,
+    data: PlayerSectData,
+  ): SectBetrayPenalty;
 }

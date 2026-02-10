@@ -17,11 +17,7 @@ export class RecoverEffect extends ExertEffectBase {
   readonly isUniversal = true;
   readonly canUseInCombat = true;
 
-  execute(
-    player: PlayerBase,
-    forceSkillId: string,
-    forceLevel: number,
-  ): ExertExecuteResult {
+  execute(player: PlayerBase, forceSkillId: string, forceLevel: number): ExertExecuteResult {
     const mp = player.get<number>('mp') ?? 0;
     const hp = player.get<number>('hp') ?? 0;
     const maxHp = player.getMaxHp();
@@ -56,7 +52,7 @@ export class RecoverEffect extends ExertEffectBase {
     // 实际消耗 = min(cost, 当前内力)
     const actualCost = Math.min(cost, mp);
     // 按比例恢复: healAmount = floor(missing * actualCost / cost)
-    const healAmount = Math.floor(missing * actualCost / cost);
+    const healAmount = Math.floor((missing * actualCost) / cost);
 
     // 扣除内力
     player.set('mp', mp - actualCost);

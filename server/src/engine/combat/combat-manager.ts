@@ -76,11 +76,7 @@ export class CombatManager implements OnModuleInit {
    * @param options 战斗选项（普通/演武模式）
    * @returns combatId
    */
-  startCombat(
-    attacker: LivingBase,
-    defender: LivingBase,
-    options?: { mode?: CombatMode },
-  ): string {
+  startCombat(attacker: LivingBase, defender: LivingBase, options?: { mode?: CombatMode }): string {
     const combatId = `combat_${Date.now()}_${++combatCounter}`;
     const mode: CombatMode = options?.mode ?? 'normal';
 
@@ -224,7 +220,9 @@ export class CombatManager implements OnModuleInit {
       }
     }
 
-    this.logger.log(`战斗结束[${combat.mode}]: ${player.getName()} vs ${enemy.getName()} (${reason})`);
+    this.logger.log(
+      `战斗结束[${combat.mode}]: ${player.getName()} vs ${enemy.getName()} (${reason})`,
+    );
   }
 
   /** 查询实体是否在战斗中 */

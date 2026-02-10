@@ -57,7 +57,8 @@ function executePractice(executor: LivingBase, args: string[], mode: PracticeMod
   }
 
   if (args.length === 0) {
-    const modeText = mode === PracticeMode.PRACTICE ? '练习' : mode === PracticeMode.DAZUO ? '打坐' : '静坐';
+    const modeText =
+      mode === PracticeMode.PRACTICE ? '练习' : mode === PracticeMode.DAZUO ? '打坐' : '静坐';
     return { success: false, message: `${modeText}什么？用法: ${modeText} <技能名>` };
   }
 
@@ -75,9 +76,7 @@ function executePractice(executor: LivingBase, args: string[], mode: PracticeMod
 
   // 从技能列表中查找匹配的技能（buildSkillListData 返回含 skillName 的 PlayerSkillInfo）
   const listData = skillManager.buildSkillListData();
-  const skill = listData.skills.find(
-    (s) => s.skillName === target || s.skillName.includes(target),
-  );
+  const skill = listData.skills.find((s) => s.skillName === target || s.skillName.includes(target));
 
   if (!skill) {
     return { success: false, message: `你没有学过「${target}」。` };
