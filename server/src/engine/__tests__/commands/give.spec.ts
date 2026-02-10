@@ -8,7 +8,10 @@ import { NpcBase } from '../../game-objects/npc-base';
 import { RoomBase } from '../../game-objects/room-base';
 
 class QuestNpc extends NpcBase {
-  override onReceiveItem(_giver: LivingBase, item: ItemBase): { accept: boolean; message?: string } {
+  override onReceiveItem(
+    _giver: LivingBase,
+    item: ItemBase,
+  ): { accept: boolean; message?: string } {
     if (item.getType() === 'quest') {
       return { accept: true, message: '白发药师接过信，轻轻点了点头。' };
     }
