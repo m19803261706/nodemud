@@ -17,6 +17,7 @@ import type { QuestManager } from './quest/quest-manager';
 import type { SkillService } from '../skill/skill.service';
 import type { SkillRegistry } from './skills/skill-registry';
 import type { PracticeManager } from './skills/practice-manager';
+import type { SectManager } from './sect/sect-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -47,6 +48,9 @@ export class ServiceLocator {
   static skillRegistry: SkillRegistry;
   static practiceManager: PracticeManager;
 
+  // Layer 8 门派服务
+  static sectManager: SectManager;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -65,6 +69,7 @@ export class ServiceLocator {
     skillService?: SkillService;
     skillRegistry?: SkillRegistry;
     practiceManager?: PracticeManager;
+    sectManager?: SectManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -80,6 +85,7 @@ export class ServiceLocator {
     if (providers.skillService) this.skillService = providers.skillService;
     if (providers.skillRegistry) this.skillRegistry = providers.skillRegistry;
     if (providers.practiceManager) this.practiceManager = providers.practiceManager;
+    if (providers.sectManager) this.sectManager = providers.sectManager;
     this._initialized = true;
   }
 
@@ -105,5 +111,6 @@ export class ServiceLocator {
     this.skillService = undefined as any;
     this.skillRegistry = undefined as any;
     this.practiceManager = undefined as any;
+    this.sectManager = undefined as any;
   }
 }

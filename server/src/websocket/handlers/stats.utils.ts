@@ -7,6 +7,8 @@ import { MessageFactory } from '@packages/core';
 import type { Character } from '../../character/character.entity';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { PlayerQuestData } from '../../engine/quest';
+import type { PlayerSectData } from '../../engine/sect/types';
+import { normalizePlayerSectData } from '../../engine/sect/types';
 import { ServiceLocator } from '../../engine/service-locator';
 
 /** 等级映射（通过 ExpManager 获取等级称号） */
@@ -50,6 +52,7 @@ const CHARACTER_TO_DBASE_ALIASES: Record<string, string[]> = {
   lastRoom: ['last_room'],
   freePoints: ['free_points'],
   questData: ['quests'],
+  sectData: ['sect'],
 };
 
 /** dbase 赋值克隆，避免 Character 实体对象引用被运行时逻辑污染 */
@@ -178,6 +181,8 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
 
   // 任务数据
   player.set('quests', cloneForDbase(character.questData ?? null));
+  // 门派数据（保持统一结构，避免登录后缺字段）
+  player.set('sect', normalizePlayerSectData(character.sectData ?? null));
 
   // HP 上限 = 血气 * 100 + 装备加成
   const equipBonus = player.getEquipmentBonus();
@@ -226,6 +231,8 @@ export function savePlayerData(player: PlayerBase, character: Character): void {
 
   // 任务数据
   character.questData = player.get<PlayerQuestData>('quests') ?? character.questData ?? null;
+  // 门派数据
+  character.sectData = normalizePlayerSectData(player.get<PlayerSectData>('sect') ?? character.sectData ?? null);
 
   // 银两
   const silver = player.get<number>('silver');

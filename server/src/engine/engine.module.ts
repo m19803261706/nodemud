@@ -21,6 +21,9 @@ import { SkillRegistry } from './skills/skill-registry';
 import { PracticeManager } from './skills/practice-manager';
 import { SkillModule } from '../skill/skill.module';
 import { SkillService } from '../skill/skill.service';
+import { SectRegistry } from './sect/sect-registry';
+import { SectManager } from './sect/sect-manager';
+import { SongyangPolicy } from './sect/policies/songyang.policy';
 
 @Module({
   imports: [SkillModule],
@@ -38,6 +41,9 @@ import { SkillService } from '../skill/skill.service';
     QuestManager,
     SkillRegistry,
     PracticeManager,
+    SectRegistry,
+    SectManager,
+    SongyangPolicy,
   ],
   exports: [
     HeartbeatManager,
@@ -53,6 +59,8 @@ import { SkillService } from '../skill/skill.service';
     QuestManager,
     SkillRegistry,
     PracticeManager,
+    SectRegistry,
+    SectManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -73,9 +81,15 @@ export class EngineModule implements OnModuleInit {
     private readonly skillRegistry: SkillRegistry,
     private readonly practiceManager: PracticeManager,
     private readonly skillService: SkillService,
+    private readonly sectRegistry: SectRegistry,
+    private readonly sectManager: SectManager,
+    private readonly songyangPolicy: SongyangPolicy,
   ) {}
 
   async onModuleInit() {
+    // 注册门派策略（后续新增门派在这里扩展）
+    this.sectRegistry.register(this.songyangPolicy);
+
     ServiceLocator.initialize({
       heartbeatManager: this.heartbeatManager,
       objectManager: this.objectManager,
@@ -91,6 +105,7 @@ export class EngineModule implements OnModuleInit {
       skillService: this.skillService,
       skillRegistry: this.skillRegistry,
       practiceManager: this.practiceManager,
+      sectManager: this.sectManager,
     });
     // 设置 PracticeManager 的技能注册表引用
     this.practiceManager.setSkillRegistry(this.skillRegistry);

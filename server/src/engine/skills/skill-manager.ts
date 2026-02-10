@@ -146,6 +146,15 @@ export class SkillManager {
       return '未知的技能。';
     }
 
+    // 门派桎锁：限定门派技能仅对应门派可学
+    const requiredSect = skillDef.factionRequired;
+    if (requiredSect) {
+      const currentSect = this.getCurrentSectId();
+      if (currentSect !== requiredSect) {
+        return '你并非此门弟子，无法修习这门武学。';
+      }
+    }
+
     // 学习条件校验
     const canLearn = skillDef.validLearn(this.player);
     if (canLearn !== true) {
@@ -250,6 +259,15 @@ export class SkillManager {
 
     const skillDef = this.skillRegistry.get(skillId);
     if (!skillDef) return false;
+
+    // 门派桎锁：非本门弟子不可继续提升门派技能
+    const requiredSect = skillDef.factionRequired;
+    if (requiredSect) {
+      const currentSect = this.getCurrentSectId();
+      if (currentSect !== requiredSect) {
+        return false;
+      }
+    }
 
     // 检查技能是否可以提升
     if (!skillDef.canImprove(this.player, data.level)) {
@@ -364,6 +382,15 @@ export class SkillManager {
     const skillDef = this.skillRegistry.get(skillId);
     if (!skillDef) {
       return '技能定义不存在。';
+    }
+
+    // 门派桎锁：非本门弟子不可装配门派技能
+    const requiredSect = skillDef.factionRequired;
+    if (requiredSect) {
+      const currentSect = this.getCurrentSectId();
+      if (currentSect !== requiredSect) {
+        return '你并非此门弟子，无法运使这门武学。';
+      }
     }
 
     // 校验 validEnable（检查技能是否可以装配到指定槽位）
@@ -749,6 +776,66 @@ export class SkillManager {
     }
   }
 
+  /**
+   * 删除指定门派归属的全部技能
+   * 用于叛门惩罚：彻底移除该门派技能记录（内存 + 数据库）。
+   * @returns 被删除的技能 ID 列表
+   */
+  removeSkillsByFaction(factionRequired: string): string[] {
+    if (!factionRequired) return [];
+
+    const removedSkillIds: string[] = [];
+    const removedDbIds: string[] = [];
+
+    for (const [skillId, data] of this.skills) {
+      const skillDef = this.skillRegistry.get(skillId);
+      if (!skillDef || skillDef.factionRequired !== factionRequired) continue;
+
+      // 清理映射
+      if (data.mappedSlot) {
+        this.skillMap.delete(data.mappedSlot);
+      }
+      if (this.activeForce === skillId) {
+        this.activeForce = null;
+      }
+
+      removedSkillIds.push(skillId);
+      if (data.dbId) {
+        removedDbIds.push(data.dbId);
+      }
+      this.skills.delete(skillId);
+    }
+
+    // 异步清理数据库，避免阻塞指令执行
+    if (removedDbIds.length > 0) {
+      void (async () => {
+        for (const id of removedDbIds) {
+          try {
+            await this.skillService.delete(id);
+          } catch (err) {
+            this.logger.error(`删除门派技能记录失败: ${id} => ${err}`);
+          }
+        }
+      })();
+    }
+
+    if (removedSkillIds.length > 0) {
+      this.player.normalizeResourcesToCaps();
+
+      // 推送完整技能列表快照，前端直接按新列表刷新
+      const msg = MessageFactory.create('skillList', this.buildSkillListData());
+      if (msg) {
+        this.player.sendToClient(MessageFactory.serialize(msg));
+      }
+
+      this.logger.debug(
+        `玩家 ${this.player.getName()} 删除门派技能 ${factionRequired}: ${removedSkillIds.join(', ')}`,
+      );
+    }
+
+    return removedSkillIds;
+  }
+
   // ================================================================
   //  查询方法
   // ================================================================
@@ -853,6 +940,11 @@ export class SkillManager {
     if (msg) {
       this.player.sendToClient(MessageFactory.serialize(msg));
     }
+  }
+
+  /** 当前玩家门派 ID（从 dbase 读取） */
+  private getCurrentSectId(): string | null {
+    return this.player.get<string>('sect/current/sectId') ?? null;
   }
 
   /**

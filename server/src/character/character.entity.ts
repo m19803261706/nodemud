@@ -5,6 +5,7 @@
 
 import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
 import type { PlayerQuestData } from '../engine/quest';
+import type { PlayerSectData } from '../engine/sect/types';
 
 /** 出身枚举 */
 export type CharacterOriginType =
@@ -245,6 +246,16 @@ export class Character {
     comment: '任务进度数据（JSON）',
   })
   questData: PlayerQuestData | null;
+
+  // ========== 门派数据 ==========
+
+  @Column({
+    name: 'sect_data',
+    type: 'simple-json',
+    nullable: true,
+    comment: '门派状态数据（JSON）',
+  })
+  sectData: PlayerSectData | null;
 
   // ========== 时间 ==========
 
