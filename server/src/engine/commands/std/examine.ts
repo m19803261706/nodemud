@@ -13,7 +13,9 @@ import { ItemBase } from '../../game-objects/item-base';
 import { ContainerBase } from '../../game-objects/container-base';
 import { ArmorBase } from '../../game-objects/armor-base';
 import { WeaponBase } from '../../game-objects/weapon-base';
-import { rt, bold, ItemQuality, QUALITY_LABEL, getEquipmentTag } from '@packages/core';
+import { rt, bold, ItemQuality, QUALITY_LABEL, getEquipmentTag, BookType } from '@packages/core';
+import { BookBase } from '../../game-objects/book-base';
+import { ServiceLocator } from '../../service-locator';
 
 /** 六维属性中文映射 */
 const ATTR_CN: Record<string, string> = {
@@ -175,6 +177,47 @@ export class ExamineCommand implements ICommand {
     const levelReq = item.getLevelReq();
     if (levelReq > 0) {
       lines.push(`需求等级: ${levelReq}`);
+    }
+
+    // 书籍类物品：展示秘籍信息/配方列表
+    if (item instanceof BookBase) {
+      const bookType = item.getBookType();
+      if (bookType === BookType.SKILL) {
+        const skillName = item.getSkillName();
+        const difficulty = item.getDifficulty();
+        const minLevel = item.getMinLevel();
+        const maxLevel = item.getMaxLevel();
+        const expRequired = item.getExpRequired();
+        const needSkills = item.getNeedSkills();
+
+        lines.push('');
+        lines.push(`记载内容: ${rt('imp', `「${skillName}」`)}`);
+        lines.push(`研习难度: ${difficulty}`);
+        lines.push(`研习范围: ${minLevel} ~ ${maxLevel} 级`);
+        if (expRequired > 0) {
+          lines.push(`要求修为: ${expRequired} 级`);
+        }
+        const skillRegistry = ServiceLocator.skillRegistry;
+        if (Object.keys(needSkills).length > 0 && skillRegistry) {
+          const parts: string[] = [];
+          for (const [needId, needLevel] of Object.entries(needSkills)) {
+            const def = skillRegistry.get(needId);
+            const needName = def?.skillName ?? needId;
+            parts.push(`${needName} ${needLevel}级`);
+          }
+          lines.push(`前置要求: ${parts.join('、')}`);
+        }
+      } else if (bookType === BookType.RECIPE) {
+        const recipes = item.getRecipes();
+        const entries = Object.entries(recipes);
+        if (entries.length > 0) {
+          lines.push('');
+          lines.push('记载配方:');
+          for (const [recipeName, recipe] of entries) {
+            lines.push(`  ${rt('imp', recipeName)} — 需要辅技 ${recipe.skillLevel} 级`);
+          }
+        }
+      }
     }
 
     // 容器类物品：展示内容物详情

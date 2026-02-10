@@ -85,7 +85,7 @@ export enum PracticeMode {
   JINGZUO = 'jingzuo',
 }
 
-/** 技能学习来源（4 种） */
+/** 技能学习来源（5 种） */
 export enum SkillLearnSource {
   /** NPC 传授 */
   NPC = 'npc',
@@ -95,6 +95,18 @@ export enum SkillLearnSource {
   QUEST = 'quest',
   /** 天生技能 */
   INNATE = 'innate',
+  /** 书籍研读 */
+  BOOK = 'book',
+}
+
+/** 书籍类型（3 种） */
+export enum BookType {
+  /** 技能秘籍 */
+  SKILL = 'skill',
+  /** 文本读物 */
+  TEXT = 'text',
+  /** 配方典籍 */
+  RECIPE = 'recipe',
 }
 
 /** 技能更新原因（7 种） */
