@@ -77,7 +77,9 @@ export const InventoryToolbar = ({
               onPress={() => onSortChange(option.key)}
               activeOpacity={0.7}
             >
-              <Text style={[s.sortBtnText, active ? s.sortBtnTextActive : null]}>
+              <Text
+                style={[s.sortBtnText, active ? s.sortBtnTextActive : null]}
+              >
                 {option.label}
               </Text>
             </TouchableOpacity>

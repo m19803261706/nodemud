@@ -39,7 +39,9 @@ export const ItemRow = React.memo(({ item, onPress }: ItemRowProps) => {
           <Text style={s.name} numberOfLines={1}>
             {item.name}
           </Text>
-          {item.count > 1 ? <Text style={s.countBadge}>x{item.count}</Text> : null}
+          {item.count > 1 ? (
+            <Text style={s.countBadge}>x{item.count}</Text>
+          ) : null}
         </View>
         <Text style={s.short} numberOfLines={1}>
           {item.short}

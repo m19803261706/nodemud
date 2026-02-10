@@ -73,10 +73,7 @@ export const CategoryTabs = ({
                   style={[s.countBadge, isActive ? s.countBadgeActive : null]}
                 >
                   <Text
-                    style={[
-                      s.countText,
-                      isActive ? s.countTextActive : null,
-                    ]}
+                    style={[s.countText, isActive ? s.countTextActive : null]}
                   >
                     {count}
                   </Text>
