@@ -17,8 +17,13 @@ import {
 /** 最大嵌套深度 */
 const MAX_DEPTH = 3;
 
-/** 标记匹配正则：匹配 [tag] 或 [/tag] */
-const TAG_REGEX = /\[(\/?)([\w]+)\]/g;
+/** 标记匹配正则：匹配 [tag]、[/tag] 或 [\/tag]（兼容旧文案） */
+const TAG_REGEX = /\[(\\?\/?)([\w]+)\]/g;
+
+/** 旧标记兼容映射（服务端历史文案） */
+const TAG_ALIAS: Record<string, string> = {
+  important: 'imp',
+};
 
 /** 样式状态 */
 interface StyleState {
@@ -49,7 +54,8 @@ export function parseRichText(
   let match: RegExpExecArray | null;
 
   while ((match = TAG_REGEX.exec(raw)) !== null) {
-    const [fullMatch, isClose, tagName] = match;
+    const [fullMatch, closeToken, rawTagName] = match;
+    const tagName = TAG_ALIAS[rawTagName] ?? rawTagName;
 
     // 非预定义标记 -> 当作纯文本跳过
     if (!ALL_TAGS.has(tagName)) continue;
@@ -61,7 +67,8 @@ export function parseRichText(
     }
     lastIndex = match.index + fullMatch.length;
 
-    if (isClose === '/') {
+    const isClose = closeToken.includes('/');
+    if (isClose) {
       // 关闭标记 -> 弹栈恢复上层样式
       if (stack.length > 0) {
         currentStyle = stack.pop()!;
