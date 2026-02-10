@@ -97,9 +97,7 @@ export const QuestListModal = () => {
             </View>
 
             {/* 进行中任务 */}
-            <Text style={s.sectionTitle}>
-              进行中 ({quests.active.length})
-            </Text>
+            <Text style={s.sectionTitle}>进行中 ({quests.active.length})</Text>
 
             {quests.active.length > 0 ? (
               <View style={s.activeList}>
@@ -137,7 +135,9 @@ const s = StyleSheet.create({
   },
   card: {
     width: '88%',
-    maxHeight: '80%',
+    height: '78%',
+    maxHeight: 640,
+    minHeight: 360,
     borderRadius: 4,
     overflow: 'hidden',
   },
