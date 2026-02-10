@@ -61,12 +61,13 @@ export class QuestManager {
     this.definitions.set(def.id, def);
 
     // 更新 NPC → 任务 索引
-    const giverNpc = def.giverNpc;
-    const existing = this.npcQuestIndex.get(giverNpc) ?? [];
-    if (!existing.includes(def.id)) {
-      existing.push(def.id);
+    // 发布 NPC: 用于可接任务展示
+    // 交付 NPC: 用于 READY 状态展示（确保“完成任务”按钮出现在正确 NPC 身上）
+    this.addNpcQuestIndex(def.giverNpc, def.id);
+    const turnInNpc = def.turnInNpc ?? def.giverNpc;
+    if (turnInNpc !== def.giverNpc) {
+      this.addNpcQuestIndex(turnInNpc, def.id);
     }
-    this.npcQuestIndex.set(giverNpc, existing);
 
     this.logger.log(`任务已注册: ${def.id} (${def.name})`);
   }
@@ -129,10 +130,11 @@ export class QuestManager {
     const result: QuestDefinition[] = [];
 
     for (const questId of questIds) {
-      if (this.canAccept(player, questId)) {
-        const def = this.definitions.get(questId);
-        if (def) result.push(def);
-      }
+      const def = this.definitions.get(questId);
+      if (!def) continue;
+      // 可接任务只在发布 NPC 身上显示
+      if (def.giverNpc !== npcBlueprintId) continue;
+      if (this.canAccept(player, questId)) result.push(def);
     }
 
     return result;
@@ -167,7 +169,7 @@ export class QuestManager {
           state: isReadyHere ? 'ready' : 'active',
           objectives: this.buildObjectiveProgress(def, progress),
         });
-      } else if (this.canAccept(player, questId)) {
+      } else if (def.giverNpc === npcBlueprintId && this.canAccept(player, questId)) {
         // 可接受
         briefs.push({
           questId,
@@ -593,6 +595,15 @@ export class QuestManager {
   /** 保存玩家任务数据到 dbase */
   private savePlayerQuestData(player: PlayerBase, data: PlayerQuestData): void {
     player.set('quests', data);
+  }
+
+  /** 维护 NPC → 任务 索引 */
+  private addNpcQuestIndex(npcBlueprintId: string, questId: string): void {
+    const existing = this.npcQuestIndex.get(npcBlueprintId) ?? [];
+    if (!existing.includes(questId)) {
+      existing.push(questId);
+    }
+    this.npcQuestIndex.set(npcBlueprintId, existing);
   }
 
   /** 从实例 ID 提取蓝图 ID（如 "npc/guard#1" → "npc/guard"） */

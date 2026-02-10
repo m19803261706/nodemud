@@ -8,6 +8,9 @@
  */
 import type { QuestDefinition } from '../quest/quest-definition';
 import { LivingBase } from '../game-objects/living-base';
+import { PlayerBase } from '../game-objects/player-base';
+import { QuestManager } from '../quest/quest-manager';
+import { QuestStatus } from '../quest/quest-definition';
 import Blacksmith from '../../world/npc/rift-town/blacksmith';
 import Herbalist from '../../world/npc/rift-town/herbalist';
 import Bartender from '../../world/npc/rift-town/bartender';
@@ -73,5 +76,32 @@ describe('裂隙镇新手任务链', () => {
 
     expect(bartender.onReceiveItem(giver, sachet).accept).toBe(true);
     expect(bartender.onReceiveItem(giver, letter).accept).toBe(false);
+  });
+
+  it('可交付状态应在交付 NPC 身上显示，且交付 NPC 不显示可接任务', () => {
+    const questManager = new QuestManager();
+    const player = new PlayerBase('player/quest-spec');
+    player.set('name', '测试玩家');
+
+    const q1 = (blacksmith.get<QuestDefinition[]>('quests') ?? [])[0];
+    expect(q1).toBeDefined();
+    questManager.registerQuest(q1!);
+
+    // 未接任务时：发布者可见可接，交付者不可见可接
+    const beforeGiver = questManager.getNpcQuestBriefs(player, 'npc/rift-town/blacksmith');
+    const beforeTurnIn = questManager.getNpcQuestBriefs(player, 'npc/rift-town/herbalist');
+    expect(beforeGiver.some((q) => q.questId === q1!.id && q.state === 'available')).toBe(true);
+    expect(beforeTurnIn.some((q) => q.questId === q1!.id && q.state === 'available')).toBe(false);
+
+    // 接受任务后，手动模拟已达成 READY
+    const accept = questManager.acceptQuest(player, q1!.id, blacksmith);
+    expect(accept.success).toBe(true);
+    const questData = player.get<any>('quests');
+    questData.active[q1!.id].status = QuestStatus.READY;
+    player.set('quests', questData);
+
+    // READY 应显示在交付 NPC（药师）身上
+    const readyAtTurnIn = questManager.getNpcQuestBriefs(player, 'npc/rift-town/herbalist');
+    expect(readyAtTurnIn.some((q) => q.questId === q1!.id && q.state === 'ready')).toBe(true);
   });
 });
