@@ -38,6 +38,7 @@ export default class NorthGuard extends NpcBase {
       裂谷: '北门卫兵压低声音：「裂谷里最近有异动，上头让我们加强巡逻。具体什么情况，不方便说。」',
       default: '北门卫兵摆摆手：「我只负责守门，别的事情不归我管。」',
     });
+    this.set('combat_exp', 100);
     this.set('equipment', [
       { blueprintId: 'item/rift-town/iron-helmet', position: 'head' },
       { blueprintId: 'item/rift-town/guard-armor', position: 'body' },

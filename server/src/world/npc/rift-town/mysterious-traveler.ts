@@ -37,6 +37,7 @@ export default class MysteriousTraveler extends NpcBase {
       裂谷: '神秘旅人沉默片刻，低声说：「裂谷深处……有些东西，最好不要去碰。」',
       default: '神秘旅人没有理会你，继续盯着手中的酒杯出神。',
     });
+    this.set('combat_exp', 150);
     this.set('equipment', [
       { blueprintId: 'item/rift-town/dark-robe', position: 'body' },
       { blueprintId: 'item/rift-town/dark-gloves', position: 'hands' },

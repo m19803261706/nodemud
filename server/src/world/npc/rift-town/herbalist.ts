@@ -1,9 +1,12 @@
 /**
  * 白发药师 — 裂隙镇药铺
  * 百蛮退隐高手，隐居裂隙镇开药铺
+ * 作为 rift-town-001 任务的交付 NPC，接受任务物品
  */
 import { Factions } from '@packages/core';
 import { MerchantBase } from '../../../engine/game-objects/merchant-base';
+import type { LivingBase } from '../../../engine/game-objects/living-base';
+import type { ItemBase } from '../../../engine/game-objects/item-base';
 
 export default class Herbalist extends MerchantBase {
   static virtual = false;
@@ -61,5 +64,21 @@ export default class Herbalist extends MerchantBase {
       minPrice: 1,
       rejectionMessage: '白发药师淡淡道：「老身只收药品与可入药之物，其它拿走。」',
     });
+  }
+
+  /**
+   * 接收物品钩子 — 接受任务物品（type=quest），拒绝其余
+   */
+  onReceiveItem(_giver: LivingBase, item: ItemBase): { accept: boolean; message?: string } {
+    if (item.getType() === 'quest') {
+      return {
+        accept: true,
+        message: '白发药师接过信，微微颔首：「嗯，老周的信……老身知道了。多谢你跑这一趟。」',
+      };
+    }
+    return {
+      accept: false,
+      message: '白发药师头也不抬：「老身不需要这个，别打扰我做药。」',
+    };
   }
 }

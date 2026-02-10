@@ -65,6 +65,8 @@ export interface QuestRewards {
   silver?: number;
   /** 潜能奖励 */
   potential?: number;
+  /** 积分（阅历）奖励 */
+  score?: number;
   /** 物品奖励 */
   items?: { blueprintId: string; count: number }[];
 }

@@ -7,7 +7,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BlueprintRegistry } from './blueprint-registry';
 import { ObjectManager } from './object-manager';
+import { ServiceLocator } from './service-locator';
 import type { BaseEntity } from './base-entity';
+import type { QuestDefinition } from './quest/quest-definition';
 
 @Injectable()
 export class BlueprintFactory {
@@ -54,6 +56,10 @@ export class BlueprintFactory {
     const instance = new meta.blueprintClass(instanceId);
     this.objectManager.register(instance);
     instance.create();
+
+    // NPC 蓝图加载后自动注册 quests 到 QuestManager
+    this.registerQuestsIfPresent(instance);
+
     this.logger.log(`克隆对象已创建: ${instanceId}`);
     return instance;
   }
@@ -66,5 +72,21 @@ export class BlueprintFactory {
     const meta = this.registry.get(blueprintId);
     if (!meta) return undefined;
     return this.objectManager.findById(blueprintId);
+  }
+
+  /**
+   * 检查实体是否携带任务定义，若有则注册到 QuestManager
+   * 由 clone() 在 create() 之后调用，利用 QuestManager 的重复检测
+   */
+  private registerQuestsIfPresent(entity: BaseEntity): void {
+    const quests = entity.get<QuestDefinition[]>('quests');
+    if (!quests || quests.length === 0) return;
+
+    const questManager = ServiceLocator.questManager;
+    if (!questManager) return;
+
+    for (const def of quests) {
+      questManager.registerQuest(def);
+    }
   }
 }

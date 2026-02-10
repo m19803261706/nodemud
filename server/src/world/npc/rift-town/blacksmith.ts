@@ -4,6 +4,11 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import {
+  type QuestDefinition,
+  QuestType,
+  ObjectiveType,
+} from '../../../engine/quest/quest-definition';
 
 export default class Blacksmith extends NpcBase {
   static virtual = false;
@@ -40,10 +45,34 @@ export default class Blacksmith extends NpcBase {
       铠甲: '老周铁匠拍了拍胸脯：「铠甲也能打，不过费时费料。你要是真想要，先交定金，我给你量身打一副。」',
       default: '老周铁匠摆摆手：「这事儿我不懂，你去问别人吧。我就是个打铁的。」',
     });
+    this.set('combat_exp', 120);
     this.set('equipment', [
       { blueprintId: 'item/rift-town/smith-apron', position: 'body' },
       { blueprintId: 'item/rift-town/smith-gloves', position: 'hands' },
       { blueprintId: 'item/rift-town/smith-hammer', position: 'weapon' },
     ]);
+
+    // 任务定义：药师的来信（deliver 类型）
+    const questDefs: QuestDefinition[] = [
+      {
+        id: 'rift-town-001',
+        name: '药师的来信',
+        description: '老周铁匠有一封重要的信需要送到白发药师手中。',
+        type: QuestType.DELIVER,
+        giverNpc: 'npc/rift-town/blacksmith',
+        turnInNpc: 'npc/rift-town/herbalist',
+        objectives: [
+          {
+            type: ObjectiveType.DELIVER,
+            targetId: 'item/quest/blacksmith-letter',
+            count: 1,
+            description: '将铁匠的信交给白发药师',
+          },
+        ],
+        rewards: { exp: 100, score: 5 },
+        giveItems: [{ blueprintId: 'item/quest/blacksmith-letter', count: 1 }],
+      },
+    ];
+    this.set('quests', questDefs);
   }
 }

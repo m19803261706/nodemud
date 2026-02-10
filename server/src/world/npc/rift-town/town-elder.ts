@@ -4,6 +4,11 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import {
+  type QuestDefinition,
+  QuestType,
+  ObjectiveType,
+} from '../../../engine/quest/quest-definition';
 
 export default class TownElder extends NpcBase {
   static virtual = false;
@@ -37,7 +42,35 @@ export default class TownElder extends NpcBase {
         '老镇长慢悠悠地说：「裂隙镇啊，原本只是个寻常山谷里的小村庄。五十年前那场天裂，大地撕开一道深谷，我们就在裂谷边上重建了这个小镇。如今南来北往的人多了，倒也热闹了不少。」',
       天裂: '老镇长神色凝重：「天裂之变，是五十年前的事了。那一夜天空好像被撕开一道口子，大地震颤不止，整个山谷裂成了深不见底的裂谷。死了不少人啊……至今裂谷深处还时不时传出奇怪的响动。」',
       势力: '老镇长摇了摇头：「承天朝的兵、嵩阳宗的弟子、东海散盟的商人……这些年什么人都来过。裂隙镇是中立之地，我们不站队，谁来了都欢迎，但谁也别想在这儿闹事。」',
+      盗匪: '老镇长叹了口气：「北道上最近来了些不三不四的家伙，劫掠过往行人。我已经让卫兵加强巡逻了，但人手实在不够。你若是有本事，帮忙清理一下最好不过。」',
       default: '老镇长笑了笑：「老朽年纪大了，记性不好啦。你四处走走问问别人吧。」',
     });
+
+    // 任务定义：裂谷盗匪（capture 类型）
+    const questDefs: QuestDefinition[] = [
+      {
+        id: 'rift-town-002',
+        name: '裂谷盗匪',
+        description: '镇长希望你能清除盘踞在裂谷北道的盗匪。',
+        type: QuestType.CAPTURE,
+        giverNpc: 'npc/rift-town/town-elder',
+        prerequisites: { completedQuests: ['rift-town-001'] },
+        objectives: [
+          {
+            type: ObjectiveType.KILL,
+            targetId: 'npc/rift-town/bandit',
+            count: 1,
+            description: '击杀裂谷北道的盗匪',
+          },
+        ],
+        rewards: {
+          exp: 200,
+          potential: 50,
+          score: 10,
+          items: [{ blueprintId: 'item/rift-town/short-knife', count: 1 }],
+        },
+      },
+    ];
+    this.set('quests', questDefs);
   }
 }

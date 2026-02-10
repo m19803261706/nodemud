@@ -329,6 +329,13 @@ export class QuestManager {
       rewardParts.push(`潜能 ${rewards.potential}`);
     }
 
+    // 积分（阅历）奖励
+    if (rewards.score && rewards.score > 0) {
+      const currentScore = player.get<number>('score') ?? 0;
+      player.set('score', currentScore + rewards.score);
+      rewardParts.push(`阅历 ${rewards.score}`);
+    }
+
     // 物品奖励
     if (rewards.items && rewards.items.length > 0) {
       this.giveItems(player, rewards.items);

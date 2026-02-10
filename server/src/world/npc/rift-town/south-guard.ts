@@ -38,6 +38,7 @@ export default class SouthGuard extends NpcBase {
       北门: '南门卫兵小声说：「北门那位张大哥是老兵了，在裂隙镇守了三年。听说北边最近有点不太平，你要是好奇就去问问他。」',
       default: '南门卫兵挠了挠头：「这个我真不太清楚，你去镇里问问别人吧。」',
     });
+    this.set('combat_exp', 80);
     this.set('equipment', [
       { blueprintId: 'item/rift-town/leather-cap', position: 'head' },
       { blueprintId: 'item/rift-town/guard-armor', position: 'body' },

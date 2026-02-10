@@ -91,6 +91,12 @@ export default class RiftTownArea extends Area {
         count: 1,
         interval: 300000,
       },
+      {
+        blueprintId: 'npc/rift-town/bandit',
+        roomId: 'area/rift-town/north-road',
+        count: 1,
+        interval: 300000,
+      },
     ]);
 
     // 物品刷新规则
