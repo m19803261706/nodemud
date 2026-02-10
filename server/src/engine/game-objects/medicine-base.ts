@@ -80,7 +80,8 @@ export class MedicineBase extends ItemBase implements IUsableItem {
   override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
     const useActions = this.getUseOptions(owner).map((option) => ({
       label: option.label,
-      command: option.key === 'default' ? `use ${this.getName()}` : `use ${this.getName()} ${option.key}`,
+      command:
+        option.key === 'default' ? `use ${this.getName()}` : `use ${this.getName()} ${option.key}`,
     }));
     return [...useActions, ...super.getActionDefinitions(owner)];
   }

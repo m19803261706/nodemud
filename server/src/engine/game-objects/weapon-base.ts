@@ -38,6 +38,9 @@ export class WeaponBase extends ItemBase {
 
   /** 武器动作定义 */
   override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
-    return [{ label: '装备', command: `wield ${this.getName()}` }, ...super.getActionDefinitions(owner)];
+    return [
+      { label: '装备', command: `wield ${this.getName()}` },
+      ...super.getActionDefinitions(owner),
+    ];
   }
 }

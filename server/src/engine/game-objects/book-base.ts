@@ -64,7 +64,8 @@ export class BookBase extends ItemBase implements IUsableItem {
   override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
     const useActions = this.getUseOptions(owner).map((option) => ({
       label: option.label,
-      command: option.key === 'read' ? `use ${this.getName()}` : `use ${this.getName()} ${option.key}`,
+      command:
+        option.key === 'read' ? `use ${this.getName()}` : `use ${this.getName()} ${option.key}`,
     }));
     return [...useActions, ...super.getActionDefinitions(owner)];
   }

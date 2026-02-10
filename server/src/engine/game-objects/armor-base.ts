@@ -27,6 +27,9 @@ export class ArmorBase extends ItemBase {
 
   /** 防具动作定义 */
   override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
-    return [{ label: '装备', command: `wear ${this.getName()}` }, ...super.getActionDefinitions(owner)];
+    return [
+      { label: '装备', command: `wear ${this.getName()}` },
+      ...super.getActionDefinitions(owner),
+    ];
   }
 }
