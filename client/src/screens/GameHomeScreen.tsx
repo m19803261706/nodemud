@@ -16,6 +16,7 @@ import { MapNavigation } from '../components/game/MapNavigation';
 import { NpcList } from '../components/game/NpcList';
 import { ItemInfoModal } from '../components/game/NpcList/ItemInfoModal';
 import { InventoryPage } from '../components/game/Inventory';
+import { CharacterPage } from '../components/game/Character';
 import { BottomNavBar } from '../components/game/BottomNavBar';
 import { QuestListModal } from '../components/game/QuestListModal';
 
@@ -27,6 +28,7 @@ export const GameHomeScreen = ({ route: _route }: any) => {
   const sendCommand = useGameStore(state => state.sendCommand);
 
   const isInventory = activeTab === '背包';
+  const isCharacter = activeTab === '人物';
 
   return (
     <LinearGradient
@@ -38,10 +40,10 @@ export const GameHomeScreen = ({ route: _route }: any) => {
     >
       <View style={[s.safeArea, { paddingTop: insets.top }]}>
         <PlayerStats />
-        {isInventory ? (
-          /* 背包全屏布局：替换 LocationHeader + mainContent */
+        {isInventory || isCharacter ? (
+          /* 全屏功能页：替换 LocationHeader + mainContent */
           <View style={s.fullContent}>
-            <InventoryPage />
+            {isInventory ? <InventoryPage /> : <CharacterPage />}
           </View>
         ) : (
           /* 默认左右分栏布局 — 用 View 包裹避免 Fragment 导致 Fabric 视图回收崩溃 */
