@@ -13,3 +13,5 @@ export {
 } from './quest-definition';
 
 export { type QuestProgress, type PlayerQuestData } from './quest-progress';
+
+export { ExpManager, type AllocatePointsData } from './exp-manager';

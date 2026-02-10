@@ -7,9 +7,13 @@ import { MessageFactory } from '@packages/core';
 import type { Character } from '../../character/character.entity';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { PlayerQuestData } from '../../engine/quest';
+import { ServiceLocator } from '../../engine/service-locator';
 
-/** 等级映射（当前新角色固定） */
-function getLevelText(): string {
+/** 等级映射（通过 ExpManager 获取等级称号） */
+function getLevelText(level: number): string {
+  if (ServiceLocator.initialized && ServiceLocator.expManager) {
+    return ServiceLocator.expManager.getLevelTitle(level);
+  }
   return '初入江湖';
 }
 
@@ -51,7 +55,7 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
 
   return {
     name: character.name,
-    level: getLevelText(),
+    level: getLevelText(character.level ?? 1),
     silver,
     hp: { current: hpCurrent, max: hpMax },
     mp: { current: mpCurrent, max: mpMax },

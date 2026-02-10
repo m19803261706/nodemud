@@ -15,6 +15,7 @@ import { CommandManager } from './command-manager';
 import { CommandLoader } from './command-loader';
 import { SpawnManager } from './spawn-manager';
 import { CombatManager } from './combat/combat-manager';
+import { ExpManager } from './quest/exp-manager';
 
 @Module({
   providers: [
@@ -27,6 +28,7 @@ import { CombatManager } from './combat/combat-manager';
     CommandLoader,
     SpawnManager,
     CombatManager,
+    ExpManager,
   ],
   exports: [
     HeartbeatManager,
@@ -38,6 +40,7 @@ import { CombatManager } from './combat/combat-manager';
     CommandLoader,
     SpawnManager,
     CombatManager,
+    ExpManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -53,6 +56,7 @@ export class EngineModule implements OnModuleInit {
     private readonly commandLoader: CommandLoader,
     private readonly spawnManager: SpawnManager,
     private readonly combatManager: CombatManager,
+    private readonly expManager: ExpManager,
   ) {}
 
   async onModuleInit() {
@@ -65,6 +69,7 @@ export class EngineModule implements OnModuleInit {
       commandManager: this.commandManager,
       commandLoader: this.commandLoader,
       combatManager: this.combatManager,
+      expManager: this.expManager,
     });
     this.objectManager.startGC();
 
