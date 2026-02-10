@@ -62,7 +62,7 @@ export class DamageEngine {
     // Phase 1: 暴击伤害 x1.5
     // if (isCrit) damage = Math.floor(damage * 1.5);
 
-    const defenderMaxHp = defender.get<number>('max_hp') || 100;
+    const defenderMaxHp = defender.getMaxHp();
     const description = this.generateDescription(attacker, defender, damage, isCrit, defenderMaxHp);
 
     return {
@@ -162,7 +162,6 @@ export class DamageEngine {
     // 保底伤害
     damage = Math.max(COMBAT_CONSTANTS.MIN_DAMAGE, damage);
 
-    const defenderMaxHp = defender.get<number>('max_hp') || 100;
     const description = this.generateSkillDescription(
       attacker,
       defender,

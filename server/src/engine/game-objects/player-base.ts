@@ -118,6 +118,28 @@ export class PlayerBase extends LivingBase {
   }
 
   /**
+   * 玩家进场初始化（类似传统 MUD user->setup）：
+   * - 绑定角色 ID
+   * - 初始化运行时子系统（当前为技能系统）
+   * - 打标初始化完成，便于后续扩展更多子系统
+   */
+  async setupOnEnterWorld(characterId: string): Promise<void> {
+    this.set('characterId', characterId);
+    this.setTemp('player/setup_started_at', Date.now());
+
+    try {
+      await this.initSkillManager(characterId);
+    } catch (err) {
+      this.logger.error('玩家进场初始化失败:', err);
+    }
+
+    // 技能系统加载后，资源上限可能变化（如激活内功），统一钳制当前值
+    this.normalizeResourcesToCaps();
+    this.setTemp('player/setup_ready', true);
+    this.setTemp('combat/state', this.getTemp<string>('combat/state') ?? 'idle');
+  }
+
+  /**
    * 保存技能数据到数据库
    * 在断线/退出时调用
    */
@@ -160,6 +182,40 @@ export class PlayerBase extends LivingBase {
       };
     }
     return this.skillManager.getSkillBonusSummary();
+  }
+
+  /** 生命上限（基础 max_hp + 技能资源加成） */
+  override getMaxHp(): number {
+    const base = super.getMaxHp();
+    const skillBonus = this.getSkillBonusSummary().maxHp ?? 0;
+    return Math.max(1, Math.floor(base + skillBonus));
+  }
+
+  /** 内力上限（基础 max_mp + 技能资源加成） */
+  override getMaxMp(): number {
+    const base = super.getMaxMp();
+    const skillBonus = this.getSkillBonusSummary().maxMp ?? 0;
+    return Math.max(0, Math.floor(base + skillBonus));
+  }
+
+  /** 按当前有效上限钳制 hp/mp/energy，并同步 legacy *_current 字段 */
+  normalizeResourcesToCaps(): void {
+    const hpMax = this.getMaxHp();
+    const mpMax = this.getMaxMp();
+    const energyMax = this.getMaxEnergy();
+
+    const hp = Math.min(Math.max(this.get<number>('hp') ?? hpMax, 0), hpMax);
+    const mp = Math.min(Math.max(this.get<number>('mp') ?? mpMax, 0), mpMax);
+    this.set('hp', hp);
+    this.set('mp', mp);
+    this.set('hp_current', hp);
+    this.set('mp_current', mp);
+
+    if (typeof energyMax === 'number') {
+      const energy = Math.min(Math.max(this.get<number>('energy') ?? energyMax, 0), energyMax);
+      this.set('energy', energy);
+      this.set('energy_current', energy);
+    }
   }
 
   // ========== 装备加成（仅玩家需要） ==========
@@ -249,7 +305,7 @@ export class PlayerBase extends LivingBase {
    * 由 CombatManager 在战败结算后调用
    */
   async revive(): Promise<void> {
-    const maxHp = this.get<number>('max_hp') || 100;
+    const maxHp = this.getMaxHp();
     const reviveHp = Math.floor(maxHp * 0.3);
     this.set('hp', reviveHp);
     this.setTemp('combat/state', 'idle');

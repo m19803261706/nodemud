@@ -141,6 +141,32 @@ describe('stats.utils derivePlayerStats', () => {
     const astrolabe = player.get<any>('astrolabeJson');
     astrolabe.extra = 'runtime-only';
     expect((character.astrolabeJson as any).extra).toBeUndefined();
+
+    const quests = player.get<any>('quests');
+    quests.active.rift = { progress: 1 };
+    expect((character.questData as any)?.active?.rift).toBeUndefined();
+  });
+
+  it('playerStats 的 hp/mp 上限优先使用运行时 max_* 并叠加技能加成', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ vitality: 5, spirit: 4 });
+
+    player.set('max_hp', 900);
+    player.set('max_mp', 700);
+    jest.spyOn(player, 'getSkillBonusSummary').mockReturnValue({
+      attack: 0,
+      defense: 0,
+      dodge: 0,
+      parry: 0,
+      maxHp: 120,
+      maxMp: 80,
+      critRate: 0,
+      hitRate: 0,
+    });
+
+    const stats = derivePlayerStats(character, player);
+    expect(stats.hp.max).toBe(1020);
+    expect(stats.mp.max).toBe(780);
   });
 
   it('保存玩家数据时 exp 缺失会回退 combat_exp', () => {

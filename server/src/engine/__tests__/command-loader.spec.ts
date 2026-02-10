@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { CommandLoader } from '../command-loader';
 import { CommandManager } from '../command-manager';
+import { Permission } from '../types/command';
 
 /** 临时测试目录 */
 let tmpDir: string;
@@ -66,6 +67,40 @@ module.exports = { key: "value" };
   );
 
   return tmpDir;
+}
+
+/** 添加多指令导出 fixture（同文件 2 个 @Command） */
+function addMultiCommandFixture(rootDir: string): void {
+  const stdDir = path.join(rootDir, 'std');
+  fs.writeFileSync(
+    path.join(stdDir, 'practice.js'),
+    `
+"use strict";
+require("${reflectMetadataPath}");
+const { COMMAND_META_KEY } = require("${commandTypesPath}");
+
+class PracticeCommand {
+  execute() { return { success: true, message: "practice executed" }; }
+}
+class DazuoCommand {
+  execute() { return { success: true, message: "dazuo executed" }; }
+}
+
+Reflect.defineMetadata(COMMAND_META_KEY, {
+  name: "practice",
+  aliases: ["练习"],
+  description: "practice"
+}, PracticeCommand);
+
+Reflect.defineMetadata(COMMAND_META_KEY, {
+  name: "dazuo",
+  aliases: ["打坐"],
+  description: "dazuo"
+}, DazuoCommand);
+
+module.exports = { PracticeCommand, DazuoCommand };
+`,
+  );
 }
 
 /** 清理临时目录 */
@@ -141,5 +176,17 @@ describe('CommandLoader 指令扫描加载器', () => {
     const cmd = loader.loadCommand(filePath, 'std');
 
     expect(cmd).toBeNull();
+  });
+
+  it('同文件多个 @Command 导出会全部注册', () => {
+    const dir = setupFixtures();
+    addMultiCommandFixture(dir);
+
+    loader.scanAndLoad(dir);
+
+    expect(manager.getCount()).toBe(3);
+    expect(manager.findCommand('look', Permission.PLAYER)).toBeDefined();
+    expect(manager.findCommand('practice', Permission.PLAYER)).toBeDefined();
+    expect(manager.findCommand('dazuo', Permission.PLAYER)).toBeDefined();
   });
 });

@@ -152,6 +152,33 @@ export class LivingBase extends BaseEntity {
     return Math.floor(vitality * 1.5);
   }
 
+  /** 获取生命上限（默认基于 max_hp 字段） */
+  getMaxHp(): number {
+    const value = this.get<number>('max_hp');
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return Math.max(1, Math.floor(value));
+    }
+    return 100;
+  }
+
+  /** 获取内力上限（默认基于 max_mp 字段） */
+  getMaxMp(): number {
+    const value = this.get<number>('max_mp');
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return Math.max(0, Math.floor(value));
+    }
+    return 80;
+  }
+
+  /** 获取精力上限（未设置时返回 undefined，表示不做上限钳制） */
+  getMaxEnergy(): number | undefined {
+    const value = this.get<number>('max_energy');
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return Math.max(0, Math.floor(value));
+    }
+    return undefined;
+  }
+
   /**
    * 战斗速度 = perception*3 + spirit*2 + strength*1 + meridian*1
    * 综合反映角色的反应速度和内力流转
@@ -195,17 +222,17 @@ export class LivingBase extends BaseEntity {
 
   /** 恢复生命值（返回实际恢复量） */
   recoverHp(amount: number): number {
-    return this.recoverResource('hp', 'max_hp', amount);
+    return this.recoverResource('hp', amount, this.getMaxHp());
   }
 
   /** 恢复内力（返回实际恢复量） */
   recoverMp(amount: number): number {
-    return this.recoverResource('mp', 'max_mp', amount);
+    return this.recoverResource('mp', amount, this.getMaxMp());
   }
 
   /** 恢复精力（返回实际恢复量） */
   recoverEnergy(amount: number): number {
-    return this.recoverResource('energy', 'max_energy', amount);
+    return this.recoverResource('energy', amount, this.getMaxEnergy());
   }
 
   /**
@@ -214,10 +241,9 @@ export class LivingBase extends BaseEntity {
    * - max 存在时做上限钳制
    * - 返回实际恢复量
    */
-  private recoverResource(currentKey: string, maxKey: string, amount: number): number {
+  private recoverResource(currentKey: string, amount: number, max?: number): number {
     if (amount <= 0) return 0;
     const current = this.get<number>(currentKey) ?? 0;
-    const max = this.get<number>(maxKey);
     const target = typeof max === 'number' ? Math.min(current + amount, max) : current + amount;
     this.set(currentKey, target);
     return Math.max(0, target - current);

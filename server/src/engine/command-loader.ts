@@ -60,8 +60,8 @@ export class CommandLoader {
 
       for (const file of files) {
         const filePath = path.join(dirPath, file);
-        const command = this.loadCommand(filePath, dir);
-        if (command) total++;
+        const commands = this.loadCommands(filePath, dir);
+        total += commands.length;
       }
     }
 
@@ -79,43 +79,78 @@ export class CommandLoader {
    * @returns 指令实例，加载失败返回 null
    */
   loadCommand(filePath: string, directory: string): ICommand | null {
+    const commands = this.loadCommands(filePath, directory);
+    return commands[0] ?? null;
+  }
+
+  /**
+   * 加载并注册单个文件中的全部指令类
+   *
+   * 支持一个文件导出多个 @Command 类（named exports）。
+   *
+   * @param filePath 指令文件绝对路径
+   * @param directory 所属目录名
+   * @returns 已注册的指令实例列表
+   */
+  loadCommands(filePath: string, directory: string): ICommand[] {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const mod = require(filePath);
+      const commandClasses = this.extractCommandClasses(mod);
+      if (commandClasses.length === 0) {
+        const hasClassExport =
+          typeof mod === 'function' ||
+          (mod &&
+            typeof mod === 'object' &&
+            Object.values(mod).some((v) => typeof v === 'function'));
 
-      // 支持多种导出形式: default export / named export / module.exports = Class
-      let CommandClass: any = mod.default || mod;
-      if (typeof CommandClass !== 'function') {
-        // 尝试从命名导出中找到带 @Command 装饰器的类
-        CommandClass = Object.values(mod).find(
-          (v) => typeof v === 'function' && Reflect.getMetadata(COMMAND_META_KEY, v),
-        );
+        if (hasClassExport) {
+          this.logger.warn(`跳过无 @Command 装饰器: ${filePath}`);
+        } else {
+          this.logger.warn(`跳过非类导出: ${filePath}`);
+        }
+        return [];
       }
 
-      if (typeof CommandClass !== 'function') {
-        this.logger.warn(`跳过非类导出: ${filePath}`);
-        return null;
+      const loaded: ICommand[] = [];
+      for (const CommandClass of commandClasses) {
+        const meta: CommandMeta | undefined = Reflect.getMetadata(COMMAND_META_KEY, CommandClass);
+        if (!meta) continue;
+
+        const instance = new (CommandClass as any)() as ICommand;
+        instance.name = meta.name;
+        instance.aliases = meta.aliases ?? [];
+        instance.description = meta.description ?? '';
+        instance.directory = directory;
+
+        this.commandManager.register(instance, directory);
+        loaded.push(instance);
       }
-
-      const meta: CommandMeta | undefined = Reflect.getMetadata(COMMAND_META_KEY, CommandClass);
-      if (!meta) {
-        this.logger.warn(`跳过无 @Command 装饰器: ${filePath}`);
-        return null;
-      }
-
-      // 创建指令实例并设置元数据
-      const instance = new CommandClass() as ICommand;
-      instance.name = meta.name;
-      instance.aliases = meta.aliases ?? [];
-      instance.description = meta.description ?? '';
-      instance.directory = directory;
-
-      this.commandManager.register(instance, directory);
-      return instance;
+      return loaded;
     } catch (err) {
       this.logger.warn(`加载指令失败 ${filePath}: ${(err as Error).message}`);
-      return null;
+      return [];
     }
+  }
+
+  /** 从模块导出中提取全部带 @Command 装饰器的类 */
+  private extractCommandClasses(mod: any): Function[] {
+    const classes = new Set<Function>();
+    const collect = (candidate: unknown) => {
+      if (typeof candidate !== 'function') return;
+      if (!Reflect.getMetadata(COMMAND_META_KEY, candidate)) return;
+      classes.add(candidate);
+    };
+
+    collect(mod);
+    if (mod && typeof mod === 'object') {
+      collect(mod.default);
+      for (const value of Object.values(mod)) {
+        collect(value);
+      }
+    }
+
+    return [...classes];
   }
 
   /**

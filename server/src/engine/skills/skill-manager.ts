@@ -120,6 +120,7 @@ export class SkillManager {
       }
     }
 
+    this.player.normalizeResourcesToCaps();
     this.logger.debug(`玩家 ${this.player.getName()} 加载 ${this.skills.size} 个技能`);
   }
 
@@ -309,6 +310,8 @@ export class SkillManager {
       this.logger.debug(
         `玩家 ${this.player.getName()} 技能 ${skillDef.skillName} 升级: ${oldLevel} -> ${data.level}`,
       );
+
+      this.player.normalizeResourcesToCaps();
     }
 
     return didLevelUp;
@@ -428,6 +431,8 @@ export class SkillManager {
       `玩家 ${this.player.getName()} 映射技能: ${skillDef.skillName} -> ${slotType}`,
     );
 
+    this.player.normalizeResourcesToCaps();
+
     return true;
   }
 
@@ -467,6 +472,8 @@ export class SkillManager {
       },
       SkillUpdateReason.UNMAPPED,
     );
+
+    this.player.normalizeResourcesToCaps();
 
     return true;
   }
@@ -543,6 +550,7 @@ export class SkillManager {
       }
     }
 
+    this.player.normalizeResourcesToCaps();
     this.logger.debug(`玩家 ${this.player.getName()} 死亡惩罚: ${changedSkills.size} 个技能变更`);
   }
 

@@ -524,12 +524,12 @@ export class CombatManager implements OnModuleInit {
       actions,
       player: {
         hp: combat.player.get<number>('hp') ?? 0,
-        maxHp: combat.player.get<number>('max_hp') ?? 100,
+        maxHp: combat.player.getMaxHp(),
         atbPct: Math.floor((playerParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
       },
       enemy: {
         hp: combat.enemy.get<number>('hp') ?? 0,
-        maxHp: combat.enemy.get<number>('max_hp') ?? 100,
+        maxHp: combat.enemy.getMaxHp(),
         atbPct: Math.floor((enemyParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
       },
     };
@@ -553,7 +553,7 @@ export class CombatManager implements OnModuleInit {
       name: entity.getName(),
       level: entity.get<number>('level') ?? 1,
       hp: entity.get<number>('hp') ?? 0,
-      maxHp: entity.get<number>('max_hp') ?? 100,
+      maxHp: entity.getMaxHp(),
       atbPct: Math.floor((participant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
     };
   }

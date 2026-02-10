@@ -90,12 +90,19 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
   const skillBonus = player.getSkillBonusSummary();
 
-  const hpMax =
-    character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0) + (skillBonus.maxHp ?? 0);
-  const mpMax =
-    character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0) + (skillBonus.maxMp ?? 0);
-  const energyMax =
-    (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
+  // 上限统一优先取运行时 max_*，避免与战斗/恢复链路产生分叉
+  const runtimeHpMax = player.get<number>('max_hp');
+  const runtimeMpMax = player.get<number>('max_mp');
+  const runtimeEnergyMax = player.get<number>('max_energy');
+
+  const hpBase = runtimeHpMax ?? character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0);
+  const mpBase = runtimeMpMax ?? character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0);
+  const energyBase =
+    runtimeEnergyMax ?? (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
+
+  const hpMax = Math.max(0, Math.floor(hpBase + (skillBonus.maxHp ?? 0)));
+  const mpMax = Math.max(0, Math.floor(mpBase + (skillBonus.maxMp ?? 0)));
+  const energyMax = Math.max(0, Math.floor(energyBase));
 
   // 资源当前值（优先运行时字段，兼容旧字段）
   const hpCurrent = resolveCurrentValue(player, 'hp', 'hp_current', hpMax);
@@ -170,7 +177,7 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   player.set('free_points', toSafeInt(character.freePoints, 0));
 
   // 任务数据
-  player.set('quests', character.questData ?? null);
+  player.set('quests', cloneForDbase(character.questData ?? null));
 
   // HP 上限 = 血气 * 100 + 装备加成
   const equipBonus = player.getEquipmentBonus();

@@ -165,4 +165,68 @@ describe('PlayerBase', () => {
       expect(player.get('hp')).toBe(200);
     });
   });
+
+  describe('setupOnEnterWorld()', () => {
+    it('会写入 characterId 并标记 setup_ready', async () => {
+      const player = new PlayerBase('player/test');
+      const initSpy = jest.spyOn(player, 'initSkillManager').mockResolvedValue();
+
+      await player.setupOnEnterWorld('char-001');
+
+      expect(initSpy).toHaveBeenCalledWith('char-001');
+      expect(player.get<string>('characterId')).toBe('char-001');
+      expect(player.getTemp<boolean>('player/setup_ready')).toBe(true);
+      expect(player.getTemp<string>('combat/state')).toBe('idle');
+    });
+  });
+
+  describe('资源上限与钳制', () => {
+    it('getMaxHp/getMaxMp 会叠加技能资源加成', () => {
+      const player = new PlayerBase('player/test');
+      player.set('max_hp', 500);
+      player.set('max_mp', 320);
+      jest.spyOn(player, 'getSkillBonusSummary').mockReturnValue({
+        attack: 0,
+        defense: 0,
+        dodge: 0,
+        parry: 0,
+        maxHp: 120,
+        maxMp: 80,
+        critRate: 0,
+        hitRate: 0,
+      });
+
+      expect(player.getMaxHp()).toBe(620);
+      expect(player.getMaxMp()).toBe(400);
+    });
+
+    it('normalizeResourcesToCaps 会按有效上限钳制并同步 legacy 字段', () => {
+      const player = new PlayerBase('player/test');
+      player.set('max_hp', 500);
+      player.set('max_mp', 320);
+      player.set('max_energy', 300);
+      player.set('hp', 999);
+      player.set('mp', 999);
+      player.set('energy', -5);
+      jest.spyOn(player, 'getSkillBonusSummary').mockReturnValue({
+        attack: 0,
+        defense: 0,
+        dodge: 0,
+        parry: 0,
+        maxHp: 120,
+        maxMp: 80,
+        critRate: 0,
+        hitRate: 0,
+      });
+
+      player.normalizeResourcesToCaps();
+
+      expect(player.get<number>('hp')).toBe(620);
+      expect(player.get<number>('mp')).toBe(400);
+      expect(player.get<number>('energy')).toBe(0);
+      expect(player.get<number>('hp_current')).toBe(620);
+      expect(player.get<number>('mp_current')).toBe(400);
+      expect(player.get<number>('energy_current')).toBe(0);
+    });
+  });
 });
