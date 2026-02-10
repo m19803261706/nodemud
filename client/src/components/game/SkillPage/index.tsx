@@ -38,6 +38,8 @@ const MARTIAL_SUBGROUPS: { key: string; label: string }[] = [
 export const SkillPage = () => {
   const skills = useSkillStore(state => state.skills);
   const bonusSummary = useSkillStore(state => state.bonusSummary);
+  const lastLearnFailure = useSkillStore(state => state.lastLearnFailure);
+  const clearLearnFailure = useSkillStore(state => state.clearLearnFailure);
   const sendCommand = useGameStore(state => state.sendCommand);
 
   /** 当前激活的分类 Tab */
@@ -210,6 +212,28 @@ export const SkillPage = () => {
           ) : null}
         </View>
 
+        {/* 学艺失败提示 */}
+        {lastLearnFailure ? (
+          <View style={s.failureBanner}>
+            <View style={s.failureTextWrap}>
+              <Text style={s.failureTitle}>
+                学艺受阻：{lastLearnFailure.skillName}
+              </Text>
+              <Text style={s.failureMessage}>{lastLearnFailure.message}</Text>
+              {lastLearnFailure.hint ? (
+                <Text style={s.failureHint}>{lastLearnFailure.hint}</Text>
+              ) : null}
+            </View>
+            <TouchableOpacity
+              onPress={clearLearnFailure}
+              style={s.failureCloseBtn}
+              activeOpacity={0.7}
+            >
+              <Text style={s.failureCloseText}>知道了</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         {/* 技能列表 */}
         <View style={s.listContainer}>
           {activeTab === SkillCategory.MARTIAL
@@ -287,6 +311,55 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
     fontWeight: '500',
+  },
+  failureBanner: {
+    marginHorizontal: 12,
+    marginBottom: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#B85C3E80',
+    backgroundColor: '#B85C3E12',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  failureTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  failureTitle: {
+    fontSize: 12,
+    color: '#7A2F1A',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+  },
+  failureMessage: {
+    fontSize: 11,
+    color: '#6B3E31',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 16,
+  },
+  failureHint: {
+    fontSize: 11,
+    color: '#8B6A50',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 15,
+  },
+  failureCloseBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A60',
+    backgroundColor: '#F5F0E8',
+  },
+  failureCloseText: {
+    fontSize: 10,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '600',
   },
   listContainer: {
     flex: 1,

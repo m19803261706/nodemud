@@ -31,7 +31,6 @@ export const SkillListItem = ({
       style={[s.container, skill.isLocked ? s.containerLocked : undefined]}
       onPress={() => onPress(skill.skillId)}
       activeOpacity={0.7}
-      disabled={skill.isLocked}
     >
       {/* 左侧: 映射绿点 + 技能名 */}
       <View style={s.nameRow}>
@@ -45,6 +44,11 @@ export const SkillListItem = ({
         {skill.isActiveForce ? (
           <View style={s.forceBadge}>
             <Text style={s.forceBadgeText}>运功</Text>
+          </View>
+        ) : null}
+        {skill.isLocked ? (
+          <View style={s.lockBadge}>
+            <Text style={s.lockBadgeText}>锁定</Text>
           </View>
         ) : null}
       </View>
@@ -136,6 +140,20 @@ const s = StyleSheet.create({
     fontSize: 9,
     fontWeight: '600',
     color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+  },
+  lockBadge: {
+    backgroundColor: '#B85C3E18',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#B85C3E66',
+  },
+  lockBadgeText: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#8B3A3A',
     fontFamily: 'Noto Serif SC',
   },
   rightRow: {

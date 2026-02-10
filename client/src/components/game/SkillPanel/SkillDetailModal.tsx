@@ -29,6 +29,30 @@ interface SkillDetailModalProps {
   skillId: string | null;
 }
 
+const DESCRIPTION_TITLES = ['【背景】', '【学习条件】', '【战斗公式】', '【扩展】'];
+
+function splitDescriptionSections(
+  description: string,
+): Array<{ title: string; body: string }> {
+  const sections = DESCRIPTION_TITLES.map((title, index) => {
+    const start = description.indexOf(title);
+    if (start === -1) return null;
+
+    const endCandidates = DESCRIPTION_TITLES.slice(index + 1)
+      .map(next => description.indexOf(next))
+      .filter(pos => pos !== -1);
+    const end =
+      endCandidates.length > 0 ? Math.min(...endCandidates) : description.length;
+
+    const body = description
+      .slice(start + title.length, end)
+      .replace(/^\s+|\s+$/g, '');
+    return { title, body };
+  }).filter(Boolean) as Array<{ title: string; body: string }>;
+
+  return sections;
+}
+
 export const SkillDetailModal = ({
   visible,
   onClose,
@@ -41,6 +65,9 @@ export const SkillDetailModal = ({
   /** 当前技能的映射状态 */
   const currentSkill = skillId ? skills.find(s => s.skillId === skillId) : null;
   const isMapped = currentSkill?.isMapped ?? false;
+  const descSections = skillDetail?.description
+    ? splitDescriptionSections(skillDetail.description)
+    : [];
 
   /** 装配/卸下操作 */
   const handleEquipToggle = () => {
@@ -117,10 +144,30 @@ export const SkillDetailModal = ({
                 {/* 技能描述 */}
                 {skillDetail?.description ? (
                   <View>
-                    <Text style={s.desc}>{skillDetail.description}</Text>
+                    {descSections.length > 0 ? (
+                      <View style={s.descSectionWrap}>
+                        {descSections.map(section => (
+                          <View key={section.title} style={s.descSection}>
+                            <Text style={s.descSectionTitle}>{section.title}</Text>
+                            <Text style={s.desc}>{section.body}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={s.desc}>{skillDetail.description}</Text>
+                    )}
                     <View style={s.dividerWrap}>
                       <GradientDivider />
                     </View>
+                  </View>
+                ) : null}
+
+                {currentSkill?.isLocked ? (
+                  <View style={s.lockNote}>
+                    <Text style={s.lockNoteTitle}>断裂传承</Text>
+                    <Text style={s.lockNoteText}>
+                      此技能处于锁定状态，无法装配与精进，仅保留残篇心得。
+                    </Text>
                   </View>
                 ) : null}
 
@@ -232,6 +279,40 @@ const s = StyleSheet.create({
     color: '#5A5550',
     fontFamily: 'Noto Serif SC',
     lineHeight: 22,
+  },
+  descSectionWrap: {
+    gap: 6,
+  },
+  descSection: {
+    gap: 2,
+  },
+  descSectionTitle: {
+    fontSize: 12,
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+  },
+  lockNote: {
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B3A3A55',
+    backgroundColor: '#8B3A3A12',
+  },
+  lockNoteTitle: {
+    fontSize: 12,
+    color: '#7A2F1A',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  lockNoteText: {
+    fontSize: 11,
+    color: '#6B3E31',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 17,
   },
   sectionTitle: {
     fontSize: 13,

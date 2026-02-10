@@ -7,6 +7,7 @@
 import { create } from 'zustand';
 import type {
   PlayerSkillInfo,
+  SkillSlotType,
   SkillBonusSummary,
   SkillListData,
   SkillUpdateData,
@@ -17,6 +18,7 @@ import type {
   SkillLearnResultData,
   SkillDetailInfo,
 } from '@packages/core';
+import { getSkillLearnFailureHint } from '../utils/skillLearnReason';
 
 /* ─── 修炼状态 ─── */
 
@@ -38,6 +40,15 @@ export interface PracticeState {
   learnedMax: number;
 }
 
+/** 最近一次学艺失败信息（用于 UI 提示） */
+export interface SkillLearnFailureState {
+  skillId: string;
+  skillName: string;
+  reason?: string;
+  message: string;
+  hint?: string;
+}
+
 /* ─── Store 接口 ─── */
 
 export interface SkillState {
@@ -53,6 +64,8 @@ export interface SkillState {
   practiceState: PracticeState;
   /** 技能详情（面板展开时使用） */
   skillDetail: SkillDetailInfo | null;
+  /** 最近一次学艺失败 */
+  lastLearnFailure: SkillLearnFailureState | null;
 
   // ─── Actions ───
 
@@ -74,6 +87,8 @@ export interface SkillState {
   applyLearnResult: (data: SkillLearnResultData) => void;
   /** 设置技能详情 */
   setSkillDetail: (detail: SkillDetailInfo | null) => void;
+  /** 清空学艺失败提示 */
+  clearLearnFailure: () => void;
 }
 
 /* ─── 修炼初始状态 ─── */
@@ -97,6 +112,7 @@ export const useSkillStore = create<SkillState>((set, get) => ({
   bonusSummary: null,
   practiceState: INITIAL_PRACTICE,
   skillDetail: null,
+  lastLearnFailure: null,
 
   // 全量设置技能列表
   setSkillList: (data: SkillListData) =>
@@ -162,7 +178,11 @@ export const useSkillStore = create<SkillState>((set, get) => ({
           const slot = Object.entries(skillMap).find(
             ([, id]) => id === s.skillId,
           );
-          return { ...s, isMapped: true, mappedSlot: slot ? slot[0] : null };
+          return {
+            ...s,
+            isMapped: true,
+            mappedSlot: slot ? (slot[0] as SkillSlotType) : null,
+          };
         }
         // 该技能不在映射表中，如果之前是映射的则清除
         if (s.isMapped) {
@@ -217,7 +237,18 @@ export const useSkillStore = create<SkillState>((set, get) => ({
   // 更新学艺结果
   applyLearnResult: (data: SkillLearnResultData) =>
     set(state => {
-      if (!data.success) return state;
+      if (!data.success) {
+        const hint = getSkillLearnFailureHint(data.reason ?? undefined) ?? undefined;
+        return {
+          lastLearnFailure: {
+            skillId: data.skillId,
+            skillName: data.skillName,
+            reason: data.reason ?? undefined,
+            message: data.message,
+            hint,
+          },
+        };
+      }
 
       // 同步更新技能列表中对应技能的经验数据
       const skills = state.skills.map(s =>
@@ -230,10 +261,12 @@ export const useSkillStore = create<SkillState>((set, get) => ({
             }
           : s,
       );
-      return { skills };
+      return { skills, lastLearnFailure: null };
     }),
 
   // 设置技能详情
   setSkillDetail: (detail: SkillDetailInfo | null) =>
     set({ skillDetail: detail }),
+
+  clearLearnFailure: () => set({ lastLearnFailure: null }),
 }));
