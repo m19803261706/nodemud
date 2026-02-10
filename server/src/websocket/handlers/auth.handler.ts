@@ -9,11 +9,8 @@ import { AccountService } from '../../account/account.service';
 import { CharacterService } from '../../character/character.service';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { ObjectManager } from '../../engine/object-manager';
-import { PlayerBase } from '../../engine/game-objects/player-base';
-import type { RoomBase } from '../../engine/game-objects/room-base';
-import { sendRoomInfo } from './room-utils';
-import { loadCharacterToPlayer, sendPlayerStats } from './stats.utils';
 import type { Session } from '../types/session';
+import { enterWorldWithCharacter } from './enter-world.utils';
 
 /** 默认出生房间 */
 const DEFAULT_ROOM = 'area/rift-town/square';
@@ -60,43 +57,17 @@ export class AuthHandler {
         try {
           const character = await this.characterService.findByAccountId(result.account!.id);
           if (character) {
-            // 创建 PlayerBase 并注册
-            const playerId = this.objectManager.nextInstanceId('player');
-            const player = new PlayerBase(playerId);
-            this.objectManager.register(player);
-            loadCharacterToPlayer(player, character);
-
-            // 绑定 WebSocket 连接
-            player.bindConnection((msg: any) => {
-              const payload = typeof msg === 'string' ? msg : JSON.stringify(msg);
-              client.send(payload);
+            await enterWorldWithCharacter({
+              client,
+              session,
+              character,
+              objectManager: this.objectManager,
+              blueprintFactory: this.blueprintFactory,
+              defaultRoomId: DEFAULT_ROOM,
+              entryBroadcastText: `${character.name}上线了。`,
+              useLastRoom: true,
+              logger: this.logger,
             });
-
-            // 记录到 Session
-            session.playerId = playerId;
-            session.characterId = character.id;
-
-            // 获取上次下线房间，不存在时 fallback 到广场
-            const roomId = character.lastRoom || DEFAULT_ROOM;
-            const room =
-              (this.blueprintFactory.getVirtual(roomId) as RoomBase | undefined) ??
-              (this.blueprintFactory.getVirtual(DEFAULT_ROOM) as RoomBase | undefined);
-
-            if (room) {
-              await player.moveTo(room, { quiet: true });
-              sendRoomInfo(player, room, this.blueprintFactory);
-              sendPlayerStats(player, character);
-              room.broadcast(`${character.name}上线了。`, player);
-            } else {
-              this.logger.warn(`房间 ${roomId} 和默认房间都不存在`);
-            }
-
-            // 初始化技能管理器（从数据库加载技能并推送 skillList）
-            try {
-              await player.initSkillManager(character.id);
-            } catch (skillError) {
-              this.logger.error('初始化技能管理器失败:', skillError);
-            }
           }
         } catch (enterError) {
           this.logger.error('登录进场失败:', enterError);

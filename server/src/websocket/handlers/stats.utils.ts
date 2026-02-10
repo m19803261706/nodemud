@@ -101,7 +101,8 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const hpBase = runtimeHpMax ?? character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0);
   const mpBase = runtimeMpMax ?? character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0);
   const energyBase =
-    runtimeEnergyMax ?? (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
+    runtimeEnergyMax ??
+    (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
 
   const hpMax = Math.max(0, Math.floor(hpBase + (skillBonus.maxHp ?? 0)));
   const mpMax = Math.max(0, Math.floor(mpBase + (skillBonus.maxMp ?? 0)));
@@ -232,7 +233,9 @@ export function savePlayerData(player: PlayerBase, character: Character): void {
   // 任务数据
   character.questData = player.get<PlayerQuestData>('quests') ?? character.questData ?? null;
   // 门派数据
-  character.sectData = normalizePlayerSectData(player.get<PlayerSectData>('sect') ?? character.sectData ?? null);
+  character.sectData = normalizePlayerSectData(
+    player.get<PlayerSectData>('sect') ?? character.sectData ?? null,
+  );
 
   // 银两
   const silver = player.get<number>('silver');
