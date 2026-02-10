@@ -14,6 +14,9 @@ const ACTION_BUTTONS = ['拜师', '领取任务', '打坐'];
 export const GameLog = () => {
   const showMapDesc = useGameStore(state => state.showMapDesc);
   const description = useGameStore(state => state.location.description);
+  const logQuickActions = useGameStore(state => state.logQuickActions);
+  const sendCommand = useGameStore(state => state.sendCommand);
+  const removeLogQuickAction = useGameStore(state => state.removeLogQuickAction);
 
   return (
     <View style={s.container}>
@@ -22,6 +25,18 @@ export const GameLog = () => {
       <View style={s.actionBar}>
         {ACTION_BUTTONS.map(label => (
           <ActionButton key={label} label={label} />
+        ))}
+        {logQuickActions.map(action => (
+          <ActionButton
+            key={action.id}
+            label={action.label}
+            onPress={() => {
+              sendCommand(action.command);
+              if (action.consumeOnPress !== false) {
+                removeLogQuickAction(action.id);
+              }
+            }}
+          />
         ))}
       </View>
     </View>
@@ -41,6 +56,7 @@ const s = StyleSheet.create({
   },
   actionBar: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 10,
   },

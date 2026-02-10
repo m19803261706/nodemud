@@ -31,6 +31,13 @@ const Stack = createNativeStackNavigator();
 /** 导航引用（用于 WebSocket 回调中的页面跳转） */
 const navigationRef = createNavigationContainerRef();
 
+const SONGYANG_GATE_INTENT_ACTION_ID = 'songyang-gate-intent';
+const SONGYANG_GATE_INTENT_COMMAND = 'ask 守山弟子 about 来意';
+
+function stripRichTags(text: string): string {
+  return text.replace(/\[[^\]]+\]/g, '');
+}
+
 /** 应用根组件 */
 function App(): React.JSX.Element {
   // App 启动时建立 WebSocket 连接（类似 MUD 的 telnet 连接大厅）
@@ -40,10 +47,55 @@ function App(): React.JSX.Element {
       wsService.connect(WS_URL);
     }
 
+    const syncSongyangGateIntentAction = (rawText: unknown) => {
+      const content = typeof rawText === 'string' ? rawText : '';
+      if (!content) return;
+
+      const plain = stripRichTags(content);
+      const {
+        location,
+        upsertLogQuickAction,
+        removeLogQuickAction,
+      } = useGameStore.getState();
+
+      if (location.name !== '嵩阳山道') {
+        return;
+      }
+
+      if (
+        plain.includes('守山弟子') &&
+        (plain.includes('报上来意') ||
+          plain.includes('先把来意说明白') ||
+          plain.includes('ask 守山弟子 about 来意'))
+      ) {
+        upsertLogQuickAction({
+          id: SONGYANG_GATE_INTENT_ACTION_ID,
+          label: '说明来意',
+          command: SONGYANG_GATE_INTENT_COMMAND,
+          consumeOnPress: true,
+        });
+        return;
+      }
+
+      if (
+        plain.includes('可入山门一次') ||
+        plain.includes('同门请入') ||
+        plain.includes('侧身让出半步')
+      ) {
+        removeLogQuickAction(SONGYANG_GATE_INTENT_ACTION_ID);
+      }
+    };
+
     // 全局监听游戏消息（必须在连接建立时就注册，避免导航时丢消息）
     const handleRoomInfo = (data: any) => {
-      const { setLocation, setDirections, setNpcs, setGroundItems, location } =
-        useGameStore.getState();
+      const {
+        setLocation,
+        setDirections,
+        setNpcs,
+        setGroundItems,
+        location,
+        removeLogQuickAction,
+      } = useGameStore.getState();
       // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
       const shortName = data.short?.includes('·')
         ? data.short.split('·').pop()!
@@ -57,6 +109,10 @@ function App(): React.JSX.Element {
       setNpcs(data.npcs ?? []);
       setGroundItems(data.items ?? []);
       useGameStore.getState().setShopListDetail(null);
+
+      if (shortName !== '嵩阳山道') {
+        removeLogQuickAction(SONGYANG_GATE_INTENT_ACTION_ID);
+      }
     };
 
     const handleInventoryUpdate = (data: any) => {
@@ -108,6 +164,7 @@ function App(): React.JSX.Element {
         const { appendLog } = useGameStore.getState();
         const color = data.success ? '#3D3935' : '#8B3A3A';
         appendLog({ text: data.message, color });
+        syncSongyangGateIntentAction(data.message);
       }
     };
 
@@ -116,6 +173,7 @@ function App(): React.JSX.Element {
         typeof data === 'string' ? data : data?.content || data?.message;
       if (!content) return;
       useGameStore.getState().appendLog({ text: content, color: '#5A5048' });
+      syncSongyangGateIntentAction(content);
     };
 
     const handlePlayerStats = (data: any) => {

@@ -75,6 +75,14 @@ export type LogEntryInput = Omit<LogEntry, 'id' | 'timestamp'>;
 
 let logIdCounter = 0;
 
+/** 日志区底部上下文交互按钮（由前端根据上下文动态生成） */
+export interface LogQuickAction {
+  id: string;
+  label: string;
+  command: string;
+  consumeOnPress?: boolean;
+}
+
 export interface ChatMessage {
   text: string;
   color: string;
@@ -215,6 +223,10 @@ export interface GameState {
   gameLog: LogEntry[];
   appendLog: (entry: LogEntryInput) => void;
   clearLog: () => void;
+  logQuickActions: LogQuickAction[];
+  upsertLogQuickAction: (action: LogQuickAction) => void;
+  removeLogQuickAction: (actionId: string) => void;
+  clearLogQuickActions: () => void;
 
   // 聊天
   chatMessages: ChatMessage[];
@@ -419,6 +431,23 @@ export const useGameStore = create<GameState>(set => ({
       ],
     })),
   clearLog: () => set({ gameLog: [] }),
+  logQuickActions: [],
+  upsertLogQuickAction: action =>
+    set(state => {
+      const index = state.logQuickActions.findIndex(item => item.id === action.id);
+      if (index === -1) {
+        return { logQuickActions: [...state.logQuickActions, action] };
+      }
+
+      const next = [...state.logQuickActions];
+      next[index] = action;
+      return { logQuickActions: next };
+    }),
+  removeLogQuickAction: actionId =>
+    set(state => ({
+      logQuickActions: state.logQuickActions.filter(item => item.id !== actionId),
+    })),
+  clearLogQuickActions: () => set({ logQuickActions: [] }),
 
   // 聊天
   chatMessages: INITIAL_CHAT,
