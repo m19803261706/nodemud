@@ -27,6 +27,7 @@ import { ObjectManager } from '../engine/object-manager';
 import { ServiceLocator } from '../engine/service-locator';
 import type { PlayerBase } from '../engine/game-objects/player-base';
 import type { RoomBase } from '../engine/game-objects/room-base';
+import { NpcBase } from '../engine/game-objects/npc-base';
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class GameGateway
@@ -203,6 +204,18 @@ export class GameGateway
       case 'command':
         await this.commandHandler.handleCommand(client, session, message.data as any);
         break;
+      case 'questAccept':
+        await this.handleQuestAccept(session, message.data as any);
+        break;
+      case 'questAbandon':
+        await this.handleQuestAbandon(session, message.data as any);
+        break;
+      case 'questComplete':
+        await this.handleQuestComplete(session, message.data as any);
+        break;
+      case 'allocatePoints':
+        await this.handleAllocatePoints(client, session, message.data as any);
+        break;
       case 'ping':
         // 心跳，无需处理
         break;
@@ -216,6 +229,136 @@ export class GameGateway
     const address = client._socket?.remoteAddress;
     const port = client._socket?.remotePort;
     return address && port ? `${address}:${port}` : 'unknown';
+  }
+
+  // ================================================================
+  //  任务系统消息处理
+  // ================================================================
+
+  /** 接受任务 */
+  private async handleQuestAccept(
+    session: Session,
+    data: { questId: string; npcId: string },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const npc = this.findNpcInRoom(player, data.npcId);
+    if (!npc) {
+      player.receiveMessage('附近找不到这个人。');
+      return;
+    }
+
+    if (!ServiceLocator.questManager) return;
+
+    const result = ServiceLocator.questManager.acceptQuest(player, data.questId, npc);
+    if (result.message) {
+      player.receiveMessage(result.message);
+    }
+  }
+
+  /** 放弃任务 */
+  private async handleQuestAbandon(
+    session: Session,
+    data: { questId: string },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    if (!ServiceLocator.questManager) return;
+
+    const result = ServiceLocator.questManager.abandonQuest(player, data.questId);
+    if (result.message) {
+      player.receiveMessage(result.message);
+    }
+  }
+
+  /** 完成（交付）任务 */
+  private async handleQuestComplete(
+    session: Session,
+    data: { questId: string; npcId: string },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const npc = this.findNpcInRoom(player, data.npcId);
+    if (!npc) {
+      player.receiveMessage('附近找不到这个人。');
+      return;
+    }
+
+    if (!ServiceLocator.questManager) return;
+
+    const result = ServiceLocator.questManager.completeQuest(player, data.questId, npc);
+    if (result.message) {
+      player.receiveMessage(result.message);
+    }
+
+    // 完成任务可能获得经验，检查升级
+    if (result.success && ServiceLocator.expManager && session.characterId) {
+      try {
+        const character = await this.characterService.findById(session.characterId);
+        if (character) {
+          ServiceLocator.expManager.checkLevelUp(player, character);
+          // 持久化玩家数据
+          await this.characterService.savePlayerDataToDB(player, session.characterId);
+        }
+      } catch {
+        // 查询失败不阻塞主流程
+      }
+    }
+  }
+
+  /** 分配属性点 */
+  private async handleAllocatePoints(
+    client: any,
+    session: Session,
+    data: { allocations: Record<string, number> },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    if (!ServiceLocator.expManager || !session.characterId) return;
+
+    try {
+      const character = await this.characterService.findById(session.characterId);
+      if (!character) return;
+
+      const result = ServiceLocator.expManager.allocatePoints(player, character, {
+        allocations: data.allocations,
+      });
+
+      if (result.message) {
+        player.receiveMessage(result.message);
+      }
+
+      // 持久化角色属性数据
+      if (result.success) {
+        await this.characterService.savePlayerDataToDB(player, session.characterId);
+      }
+    } catch {
+      // 查询失败不阻塞主流程
+    }
+  }
+
+  // ================================================================
+  //  内部工具方法
+  // ================================================================
+
+  /** 从 session 获取玩家对象 */
+  private getPlayerFromSession(session: Session): PlayerBase | undefined {
+    if (!session.authenticated || !session.playerId) return undefined;
+    return this.objectManager.findById(session.playerId) as PlayerBase | undefined;
+  }
+
+  /** 在玩家所在房间中查找 NPC（按实例 ID） */
+  private findNpcInRoom(player: PlayerBase, npcId: string): NpcBase | undefined {
+    const room = player.getEnvironment() as RoomBase | null;
+    if (!room) return undefined;
+
+    return room
+      .getInventory()
+      .find((e): e is NpcBase => e instanceof NpcBase && e.id === npcId) as NpcBase | undefined;
   }
 
   /** 获取 Session */

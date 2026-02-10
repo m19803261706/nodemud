@@ -12,6 +12,7 @@ import { ItemBase } from '../../engine/game-objects/item-base';
 import { ContainerBase } from '../../engine/game-objects/container-base';
 import { RemainsBase } from '../../engine/game-objects/remains-base';
 import type { BlueprintFactory } from '../../engine/blueprint-factory';
+import { ServiceLocator } from '../../engine/service-locator';
 
 /** 反方向映射表 */
 const OPPOSITE_DIRECTION: Record<string, string> = {
@@ -80,16 +81,35 @@ export function sendRoomInfo(
   const npcs: NpcBrief[] = room
     .getInventory()
     .filter((e): e is NpcBase => e instanceof NpcBase)
-    .map((npc) => ({
-      id: npc.id,
-      name: npc.getName(),
-      title: npc.get<string>('title') || '',
-      gender: npc.get<string>('gender') || 'male',
-      faction: npc.get<string>('visible_faction') || '',
-      level: npc.get<number>('level') || 1,
-      hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
-      attitude: npc.get<string>('attitude') || 'neutral',
-    }));
+    .map((npc) => {
+      const brief: NpcBrief = {
+        id: npc.id,
+        name: npc.getName(),
+        title: npc.get<string>('title') || '',
+        gender: npc.get<string>('gender') || 'male',
+        faction: npc.get<string>('visible_faction') || '',
+        level: npc.get<number>('level') || 1,
+        hpPct: Math.round(
+          ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
+        ),
+        attitude: npc.get<string>('attitude') || 'neutral',
+      };
+
+      // 任务系统：标记 NPC 是否有可接/可交付任务
+      if (ServiceLocator.questManager) {
+        const npcBlueprintId = npc.id.split('#')[0];
+        const questBriefs = ServiceLocator.questManager.getNpcQuestBriefs(
+          player,
+          npcBlueprintId,
+        );
+        if (questBriefs.length > 0) {
+          brief.hasQuest = questBriefs.some((q) => q.state === 'available');
+          brief.hasQuestReady = questBriefs.some((q) => q.state === 'ready');
+        }
+      }
+
+      return brief;
+    });
 
   // 收集房间内地面物品列表
   const items: ItemBrief[] = room

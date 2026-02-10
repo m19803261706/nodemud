@@ -13,7 +13,9 @@ import { ItemBase } from '../../game-objects/item-base';
 import { ContainerBase } from '../../game-objects/container-base';
 import { MerchantBase } from '../../game-objects/merchant-base';
 import { RoomBase } from '../../game-objects/room-base';
+import { PlayerBase } from '../../game-objects/player-base';
 import { BaseEntity } from '../../base-entity';
+import { ServiceLocator } from '../../service-locator';
 import { rt, bold, getEquipmentTag } from '@packages/core';
 
 @Command({ name: 'look', aliases: ['l', '看'], description: '查看当前位置或指定对象' })
@@ -109,7 +111,7 @@ export class LookCommand implements ICommand {
       (e) => e instanceof NpcBase && (e as NpcBase).getName().includes(target),
     );
     if (npc) {
-      return this.lookAtNpc(npc as NpcBase);
+      return this.lookAtNpc(npc as NpcBase, executor);
     }
 
     // 3. 查房间地面的物品
@@ -210,7 +212,7 @@ export class LookCommand implements ICommand {
   }
 
   /** 查看 NPC 详细信息 */
-  private lookAtNpc(npc: NpcBase): CommandResult {
+  private lookAtNpc(npc: NpcBase, executor?: LivingBase): CommandResult {
     const name = npc.getName();
     const title = npc.get<string>('title') || '';
     const long = npc.getLong();
@@ -223,7 +225,9 @@ export class LookCommand implements ICommand {
 
     const canReceiveItemFlag = npc.get<boolean>('can_receive_item');
     const canGive =
-      typeof canReceiveItemFlag === 'boolean' ? canReceiveItemFlag : npc.onReceiveItem !== NpcBase.prototype.onReceiveItem;
+      typeof canReceiveItemFlag === 'boolean'
+        ? canReceiveItemFlag
+        : npc.onReceiveItem !== NpcBase.prototype.onReceiveItem;
 
     const attackable = npc.get<boolean>('attackable');
     const canAttack =
@@ -231,7 +235,9 @@ export class LookCommand implements ICommand {
 
     const isMerchant = npc instanceof MerchantBase;
     const canShopList = isMerchant;
-    const canShopSell = isMerchant ? (npc as MerchantBase).getRecycleConfig().enabled ?? true : false;
+    const canShopSell = isMerchant
+      ? ((npc as MerchantBase).getRecycleConfig().enabled ?? true)
+      : false;
 
     const actions: string[] = [];
     if (canChat) actions.push('chat');
@@ -302,8 +308,22 @@ export class LookCommand implements ICommand {
           shopSell: canShopSell,
           // 兼容旧客户端：保留 shop 总开关
           shop: canShopList || canShopSell,
+          // 任务系统：获取 NPC 可用任务摘要
+          quests: this.getNpcQuests(npc, executor),
         },
       },
     };
+  }
+
+  /**
+   * 获取 NPC 任务摘要列表
+   * 只有 executor 为玩家时才返回任务信息
+   */
+  private getNpcQuests(npc: NpcBase, executor?: LivingBase): any[] {
+    if (!executor || !(executor instanceof PlayerBase)) return [];
+    if (!ServiceLocator.questManager) return [];
+
+    const npcBlueprintId = npc.id.split('#')[0];
+    return ServiceLocator.questManager.getNpcQuestBriefs(executor as PlayerBase, npcBlueprintId);
   }
 }
