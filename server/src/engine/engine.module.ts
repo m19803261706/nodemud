@@ -19,6 +19,7 @@ import { ExpManager } from './quest/exp-manager';
 import { QuestManager } from './quest/quest-manager';
 import { SkillRegistry } from './skills/skill-registry';
 import { PracticeManager } from './skills/practice-manager';
+import { registerSongyangSkills } from './skills/songyang/register-songyang-skills';
 import { SkillModule } from '../skill/skill.module';
 import { SkillService } from '../skill/skill.service';
 import { SectRegistry } from './sect/sect-registry';
@@ -87,6 +88,9 @@ export class EngineModule implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    const registeredSongyangSkillCount = registerSongyangSkills(this.skillRegistry);
+    this.logger.log(`嵩阳技能注册完成: ${registeredSongyangSkillCount} 项`);
+
     // 注册门派策略（后续新增门派在这里扩展）
     this.sectRegistry.register(this.songyangPolicy);
 
