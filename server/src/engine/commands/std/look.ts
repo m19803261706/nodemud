@@ -11,6 +11,7 @@ import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { ContainerBase } from '../../game-objects/container-base';
+import { MerchantBase } from '../../game-objects/merchant-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold, getEquipmentTag } from '@packages/core';
@@ -214,7 +215,31 @@ export class LookCommand implements ICommand {
     const title = npc.get<string>('title') || '';
     const long = npc.getLong();
     const gender = npc.get<string>('gender') === 'male' ? '男' : '女';
-    const capabilities = npc.getInteractionCapabilities();
+    const inquiry = npc.get<Record<string, string>>('inquiry');
+    const canChat =
+      typeof npc.get<boolean>('can_chat') === 'boolean'
+        ? !!npc.get<boolean>('can_chat')
+        : !!inquiry && Object.keys(inquiry).length > 0;
+
+    const canReceiveItemFlag = npc.get<boolean>('can_receive_item');
+    const canGive =
+      typeof canReceiveItemFlag === 'boolean' ? canReceiveItemFlag : npc.onReceiveItem !== NpcBase.prototype.onReceiveItem;
+
+    const attackable = npc.get<boolean>('attackable');
+    const canAttack =
+      typeof attackable === 'boolean' ? attackable : npc.get<boolean>('no_fight') !== true;
+
+    const isMerchant = npc instanceof MerchantBase;
+    const canShopList = isMerchant;
+    const canShopSell = isMerchant ? (npc as MerchantBase).getRecycleConfig().enabled ?? true : false;
+
+    const actions: string[] = [];
+    if (canChat) actions.push('chat');
+    if (canShopList) actions.push('shopList');
+    if (canShopSell) actions.push('shopSell');
+    if (canGive) actions.push('give');
+    if (canAttack) actions.push('attack');
+    actions.push('close');
 
     const header = title ? `${title}·${name}` : name;
     const lines: string[] = [];
@@ -268,10 +293,15 @@ export class LookCommand implements ICommand {
         short: npc.getShort(),
         long,
         equipment: eqData,
+        actions,
         capabilities: {
-          ...capabilities,
+          chat: canChat,
+          give: canGive,
+          attack: canAttack,
+          shopList: canShopList,
+          shopSell: canShopSell,
           // 兼容旧客户端：保留 shop 总开关
-          shop: capabilities.shopList || capabilities.shopSell,
+          shop: canShopList || canShopSell,
         },
       },
     };

@@ -115,6 +115,7 @@ describe('LookCommand', () => {
       shopSell: false,
       shop: false,
     });
+    expect(result.data.actions).toEqual(['chat', 'attack', 'close']);
   });
 
   it('look 商人 NPC 返回商店能力位', async () => {
@@ -137,6 +138,7 @@ describe('LookCommand', () => {
     expect(result.data.capabilities.shopList).toBe(true);
     expect(result.data.capabilities.shopSell).toBe(false);
     expect(result.data.capabilities.shop).toBe(true);
+    expect(result.data.actions).toEqual(['shopList', 'attack', 'close']);
   });
 
   it('不在环境中返回错误', () => {

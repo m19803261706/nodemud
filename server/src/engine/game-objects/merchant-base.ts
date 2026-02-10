@@ -9,7 +9,7 @@
  */
 import { ItemBase } from './item-base';
 import { LivingBase } from './living-base';
-import { NpcBase, type NpcInteractionCapabilities } from './npc-base';
+import { NpcBase } from './npc-base';
 import { ServiceLocator } from '../service-locator';
 
 /** 商店商品配置 */
@@ -101,16 +101,6 @@ export interface ShopSellResult {
 
 export class MerchantBase extends NpcBase {
   static virtual = false;
-
-  override getInteractionCapabilities(): NpcInteractionCapabilities {
-    const base = super.getInteractionCapabilities();
-    const recycle = this.getRecycleConfig();
-    return {
-      ...base,
-      shopList: true,
-      shopSell: recycle.enabled ?? true,
-    };
-  }
 
   /** 获取商店配置 */
   getShopGoods(): ShopGoodConfig[] {

@@ -13,15 +13,6 @@ import { LivingBase } from './living-base';
 import { RemainsBase } from './remains-base';
 import { RoomBase } from './room-base';
 
-/** NPC 可用交互能力（用于前端动态渲染按钮） */
-export interface NpcInteractionCapabilities {
-  chat: boolean;
-  give: boolean;
-  attack: boolean;
-  shopList: boolean;
-  shopSell: boolean;
-}
-
 export class NpcBase extends LivingBase {
   /** NPC 可克隆（非虚拟对象） */
   static virtual = false;
@@ -132,43 +123,5 @@ export class NpcBase extends LivingBase {
       accept: false,
       message: `${this.getName()}不需要这个东西。`,
     };
-  }
-
-  /** NPC 交互能力：前端根据能力位显示按钮 */
-  getInteractionCapabilities(): NpcInteractionCapabilities {
-    return {
-      chat: this.canChat(),
-      give: this.canReceiveItem(),
-      attack: this.canBeAttacked(),
-      shopList: false,
-      shopSell: false,
-    };
-  }
-
-  /** 能否进行 ask/打听 对话 */
-  protected canChat(): boolean {
-    const force = this.get<boolean>('can_chat');
-    if (typeof force === 'boolean') return force;
-
-    const inquiry = this.get<Record<string, string>>('inquiry');
-    const hasInquiry = !!inquiry && Object.keys(inquiry).length > 0;
-    const hasCustomOnChat = this.onChat !== NpcBase.prototype.onChat;
-    return hasInquiry || hasCustomOnChat;
-  }
-
-  /** 能否接收 give 物品 */
-  protected canReceiveItem(): boolean {
-    const force = this.get<boolean>('can_receive_item');
-    if (typeof force === 'boolean') return force;
-    return this.onReceiveItem !== NpcBase.prototype.onReceiveItem;
-  }
-
-  /** 能否被 kill/攻击 */
-  protected canBeAttacked(): boolean {
-    const attackable = this.get<boolean>('attackable');
-    if (typeof attackable === 'boolean') return attackable;
-
-    if (this.get<boolean>('no_fight') === true) return false;
-    return true;
   }
 }

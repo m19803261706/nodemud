@@ -123,6 +123,7 @@ export interface NpcDetailData {
   short: string;
   long: string;
   equipment?: NpcEquipmentItem[];
+  actions?: string[];
   capabilities?: {
     chat?: boolean;
     give?: boolean;

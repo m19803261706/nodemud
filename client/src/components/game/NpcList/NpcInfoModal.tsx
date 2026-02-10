@@ -157,11 +157,17 @@ export const NpcInfoModal = ({
     : detail.name;
   const isSelectingItem = actionListMode !== null;
   const selectingTitle = actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
-  const canChat = detail.capabilities?.chat ?? true;
-  const canShopList = detail.capabilities?.shopList ?? detail.capabilities?.shop ?? false;
-  const canShopSell = detail.capabilities?.shopSell ?? detail.capabilities?.shop ?? false;
-  const canGive = detail.capabilities?.give ?? true;
-  const canAttack = detail.capabilities?.attack ?? true;
+  const actionSet = new Set(detail.actions ?? []);
+  const hasActions = actionSet.size > 0;
+  const canChat = hasActions ? actionSet.has('chat') : detail.capabilities?.chat ?? true;
+  const canShopList = hasActions
+    ? actionSet.has('shopList')
+    : detail.capabilities?.shopList ?? detail.capabilities?.shop ?? false;
+  const canShopSell = hasActions
+    ? actionSet.has('shopSell')
+    : detail.capabilities?.shopSell ?? detail.capabilities?.shop ?? false;
+  const canGive = hasActions ? actionSet.has('give') : detail.capabilities?.give ?? true;
+  const canAttack = hasActions ? actionSet.has('attack') : detail.capabilities?.attack ?? true;
 
   const actionButtons: NpcActionButton[] = [];
 

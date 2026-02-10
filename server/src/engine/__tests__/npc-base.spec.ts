@@ -4,7 +4,6 @@
  * 覆盖: virtual 标记、getName/getShort/getLong、onHeartbeat->onAI 链路、onChat
  */
 import { NpcBase } from '../game-objects/npc-base';
-import { MerchantBase } from '../game-objects/merchant-base';
 import { BaseEntity } from '../base-entity';
 import { LivingBase } from '../game-objects/living-base';
 
@@ -148,53 +147,6 @@ describe('NpcBase', () => {
       const npc = new NpcBase('test/npc');
       npc.set('hp', 100);
       expect(npc.get('hp')).toBe(100);
-    });
-  });
-
-  // ========== 交互能力 ==========
-
-  describe('getInteractionCapabilities()', () => {
-    it('默认 NPC：可攻击，不可给予，不含商店能力', () => {
-      const npc = new NpcBase('test/npc');
-      const caps = npc.getInteractionCapabilities();
-      expect(caps).toEqual({
-        chat: false,
-        give: false,
-        attack: true,
-        shopList: false,
-        shopSell: false,
-      });
-    });
-
-    it('有 inquiry 时启用对话能力', () => {
-      const npc = new NpcBase('test/npc');
-      npc.set('inquiry', { default: '你好。' });
-      expect(npc.getInteractionCapabilities().chat).toBe(true);
-    });
-
-    it('can_receive_item 可显式开启给予能力', () => {
-      const npc = new NpcBase('test/npc');
-      npc.set('can_receive_item', true);
-      expect(npc.getInteractionCapabilities().give).toBe(true);
-    });
-
-    it('attackable=false 时不可攻击', () => {
-      const npc = new NpcBase('test/npc');
-      npc.set('attackable', false);
-      expect(npc.getInteractionCapabilities().attack).toBe(false);
-    });
-
-    it('商人默认启用货单和出售能力', () => {
-      const merchant = new MerchantBase('test/merchant');
-      const caps = merchant.getInteractionCapabilities();
-      expect(caps.shopList).toBe(true);
-      expect(caps.shopSell).toBe(true);
-    });
-
-    it('商人关闭回收后禁用出售能力', () => {
-      const merchant = new MerchantBase('test/merchant');
-      merchant.set('shop_recycle', { enabled: false });
-      expect(merchant.getInteractionCapabilities().shopSell).toBe(false);
     });
   });
 });
