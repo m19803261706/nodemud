@@ -5,7 +5,11 @@
 import { RoomBase } from '../../../engine/game-objects/room-base';
 import { PlayerBase } from '../../../engine/game-objects/player-base';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
-import { GameEvents, type CancellableEvent, type MoveEventData } from '../../../engine/types/events';
+import {
+  GameEvents,
+  type CancellableEvent,
+  type MoveEventData,
+} from '../../../engine/types/events';
 
 const SONGYANG_GATE_ROOM_ID = 'area/songyang/gate';
 const GATE_GUARD_ID_PREFIX = 'npc/songyang/gate-disciple';

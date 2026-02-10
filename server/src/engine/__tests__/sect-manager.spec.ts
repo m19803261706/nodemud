@@ -12,7 +12,11 @@ function createPlayer(id = 'player/test'): PlayerBase {
   return player;
 }
 
-function createSongyangNpc(id: string, name: string, role: 'mentor' | 'master' | 'deacon' | 'sparring'): NpcBase {
+function createSongyangNpc(
+  id: string,
+  name: string,
+  role: 'mentor' | 'master' | 'deacon' | 'sparring',
+): NpcBase {
   const npc = new NpcBase(`${id}#1`);
   npc.set('name', name);
   npc.set('sect_id', 'songyang');

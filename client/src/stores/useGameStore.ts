@@ -434,7 +434,9 @@ export const useGameStore = create<GameState>(set => ({
   logQuickActions: [],
   upsertLogQuickAction: action =>
     set(state => {
-      const index = state.logQuickActions.findIndex(item => item.id === action.id);
+      const index = state.logQuickActions.findIndex(
+        item => item.id === action.id,
+      );
       if (index === -1) {
         return { logQuickActions: [...state.logQuickActions, action] };
       }
@@ -445,7 +447,9 @@ export const useGameStore = create<GameState>(set => ({
     }),
   removeLogQuickAction: actionId =>
     set(state => ({
-      logQuickActions: state.logQuickActions.filter(item => item.id !== actionId),
+      logQuickActions: state.logQuickActions.filter(
+        item => item.id !== actionId,
+      ),
     })),
   clearLogQuickActions: () => set({ logQuickActions: [] }),
 

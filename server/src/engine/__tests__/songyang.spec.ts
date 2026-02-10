@@ -104,7 +104,9 @@ describe('嵩阳宗地图', () => {
     const hall = objectManager.findById('area/songyang/hall') as RoomBase;
     const drillGround = objectManager.findById('area/songyang/drill-ground') as RoomBase;
     const disciplesYard = objectManager.findById('area/songyang/disciples-yard') as RoomBase;
-    const scripturePavilion = objectManager.findById('area/songyang/scripture-pavilion') as RoomBase;
+    const scripturePavilion = objectManager.findById(
+      'area/songyang/scripture-pavilion',
+    ) as RoomBase;
     const deaconCourt = objectManager.findById('area/songyang/deacon-court') as RoomBase;
     const meditationRoom = objectManager.findById('area/songyang/meditation-room') as RoomBase;
     const armory = objectManager.findById('area/songyang/armory') as RoomBase;

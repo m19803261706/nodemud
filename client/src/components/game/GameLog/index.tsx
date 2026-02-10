@@ -14,7 +14,9 @@ export const GameLog = () => {
   const description = useGameStore(state => state.location.description);
   const logQuickActions = useGameStore(state => state.logQuickActions);
   const sendCommand = useGameStore(state => state.sendCommand);
-  const removeLogQuickAction = useGameStore(state => state.removeLogQuickAction);
+  const removeLogQuickAction = useGameStore(
+    state => state.removeLogQuickAction,
+  );
 
   return (
     <View style={s.container}>

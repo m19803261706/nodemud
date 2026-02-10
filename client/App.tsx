@@ -52,11 +52,8 @@ function App(): React.JSX.Element {
       if (!content) return;
 
       const plain = stripRichTags(content);
-      const {
-        location,
-        upsertLogQuickAction,
-        removeLogQuickAction,
-      } = useGameStore.getState();
+      const { location, upsertLogQuickAction, removeLogQuickAction } =
+        useGameStore.getState();
 
       if (location.name !== '嵩阳山道') {
         return;
