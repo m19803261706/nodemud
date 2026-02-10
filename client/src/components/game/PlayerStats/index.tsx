@@ -59,7 +59,7 @@ export const PlayerStats = () => {
     <View style={s.container}>
       <PlayerNameBadge
         name={hasData ? player.name : '连接中…'}
-        level={hasData ? player.level : ''}
+        level={hasData ? player.levelTitle : ''}
       />
 
       {/* 第一行：气血/内力/精力 进度条 */}
@@ -107,8 +107,12 @@ export const PlayerStats = () => {
       {showMeta && (
         <View style={s.combatRow}>
           <CombatValue label="银两" value={player.silver} />
-          {hasCombat ? <CombatValue label="攻击" value={player.combat.attack} /> : null}
-          {hasCombat ? <CombatValue label="防御" value={player.combat.defense} /> : null}
+          {hasCombat ? (
+            <CombatValue label="攻击" value={player.combat.attack} />
+          ) : null}
+          {hasCombat ? (
+            <CombatValue label="防御" value={player.combat.defense} />
+          ) : null}
         </View>
       )}
 

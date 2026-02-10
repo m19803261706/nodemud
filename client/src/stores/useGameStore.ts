@@ -14,6 +14,7 @@ import type {
   CombatStartData,
   CombatUpdateData,
   CombatEndData,
+  QuestObjectiveProgress,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -44,7 +45,8 @@ export interface CombatData {
 /** 玩家数据（来自服务端 playerStats 消息） */
 export interface PlayerData {
   name: string;
-  level: string;
+  level: number;
+  levelTitle: string;
   silver: number;
   hp: ResourceValue;
   mp: ResourceValue;
@@ -52,6 +54,11 @@ export interface PlayerData {
   attrs: CharacterAttrs;
   equipBonus: EquipmentBonus;
   combat: CombatData;
+  exp: number;
+  expToNextLevel: number;
+  potential: number;
+  score: number;
+  freePoints: number;
 }
 
 export interface LogEntry {
@@ -86,6 +93,8 @@ export interface NpcData {
   level: number;
   hpPct: number;
   attitude: string;
+  hasQuest?: boolean;
+  hasQuestReady?: boolean;
 }
 
 /** NPC 装备条目 */
@@ -110,6 +119,15 @@ export interface ItemDetailData {
   value?: number;
 }
 
+/** NPC 任务摘要（NPC look 返回用） */
+export interface NpcQuestBrief {
+  questId: string;
+  name: string;
+  description: string;
+  state: 'available' | 'active' | 'ready';
+  objectives?: QuestObjectiveProgress[];
+}
+
 /** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
 export interface NpcDetailData {
   npcId: string;
@@ -132,7 +150,33 @@ export interface NpcDetailData {
     shopSell?: boolean;
     /** 兼容旧服务端字段 */
     shop?: boolean;
+    /** NPC 可交互任务列表 */
+    quests?: NpcQuestBrief[];
   };
+}
+
+/** 进行中的任务信息 */
+export interface ActiveQuestInfo {
+  questId: string;
+  name: string;
+  description: string;
+  type: 'deliver' | 'capture' | 'collect' | 'dialogue';
+  giverNpcName: string;
+  status: 'active' | 'ready';
+  objectives: QuestObjectiveProgress[];
+  acceptedAt: number;
+}
+
+/** 已完成的任务信息 */
+export interface CompletedQuestInfo {
+  questId: string;
+  name: string;
+}
+
+/** 任务状态切片 */
+export interface QuestState {
+  active: ActiveQuestInfo[];
+  completed: CompletedQuestInfo[];
 }
 
 export interface GameState {
@@ -185,6 +229,10 @@ export interface GameState {
   itemDetail: ItemDetailData | null;
   setItemDetail: (detail: ItemDetailData | null) => void;
 
+  // 任务
+  quests: QuestState;
+  setQuests: (quests: QuestState) => void;
+
   // 指令
   sendCommand: (input: string) => void;
 
@@ -221,7 +269,8 @@ const EMPTY_ATTRS: CharacterAttrs = {
 
 const INITIAL_PLAYER: PlayerData = {
   name: '',
-  level: '',
+  level: 0,
+  levelTitle: '',
   silver: 0,
   hp: { current: 0, max: 0 },
   mp: { current: 0, max: 0 },
@@ -229,6 +278,11 @@ const INITIAL_PLAYER: PlayerData = {
   attrs: EMPTY_ATTRS,
   equipBonus: {},
   combat: { attack: 0, defense: 0 },
+  exp: 0,
+  expToNextLevel: 0,
+  potential: 0,
+  score: 0,
+  freePoints: 0,
 };
 
 const INITIAL_LOG: LogEntry[] = [];
@@ -367,6 +421,10 @@ export const useGameStore = create<GameState>(set => ({
   setGroundItems: items => set({ groundItems: items }),
   itemDetail: null,
   setItemDetail: detail => set({ itemDetail: detail }),
+
+  // 任务
+  quests: { active: [], completed: [] },
+  setQuests: quests => set({ quests }),
 
   // 指令
   sendCommand: (input: string) => {

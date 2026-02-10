@@ -97,7 +97,23 @@ function App(): React.JSX.Element {
 
     const handlePlayerStats = (data: any) => {
       const { updatePlayer } = useGameStore.getState();
-      updatePlayer(data);
+      updatePlayer({
+        name: data.name,
+        level: data.level,
+        levelTitle: data.levelTitle,
+        silver: data.silver,
+        hp: data.hp,
+        mp: data.mp,
+        energy: data.energy,
+        attrs: data.attrs,
+        equipBonus: data.equipBonus,
+        combat: data.combat,
+        exp: data.exp,
+        expToNextLevel: data.expToNextLevel,
+        potential: data.potential,
+        score: data.score,
+        freePoints: data.freePoints,
+      });
     };
 
     const handleEquipmentUpdate = (data: any) => {
@@ -140,6 +156,19 @@ function App(): React.JSX.Element {
       }, 2000);
     };
 
+    /** 任务更新 → 刷新任务列表 + 同步经验/等级等字段 */
+    const handleQuestUpdate = (data: any) => {
+      const { setQuests, updatePlayer } = useGameStore.getState();
+      setQuests({ active: data.active, completed: data.completed });
+      updatePlayer({
+        exp: data.exp,
+        level: data.level,
+        potential: data.potential,
+        score: data.score,
+        freePoints: data.freePoints,
+      });
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -149,6 +178,7 @@ function App(): React.JSX.Element {
     wsService.on('combatStart', handleCombatStart);
     wsService.on('combatUpdate', handleCombatUpdate);
     wsService.on('combatEnd', handleCombatEnd);
+    wsService.on('questUpdate', handleQuestUpdate);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -160,6 +190,7 @@ function App(): React.JSX.Element {
       wsService.off('combatStart', handleCombatStart);
       wsService.off('combatUpdate', handleCombatUpdate);
       wsService.off('combatEnd', handleCombatEnd);
+      wsService.off('questUpdate', handleQuestUpdate);
     };
   }, []);
 
