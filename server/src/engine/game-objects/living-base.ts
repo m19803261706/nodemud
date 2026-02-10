@@ -166,6 +166,36 @@ export class LivingBase extends BaseEntity {
     return Math.max(calculated, level * 3);
   }
 
+  /** 恢复生命值（返回实际恢复量） */
+  recoverHp(amount: number): number {
+    return this.recoverResource('hp', 'max_hp', amount);
+  }
+
+  /** 恢复内力（返回实际恢复量） */
+  recoverMp(amount: number): number {
+    return this.recoverResource('mp', 'max_mp', amount);
+  }
+
+  /** 恢复精力（返回实际恢复量） */
+  recoverEnergy(amount: number): number {
+    return this.recoverResource('energy', 'max_energy', amount);
+  }
+
+  /**
+   * 恢复资源通用逻辑：
+   * - 当前值不存在时按 0 处理
+   * - max 存在时做上限钳制
+   * - 返回实际恢复量
+   */
+  private recoverResource(currentKey: string, maxKey: string, amount: number): number {
+    if (amount <= 0) return 0;
+    const current = this.get<number>(currentKey) ?? 0;
+    const max = this.get<number>(maxKey);
+    const target = typeof max === 'number' ? Math.min(current + amount, max) : current + amount;
+    this.set(currentKey, target);
+    return Math.max(0, target - current);
+  }
+
   /**
    * 受到伤害
    * 扣减当前 HP，降至 0 时触发死亡

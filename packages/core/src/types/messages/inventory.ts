@@ -29,6 +29,8 @@ export interface InventoryItem {
   value: number;
   count: number;
   actions: string[];
+  /** 动作文案 -> 指令映射（可选，兼容旧客户端） */
+  actionCommands?: Record<string, string>;
 }
 
 /** 背包更新消息（服务端 → 客户端） */

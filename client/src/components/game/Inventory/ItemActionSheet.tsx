@@ -37,6 +37,15 @@ function actionToCommand(action: string, item: InventoryItem): string {
   }
 }
 
+/** 优先使用服务端下发的动作指令映射 */
+function resolveActionCommand(action: string, item: InventoryItem): string {
+  const mapped = item.actionCommands?.[action];
+  if (mapped && mapped.trim().length > 0) {
+    return mapped;
+  }
+  return actionToCommand(action, item);
+}
+
 /** 物品类型中文映射 */
 const ITEM_TYPE_LABEL: Record<string, string> = {
   weapon: '武器',
@@ -71,7 +80,7 @@ export const ItemActionSheet = ({ item, onClose }: ItemActionSheetProps) => {
   const handleAction = useCallback(
     (action: string) => {
       if (!item) return;
-      const cmd = actionToCommand(action, item);
+      const cmd = resolveActionCommand(action, item);
       sendCommand(cmd);
       onClose();
     },

@@ -5,6 +5,15 @@
  * 提供物品通用属性访问方法：名称、描述、类型、重量、价值、堆叠等。
  */
 import { BaseEntity } from '../base-entity';
+import type { LivingBase } from './living-base';
+
+/** 物品动作定义（用于前端渲染按钮 + 执行指令） */
+export interface ItemActionDefinition {
+  /** 按钮文案 */
+  label: string;
+  /** 点击按钮时发送的指令 */
+  command: string;
+}
 
 export class ItemBase extends BaseEntity {
   /** 物品可克隆（非虚拟） */
@@ -80,14 +89,40 @@ export class ItemBase extends BaseEntity {
     return this.get<number>('quality') ?? 0;
   }
 
-  /** 获取物品可用操作列表（子类/蓝图可 override） */
-  getActions(): string[] {
-    const actions: string[] = [];
-    actions.push('查看');
+  /**
+   * 获取物品可用动作定义（子类/蓝图可 override）
+   * - 旧协议兼容: getActions() 仍返回 label 列表
+   * - 新协议扩展: getActionCommands() 返回 label -> command 映射
+   */
+  getActionDefinitions(_owner?: LivingBase): ItemActionDefinition[] {
+    const defs: ItemActionDefinition[] = [
+      {
+        label: '查看',
+        command: `look ${this.getName()}`,
+      },
+    ];
     if (this.isDroppable()) {
-      actions.push('丢弃');
+      defs.push({
+        label: '丢弃',
+        command: `drop ${this.getName()}`,
+      });
     }
-    return actions;
+    return defs;
+  }
+
+  /** 兼容旧接口：仅返回动作文案 */
+  getActions(owner?: LivingBase): string[] {
+    return this.getActionDefinitions(owner).map((def) => def.label);
+  }
+
+  /** 新接口：返回动作文案到指令的映射 */
+  getActionCommands(owner?: LivingBase): Record<string, string> {
+    const defs = this.getActionDefinitions(owner);
+    const mapping: Record<string, string> = {};
+    for (const def of defs) {
+      mapping[def.label] = def.command;
+    }
+    return mapping;
   }
 
   /** 物品不在任何容器中 → 可清理 */

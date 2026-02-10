@@ -3,7 +3,8 @@
  * 所有防具物品的基类，提供防御力、穿戴位置等属性访问
  */
 import { parseRawBonus, type EquipmentBonus } from '@packages/core';
-import { ItemBase } from './item-base';
+import type { LivingBase } from './living-base';
+import { ItemBase, type ItemActionDefinition } from './item-base';
 
 export class ArmorBase extends ItemBase {
   static virtual = false;
@@ -24,8 +25,8 @@ export class ArmorBase extends ItemBase {
     return parseRawBonus(raw);
   }
 
-  /** 防具可装备 */
-  override getActions(): string[] {
-    return ['装备', ...super.getActions()];
+  /** 防具动作定义 */
+  override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
+    return [{ label: '装备', command: `wear ${this.getName()}` }, ...super.getActionDefinitions(owner)];
   }
 }

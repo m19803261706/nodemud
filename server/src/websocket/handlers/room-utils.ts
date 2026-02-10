@@ -149,7 +149,8 @@ export function sendInventoryUpdate(player: PlayerBase): void {
       weight: item.getWeight(),
       value: item.getValue(),
       count: 1,
-      actions: item.getActions(),
+      actions: item.getActions(player),
+      actionCommands: item.getActionCommands(player),
     }));
 
   const msg = MessageFactory.create('inventoryUpdate', items);

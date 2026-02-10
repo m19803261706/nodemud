@@ -150,9 +150,21 @@ export class CommandHandler {
       }
     }
 
-    // use 命令成功后（消耗品被使用）：推送 inventoryUpdate
-    if (result.success && result.data?.action === 'use' && result.data?.consumed) {
-      sendInventoryUpdate(player);
+    // use 命令成功后：
+    // - consumed: 推送 inventoryUpdate
+    // - resourceChanged: 推送 playerStats（修复状态栏不同步）
+    if (result.success && result.data?.action === 'use') {
+      if (result.data?.consumed) {
+        sendInventoryUpdate(player);
+      }
+      if (result.data?.resourceChanged && session.characterId) {
+        try {
+          const character = await this.characterService.findById(session.characterId);
+          if (character) sendPlayerStats(player, character);
+        } catch {
+          // 查询失败不阻塞主流程
+        }
+      }
     }
 
     // get_from 成功后：推送 inventoryUpdate + roomInfo

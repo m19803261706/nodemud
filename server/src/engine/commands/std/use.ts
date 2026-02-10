@@ -1,18 +1,17 @@
 /**
  * use 指令 -- 使用物品
  *
- * 使用消耗品（药品/食物）或研读秘籍。
- * 消耗品使用后销毁，秘籍不销毁。
+ * 统一调用物品可使用协议（IUsableItem）：
+ * - 支持默认使用: use <物品名>
+ * - 支持指定选项: use <物品名> <optionKey>
+ * - 可由物品自行决定是否消耗、是否改变资源
  *
  * 对标: LPC use / 炎黄 use_cmd
  */
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
 import { ItemBase } from '../../game-objects/item-base';
-import { MedicineBase } from '../../game-objects/medicine-base';
-import { FoodBase } from '../../game-objects/food-base';
-import { BookBase } from '../../game-objects/book-base';
-import { rt } from '@packages/core';
+import { isUsableItem } from '../../game-objects/usable-item';
 
 @Command({ name: 'use', aliases: ['使用'], description: '使用物品' })
 export class UseCommand implements ICommand {
@@ -26,83 +25,79 @@ export class UseCommand implements ICommand {
       return { success: false, message: '使用什么？用法: use <物品名>' };
     }
 
-    const target = args.join(' ').trim();
-
     // 从背包查找物品
     const items = executor.getInventory().filter((e): e is ItemBase => e instanceof ItemBase);
-    const item = items.find(
-      (i) => i.getName().includes(target) || i.getName().toLowerCase() === target.toLowerCase(),
-    );
+    const parsed = this.resolveItemAndOption(items, args);
+    const item = parsed?.item;
+    const optionKey = parsed?.optionKey;
 
     if (!item) {
       return { success: false, message: '你没有这个东西。' };
     }
 
-    // 药品
-    if (item instanceof MedicineBase) {
-      return this.useMedicine(executor, item);
+    if (!isUsableItem(item)) {
+      return { success: false, message: `${item.getName()}不能被使用。` };
     }
 
-    // 食物
-    if (item instanceof FoodBase) {
-      return this.useFood(executor, item);
+    const result = item.use(executor, optionKey);
+    if (!result.success) {
+      return {
+        success: false,
+        message: result.message,
+        data: {
+          action: 'use',
+          itemId: item.id,
+          optionKey: optionKey ?? 'default',
+          consumed: false,
+          resourceChanged: false,
+          ...result.data,
+        },
+      };
     }
 
-    // 书籍
-    if (item instanceof BookBase) {
-      return this.readBook(executor, item);
+    const consumed = result.consume ?? true;
+    if (consumed) {
+      item.destroy();
     }
-
-    return { success: false, message: `${item.getName()}不能被使用。` };
-  }
-
-  /** 使用药品 */
-  private useMedicine(executor: LivingBase, item: MedicineBase): CommandResult {
-    const name = item.getName();
-    const healHp = item.getHealHp();
-    const healMp = item.getHealMp();
-
-    const effects: string[] = [];
-    if (healHp > 0) effects.push(`恢复了 ${healHp} 点生命`);
-    if (healMp > 0) effects.push(`恢复了 ${healMp} 点内力`);
-
-    // 消耗物品
-    item.destroy();
 
     return {
       success: true,
-      message: `你使用了${rt('item', name)}。${effects.join('，')}。`,
-      data: { action: 'use', itemId: item.id, consumed: true },
+      message: result.message,
+      data: {
+        action: 'use',
+        itemId: item.id,
+        optionKey: optionKey ?? 'default',
+        consumed,
+        resourceChanged: !!result.resourceChanged,
+        ...result.data,
+      },
     };
   }
 
-  /** 使用食物 */
-  private useFood(executor: LivingBase, item: FoodBase): CommandResult {
-    const name = item.getName();
+  /**
+   * 解析“物品名 + 可选 use 选项”
+   * 策略：从长到短尝试匹配物品名，剩余参数作为 optionKey
+   */
+  private resolveItemAndOption(
+    items: ItemBase[],
+    args: string[],
+  ): { item: ItemBase; optionKey?: string } | null {
+    for (let i = args.length; i >= 1; i--) {
+      const itemName = args.slice(0, i).join(' ').trim();
+      if (!itemName) continue;
+      const item = items.find(
+        (candidate) =>
+          candidate.getName().includes(itemName) ||
+          candidate.getName().toLowerCase() === itemName.toLowerCase(),
+      );
+      if (!item) continue;
 
-    // 消耗食物
-    item.destroy();
-
-    return {
-      success: true,
-      message: `你吃了${rt('item', name)}，感觉好多了。`,
-      data: { action: 'use', itemId: item.id, consumed: true },
-    };
-  }
-
-  /** 研读书籍 */
-  private readBook(executor: LivingBase, item: BookBase): CommandResult {
-    const name = item.getName();
-    const skillName = item.getSkillName();
-
-    const msg = skillName
-      ? `你仔细研读了${rt('item', name)}，领悟了${skillName}的奥秘。`
-      : `你翻阅了${rt('item', name)}。`;
-
-    return {
-      success: true,
-      message: msg,
-      data: { action: 'use', itemId: item.id, consumed: false },
-    };
+      const optionKeyRaw = args.slice(i).join(' ').trim();
+      return {
+        item,
+        optionKey: optionKeyRaw || undefined,
+      };
+    }
+    return null;
   }
 }

@@ -3,7 +3,8 @@
  * 所有武器物品的基类，提供伤害、武器类型等属性访问
  */
 import { parseRawBonus, type EquipmentBonus } from '@packages/core';
-import { ItemBase } from './item-base';
+import type { LivingBase } from './living-base';
+import { ItemBase, type ItemActionDefinition } from './item-base';
 
 export class WeaponBase extends ItemBase {
   static virtual = false;
@@ -35,8 +36,8 @@ export class WeaponBase extends ItemBase {
     return bonus;
   }
 
-  /** 武器可装备 */
-  override getActions(): string[] {
-    return ['装备', ...super.getActions()];
+  /** 武器动作定义 */
+  override getActionDefinitions(owner?: LivingBase): ItemActionDefinition[] {
+    return [{ label: '装备', command: `wield ${this.getName()}` }, ...super.getActionDefinitions(owner)];
   }
 }

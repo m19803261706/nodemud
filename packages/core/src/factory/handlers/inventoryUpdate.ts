@@ -27,7 +27,13 @@ export class InventoryUpdateHandler implements IMessageHandler {
           typeof item.weight === 'number' &&
           typeof item.value === 'number' &&
           typeof item.count === 'number' &&
-          Array.isArray(item.actions),
+          Array.isArray(item.actions) &&
+          item.actions.every((action: any) => typeof action === 'string') &&
+          (item.actionCommands === undefined ||
+            (typeof item.actionCommands === 'object' &&
+              item.actionCommands !== null &&
+              !Array.isArray(item.actionCommands) &&
+              Object.values(item.actionCommands).every((command: any) => typeof command === 'string'))),
       )
     );
   }
