@@ -68,6 +68,8 @@ interface NpcInfoModalProps {
   inventory: InventoryItem[];
   onClose: () => void;
   onChat: (npcName: string) => void;
+  onShop: (npcName: string) => void;
+  onSell: (itemName: string, npcName: string) => void;
   onAttack: (npcName: string) => void;
   onGive: (itemName: string, npcName: string) => void;
 }
@@ -121,14 +123,18 @@ export const NpcInfoModal = ({
   inventory,
   onClose,
   onChat,
+  onShop,
+  onSell,
   onAttack,
   onGive,
 }: NpcInfoModalProps) => {
-  const [showGiveList, setShowGiveList] = useState(false);
+  const [actionListMode, setActionListMode] = useState<'give' | 'sell' | null>(
+    null,
+  );
 
-  /** 关闭时重置给予列表状态 */
+  /** 关闭时重置交易选择状态 */
   const handleClose = () => {
-    setShowGiveList(false);
+    setActionListMode(null);
     onClose();
   };
 
@@ -142,6 +148,8 @@ export const NpcInfoModal = ({
   const header = detail.title
     ? `「${detail.title}」${detail.name}`
     : detail.name;
+  const isSelectingItem = actionListMode !== null;
+  const selectingTitle = actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
 
   return (
     <Modal
@@ -245,13 +253,32 @@ export const NpcInfoModal = ({
 
                 <Divider />
 
-                {/* 按钮（2×2 网格） */}
+                {/* 按钮（3×2 网格） */}
                 <View style={s.buttonGrid}>
                   <View style={s.buttonRow}>
                     <ActionButton
                       label="对话"
                       onPress={() => onChat(detail.name)}
                     />
+                    <ActionButton
+                      label="货单"
+                      onPress={() => {
+                        onShop(detail.name);
+                        handleClose();
+                      }}
+                    />
+                  </View>
+                  <View style={s.buttonRow}>
+                    <ActionButton
+                      label="出售"
+                      onPress={() => setActionListMode('sell')}
+                    />
+                    <ActionButton
+                      label="给予"
+                      onPress={() => setActionListMode('give')}
+                    />
+                  </View>
+                  <View style={s.buttonRow}>
                     <ActionButton
                       label="攻击"
                       variant="danger"
@@ -260,22 +287,16 @@ export const NpcInfoModal = ({
                         handleClose();
                       }}
                     />
-                  </View>
-                  <View style={s.buttonRow}>
-                    <ActionButton
-                      label="给予"
-                      onPress={() => setShowGiveList(true)}
-                    />
                     <ActionButton label="关闭" onPress={handleClose} />
                   </View>
                 </View>
 
-                {/* 给予物品选择列表 */}
-                {showGiveList && (
+                {/* 给予/出售物品选择列表 */}
+                {isSelectingItem && (
                   <View style={s.giveOverlay}>
                     <View style={s.giveHeader}>
-                      <Text style={s.giveTitle}>选择物品</Text>
-                      <TouchableOpacity onPress={() => setShowGiveList(false)}>
+                      <Text style={s.giveTitle}>{selectingTitle}</Text>
+                      <TouchableOpacity onPress={() => setActionListMode(null)}>
                         <Text style={s.giveBack}>返回</Text>
                       </TouchableOpacity>
                     </View>
@@ -292,7 +313,11 @@ export const NpcInfoModal = ({
                             style={s.giveItem}
                             activeOpacity={0.6}
                             onPress={() => {
-                              onGive(item.name, detail.name);
+                              if (actionListMode === 'sell') {
+                                onSell(item.name, detail.name);
+                              } else {
+                                onGive(item.name, detail.name);
+                              }
                               handleClose();
                             }}
                           >

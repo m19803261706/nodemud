@@ -51,6 +51,13 @@ export const NpcList = () => {
           sendCommand(`ask ${name} default`);
           setNpcDetail(null);
         }}
+        onShop={name => {
+          sendCommand(`list ${name}`);
+          setNpcDetail(null);
+        }}
+        onSell={(itemName, npcName) => {
+          sendCommand(`sell ${itemName} to ${npcName}`);
+        }}
         onAttack={name => {
           sendCommand(`kill ${name}`);
         }}
