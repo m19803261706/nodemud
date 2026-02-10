@@ -60,7 +60,7 @@ export class SectManager {
     const actions: string[] = [];
 
     if (!data.current) {
-      if (role === 'master' && !data.restrictions.bannedSectIds.includes(policy.sectId)) {
+      if (role === 'mentor' && !data.restrictions.bannedSectIds.includes(policy.sectId)) {
         actions.push('apprentice');
       }
       return actions;
@@ -88,8 +88,8 @@ export class SectManager {
     }
 
     const role = this.getNpcSectRole(master);
-    if (role !== 'master') {
-      return { success: false, message: `${master.getName()}并无收徒之权。` };
+    if (role !== 'mentor') {
+      return { success: false, message: `${master.getName()}道：「收徒之事，先去弟子院找何教习。」` };
     }
 
     const data = this.getPlayerSectData(player);

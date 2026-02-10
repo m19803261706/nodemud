@@ -36,7 +36,7 @@ export default class SongyangMasterLi extends NpcBase {
     ]);
 
     this.set('inquiry', {
-      拜师: '李掌门道：「愿入我门，可直言拜师。」',
+      拜师: '李掌门道：「入门先过教习一关。去弟子院找何教习。」',
       门规: '李掌门道：「嵩阳重守正，先做人，再练刀。」',
       叛门: '李掌门道：「叛门者，自绝门墙，后果自担。」',
       default: '李掌门道：「心要静，路才看得远。」',

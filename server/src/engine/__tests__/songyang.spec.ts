@@ -66,7 +66,7 @@ describe('嵩阳宗地图', () => {
     }
   });
 
-  it('Area 应包含 9 个房间与 7 条 NPC 刷新规则', () => {
+  it('Area 应包含 9 个房间与 9 条 NPC 刷新规则', () => {
     const area = objectManager.findById('area/songyang/area') as Area;
     const roomIds = area.getRoomIds();
     expect(roomIds).toHaveLength(9);
@@ -75,7 +75,7 @@ describe('嵩阳宗地图', () => {
     }
 
     const spawnRules = area.getSpawnRules();
-    expect(spawnRules).toHaveLength(7);
+    expect(spawnRules).toHaveLength(9);
     expect(spawnRules.map((x) => x.blueprintId)).toEqual(
       expect.arrayContaining([
         'npc/songyang/master-li',
@@ -84,6 +84,7 @@ describe('嵩阳宗地图', () => {
         'npc/songyang/elder-xu',
         'npc/songyang/discipline-elder-lu',
         'npc/songyang/senior-disciple-lin',
+        'npc/songyang/mentor-he',
         'npc/songyang/gate-disciple',
       ]),
     );

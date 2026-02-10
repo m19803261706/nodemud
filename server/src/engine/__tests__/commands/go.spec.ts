@@ -102,4 +102,35 @@ describe('GoCommand go 指令', () => {
     expect(result.success).toBe(false);
     expect(result.message).toContain('未知方向');
   });
+
+  it('嵩阳山门应拦截未报来意的外来者', async () => {
+    const room = new RoomBase('area/songyang/mountain-path');
+    room.set('exits', { north: 'area/songyang/gate' });
+    await executor.moveTo(room, { quiet: true });
+
+    const result = goCmd.execute(executor, ['north']);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('报上来意');
+  });
+
+  it('嵩阳山门应放行同门弟子', async () => {
+    const room = new RoomBase('area/songyang/mountain-path');
+    room.set('exits', { north: 'area/songyang/gate' });
+    await executor.moveTo(room, { quiet: true });
+    executor.set('sect', { current: { sectId: 'songyang' } });
+
+    const result = goCmd.execute(executor, ['north']);
+    expect(result.success).toBe(true);
+  });
+
+  it('嵩阳山门应放行一次性通行许可并消耗许可', async () => {
+    const room = new RoomBase('area/songyang/mountain-path');
+    room.set('exits', { north: 'area/songyang/gate' });
+    await executor.moveTo(room, { quiet: true });
+    executor.setTemp('sect/songyang_gate_pass_until', Date.now() + 30_000);
+
+    const result = goCmd.execute(executor, ['north']);
+    expect(result.success).toBe(true);
+    expect(executor.getTemp('sect/songyang_gate_pass_until')).toBe(0);
+  });
 });

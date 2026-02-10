@@ -12,7 +12,7 @@ function createPlayer(id = 'player/test'): PlayerBase {
   return player;
 }
 
-function createSongyangNpc(id: string, name: string, role: 'master' | 'deacon' | 'sparring'): NpcBase {
+function createSongyangNpc(id: string, name: string, role: 'mentor' | 'master' | 'deacon' | 'sparring'): NpcBase {
   const npc = new NpcBase(`${id}#1`);
   npc.set('name', name);
   npc.set('sect_id', 'songyang');
@@ -32,23 +32,33 @@ describe('SectManager', () => {
 
   it('可成功拜入嵩阳宗并写入门派状态', () => {
     const player = createPlayer();
-    const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
 
-    const result = manager.apprentice(player, master);
+    const result = manager.apprentice(player, mentor);
     const data = manager.getPlayerSectData(player);
 
     expect(result.success).toBe(true);
     expect(data.current?.sectId).toBe('songyang');
-    expect(data.current?.masterNpcId).toBe('npc/songyang/master-li');
+    expect(data.current?.masterNpcId).toBe('npc/songyang/mentor-he');
+    expect(data.current?.masterName).toBe('何教习');
     expect(data.current?.rank).toBe('外门弟子');
     expect(data.current?.contribution).toBe(0);
   });
 
-  it('捐献可增加贡献并触发职位晋升', () => {
+  it('掌门不直接收徒，应先经何教习入门', () => {
     const player = createPlayer();
     const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+
+    const result = manager.apprentice(player, master);
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('何教习');
+  });
+
+  it('捐献可增加贡献并触发职位晋升', () => {
+    const player = createPlayer();
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
     const deacon = createSongyangNpc('npc/songyang/deacon-zhao', '赵执事', 'deacon');
-    manager.apprentice(player, master);
+    manager.apprentice(player, mentor);
 
     const ingot = new ItemBase('item/test/ingot');
     ingot.set('name', '精铁锭');
@@ -66,9 +76,9 @@ describe('SectManager', () => {
 
   it('已装备物品不能捐献，且不变更贡献', async () => {
     const player = createPlayer();
-    const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
     const deacon = createSongyangNpc('npc/songyang/deacon-zhao', '赵执事', 'deacon');
-    manager.apprentice(player, master);
+    manager.apprentice(player, mentor);
 
     const sword = new ItemBase('item/test/sword');
     sword.set('name', '练功剑');
@@ -90,9 +100,9 @@ describe('SectManager', () => {
 
   it('演武每日仅一次，结算后增加贡献', () => {
     const player = createPlayer();
-    const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
     const sparring = createSongyangNpc('npc/songyang/sparring-disciple', '陪练弟子', 'sparring');
-    manager.apprentice(player, master);
+    manager.apprentice(player, mentor);
 
     expect(manager.canStartSpar(player, sparring)).toBe(true);
     manager.reserveSparAttempt(player);
@@ -112,9 +122,9 @@ describe('SectManager', () => {
 
   it('叛门会清空当前门派并加入永久禁入，且移除同门技能', () => {
     const player = createPlayer();
-    const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
     const deacon = createSongyangNpc('npc/songyang/deacon-zhao', '赵执事', 'deacon');
-    manager.apprentice(player, master);
+    manager.apprentice(player, mentor);
 
     const removeSkillsByFaction = jest.fn().mockReturnValue(['songyang-strike', 'songyang-force']);
     player.skillManager = { removeSkillsByFaction } as any;
@@ -130,13 +140,15 @@ describe('SectManager', () => {
 
   it('NPC 动作按身份精细显示', () => {
     const player = createPlayer();
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
     const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
     const deacon = createSongyangNpc('npc/songyang/deacon-zhao', '赵执事', 'deacon');
     const sparring = createSongyangNpc('npc/songyang/sparring-disciple', '陪练弟子', 'sparring');
 
-    expect(manager.getNpcAvailableActions(player, master)).toEqual(['apprentice']);
+    expect(manager.getNpcAvailableActions(player, mentor)).toEqual(['apprentice']);
+    expect(manager.getNpcAvailableActions(player, master)).toEqual([]);
 
-    manager.apprentice(player, master);
+    manager.apprentice(player, mentor);
     expect(manager.getNpcAvailableActions(player, deacon)).toEqual(['donate', 'betray']);
     expect(manager.getNpcAvailableActions(player, sparring)).toEqual(['spar']);
 

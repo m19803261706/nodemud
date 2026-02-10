@@ -36,7 +36,7 @@ export default class SongyangElderXu extends NpcBase {
     ]);
 
     this.set('inquiry', {
-      拜师: '许长老道：「若你心性稳得住，老夫可以代宗门收你。」',
+      拜师: '许长老道：「新入门者，先去弟子院见何教习。」',
       门规: '许长老道：「守正、守信、守锋，三守缺一不可。」',
       default: '许长老道：「你若不急，江湖自会给你路。」',
     });

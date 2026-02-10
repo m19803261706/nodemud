@@ -62,9 +62,21 @@ export default class SongyangArea extends Area {
         interval: 300000,
       },
       {
+        blueprintId: 'npc/songyang/mentor-he',
+        roomId: 'area/songyang/disciples-yard',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/gate-disciple',
+        roomId: 'area/songyang/mountain-path',
+        count: 1,
+        interval: 300000,
+      },
+      {
         blueprintId: 'npc/songyang/gate-disciple',
         roomId: 'area/songyang/gate',
-        count: 2,
+        count: 1,
         interval: 300000,
       },
     ]);
