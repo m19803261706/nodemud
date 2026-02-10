@@ -31,6 +31,10 @@ import { NpcBase } from '../../engine/game-objects/npc-base';
 import type { Session } from '../types/session';
 import type { SkillAction } from '../../engine/skills/types';
 import type { SkillManager } from '../../engine/skills/skill-manager';
+import {
+  UnlockState,
+  evaluateSongyangSkillUnlockById,
+} from '../../engine/skills/songyang/songyang-unlock-evaluator';
 
 @Injectable()
 export class SkillHandler {
@@ -218,8 +222,12 @@ export class SkillHandler {
       // 检查是否已学会，未学会则先学习
       const existingSkill = skillManager.getAllSkills().find((s) => s.skillId === data.skillId);
       if (!existingSkill) {
-        const learnResult = skillManager.learnSkill(data.skillId, SkillLearnSource.NPC);
-        if (learnResult !== true) {
+        const unlockResult = evaluateSongyangSkillUnlockById(player, data.skillId);
+        if (
+          unlockResult &&
+          unlockResult.state !== UnlockState.AVAILABLE &&
+          unlockResult.state !== UnlockState.LEARNED
+        ) {
           this.sendSkillLearnResult(player, {
             success: false,
             skillId: data.skillId,
@@ -230,8 +238,27 @@ export class SkillHandler {
             learned: 0,
             learnedMax: 1,
             levelUp: false,
-            message: learnResult,
-            reason: learnResult,
+            message: unlockResult.message,
+            reason: unlockResult.reason,
+          });
+          return;
+        }
+
+        const learnResult = skillManager.learnSkill(data.skillId, SkillLearnSource.NPC);
+        if (learnResult !== true) {
+          const failedUnlock = evaluateSongyangSkillUnlockById(player, data.skillId);
+          this.sendSkillLearnResult(player, {
+            success: false,
+            skillId: data.skillId,
+            skillName: skillDef.skillName,
+            timesCompleted: 0,
+            timesRequested: times,
+            currentLevel: 0,
+            learned: 0,
+            learnedMax: 1,
+            levelUp: false,
+            message: failedUnlock?.message ?? learnResult,
+            reason: failedUnlock?.reason,
           });
           return;
         }

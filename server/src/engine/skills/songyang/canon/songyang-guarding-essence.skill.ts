@@ -3,8 +3,10 @@
  */
 import { SkillCategory, SkillSlotType } from '@packages/core';
 import { SkillBase } from '../../skill-base';
+import type { LivingBase } from '../../../game-objects/living-base';
 import { SONGYANG_SKILL_IDS } from '../songyang-skill-ids';
 import { SONGYANG_FACTION_ID, getSongyangSkillMeta } from '../songyang-skill-meta';
+import { validateSongyangSkillLearn } from '../songyang-unlock-evaluator';
 
 const META = getSongyangSkillMeta(SONGYANG_SKILL_IDS.CANON_ESSENCE);
 
@@ -27,5 +29,9 @@ export class SongyangGuardingEssenceSkill extends SkillBase {
 
   get factionRequired(): string {
     return SONGYANG_FACTION_ID;
+  }
+
+  validLearn(player: LivingBase): true | string {
+    return validateSongyangSkillLearn(player, META.skillId);
   }
 }

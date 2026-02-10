@@ -20,6 +20,26 @@ export interface SongyangSkillMeta {
   slot: SkillSlotType;
   tier: SkillTier;
   factionRequired: typeof SONGYANG_FACTION_ID;
+  unlockRules: SongyangUnlockRules;
+}
+
+export type SongyangAttrKey =
+  | 'strength'
+  | 'vitality'
+  | 'perception'
+  | 'spirit'
+  | 'wisdom'
+  | 'meridian';
+
+export type SongyangPuzzleKey = 'canju' | 'duanju' | 'shiyan';
+export type SongyangChallengeKey = 'chiefDiscipleWin' | 'sparStreakWin' | 'masterApproval';
+
+export interface SongyangUnlockRules {
+  minRank?: string;
+  minAttrs?: Partial<Record<SongyangAttrKey, number>>;
+  preSkills?: Partial<Record<SongyangSkillId, number>>;
+  puzzle?: SongyangPuzzleKey[];
+  challenges?: SongyangChallengeKey[];
 }
 
 export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
@@ -29,6 +49,9 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.BLADE,
     tier: SkillTier.ENTRY,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minAttrs: { strength: 10 },
+    },
   },
   [SONGYANG_SKILL_IDS.ENTRY_DODGE]: {
     skillId: SONGYANG_SKILL_IDS.ENTRY_DODGE,
@@ -36,6 +59,9 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.DODGE,
     tier: SkillTier.ENTRY,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minAttrs: { perception: 10 },
+    },
   },
   [SONGYANG_SKILL_IDS.ENTRY_PARRY]: {
     skillId: SONGYANG_SKILL_IDS.ENTRY_PARRY,
@@ -43,6 +69,9 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.PARRY,
     tier: SkillTier.ENTRY,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minAttrs: { vitality: 10 },
+    },
   },
   [SONGYANG_SKILL_IDS.ENTRY_FORCE]: {
     skillId: SONGYANG_SKILL_IDS.ENTRY_FORCE,
@@ -50,6 +79,9 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.FORCE,
     tier: SkillTier.ENTRY,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minAttrs: { spirit: 10 },
+    },
   },
   [SONGYANG_SKILL_IDS.ADVANCED_BLADE]: {
     skillId: SONGYANG_SKILL_IDS.ADVANCED_BLADE,
@@ -57,6 +89,13 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.BLADE,
     tier: SkillTier.ADVANCED,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '执礼弟子',
+      minAttrs: { strength: 16, meridian: 12 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 80,
+      },
+    },
   },
   [SONGYANG_SKILL_IDS.ADVANCED_DODGE]: {
     skillId: SONGYANG_SKILL_IDS.ADVANCED_DODGE,
@@ -64,6 +103,13 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.DODGE,
     tier: SkillTier.ADVANCED,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '执礼弟子',
+      minAttrs: { perception: 16, wisdom: 12 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ENTRY_DODGE]: 80,
+      },
+    },
   },
   [SONGYANG_SKILL_IDS.ADVANCED_PARRY]: {
     skillId: SONGYANG_SKILL_IDS.ADVANCED_PARRY,
@@ -71,6 +117,13 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.PARRY,
     tier: SkillTier.ADVANCED,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '执礼弟子',
+      minAttrs: { vitality: 16, strength: 12 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ENTRY_PARRY]: 80,
+      },
+    },
   },
   [SONGYANG_SKILL_IDS.ADVANCED_FORCE]: {
     skillId: SONGYANG_SKILL_IDS.ADVANCED_FORCE,
@@ -78,6 +131,13 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.FORCE,
     tier: SkillTier.ADVANCED,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '执礼弟子',
+      minAttrs: { spirit: 16, meridian: 16 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ENTRY_FORCE]: 80,
+      },
+    },
   },
   [SONGYANG_SKILL_IDS.ULTIMATE_BLADE]: {
     skillId: SONGYANG_SKILL_IDS.ULTIMATE_BLADE,
@@ -85,6 +145,15 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.BLADE,
     tier: SkillTier.ULTIMATE,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '嵩阳长老',
+      minAttrs: { strength: 24, meridian: 18 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ADVANCED_BLADE]: 160,
+      },
+      puzzle: ['canju', 'duanju'],
+      challenges: ['chiefDiscipleWin'],
+    },
   },
   [SONGYANG_SKILL_IDS.ULTIMATE_DODGE]: {
     skillId: SONGYANG_SKILL_IDS.ULTIMATE_DODGE,
@@ -92,6 +161,15 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.DODGE,
     tier: SkillTier.ULTIMATE,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '嵩阳长老',
+      minAttrs: { perception: 24, wisdom: 18 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ADVANCED_DODGE]: 160,
+      },
+      puzzle: ['canju', 'shiyan'],
+      challenges: ['sparStreakWin'],
+    },
   },
   [SONGYANG_SKILL_IDS.ULTIMATE_PARRY]: {
     skillId: SONGYANG_SKILL_IDS.ULTIMATE_PARRY,
@@ -99,6 +177,15 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.PARRY,
     tier: SkillTier.ULTIMATE,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '嵩阳长老',
+      minAttrs: { vitality: 24, strength: 18 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ADVANCED_PARRY]: 160,
+      },
+      puzzle: ['duanju', 'shiyan'],
+      challenges: ['masterApproval'],
+    },
   },
   [SONGYANG_SKILL_IDS.ULTIMATE_FORCE]: {
     skillId: SONGYANG_SKILL_IDS.ULTIMATE_FORCE,
@@ -106,6 +193,15 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.FORCE,
     tier: SkillTier.ULTIMATE,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '嵩阳长老',
+      minAttrs: { spirit: 24, meridian: 24 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ADVANCED_FORCE]: 160,
+      },
+      puzzle: ['canju', 'duanju', 'shiyan'],
+      challenges: ['chiefDiscipleWin', 'sparStreakWin'],
+    },
   },
   [SONGYANG_SKILL_IDS.CANON_ESSENCE]: {
     skillId: SONGYANG_SKILL_IDS.CANON_ESSENCE,
@@ -113,6 +209,18 @@ export const SONGYANG_SKILL_META: Record<SongyangSkillId, SongyangSkillMeta> = {
     slot: SkillSlotType.COGNIZE,
     tier: SkillTier.CANON,
     factionRequired: SONGYANG_FACTION_ID,
+    unlockRules: {
+      minRank: '副掌门',
+      minAttrs: { wisdom: 30, spirit: 30, meridian: 30 },
+      preSkills: {
+        [SONGYANG_SKILL_IDS.ULTIMATE_BLADE]: 200,
+        [SONGYANG_SKILL_IDS.ULTIMATE_DODGE]: 200,
+        [SONGYANG_SKILL_IDS.ULTIMATE_PARRY]: 200,
+        [SONGYANG_SKILL_IDS.ULTIMATE_FORCE]: 220,
+      },
+      puzzle: ['canju', 'duanju', 'shiyan'],
+      challenges: ['chiefDiscipleWin', 'sparStreakWin', 'masterApproval'],
+    },
   },
 };
 

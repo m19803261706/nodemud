@@ -38,3 +38,9 @@ export const SONGYANG_SKILL_ID_LIST: SongyangSkillId[] = [
   SONGYANG_SKILL_IDS.ULTIMATE_FORCE,
   SONGYANG_SKILL_IDS.CANON_ESSENCE,
 ];
+
+const SONGYANG_SKILL_ID_SET = new Set<string>(SONGYANG_SKILL_ID_LIST);
+
+export function isSongyangSkillId(skillId: string): skillId is SongyangSkillId {
+  return SONGYANG_SKILL_ID_SET.has(skillId);
+}
