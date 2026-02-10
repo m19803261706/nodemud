@@ -4,8 +4,8 @@
  * 参照 InventoryPage 布局模式，复用 SkillPanel 的子组件
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import {
   MessageFactory,
   SkillCategory,
@@ -38,6 +38,9 @@ export const SkillPage = () => {
     SkillCategory.MARTIAL,
   );
 
+  /** 搜索关键词 */
+  const [keyword, setKeyword] = useState('');
+
   /** 技能详情弹窗 */
   const [detailSkillId, setDetailSkillId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
@@ -47,8 +50,17 @@ export const SkillPage = () => {
     wsService.send(MessageFactory.create('skillPanelRequest', {}));
   }, []);
 
-  /** 按当前 Tab 过滤技能列表 */
-  const filteredSkills = skills.filter(s => s.category === activeTab);
+  /** 按当前 Tab + 关键词过滤技能列表 */
+  const filteredSkills = useMemo(() => {
+    let result = skills.filter(s => s.category === activeTab);
+    const normalizedKeyword = keyword.trim().toLowerCase();
+    if (normalizedKeyword.length > 0) {
+      result = result.filter(s =>
+        s.skillName.toLowerCase().includes(normalizedKeyword),
+      );
+    }
+    return result;
+  }, [skills, activeTab, keyword]);
 
   /** 武学分类按子分组排列（带分组标题） */
   const buildMartialSections = useCallback((): {
@@ -170,6 +182,27 @@ export const SkillPage = () => {
           <SkillCategoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </View>
 
+        {/* 搜索栏 */}
+        <View style={s.searchRow}>
+          <TextInput
+            value={keyword}
+            onChangeText={setKeyword}
+            placeholder="搜索技能名称"
+            placeholderTextColor="#A79C8C"
+            style={s.searchInput}
+            returnKeyType="search"
+          />
+          {keyword.length > 0 ? (
+            <TouchableOpacity
+              style={s.clearBtn}
+              onPress={() => setKeyword('')}
+              activeOpacity={0.7}
+            >
+              <Text style={s.clearText}>清空</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
         {/* 技能列表 */}
         <View style={s.listContainer}>
           {activeTab === SkillCategory.MARTIAL
@@ -210,6 +243,43 @@ const s = StyleSheet.create({
   },
   tabsWrap: {
     paddingHorizontal: 12,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    paddingBottom: 4,
+  },
+  searchInput: {
+    flex: 1,
+    height: 30,
+    borderWidth: 1,
+    borderColor: '#8B7A5A40',
+    borderRadius: 3,
+    paddingHorizontal: 10,
+    fontSize: 12,
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    backgroundColor: '#FFFFFF80',
+  },
+  clearBtn: {
+    height: 30,
+    minWidth: 44,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#8B7A5A50',
+    borderRadius: 3,
+    backgroundColor: '#F5F0E8',
+  },
+  clearText: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '500',
   },
   listContainer: {
     flex: 1,
