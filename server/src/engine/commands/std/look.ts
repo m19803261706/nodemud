@@ -11,6 +11,7 @@ import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { ContainerBase } from '../../game-objects/container-base';
+import { MerchantBase } from '../../game-objects/merchant-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold, getEquipmentTag } from '@packages/core';
@@ -267,6 +268,9 @@ export class LookCommand implements ICommand {
         short: npc.getShort(),
         long,
         equipment: eqData,
+        capabilities: {
+          shop: npc instanceof MerchantBase,
+        },
       },
     };
   }

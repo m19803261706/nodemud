@@ -123,6 +123,9 @@ export interface NpcDetailData {
   short: string;
   long: string;
   equipment?: NpcEquipmentItem[];
+  capabilities?: {
+    shop?: boolean;
+  };
 }
 
 export interface GameState {

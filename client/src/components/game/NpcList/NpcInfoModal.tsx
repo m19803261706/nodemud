@@ -150,6 +150,7 @@ export const NpcInfoModal = ({
     : detail.name;
   const isSelectingItem = actionListMode !== null;
   const selectingTitle = actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
+  const canTrade = !!detail.capabilities?.shop;
 
   return (
     <Modal
@@ -253,42 +254,70 @@ export const NpcInfoModal = ({
 
                 <Divider />
 
-                {/* 按钮（3×2 网格） */}
+                {/* 按钮（按 NPC 能力动态渲染） */}
                 <View style={s.buttonGrid}>
-                  <View style={s.buttonRow}>
-                    <ActionButton
-                      label="对话"
-                      onPress={() => onChat(detail.name)}
-                    />
-                    <ActionButton
-                      label="货单"
-                      onPress={() => {
-                        onShop(detail.name);
-                        handleClose();
-                      }}
-                    />
-                  </View>
-                  <View style={s.buttonRow}>
-                    <ActionButton
-                      label="出售"
-                      onPress={() => setActionListMode('sell')}
-                    />
-                    <ActionButton
-                      label="给予"
-                      onPress={() => setActionListMode('give')}
-                    />
-                  </View>
-                  <View style={s.buttonRow}>
-                    <ActionButton
-                      label="攻击"
-                      variant="danger"
-                      onPress={() => {
-                        onAttack(detail.name);
-                        handleClose();
-                      }}
-                    />
-                    <ActionButton label="关闭" onPress={handleClose} />
-                  </View>
+                  {canTrade ? (
+                    <>
+                      <View style={s.buttonRow}>
+                        <ActionButton
+                          label="对话"
+                          onPress={() => onChat(detail.name)}
+                        />
+                        <ActionButton
+                          label="货单"
+                          onPress={() => {
+                            onShop(detail.name);
+                            handleClose();
+                          }}
+                        />
+                      </View>
+                      <View style={s.buttonRow}>
+                        <ActionButton
+                          label="出售"
+                          onPress={() => setActionListMode('sell')}
+                        />
+                        <ActionButton
+                          label="给予"
+                          onPress={() => setActionListMode('give')}
+                        />
+                      </View>
+                      <View style={s.buttonRow}>
+                        <ActionButton
+                          label="攻击"
+                          variant="danger"
+                          onPress={() => {
+                            onAttack(detail.name);
+                            handleClose();
+                          }}
+                        />
+                        <ActionButton label="关闭" onPress={handleClose} />
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={s.buttonRow}>
+                        <ActionButton
+                          label="对话"
+                          onPress={() => onChat(detail.name)}
+                        />
+                        <ActionButton
+                          label="给予"
+                          onPress={() => setActionListMode('give')}
+                        />
+                      </View>
+                      <View style={s.buttonRow}>
+                        <ActionButton
+                          label="攻击"
+                          variant="danger"
+                          onPress={() => {
+                            onAttack(detail.name);
+                            handleClose();
+                          }}
+                        />
+                        <ActionButton label="关闭" onPress={handleClose} />
+                      </View>
+                    </>
+                  )}
                 </View>
 
                 {/* 给予/出售物品选择列表 */}
