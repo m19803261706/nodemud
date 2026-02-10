@@ -4,6 +4,7 @@
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
+import { SONGYANG_SKILL_IDS } from '../../../engine/skills/songyang/songyang-skill-ids';
 
 export default class SongyangElderXu extends NpcBase {
   static virtual = false;
@@ -27,6 +28,13 @@ export default class SongyangElderXu extends NpcBase {
 
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'master');
+    this.set('teach_cost', 60);
+    this.set('teach_skills', [
+      SONGYANG_SKILL_IDS.ADVANCED_BLADE,
+      SONGYANG_SKILL_IDS.ADVANCED_DODGE,
+      SONGYANG_SKILL_IDS.ADVANCED_PARRY,
+      SONGYANG_SKILL_IDS.ADVANCED_FORCE,
+    ]);
 
     this.set('chat_chance', 9);
     this.set('chat_msg', [
@@ -38,6 +46,7 @@ export default class SongyangElderXu extends NpcBase {
     this.set('inquiry', {
       拜师: '许长老道：「新入门者，先去弟子院见何教习。」',
       门规: '许长老道：「守正、守信、守锋，三守缺一不可。」',
+      学艺: '许长老道：「进阶功课最忌急躁。先达职位，再补心性，方可承得住更重的招法。」',
       default: '许长老道：「你若不急，江湖自会给你路。」',
     });
   }

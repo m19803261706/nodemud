@@ -4,6 +4,7 @@
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
+import { SONGYANG_SKILL_IDS } from '../../../engine/skills/songyang/songyang-skill-ids';
 
 export default class SongyangMentorHe extends NpcBase {
   static virtual = false;
@@ -27,6 +28,13 @@ export default class SongyangMentorHe extends NpcBase {
 
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'mentor');
+    this.set('teach_cost', 20);
+    this.set('teach_skills', [
+      SONGYANG_SKILL_IDS.ENTRY_BLADE,
+      SONGYANG_SKILL_IDS.ENTRY_DODGE,
+      SONGYANG_SKILL_IDS.ENTRY_PARRY,
+      SONGYANG_SKILL_IDS.ENTRY_FORCE,
+    ]);
 
     this.set('chat_chance', 12);
     this.set('chat_msg', [
@@ -38,6 +46,7 @@ export default class SongyangMentorHe extends NpcBase {
     this.set('inquiry', {
       拜师: '何教习道：「入我门墙，先守门规。你若想清楚了，便可开口拜师。」',
       门规: '何教习道：「欺师灭祖、残害同门，皆是重罪。」',
+      学艺: '何教习道：「先把入门四课练扎实：刀、步、架、吐纳，一样都不能省。」',
       来意: '何教习道：「要学本事，先把心摆正。」',
       default: '何教习道：「说重点，江湖不听废话。」',
     });

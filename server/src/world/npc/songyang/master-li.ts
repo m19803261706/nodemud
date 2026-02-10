@@ -4,6 +4,7 @@
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
+import { SONGYANG_SKILL_IDS } from '../../../engine/skills/songyang/songyang-skill-ids';
 
 export default class SongyangMasterLi extends NpcBase {
   static virtual = false;
@@ -27,6 +28,14 @@ export default class SongyangMasterLi extends NpcBase {
 
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'master');
+    this.set('teach_cost', 120);
+    this.set('teach_skills', [
+      SONGYANG_SKILL_IDS.ULTIMATE_BLADE,
+      SONGYANG_SKILL_IDS.ULTIMATE_DODGE,
+      SONGYANG_SKILL_IDS.ULTIMATE_PARRY,
+      SONGYANG_SKILL_IDS.ULTIMATE_FORCE,
+      SONGYANG_SKILL_IDS.CANON_ESSENCE,
+    ]);
 
     this.set('chat_chance', 8);
     this.set('chat_msg', [
@@ -38,6 +47,7 @@ export default class SongyangMasterLi extends NpcBase {
     this.set('inquiry', {
       拜师: '李掌门道：「入门先过教习一关。去弟子院找何教习。」',
       门规: '李掌门道：「嵩阳重守正，先做人，再练刀。」',
+      学艺: '李掌门道：「终阶之法，不凭嘴上求。职位、心性、磨砺，缺一不可。」',
       叛门: '李掌门道：「叛门者，自绝门墙，后果自担。」',
       default: '李掌门道：「心要静，路才看得远。」',
     });

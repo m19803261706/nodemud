@@ -17,6 +17,7 @@ import { NpcBase } from '../../game-objects/npc-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { ServiceLocator } from '../../service-locator';
 import { SkillLearnSource, MessageFactory, type SkillLearnResultData } from '@packages/core';
+import { evaluateSongyangSkillUnlockById, UnlockState } from '../../skills/songyang/songyang-unlock-evaluator';
 
 @Command({ name: 'learn', aliases: ['学艺', 'xue', '学习'], description: '向 NPC 学习技能' })
 export class LearnCommand implements ICommand {
@@ -101,12 +102,39 @@ export class LearnCommand implements ICommand {
       return { success: false, message: `${npc.getName()}不教授「${skillDef.skillName}」。` };
     }
 
+    // 嵩阳技能统一判定：失败时回传 reason，便于前端提示
+    const unlockResult = evaluateSongyangSkillUnlockById(executor, skillDef.skillId);
+    if (
+      unlockResult &&
+      unlockResult.state !== UnlockState.AVAILABLE &&
+      unlockResult.state !== UnlockState.LEARNED
+    ) {
+      return {
+        success: false,
+        message: unlockResult.message,
+        data: {
+          action: 'learn',
+          skillId: skillDef.skillId,
+          reason: unlockResult.reason,
+        },
+      };
+    }
+
     // 检查是否已学会，未学会则先学习
     const existingSkill = skillManager.getAllSkills().find((s) => s.skillId === skillDef.skillId);
     if (!existingSkill) {
       const learnResult = skillManager.learnSkill(skillDef.skillId, SkillLearnSource.NPC);
       if (learnResult !== true) {
-        return { success: false, message: learnResult };
+        const failedUnlock = evaluateSongyangSkillUnlockById(executor, skillDef.skillId);
+        return {
+          success: false,
+          message: failedUnlock?.message ?? learnResult,
+          data: {
+            action: 'learn',
+            skillId: skillDef.skillId,
+            reason: failedUnlock?.reason,
+          },
+        };
       }
     }
 
