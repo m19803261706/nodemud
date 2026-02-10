@@ -74,6 +74,13 @@ interface NpcInfoModalProps {
   onGive: (itemName: string, npcName: string) => void;
 }
 
+interface NpcActionButton {
+  key: string;
+  label: string;
+  variant?: 'danger';
+  onPress: () => void;
+}
+
 /** 通用按钮（水墨渐变） */
 const ActionButton = ({
   label,
@@ -150,7 +157,71 @@ export const NpcInfoModal = ({
     : detail.name;
   const isSelectingItem = actionListMode !== null;
   const selectingTitle = actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
-  const canTrade = !!detail.capabilities?.shop;
+  const canChat = detail.capabilities?.chat ?? true;
+  const canShopList = detail.capabilities?.shopList ?? detail.capabilities?.shop ?? false;
+  const canShopSell = detail.capabilities?.shopSell ?? detail.capabilities?.shop ?? false;
+  const canGive = detail.capabilities?.give ?? true;
+  const canAttack = detail.capabilities?.attack ?? true;
+
+  const actionButtons: NpcActionButton[] = [];
+
+  if (canChat) {
+    actionButtons.push({
+      key: 'chat',
+      label: '对话',
+      onPress: () => onChat(detail.name),
+    });
+  }
+
+  if (canShopList) {
+    actionButtons.push({
+      key: 'shop-list',
+      label: '货单',
+      onPress: () => {
+        onShop(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  if (canShopSell) {
+    actionButtons.push({
+      key: 'shop-sell',
+      label: '出售',
+      onPress: () => setActionListMode('sell'),
+    });
+  }
+
+  if (canGive) {
+    actionButtons.push({
+      key: 'give',
+      label: '给予',
+      onPress: () => setActionListMode('give'),
+    });
+  }
+
+  if (canAttack) {
+    actionButtons.push({
+      key: 'attack',
+      label: '攻击',
+      variant: 'danger',
+      onPress: () => {
+        onAttack(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  actionButtons.push({
+    key: 'close',
+    label: '关闭',
+    onPress: handleClose,
+  });
+
+  const actionRows: NpcActionButton[][] = [];
+  for (let i = 0; i < actionButtons.length; i += 2) {
+    actionRows.push(actionButtons.slice(i, i + 2));
+  }
 
   return (
     <Modal
@@ -256,68 +327,19 @@ export const NpcInfoModal = ({
 
                 {/* 按钮（按 NPC 能力动态渲染） */}
                 <View style={s.buttonGrid}>
-                  {canTrade ? (
-                    <>
-                      <View style={s.buttonRow}>
+                  {actionRows.map((row, rowIndex) => (
+                    <View style={s.buttonRow} key={`npc-action-row-${rowIndex}`}>
+                      {row.map(button => (
                         <ActionButton
-                          label="对话"
-                          onPress={() => onChat(detail.name)}
+                          key={button.key}
+                          label={button.label}
+                          onPress={button.onPress}
+                          variant={button.variant}
                         />
-                        <ActionButton
-                          label="货单"
-                          onPress={() => {
-                            onShop(detail.name);
-                            handleClose();
-                          }}
-                        />
-                      </View>
-                      <View style={s.buttonRow}>
-                        <ActionButton
-                          label="出售"
-                          onPress={() => setActionListMode('sell')}
-                        />
-                        <ActionButton
-                          label="给予"
-                          onPress={() => setActionListMode('give')}
-                        />
-                      </View>
-                      <View style={s.buttonRow}>
-                        <ActionButton
-                          label="攻击"
-                          variant="danger"
-                          onPress={() => {
-                            onAttack(detail.name);
-                            handleClose();
-                          }}
-                        />
-                        <ActionButton label="关闭" onPress={handleClose} />
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <View style={s.buttonRow}>
-                        <ActionButton
-                          label="对话"
-                          onPress={() => onChat(detail.name)}
-                        />
-                        <ActionButton
-                          label="给予"
-                          onPress={() => setActionListMode('give')}
-                        />
-                      </View>
-                      <View style={s.buttonRow}>
-                        <ActionButton
-                          label="攻击"
-                          variant="danger"
-                          onPress={() => {
-                            onAttack(detail.name);
-                            handleClose();
-                          }}
-                        />
-                        <ActionButton label="关闭" onPress={handleClose} />
-                      </View>
-                    </>
-                  )}
+                      ))}
+                      {row.length === 1 ? <View style={s.btnWrap} /> : null}
+                    </View>
+                  ))}
                 </View>
 
                 {/* 给予/出售物品选择列表 */}

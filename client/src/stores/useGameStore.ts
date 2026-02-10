@@ -124,6 +124,12 @@ export interface NpcDetailData {
   long: string;
   equipment?: NpcEquipmentItem[];
   capabilities?: {
+    chat?: boolean;
+    give?: boolean;
+    attack?: boolean;
+    shopList?: boolean;
+    shopSell?: boolean;
+    /** 兼容旧服务端字段 */
     shop?: boolean;
   };
 }

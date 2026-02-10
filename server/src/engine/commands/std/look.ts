@@ -11,7 +11,6 @@ import { LivingBase } from '../../game-objects/living-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { ItemBase } from '../../game-objects/item-base';
 import { ContainerBase } from '../../game-objects/container-base';
-import { MerchantBase } from '../../game-objects/merchant-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { BaseEntity } from '../../base-entity';
 import { rt, bold, getEquipmentTag } from '@packages/core';
@@ -215,6 +214,7 @@ export class LookCommand implements ICommand {
     const title = npc.get<string>('title') || '';
     const long = npc.getLong();
     const gender = npc.get<string>('gender') === 'male' ? '男' : '女';
+    const capabilities = npc.getInteractionCapabilities();
 
     const header = title ? `${title}·${name}` : name;
     const lines: string[] = [];
@@ -269,7 +269,9 @@ export class LookCommand implements ICommand {
         long,
         equipment: eqData,
         capabilities: {
-          shop: npc instanceof MerchantBase,
+          ...capabilities,
+          // 兼容旧客户端：保留 shop 总开关
+          shop: capabilities.shopList || capabilities.shopSell,
         },
       },
     };

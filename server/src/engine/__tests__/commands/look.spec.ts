@@ -12,6 +12,8 @@ import 'reflect-metadata';
 import { LookCommand } from '../../commands/std/look';
 import { LivingBase } from '../../game-objects/living-base';
 import { RoomBase } from '../../game-objects/room-base';
+import { NpcBase } from '../../game-objects/npc-base';
+import { MerchantBase } from '../../game-objects/merchant-base';
 import { BaseEntity } from '../../base-entity';
 import { COMMAND_META_KEY } from '../../types/command';
 
@@ -85,6 +87,56 @@ describe('LookCommand', () => {
     expect(result.message).toBe('[rd]一个机灵的小伙计，手里拿着一块抹布。[/rd]');
     expect(result.data.target).toBe('npc/innkeeper#1');
     expect(result.data.long).toBe('一个机灵的小伙计，手里拿着一块抹布。');
+  });
+
+  it('look NPC 返回细粒度能力位', async () => {
+    const room = new RoomBase('yangzhou/square');
+    room.set('short', '广场');
+
+    const player = new LivingBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/elder#1');
+    npc.set('name', '老者');
+    npc.set('short', '白发老者');
+    npc.set('inquiry', { default: '老者点了点头。' });
+    await npc.moveTo(room, { quiet: true });
+
+    const result = cmd.execute(player, ['老者']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.target).toBe('npc');
+    expect(result.data.capabilities).toEqual({
+      chat: true,
+      give: false,
+      attack: true,
+      shopList: false,
+      shopSell: false,
+      shop: false,
+    });
+  });
+
+  it('look 商人 NPC 返回商店能力位', async () => {
+    const room = new RoomBase('yangzhou/shop');
+    room.set('short', '商铺');
+
+    const player = new LivingBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const merchant = new MerchantBase('npc/merchant#1');
+    merchant.set('name', '杂货商');
+    merchant.set('shop_recycle', { enabled: false });
+    await merchant.moveTo(room, { quiet: true });
+
+    const result = cmd.execute(player, ['杂货商']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.target).toBe('npc');
+    expect(result.data.capabilities.shopList).toBe(true);
+    expect(result.data.capabilities.shopSell).toBe(false);
+    expect(result.data.capabilities.shop).toBe(true);
   });
 
   it('不在环境中返回错误', () => {
