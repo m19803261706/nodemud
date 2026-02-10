@@ -89,19 +89,14 @@ export function sendRoomInfo(
         gender: npc.get<string>('gender') || 'male',
         faction: npc.get<string>('visible_faction') || '',
         level: npc.get<number>('level') || 1,
-        hpPct: Math.round(
-          ((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100,
-        ),
+        hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
         attitude: npc.get<string>('attitude') || 'neutral',
       };
 
       // 任务系统：标记 NPC 是否有可接/可交付任务
       if (ServiceLocator.questManager) {
         const npcBlueprintId = npc.id.split('#')[0];
-        const questBriefs = ServiceLocator.questManager.getNpcQuestBriefs(
-          player,
-          npcBlueprintId,
-        );
+        const questBriefs = ServiceLocator.questManager.getNpcQuestBriefs(player, npcBlueprintId);
         if (questBriefs.length > 0) {
           brief.hasQuest = questBriefs.some((q) => q.state === 'available');
           brief.hasQuestReady = questBriefs.some((q) => q.state === 'ready');
@@ -157,11 +152,14 @@ export function sendInventoryUpdate(player: PlayerBase): void {
     if (item) equippedIds.add(item.id);
   }
 
-  const items: InventoryItem[] = player
+  const items: InventoryItem[] = [];
+  const stackIndexByBlueprint = new Map<string, number>();
+
+  for (const item of player
     .getInventory()
     .filter((e): e is ItemBase => e instanceof ItemBase)
-    .filter((item) => !equippedIds.has(item.id))
-    .map((item) => ({
+    .filter((it) => !equippedIds.has(it.id))) {
+    const itemData: InventoryItem = {
       id: item.id,
       name: item.getName(),
       short: item.getShort(),
@@ -171,7 +169,23 @@ export function sendInventoryUpdate(player: PlayerBase): void {
       count: 1,
       actions: item.getActions(player),
       actionCommands: item.getActionCommands(player),
-    }));
+    };
+
+    if (!item.isStackable()) {
+      items.push(itemData);
+      continue;
+    }
+
+    const blueprintId = item.id.split('#')[0];
+    const existingIndex = stackIndexByBlueprint.get(blueprintId);
+    if (existingIndex === undefined) {
+      stackIndexByBlueprint.set(blueprintId, items.length);
+      items.push(itemData);
+      continue;
+    }
+
+    items[existingIndex].count += 1;
+  }
 
   const msg = MessageFactory.create('inventoryUpdate', items);
   if (msg) player.sendToClient(MessageFactory.serialize(msg));
