@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import LinearGradient from '../../LinearGradient';
 import type { ItemDetailData } from '../../../stores/useGameStore';
+import { useGameStore } from '../../../stores/useGameStore';
 import type { ItemBrief } from '@packages/core';
 
 /** 物品类型 → 中文 */
@@ -98,6 +99,8 @@ export const ItemInfoModal = ({
   onGetFrom,
   onExamine,
 }: ItemInfoModalProps) => {
+  const inventory = useGameStore(state => state.inventory);
+
   if (!detail) return null;
 
   const isContainer = !!detail.containerId;
@@ -109,6 +112,9 @@ export const ItemInfoModal = ({
       ? '残骸'
       : '容器'
     : TYPE_LABEL[detail.type || ''] || detail.type || '';
+  const isInInventory = isContainer
+    ? !!detail.containerId && inventory.some(item => item.id === detail.containerId)
+    : !!detail.itemId && inventory.some(item => item.id === detail.itemId);
 
   return (
     <Modal
@@ -160,7 +166,7 @@ export const ItemInfoModal = ({
                     </Text>
                     <ScrollView style={s.contentsList} nestedScrollEnabled>
                       {detail.contents && detail.contents.length > 0 ? (
-                        detail.contents.map((item) => (
+                        detail.contents.map(item => (
                           <ContentItem
                             key={item.id}
                             item={item}
@@ -179,13 +185,15 @@ export const ItemInfoModal = ({
 
                 {/* 按钮 */}
                 <View style={s.buttonRow}>
-                  <ActionButton
-                    label="拾取"
-                    onPress={() => {
-                      onGet(displayName);
-                      onClose();
-                    }}
-                  />
+                  {!isInInventory ? (
+                    <ActionButton
+                      label="拾取"
+                      onPress={() => {
+                        onGet(displayName);
+                        onClose();
+                      }}
+                    />
+                  ) : null}
                   <ActionButton
                     label="鉴定"
                     onPress={() => {
