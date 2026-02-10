@@ -8,12 +8,12 @@
 
 ### 必需软件
 
-| 软件 | 版本要求 | 说明 |
-|------|----------|------|
-| Android Studio | 最新稳定版 | 包含 SDK Manager 和 AVD Manager |
-| JDK | **17**（推荐） | JDK 24 会导致 CMake 构建失败 |
-| Node.js | >= 18 | React Native 运行环境 |
-| pnpm | >= 8 | 包管理器 |
+| 软件           | 版本要求       | 说明                            |
+| -------------- | -------------- | ------------------------------- |
+| Android Studio | 最新稳定版     | 包含 SDK Manager 和 AVD Manager |
+| JDK            | **17**（推荐） | JDK 24 会导致 CMake 构建失败    |
+| Node.js        | >= 18          | React Native 运行环境           |
+| pnpm           | >= 8           | 包管理器                        |
 
 > **重要**: JDK 版本必须为 17，JDK 24 与 React Native 的 CMake 配置不兼容，会报 `A restricted method in java.lang.System has been called` 错误。
 
@@ -54,10 +54,10 @@ export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/c
 4. 在 SDK Manager 中安装与 macOS 相同的组件
 5. 配置环境变量（系统设置 → 高级系统设置 → 环境变量）:
 
-| 变量名 | 值 |
-|--------|----|
-| `JAVA_HOME` | `C:\Program Files\Java\jdk-17`（JDK 17 安装路径） |
-| `ANDROID_HOME` | `C:\Users\<用户名>\AppData\Local\Android\Sdk` |
+| 变量名         | 值                                                |
+| -------------- | ------------------------------------------------- |
+| `JAVA_HOME`    | `C:\Program Files\Java\jdk-17`（JDK 17 安装路径） |
+| `ANDROID_HOME` | `C:\Users\<用户名>\AppData\Local\Android\Sdk`     |
 
 在 `Path` 中添加:
 
