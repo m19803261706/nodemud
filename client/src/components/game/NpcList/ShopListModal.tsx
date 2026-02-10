@@ -14,7 +14,10 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import LinearGradient from '../../LinearGradient';
-import type { ShopListDetail, ShopGoodView } from '../../../stores/useGameStore';
+import type {
+  ShopListDetail,
+  ShopGoodView,
+} from '../../../stores/useGameStore';
 
 interface ShopListModalProps {
   detail: ShopListDetail | null;
@@ -87,12 +90,19 @@ const GoodRow = ({
           <Text style={s.goodMeta}>库存: {stockText}</Text>
         </View>
       </View>
-      <BuyButton disabled={disabled} onPress={() => onBuy(String(good.index))} />
+      <BuyButton
+        disabled={disabled}
+        onPress={() => onBuy(String(good.index))}
+      />
     </View>
   );
 };
 
-export const ShopListModal = ({ detail, onClose, onBuy }: ShopListModalProps) => {
+export const ShopListModal = ({
+  detail,
+  onClose,
+  onBuy,
+}: ShopListModalProps) => {
   if (!detail) return null;
 
   return (
@@ -134,7 +144,9 @@ export const ShopListModal = ({ detail, onClose, onBuy }: ShopListModalProps) =>
                       <View key={`${good.blueprintId}-${good.index}`}>
                         <GoodRow
                           good={good}
-                          onBuy={selector => onBuy(selector, detail.merchantName)}
+                          onBuy={selector =>
+                            onBuy(selector, detail.merchantName)
+                          }
                         />
                         <Divider />
                       </View>

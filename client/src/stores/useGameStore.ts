@@ -431,7 +431,11 @@ export const useGameStore = create<GameState>(set => ({
   applyShopBuyResult: data =>
     set(state => {
       const current = state.shopListDetail;
-      if (!current || !data.merchantId || current.merchantId !== data.merchantId) {
+      if (
+        !current ||
+        !data.merchantId ||
+        current.merchantId !== data.merchantId
+      ) {
         return state;
       }
       if (!data.blueprintId || typeof data.stockLeft !== 'number') {
