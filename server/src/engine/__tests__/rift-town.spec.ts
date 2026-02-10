@@ -175,10 +175,11 @@ describe('裂隙镇地图', () => {
     expect(dirs).toContain('down');
   });
 
-  it('北门/南门应各有 1 个出口', () => {
+  it('北门应连通山道，南门保持单出口', () => {
     const northGate = objectManager.findById('area/rift-town/north-gate') as RoomBase;
-    expect(Object.keys(northGate.getExits())).toHaveLength(1);
+    expect(Object.keys(northGate.getExits())).toHaveLength(2);
     expect(northGate.getExit('south')).toBe('area/rift-town/north-road');
+    expect(northGate.getExit('north')).toBe('area/songyang/mountain-path');
 
     const southGate = objectManager.findById('area/rift-town/south-gate') as RoomBase;
     expect(Object.keys(southGate.getExits())).toHaveLength(1);

@@ -6,6 +6,9 @@ import type { LivingBase } from '../game-objects/living-base';
 import type { CombatSide } from '@packages/core';
 import { CombatParticipantState } from '@packages/core';
 
+/** 战斗模式 */
+export type CombatMode = 'normal' | 'spar';
+
 /** 战斗参与者 */
 export interface CombatParticipant {
   /** 游戏对象引用 */
@@ -34,4 +37,6 @@ export interface CombatInstance {
   player: LivingBase;
   /** 敌方快捷引用 */
   enemy: LivingBase;
+  /** 战斗模式（普通/演武） */
+  mode: CombatMode;
 }

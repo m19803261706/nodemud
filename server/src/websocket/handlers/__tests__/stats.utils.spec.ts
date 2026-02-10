@@ -40,6 +40,7 @@ function makeCharacter(partial?: Partial<Character>): Character {
     score: 12,
     freePoints: 2,
     questData: null,
+    sectData: null,
     createdAt: new Date(),
     ...partial,
   } as Character;
@@ -177,5 +178,57 @@ describe('stats.utils derivePlayerStats', () => {
     savePlayerData(player, character);
 
     expect(character.exp).toBe(888);
+  });
+
+  it('登录加载应归一化并挂载 sect 数据', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({
+      sectData: {
+        current: {
+          sectId: 'songyang',
+          sectName: '嵩阳宗',
+          masterNpcId: 'npc/songyang/master-li',
+          masterName: '李掌门',
+          rank: '外门弟子',
+          contribution: 120,
+          joinedAt: 1700000000000,
+        },
+        restrictions: { bannedSectIds: ['yunyue'], cooldownUntil: null },
+        daily: { dateKey: '2026-02-10', sparCount: 1 },
+      },
+    });
+
+    loadCharacterToPlayer(player, character);
+    const sect = player.get<any>('sect');
+
+    expect(sect.current.sectId).toBe('songyang');
+    expect(sect.current.contribution).toBe(120);
+    expect(sect.restrictions.bannedSectIds).toEqual(['yunyue']);
+    expect(sect.daily.sparCount).toBe(1);
+  });
+
+  it('保存玩家数据应回写 sect 状态', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ sectData: null });
+    player.set('sect', {
+      current: {
+        sectId: 'songyang',
+        sectName: '嵩阳宗',
+        masterNpcId: 'npc/songyang/master-li',
+        masterName: '李掌门',
+        rank: '内门弟子',
+        contribution: 360,
+        joinedAt: 1700000000000,
+      },
+      restrictions: { bannedSectIds: ['tianlie'], cooldownUntil: null },
+      daily: { dateKey: '2026-02-10', sparCount: 0 },
+    });
+
+    savePlayerData(player, character);
+
+    expect(character.sectData?.current?.sectId).toBe('songyang');
+    expect(character.sectData?.current?.rank).toBe('内门弟子');
+    expect(character.sectData?.current?.contribution).toBe(360);
+    expect(character.sectData?.restrictions.bannedSectIds).toEqual(['tianlie']);
   });
 });

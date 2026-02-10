@@ -15,6 +15,8 @@ import { RoomBase } from '../../game-objects/room-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { MerchantBase } from '../../game-objects/merchant-base';
 import { BaseEntity } from '../../base-entity';
+import { PlayerBase } from '../../game-objects/player-base';
+import { ServiceLocator } from '../../service-locator';
 import { COMMAND_META_KEY } from '../../types/command';
 
 describe('LookCommand', () => {
@@ -22,6 +24,11 @@ describe('LookCommand', () => {
 
   beforeEach(() => {
     cmd = new LookCommand();
+    ServiceLocator.reset();
+  });
+
+  afterEach(() => {
+    ServiceLocator.reset();
   });
 
   it('无参数时显示房间信息', async () => {
@@ -140,6 +147,31 @@ describe('LookCommand', () => {
     expect(result.data.capabilities.shopSell).toBe(false);
     expect(result.data.capabilities.shop).toBe(true);
     expect(result.data.actions).toEqual(['shopList', 'attack', 'close']);
+  });
+
+  it('look 门派 NPC 返回门派动作位', async () => {
+    const room = new RoomBase('songyang/hall');
+    room.set('short', '议事堂');
+
+    const player = new PlayerBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/songyang/master-li#1');
+    npc.set('name', '李掌门');
+    npc.set('short', '李掌门');
+    npc.set('inquiry', { 拜师: '可。' });
+    await npc.moveTo(room, { quiet: true });
+
+    (ServiceLocator as any).sectManager = {
+      getNpcAvailableActions: jest.fn().mockReturnValue(['apprentice', 'betray']),
+    };
+
+    const result = cmd.execute(player, ['李掌门']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.capabilities.chat).toBe(true);
+    expect(result.data.actions).toEqual(['chat', 'attack', 'apprentice', 'betray', 'close']);
   });
 
   it('不在环境中返回错误', () => {

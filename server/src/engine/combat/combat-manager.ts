@@ -34,7 +34,7 @@ import type { RoomBase } from '../game-objects/room-base';
 import { WeaponBase } from '../game-objects/weapon-base';
 import { DamageEngine } from './damage-engine';
 import { sendRoomInfo } from '../../websocket/handlers/room-utils';
-import type { CombatInstance, CombatParticipant } from './types';
+import type { CombatInstance, CombatMode, CombatParticipant } from './types';
 import type { SkillManager } from '../skills/skill-manager';
 import type { SkillAction } from '../skills/types';
 import type { WeaponSkillBase } from '../skills/martial/weapon/weapon-skill-base';
@@ -73,10 +73,16 @@ export class CombatManager implements OnModuleInit {
    * 发起战斗
    * @param attacker 攻击方（通常为玩家）
    * @param defender 防御方（通常为 NPC）
+   * @param options 战斗选项（普通/演武模式）
    * @returns combatId
    */
-  startCombat(attacker: LivingBase, defender: LivingBase): string {
+  startCombat(
+    attacker: LivingBase,
+    defender: LivingBase,
+    options?: { mode?: CombatMode },
+  ): string {
     const combatId = `combat_${Date.now()}_${++combatCounter}`;
+    const mode: CombatMode = options?.mode ?? 'normal';
 
     // 判断谁是 player 谁是 enemy
     const isAttackerPlayer = attacker instanceof PlayerBase;
@@ -109,6 +115,7 @@ export class CombatManager implements OnModuleInit {
       startTime: Date.now(),
       player,
       enemy,
+      mode,
     };
 
     this.combats.set(combatId, combat);
@@ -129,17 +136,17 @@ export class CombatManager implements OnModuleInit {
     };
     this.sendToPlayer(player, 'combatStart', startData);
 
-    this.logger.log(`战斗开始: ${player.getName()} vs ${enemy.getName()} (${combatId})`);
+    this.logger.log(`战斗开始[${mode}]: ${player.getName()} vs ${enemy.getName()} (${combatId})`);
 
     return combatId;
   }
 
   /**
    * 发起演武战斗
-   * 当前先复用普通战斗入口，后续在模式结算中区分演武规则。
+   * 演武模式下不会触发死亡、掉落和击杀奖励。
    */
   startSparCombat(attacker: LivingBase, defender: LivingBase): string {
-    return this.startCombat(attacker, defender);
+    return this.startCombat(attacker, defender, { mode: 'spar' });
   }
 
   /**
@@ -155,16 +162,30 @@ export class CombatManager implements OnModuleInit {
 
     // 生成结束消息
     let message: string;
-    switch (reason) {
-      case 'victory':
-        message = `你击败了[npc]${enemy.getName()}[/npc]！`;
-        break;
-      case 'defeat':
-        message = `你被[npc]${enemy.getName()}[/npc]击败了...`;
-        break;
-      case 'flee':
-        message = '你逃离了战斗。';
-        break;
+    if (combat.mode === 'spar') {
+      switch (reason) {
+        case 'victory':
+          message = `你在演武中胜过了[npc]${enemy.getName()}[/npc]。`;
+          break;
+        case 'defeat':
+          message = `你在演武中败给了[npc]${enemy.getName()}[/npc]。`;
+          break;
+        case 'flee':
+          message = '你中止了演武。';
+          break;
+      }
+    } else {
+      switch (reason) {
+        case 'victory':
+          message = `你击败了[npc]${enemy.getName()}[/npc]！`;
+          break;
+        case 'defeat':
+          message = `你被[npc]${enemy.getName()}[/npc]击败了...`;
+          break;
+        case 'flee':
+          message = '你逃离了战斗。';
+          break;
+      }
     }
 
     // 推送 combatEnd
@@ -174,22 +195,36 @@ export class CombatManager implements OnModuleInit {
     // 清理战斗状态（同步，确保后续 tick 不再处理此战斗）
     this.cleanupCombat(combat);
 
-    // 玩家胜利后：经验奖励 + 任务进度
+    // 玩家胜利后：普通战斗发放击杀奖励，演武发放门派贡献
     if (reason === 'victory' && player instanceof PlayerBase && enemy instanceof NpcBase) {
-      this.handleVictoryRewards(player, enemy);
-    }
-
-    // 玩家战败后：复活 + 传送广场 + 推送房间信息
-    if (reason === 'defeat' && player instanceof PlayerBase) {
-      await player.revive();
-      const room = player.getEnvironment() as RoomBase | null;
-      if (room) {
-        sendRoomInfo(player, room, ServiceLocator.blueprintFactory);
-        room.broadcast(`${player.getName()}在此处苏醒了。`, player);
+      if (combat.mode === 'spar') {
+        // 演武不应残留“濒死”状态，避免被立即补刀触发掉落链路
+        enemy.set('hp', enemy.getMaxHp());
+        if (ServiceLocator.sectManager) {
+          ServiceLocator.sectManager.onSparFinished(player, enemy, true);
+        }
+      } else {
+        this.handleVictoryRewards(player, enemy);
       }
     }
 
-    this.logger.log(`战斗结束: ${player.getName()} vs ${enemy.getName()} (${reason})`);
+    // 玩家战败后：普通战斗执行复活传送，演武只结算贡献不触发死亡流程
+    if (reason === 'defeat' && player instanceof PlayerBase) {
+      if (combat.mode === 'spar') {
+        if (ServiceLocator.sectManager) {
+          ServiceLocator.sectManager.onSparFinished(player, enemy, false);
+        }
+      } else {
+        await player.revive();
+        const room = player.getEnvironment() as RoomBase | null;
+        if (room) {
+          sendRoomInfo(player, room, ServiceLocator.blueprintFactory);
+          room.broadcast(`${player.getName()}在此处苏醒了。`, player);
+        }
+      }
+    }
+
+    this.logger.log(`战斗结束[${combat.mode}]: ${player.getName()} vs ${enemy.getName()} (${reason})`);
   }
 
   /** 查询实体是否在战斗中 */
@@ -337,22 +372,18 @@ export class CombatManager implements OnModuleInit {
         participant.gauge -= MAX_GAUGE;
 
         const result = DamageEngine.calculate(participant.entity, participant.target);
-
-        if (result.damage > 0) {
-          participant.target.receiveDamage(result.damage);
-        }
+        const damageResult = this.applyDamage(combat, participant.target, result.damage);
 
         actions.push({
           attacker: participant.side,
           type: result.type as CombatAction['type'],
-          damage: result.damage,
+          damage: damageResult.appliedDamage,
           isCrit: result.isCrit,
           description: result.description,
         });
 
         // 检查目标死亡
-        const targetHp = participant.target.get<number>('hp') ?? 0;
-        if (targetHp <= 0) {
+        if (damageResult.defeated) {
           const reason: CombatEndReason = participant.side === 'player' ? 'victory' : 'defeat';
           // 先发送最后一次 update（含致命一击）
           this.sendCombatUpdate(combat, actions);
@@ -451,17 +482,15 @@ export class CombatManager implements OnModuleInit {
       player.set(cost.resource, Math.max(0, current - cost.amount));
     }
 
-    // 9. 应用伤害
-    if (result.damage > 0) {
-      participant.target.receiveDamage(result.damage);
-    }
+    // 9. 应用伤害（演武模式下做非致死处理）
+    const damageResult = this.applyDamage(combat, participant.target, result.damage);
 
     // 10. 推送战斗日志
     const actions: CombatAction[] = [
       {
         attacker: participant.side,
         type: result.type as CombatAction['type'],
-        damage: result.damage,
+        damage: damageResult.appliedDamage,
         isCrit: result.isCrit,
         description: result.description,
       },
@@ -472,8 +501,7 @@ export class CombatManager implements OnModuleInit {
     participant.gauge = 0;
 
     // 12. 检查目标死亡
-    const targetHp = participant.target.get<number>('hp') ?? 0;
-    if (targetHp <= 0) {
+    if (damageResult.defeated) {
       const reason: CombatEndReason = participant.side === 'player' ? 'victory' : 'defeat';
       this.sendCombatUpdate(combat, actions);
       this.endCombat(combat.id, reason);
@@ -612,24 +640,20 @@ export class CombatManager implements OnModuleInit {
 
     // 执行普通攻击
     const result = DamageEngine.calculate(participant.entity, participant.target);
-
-    if (result.damage > 0) {
-      participant.target.receiveDamage(result.damage);
-    }
+    const damageResult = this.applyDamage(combat, participant.target, result.damage);
 
     const actions: CombatAction[] = [
       {
         attacker: participant.side,
         type: result.type as CombatAction['type'],
-        damage: result.damage,
+        damage: damageResult.appliedDamage,
         isCrit: result.isCrit,
         description: result.description,
       },
     ];
 
     // 检查目标死亡
-    const targetHp = participant.target.get<number>('hp') ?? 0;
-    if (targetHp <= 0) {
+    if (damageResult.defeated) {
       const reason: CombatEndReason = participant.side === 'player' ? 'victory' : 'defeat';
       this.sendCombatUpdate(combat, actions);
       this.endCombat(combat.id, reason);
@@ -726,6 +750,38 @@ export class CombatManager implements OnModuleInit {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * 应用伤害
+   * - 普通战斗：走 receiveDamage，可能触发死亡。
+   * - 演武战斗：非致死，最低保留 1 HP。
+   */
+  private applyDamage(
+    combat: CombatInstance,
+    target: LivingBase,
+    damage: number,
+  ): { appliedDamage: number; defeated: boolean } {
+    const finalDamage = Math.max(0, Math.floor(damage));
+    if (finalDamage <= 0) {
+      return { appliedDamage: 0, defeated: false };
+    }
+
+    if (combat.mode === 'spar') {
+      const currentHp = target.get<number>('hp') ?? 0;
+      const nextHp = currentHp - finalDamage;
+      if (nextHp <= 0) {
+        const appliedDamage = Math.max(0, currentHp - 1);
+        target.set('hp', 1);
+        return { appliedDamage, defeated: true };
+      }
+      target.set('hp', nextHp);
+      return { appliedDamage: finalDamage, defeated: false };
+    }
+
+    target.receiveDamage(finalDamage);
+    const aliveHp = target.get<number>('hp') ?? 0;
+    return { appliedDamage: finalDamage, defeated: aliveHp <= 0 };
   }
 
   // ================================================================
