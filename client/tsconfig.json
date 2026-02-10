@@ -4,6 +4,12 @@
     "types": ["jest"],
     "strict": false
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [
+    "App.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx"
+  ],
   "exclude": ["**/node_modules", "**/Pods"]
 }

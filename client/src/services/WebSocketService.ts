@@ -8,7 +8,7 @@ import type { ServerMessage } from '@packages/core';
 
 class WebSocketService {
   private ws: WebSocket | null = null;
-  private pingInterval: NodeJS.Timeout | null = null;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private listeners = new Map<string, Set<(data: any) => void>>();
   private serverUrl: string = '';

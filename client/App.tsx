@@ -385,6 +385,7 @@ function App(): React.JSX.Element {
         <StatusBar barStyle="dark-content" />
         <NavigationContainer ref={navigationRef}>
           <Stack.Navigator
+            id="root-stack"
             initialRouteName="Login"
             screenOptions={{
               headerShown: false,
