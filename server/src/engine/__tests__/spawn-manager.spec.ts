@@ -18,13 +18,11 @@ describe('SpawnManager', () => {
 
     const room = new RoomBase('room/test');
     const npc = new NpcBase('npc/test/bandit#1');
-    const enableHeartbeatSpy = jest
-      .spyOn(npc, 'enableHeartbeat')
-      .mockImplementation(() => {});
+    const enableHeartbeatSpy = jest.spyOn(npc, 'enableHeartbeat').mockImplementation(() => {});
 
     const objectManager = {
       findAll: jest.fn((predicate: (e: unknown) => boolean) =>
-        [area].filter(entity => predicate(entity)),
+        [area].filter((entity) => predicate(entity)),
       ),
       findById: jest.fn((id: string) => (id === room.id ? room : undefined)),
     };
@@ -48,9 +46,7 @@ describe('SpawnManager', () => {
     jest.useFakeTimers();
 
     const spawnManager = new SpawnManager({} as any, {} as any);
-    const respawnSpy = jest
-      .spyOn(spawnManager, 'respawnNpc')
-      .mockImplementation(() => undefined);
+    const respawnSpy = jest.spyOn(spawnManager, 'respawnNpc').mockImplementation(() => undefined);
 
     spawnManager.scheduleRespawn('npc/test/bandit', 'room/test', 1234);
     jest.advanceTimersByTime(1234);

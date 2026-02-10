@@ -110,7 +110,12 @@ export class NpcBase extends LivingBase {
     }
 
     // 通过 SpawnManager 刷新的 NPC 死亡后自动重生，避免任务怪被长期打空
-    if (spawnBlueprintId && spawnRoomId && ServiceLocator.initialized && ServiceLocator.spawnManager) {
+    if (
+      spawnBlueprintId &&
+      spawnRoomId &&
+      ServiceLocator.initialized &&
+      ServiceLocator.spawnManager
+    ) {
       const delayMs =
         typeof spawnInterval === 'number' && spawnInterval > 0 ? Math.floor(spawnInterval) : 60000;
       ServiceLocator.spawnManager.scheduleRespawn(spawnBlueprintId, spawnRoomId, delayMs);
