@@ -14,4 +14,6 @@ export {
 
 export { type QuestProgress, type PlayerQuestData } from './quest-progress';
 
+export { QuestManager, type NpcQuestBrief } from './quest-manager';
+
 export { ExpManager, type AllocatePointsData } from './exp-manager';

@@ -12,6 +12,7 @@ import type { CommandManager } from './command-manager';
 import type { CommandLoader } from './command-loader';
 import type { CombatManager } from './combat/combat-manager';
 import type { ExpManager } from './quest/exp-manager';
+import type { QuestManager } from './quest/quest-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -32,6 +33,7 @@ export class ServiceLocator {
 
   // Layer 6 经验与任务服务
   static expManager: ExpManager;
+  static questManager: QuestManager;
 
   private static _initialized = false;
 
@@ -46,6 +48,7 @@ export class ServiceLocator {
     commandLoader?: CommandLoader;
     combatManager?: CombatManager;
     expManager?: ExpManager;
+    questManager?: QuestManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -56,6 +59,7 @@ export class ServiceLocator {
     if (providers.commandLoader) this.commandLoader = providers.commandLoader;
     if (providers.combatManager) this.combatManager = providers.combatManager;
     if (providers.expManager) this.expManager = providers.expManager;
+    if (providers.questManager) this.questManager = providers.questManager;
     this._initialized = true;
   }
 
@@ -76,5 +80,6 @@ export class ServiceLocator {
     this.commandLoader = undefined as any;
     this.combatManager = undefined as any;
     this.expManager = undefined as any;
+    this.questManager = undefined as any;
   }
 }
