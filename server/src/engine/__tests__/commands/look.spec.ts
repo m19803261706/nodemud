@@ -114,6 +114,7 @@ describe('LookCommand', () => {
       shopList: false,
       shopSell: false,
       shop: false,
+      quests: [],
     });
     expect(result.data.actions).toEqual(['chat', 'attack', 'close']);
   });

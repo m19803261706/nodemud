@@ -58,8 +58,10 @@ export class GiveCommand implements ICommand {
       return { success: false, message: '你没有这个东西。' };
     }
 
-    // 2. 检查物品是否可交易
-    if (!item.isTradeable()) {
+    // 2. 检查物品是否可给予
+    // 任务物品通常不可交易（tradeable=false），但需要允许用于任务交付
+    const isQuestItem = item.getType() === 'quest';
+    if (!item.isTradeable() && !isQuestItem) {
       return {
         success: false,
         message: `${item.getName()}不能被交易。`,
