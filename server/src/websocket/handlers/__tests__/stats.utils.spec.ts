@@ -133,6 +133,14 @@ describe('stats.utils derivePlayerStats', () => {
     expect(player.get<number>('energy_current')).toBe(300);
     expect(player.get<number>('silver')).toBe(188);
     expect(player.get<any>('quests')).toEqual({ active: {}, completed: [] });
+    expect(player.get<string>('origin')).toBe('wanderer');
+    expect(player.get<number>('fortune')).toBe(3);
+    expect(player.get<string>('wuxingju')).toBe('水二局');
+    expect(player.get<string>('last_room')).toBe('area/rift-town/square');
+
+    const astrolabe = player.get<any>('astrolabeJson');
+    astrolabe.extra = 'runtime-only';
+    expect((character.astrolabeJson as any).extra).toBeUndefined();
   });
 
   it('保存玩家数据时 exp 缺失会回退 combat_exp', () => {

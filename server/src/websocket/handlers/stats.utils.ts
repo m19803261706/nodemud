@@ -44,6 +44,47 @@ function toSafeInt(value: unknown, fallback = 0): number {
   return Math.max(0, Math.floor(value));
 }
 
+/** Character 字段到运行时 dbase 的别名映射 */
+const CHARACTER_TO_DBASE_ALIASES: Record<string, string[]> = {
+  id: ['characterId'],
+  lastRoom: ['last_room'],
+  freePoints: ['free_points'],
+  questData: ['quests'],
+};
+
+/** dbase 赋值克隆，避免 Character 实体对象引用被运行时逻辑污染 */
+function cloneForDbase<T>(value: T): T {
+  if (value == null) return value;
+  if (value instanceof Date) return new Date(value.getTime()) as T;
+  if (Array.isArray(value)) {
+    return value.map((item) => cloneForDbase(item)) as T;
+  }
+  if (typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = cloneForDbase(v);
+    }
+    return out as T;
+  }
+  return value;
+}
+
+/** 将 Character 的全部字段快照写入 player dbase（含别名） */
+function hydrateCharacterSnapshot(player: PlayerBase, character: Character): void {
+  const snapshot = character as unknown as Record<string, unknown>;
+  for (const [key, raw] of Object.entries(snapshot)) {
+    if (raw === undefined) continue;
+    const value = cloneForDbase(raw);
+    player.set(key, value);
+
+    const aliases = CHARACTER_TO_DBASE_ALIASES[key];
+    if (!aliases) continue;
+    for (const alias of aliases) {
+      player.set(alias, cloneForDbase(raw));
+    }
+  }
+}
+
 /** 从 Character 实体 + 玩家装备推导 playerStats 消息数据 */
 export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
@@ -110,17 +151,12 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
  * 登录 / 创建角色进场时必须调用，确保运行时关键字段一次性完整初始化
  */
 export function loadCharacterToPlayer(player: PlayerBase, character: Character): void {
+  // 先做全量快照恢复，避免新增字段遗漏初始化
+  hydrateCharacterSnapshot(player, character);
+
   // 角色标识与展示字段
   player.set('name', character.name);
   player.set('characterId', character.id);
-
-  // 六维属性
-  player.set('wisdom', character.wisdom);
-  player.set('perception', character.perception);
-  player.set('spirit', character.spirit);
-  player.set('meridian', character.meridian);
-  player.set('strength', character.strength);
-  player.set('vitality', character.vitality);
 
   // 等级与经验
   const level = Math.max(1, toSafeInt(character.level, 1));
