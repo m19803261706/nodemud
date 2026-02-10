@@ -56,6 +56,10 @@ export class SkillHandler {
       const player = this.getPlayerFromSession(session);
       if (!player) return;
 
+      // C-6: 输入验证
+      if (!data.combatId || typeof data.combatId !== 'string') return;
+      if (typeof data.actionIndex !== 'number' || data.actionIndex < 0) return;
+
       this.combatManager.executeSkillAction(data.combatId, player, data.actionIndex);
     } catch (error) {
       this.logger.error('handleSkillUse 失败:', error);
@@ -120,10 +124,7 @@ export class SkillHandler {
    * 处理技能面板数据请求
    * 组装完整的面板数据：技能列表、映射、加成汇总、可选的技能详情
    */
-  async handleSkillPanelRequest(
-    session: Session,
-    data: SkillPanelRequestData,
-  ): Promise<void> {
+  async handleSkillPanelRequest(session: Session, data: SkillPanelRequestData): Promise<void> {
     try {
       const player = this.getPlayerFromSession(session);
       if (!player) return;
@@ -172,10 +173,7 @@ export class SkillHandler {
    * 处理 NPC 学艺请求
    * 校验 NPC 和技能，循环执行 times 次技能提升
    */
-  async handleSkillLearnRequest(
-    session: Session,
-    data: SkillLearnRequestData,
-  ): Promise<void> {
+  async handleSkillLearnRequest(session: Session, data: SkillLearnRequestData): Promise<void> {
     try {
       const player = this.getPlayerFromSession(session);
       if (!player) return;
@@ -207,8 +205,14 @@ export class SkillHandler {
         return;
       }
 
+      // C-5: 输入验证
+      if (typeof data.times !== 'number' || !Number.isFinite(data.times)) {
+        player.receiveMessage('无效的学习次数。');
+        return;
+      }
+
       // 限制 times 范围
-      const times = Math.max(1, Math.min(100, data.times));
+      const times = Math.max(1, Math.min(100, Math.floor(data.times)));
 
       // 检查是否已学会，未学会则先学习
       const existingSkill = skillManager.getAllSkills().find((s) => s.skillId === data.skillId);
@@ -294,8 +298,10 @@ export class SkillHandler {
 
         timesCompleted++;
 
-        // 如果提升失败（门槛不满足等），提前结束
-        // canImprove 在下一次循环 improveSkill 内部检查
+        // W-5: 如果技能已满级或无法继续提升，提前结束避免浪费资源
+        if (!improved && timesCompleted > 1) {
+          break;
+        }
       }
 
       // 获取最终技能数据
@@ -382,9 +388,7 @@ export class SkillHandler {
     const room = player.getEnvironment() as RoomBase | null;
     if (!room) return undefined;
 
-    return room
-      .getInventory()
-      .find((e): e is NpcBase => e instanceof NpcBase && e.id === npcId) as
+    return room.getInventory().find((e): e is NpcBase => e instanceof NpcBase && e.id === npcId) as
       | NpcBase
       | undefined;
   }

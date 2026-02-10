@@ -120,9 +120,7 @@ export class SkillManager {
       }
     }
 
-    this.logger.debug(
-      `玩家 ${this.player.getName()} 加载 ${this.skills.size} 个技能`,
-    );
+    this.logger.debug(`玩家 ${this.player.getName()} 加载 ${this.skills.size} 个技能`);
   }
 
   // ================================================================
@@ -195,9 +193,7 @@ export class SkillManager {
       this.player.sendToClient(MessageFactory.serialize(msg));
     }
 
-    this.logger.debug(
-      `玩家 ${this.player.getName()} 学习技能: ${skillDef.skillName}(${skillId})`,
-    );
+    this.logger.debug(`玩家 ${this.player.getName()} 学习技能: ${skillDef.skillName}(${skillId})`);
 
     return true;
   }
@@ -282,6 +278,7 @@ export class SkillManager {
     data.dirty = true;
 
     // 检查升级: learned >= (level + 1)^2
+    // 升级时清零 learned（方块沉淀公式）
     const oldLevel = data.level;
     let didLevelUp = false;
 
@@ -289,6 +286,7 @@ export class SkillManager {
       const threshold = Math.pow(data.level + 1, 2);
       if (data.learned < threshold) break;
 
+      data.learned = 0; // 升级后清零修炼经验
       data.level++;
       didLevelUp = true;
 
@@ -298,11 +296,15 @@ export class SkillManager {
 
     // 推送 skillUpdate 消息
     if (didLevelUp) {
-      this.sendSkillUpdate(skillId, {
-        level: data.level,
-        learned: data.learned,
-        learnedMax: Math.pow(data.level + 1, 2),
-      }, SkillUpdateReason.LEVEL_UP);
+      this.sendSkillUpdate(
+        skillId,
+        {
+          level: data.level,
+          learned: data.learned,
+          learnedMax: Math.pow(data.level + 1, 2),
+        },
+        SkillUpdateReason.LEVEL_UP,
+      );
 
       this.logger.debug(
         `玩家 ${this.player.getName()} 技能 ${skillDef.skillName} 升级: ${oldLevel} -> ${data.level}`,
@@ -396,20 +398,30 @@ export class SkillManager {
           oldForceData.isActiveForce = false;
           oldForceData.dirty = true;
         }
+        // W-2: 切换内功时清零内力（防止新旧内功上限不同导致溢出）
+        this.player.set('mp', 0);
       }
       data.isActiveForce = true;
       this.activeForce = skillId;
 
-      this.sendSkillUpdate(skillId, {
-        isMapped: true,
-        mappedSlot: slotType,
-        isActiveForce: true,
-      }, SkillUpdateReason.FORCE_ACTIVATED);
+      this.sendSkillUpdate(
+        skillId,
+        {
+          isMapped: true,
+          mappedSlot: slotType,
+          isActiveForce: true,
+        },
+        SkillUpdateReason.FORCE_ACTIVATED,
+      );
     } else {
-      this.sendSkillUpdate(skillId, {
-        isMapped: true,
-        mappedSlot: slotType,
-      }, SkillUpdateReason.MAPPED);
+      this.sendSkillUpdate(
+        skillId,
+        {
+          isMapped: true,
+          mappedSlot: slotType,
+        },
+        SkillUpdateReason.MAPPED,
+      );
     }
 
     this.logger.debug(
@@ -444,10 +456,14 @@ export class SkillManager {
 
     this.skillMap.delete(slotType);
 
-    this.sendSkillUpdate(skillId, {
-      isMapped: false,
-      mappedSlot: null,
-    }, SkillUpdateReason.UNMAPPED);
+    this.sendSkillUpdate(
+      skillId,
+      {
+        isMapped: false,
+        mappedSlot: null,
+      },
+      SkillUpdateReason.UNMAPPED,
+    );
 
     return true;
   }
@@ -471,15 +487,22 @@ export class SkillManager {
       if (!skillDef) continue;
 
       const oldLevel = data.level;
-      const newLevel = skillDef.onDeathPenalty(this.player, data.level);
 
-      if (newLevel !== oldLevel) {
-        data.level = newLevel;
+      // learned 保护机制: 若 learned > (level+1)^2 / 2 则不扣 level，只清 learned
+      const protectionThreshold = Math.pow(oldLevel + 1, 2) / 2;
+      if (data.learned > protectionThreshold) {
+        // 保护触发: 不降级，只清零 learned
+        data.learned = 0;
         data.dirty = true;
-
-        // learned 保护: 如果 learned >= (newLevel+1)^2，保留 learned
-        // 否则不做调整（已有的 learned 自然低于新的门槛）
         changedSkills.push(skillId);
+      } else {
+        // 正常降级
+        const newLevel = skillDef.onDeathPenalty(this.player, data.level);
+        if (newLevel !== oldLevel) {
+          data.level = newLevel;
+          data.dirty = true;
+          changedSkills.push(skillId);
+        }
       }
     }
 
@@ -501,19 +524,21 @@ export class SkillManager {
     for (const skillId of changedSkills) {
       const data = this.skills.get(skillId);
       if (data) {
-        this.sendSkillUpdate(skillId, {
-          level: data.level,
-          learned: data.learned,
-          learnedMax: Math.pow(data.level + 1, 2),
-          isMapped: false,
-          mappedSlot: null,
-        }, SkillUpdateReason.DEATH_PENALTY);
+        this.sendSkillUpdate(
+          skillId,
+          {
+            level: data.level,
+            learned: data.learned,
+            learnedMax: Math.pow(data.level + 1, 2),
+            isMapped: false,
+            mappedSlot: null,
+          },
+          SkillUpdateReason.DEATH_PENALTY,
+        );
       }
     }
 
-    this.logger.debug(
-      `玩家 ${this.player.getName()} 死亡惩罚: ${changedSkills.length} 个技能降级`,
-    );
+    this.logger.debug(`玩家 ${this.player.getName()} 死亡惩罚: ${changedSkills.length} 个技能降级`);
   }
 
   // ================================================================
@@ -631,9 +656,7 @@ export class SkillManager {
       const forceDef = this.skillRegistry.get(this.activeForce);
       if (forceData && forceDef && this.isInternalSkill(forceDef)) {
         const internal = forceDef as InternalSkillBase;
-        const forceActions = internal.actions.filter(
-          (action) => action.lvl <= forceData.level,
-        );
+        const forceActions = internal.actions.filter((action) => action.lvl <= forceData.level);
 
         for (const action of forceActions) {
           actions.push({
@@ -657,9 +680,7 @@ export class SkillManager {
   /**
    * 将 ResourceCost 转换为 ResourceCostInfo（附带当前值）
    */
-  private mapResourceCosts(
-    costs: import('./types').ResourceCost[],
-  ): ResourceCostInfo[] {
+  private mapResourceCosts(costs: import('./types').ResourceCost[]): ResourceCostInfo[] {
     return costs.map((cost) => ({
       resource: cost.resource,
       amount: cost.amount,
@@ -670,9 +691,7 @@ export class SkillManager {
   /**
    * 检查是否满足资源消耗条件
    */
-  private checkResourceCosts(
-    costs: import('./types').ResourceCost[],
-  ): boolean {
+  private checkResourceCosts(costs: import('./types').ResourceCost[]): boolean {
     for (const cost of costs) {
       const current = this.player.get<number>(cost.resource) ?? 0;
       if (current < cost.amount) return false;
@@ -710,9 +729,7 @@ export class SkillManager {
 
     if (updates.length > 0) {
       await this.skillService.updateMany(updates);
-      this.logger.debug(
-        `玩家 ${this.player.getName()} 保存 ${updates.length} 个技能`,
-      );
+      this.logger.debug(`玩家 ${this.player.getName()} 保存 ${updates.length} 个技能`);
     }
   }
 
@@ -784,14 +801,17 @@ export class SkillManager {
   /**
    * 战斗使用技能 -- 领悟判定
    * 每次战斗中使用技能有概率获得修炼经验
+   * 公式: random(COMBAT_INSIGHT_RANGE) < skillLevel
+   * 即技能等级越高，领悟概率越大
    */
   onCombatSkillUse(skillId: string): void {
     const data = this.skills.get(skillId);
     if (!data) return;
 
-    // 领悟判定: 随机数 < COMBAT_INSIGHT_RANGE 时触发
-    const roll = Math.floor(Math.random() * 1000);
-    if (roll < SKILL_CONSTANTS.COMBAT_INSIGHT_RANGE) {
+    // 领悟判定: random(0..COMBAT_INSIGHT_RANGE-1) < 技能等级
+    // 等级 >= COMBAT_INSIGHT_RANGE(120) 时必定触发
+    const roll = Math.floor(Math.random() * SKILL_CONSTANTS.COMBAT_INSIGHT_RANGE);
+    if (roll < data.level) {
       // 战斗领悟获得少量经验（weakMode，不应用悟性加成）
       this.improveSkill(skillId, 1, true);
     }
@@ -869,13 +889,18 @@ export class SkillManager {
    * 检查技能定义是否为武学类（具有 getAvailableActions 方法）
    */
   private isMartialSkill(skillDef: SkillBase): skillDef is MartialSkillBase {
-    return 'getAvailableActions' in skillDef && typeof (skillDef as any).getAvailableActions === 'function';
+    return (
+      'getAvailableActions' in skillDef &&
+      typeof (skillDef as any).getAvailableActions === 'function'
+    );
   }
 
   /**
    * 检查技能定义是否为内功类（具有 getAttributeBonus 方法）
    */
   private isInternalSkill(skillDef: SkillBase): skillDef is InternalSkillBase {
-    return 'getAttributeBonus' in skillDef && typeof (skillDef as any).getAttributeBonus === 'function';
+    return (
+      'getAttributeBonus' in skillDef && typeof (skillDef as any).getAttributeBonus === 'function'
+    );
   }
 }

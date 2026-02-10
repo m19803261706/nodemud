@@ -16,6 +16,7 @@ import type { ExpManager } from './quest/exp-manager';
 import type { QuestManager } from './quest/quest-manager';
 import type { SkillService } from '../skill/skill.service';
 import type { SkillRegistry } from './skills/skill-registry';
+import type { PracticeManager } from './skills/practice-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -44,6 +45,7 @@ export class ServiceLocator {
   // Layer 7 技能服务
   static skillService: SkillService;
   static skillRegistry: SkillRegistry;
+  static practiceManager: PracticeManager;
 
   private static _initialized = false;
 
@@ -62,6 +64,7 @@ export class ServiceLocator {
     questManager?: QuestManager;
     skillService?: SkillService;
     skillRegistry?: SkillRegistry;
+    practiceManager?: PracticeManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -76,6 +79,7 @@ export class ServiceLocator {
     if (providers.questManager) this.questManager = providers.questManager;
     if (providers.skillService) this.skillService = providers.skillService;
     if (providers.skillRegistry) this.skillRegistry = providers.skillRegistry;
+    if (providers.practiceManager) this.practiceManager = providers.practiceManager;
     this._initialized = true;
   }
 
@@ -100,5 +104,6 @@ export class ServiceLocator {
     this.questManager = undefined as any;
     this.skillService = undefined as any;
     this.skillRegistry = undefined as any;
+    this.practiceManager = undefined as any;
   }
 }

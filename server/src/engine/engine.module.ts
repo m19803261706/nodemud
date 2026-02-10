@@ -90,6 +90,7 @@ export class EngineModule implements OnModuleInit {
       questManager: this.questManager,
       skillService: this.skillService,
       skillRegistry: this.skillRegistry,
+      practiceManager: this.practiceManager,
     });
     // 设置 PracticeManager 的技能注册表引用
     this.practiceManager.setSkillRegistry(this.skillRegistry);

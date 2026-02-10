@@ -139,7 +139,7 @@ export const useSkillStore = create<SkillState>((set, get) => ({
         category: data.category,
         level: 0,
         learned: 0,
-        learnedMax: 100,
+        learnedMax: 1, // (0+1)^2 = 1
         isMapped: false,
         mappedSlot: null,
         isActiveForce: false,
@@ -153,14 +153,18 @@ export const useSkillStore = create<SkillState>((set, get) => ({
     set(state => {
       // 更新完整映射表
       const skillMap = { ...data.updatedMap };
-      // 同步更新技能列表中对应技能的映射状态
+      // 找出 updatedMap 中所有已映射的技能 ID
+      const mappedSkillIds = new Set(Object.values(skillMap));
+      // 同步更新技能列表中所有技能的映射状态
       const skills = state.skills.map(s => {
-        if (s.skillId === data.skillId) {
-          return {
-            ...s,
-            isMapped: data.skillId !== null,
-            mappedSlot: data.skillId !== null ? data.slotType : null,
-          };
+        if (mappedSkillIds.has(s.skillId)) {
+          // 该技能在映射表中，找到对应的槽位
+          const slot = Object.entries(skillMap).find(([, id]) => id === s.skillId);
+          return { ...s, isMapped: true, mappedSlot: slot ? slot[0] : null };
+        }
+        // 该技能不在映射表中，如果之前是映射的则清除
+        if (s.isMapped) {
+          return { ...s, isMapped: false, mappedSlot: null };
         }
         return s;
       });

@@ -110,6 +110,15 @@ export class GameGateway
       try {
         const player = this.objectManager.findById(session.playerId) as PlayerBase | undefined;
         if (player) {
+          // 断线时停止修炼：清除 PracticeManager 定时器
+          if (ServiceLocator.practiceManager) {
+            try {
+              ServiceLocator.practiceManager.stopPractice(player);
+            } catch (practiceError) {
+              this.logger.error('断线修炼清理失败:', practiceError);
+            }
+          }
+
           // 断线时清理战斗：如果玩家正在战斗中，以逃跑方式结束
           if (ServiceLocator.combatManager) {
             const combatId = ServiceLocator.combatManager.getCombatId(player as any);
