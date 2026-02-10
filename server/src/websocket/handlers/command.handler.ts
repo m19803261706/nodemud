@@ -4,7 +4,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { MessageFactory } from '@packages/core';
+import { MessageFactory, type SkillMapResultData, type SkillSlotType } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { CharacterService } from '../../character/character.service';
@@ -270,6 +270,25 @@ export class CommandHandler {
               }
             }
           }
+        }
+      }
+    }
+
+    // enable/disable 命令成功后：推送 skillMapResult 同步前端技能面板
+    if (result.success && (result.data?.action === 'enable' || result.data?.action === 'disable')) {
+      const skillManager = player.skillManager;
+      if (skillManager) {
+        const responseData: SkillMapResultData = {
+          success: true,
+          slotType: result.data.slotType as SkillSlotType,
+          skillId: result.data.skillId ?? null,
+          skillName: result.data.skillName ?? null,
+          message: result.message ?? '',
+          updatedMap: skillManager.getSkillMap(),
+        };
+        const msg = MessageFactory.create('skillMapResult', responseData);
+        if (msg) {
+          player.sendToClient(MessageFactory.serialize(msg));
         }
       }
     }
