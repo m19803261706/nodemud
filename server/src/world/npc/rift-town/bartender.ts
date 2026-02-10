@@ -3,7 +3,14 @@
  * 消息灵通的酒馆老板，什么人都见过
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
-import { Factions } from '@packages/core';
+import { Factions, rt } from '@packages/core';
+import type { LivingBase } from '../../../engine/game-objects/living-base';
+import type { ItemBase } from '../../../engine/game-objects/item-base';
+import {
+  type QuestDefinition,
+  ObjectiveType,
+  QuestType,
+} from '../../../engine/quest/quest-definition';
 
 export default class Bartender extends NpcBase {
   static virtual = false;
@@ -39,5 +46,60 @@ export default class Bartender extends NpcBase {
       旅人: '酒保朝角落里努了努嘴：「那个人？来了有段日子了，整天闷坐着喝酒，也不跟人说话。我看他身手不凡，你最好别去招惹。」',
       default: '酒保不置可否地摇了摇头：「这种事我可不清楚，你去问问广场上的老镇长。」',
     });
+
+    const questDefs: QuestDefinition[] = [
+      {
+        id: 'rift-town-novice-003',
+        name: '酒肆旧账',
+        description: '酒保请你备两份干粮，给北道巡夜的弟兄垫肚子。',
+        type: QuestType.COLLECT,
+        giverNpc: 'npc/rift-town/bartender',
+        turnInNpc: 'npc/rift-town/bartender',
+        prerequisites: { completedQuests: ['rift-town-novice-002'] },
+        objectives: [
+          {
+            type: ObjectiveType.COLLECT,
+            targetId: 'item/rift-town/dry-rations',
+            count: 2,
+            description: '在背包中备齐 2 份「干粮」',
+          },
+        ],
+        rewards: {
+          exp: 220,
+          silver: 35,
+          potential: 28,
+          score: 12,
+        },
+        flavorText: {
+          onAccept:
+            `${rt('npc', '酒保')}把一枚铜板推到你面前：「北道守夜的弟兄穷，` +
+            `你去杂货铺置两份干粮。江湖讲义气，不只在刀上，也在饭上。」`,
+          onReady:
+            `${rt('sys', '干粮已经备齐。去断崖酒馆找酒保交付任务。')}`,
+          onComplete:
+            `${rt('npc', '酒保')}收起账本，声音仍旧平：「今天你给别人一口饭，` +
+            `明天真落难，也会有人给你留盏灯。」`,
+        },
+      },
+    ];
+    this.set('quests', questDefs);
+  }
+
+  /**
+   * 接收物品钩子 — 只接药师的安神药囊
+   */
+  onReceiveItem(_giver: LivingBase, item: ItemBase): { accept: boolean; message?: string } {
+    const blueprintId = item.id.split('#')[0];
+    if (blueprintId === 'item/quest/herbal-sachet') {
+      return {
+        accept: true,
+        message:
+          '酒保把药囊系在腰间，长出一口气：「她还是记着这点旧病。替我谢谢药师。」',
+      };
+    }
+    return {
+      accept: false,
+      message: '酒保摆摆手：「这东西我用不上，你留着吧。」',
+    };
   }
 }

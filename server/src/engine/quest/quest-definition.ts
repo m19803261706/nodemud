@@ -71,6 +71,16 @@ export interface QuestRewards {
   items?: { blueprintId: string; count: number }[];
 }
 
+/** 任务文案（用于日志沉浸感） */
+export interface QuestFlavorText {
+  /** 接受任务时显示 */
+  onAccept?: string;
+  /** 目标全部达成、可交付时显示 */
+  onReady?: string;
+  /** 完成任务时显示 */
+  onComplete?: string;
+}
+
 /** 任务定义（蓝图级） */
 export interface QuestDefinition {
   /** 任务唯一 ID */
@@ -93,4 +103,6 @@ export interface QuestDefinition {
   rewards: QuestRewards;
   /** 接受任务时给予的物品 */
   giveItems?: { blueprintId: string; count: number }[];
+  /** 任务关键节点文案 */
+  flavorText?: QuestFlavorText;
 }

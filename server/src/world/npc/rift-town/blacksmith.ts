@@ -3,7 +3,7 @@
  * 承天朝退役军匠，手艺精湛
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
-import { Factions } from '@packages/core';
+import { Factions, rt } from '@packages/core';
 import {
   type QuestDefinition,
   QuestType,
@@ -52,12 +52,12 @@ export default class Blacksmith extends NpcBase {
       { blueprintId: 'item/rift-town/smith-hammer', position: 'weapon' },
     ]);
 
-    // 任务定义：药师的来信（deliver 类型）
+    // 新手主线任务 1：炉火急信（deliver）
     const questDefs: QuestDefinition[] = [
       {
-        id: 'rift-town-001',
-        name: '药师的来信',
-        description: '老周铁匠有一封重要的信需要送到白发药师手中。',
+        id: 'rift-town-novice-001',
+        name: '炉火急信',
+        description: '老周铁匠托你把密封信件送到药铺，务必亲手交给白发药师。',
         type: QuestType.DELIVER,
         giverNpc: 'npc/rift-town/blacksmith',
         turnInNpc: 'npc/rift-town/herbalist',
@@ -66,11 +66,28 @@ export default class Blacksmith extends NpcBase {
             type: ObjectiveType.DELIVER,
             targetId: 'item/quest/blacksmith-letter',
             count: 1,
-            description: '将铁匠的信交给白发药师',
+            description: '将「铁匠的信」交给白发药师',
           },
         ],
-        rewards: { exp: 100, score: 5 },
+        rewards: {
+          exp: 140,
+          silver: 20,
+          potential: 15,
+          score: 8,
+          items: [{ blueprintId: 'item/rift-town/golden-salve', count: 1 }],
+        },
         giveItems: [{ blueprintId: 'item/quest/blacksmith-letter', count: 1 }],
+        flavorText: {
+          onAccept:
+            `${rt('npc', '老周铁匠')}把油纸信往你怀里一塞：「跑快点，` +
+            `药铺那位刀子嘴豆腐心，别让她久等。」`,
+          onReady:
+            `${rt('npc', '白发药师')}已经收下了信。` +
+            `${rt('sys', '你可以当面交付任务。')}`,
+          onComplete:
+            `${rt('npc', '白发药师')}低声道：「炉火能炼铁，也能炼人心。` +
+            `你脚下这条路，先把该做的小事做好，江湖才会给你大门。」`,
+        },
       },
     ];
     this.set('quests', questDefs);

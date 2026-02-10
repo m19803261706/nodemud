@@ -3,7 +3,7 @@
  * 裂隙镇的管理者，德高望重的老人，了解镇上的一切
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
-import { Factions } from '@packages/core';
+import { Factions, rt } from '@packages/core';
 import {
   type QuestDefinition,
   QuestType,
@@ -46,28 +46,42 @@ export default class TownElder extends NpcBase {
       default: '老镇长笑了笑：「老朽年纪大了，记性不好啦。你四处走走问问别人吧。」',
     });
 
-    // 任务定义：裂谷盗匪（capture 类型）
+    // 新手主线终章：裂谷北道清剿
     const questDefs: QuestDefinition[] = [
       {
-        id: 'rift-town-002',
-        name: '裂谷盗匪',
-        description: '镇长希望你能清除盘踞在裂谷北道的盗匪。',
+        id: 'rift-town-novice-004',
+        name: '北道试锋',
+        description: '老镇长请你清剿北道盗匪，让来往商旅敢走夜路。',
         type: QuestType.CAPTURE,
         giverNpc: 'npc/rift-town/town-elder',
-        prerequisites: { completedQuests: ['rift-town-001'] },
+        prerequisites: { completedQuests: ['rift-town-novice-003'] },
         objectives: [
           {
             type: ObjectiveType.KILL,
             targetId: 'npc/rift-town/bandit',
-            count: 1,
-            description: '击杀裂谷北道的盗匪',
+            count: 2,
+            description: '击杀裂谷北道盗匪 2 名',
           },
         ],
         rewards: {
-          exp: 200,
-          potential: 50,
-          score: 10,
-          items: [{ blueprintId: 'item/rift-town/short-knife', count: 1 }],
+          exp: 320,
+          silver: 46,
+          potential: 55,
+          score: 20,
+          items: [
+            { blueprintId: 'item/rift-town/short-knife', count: 1 },
+            { blueprintId: 'item/rift-town/golden-salve', count: 1 },
+          ],
+        },
+        flavorText: {
+          onAccept:
+            `${rt('npc', '老镇长')}拄杖望北，声音不高却有力：` +
+            '「侠字不在嘴上，在脚下。去北道走一遭，把那几股匪患压下去。」',
+          onReady:
+            `${rt('sys', '北道盗匪已被震慑，回镇中广场向老镇长复命。')}`,
+          onComplete:
+            `${rt('npc', '老镇长')}轻叹道：「江湖从不缺刀，缺的是肯替旁人挡刀的人。` +
+            `记住今日这口气，往后路越远，心越要稳。」`,
         },
       },
     ];

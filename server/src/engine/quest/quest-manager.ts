@@ -13,6 +13,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   MessageFactory,
+  rt,
   type QuestUpdateData,
   type ActiveQuestInfo,
   type CompletedQuestInfo,
@@ -237,7 +238,7 @@ export class QuestManager {
 
     return {
       success: true,
-      message: `你接受了任务：${def.name}`,
+      message: this.buildAcceptMessage(def),
     };
   }
 
@@ -355,7 +356,7 @@ export class QuestManager {
 
     return {
       success: true,
-      message: `任务完成！获得${rewardText}`,
+      message: this.buildCompleteMessage(def, rewardText),
     };
   }
 
@@ -382,6 +383,7 @@ export class QuestManager {
 
       const def = this.definitions.get(questId);
       if (!def) continue;
+      let questChanged = false;
 
       for (let i = 0; i < def.objectives.length; i++) {
         const obj = def.objectives[i];
@@ -389,14 +391,18 @@ export class QuestManager {
           const current = progress.objectives[i] ?? 0;
           if (current < obj.count) {
             progress.objectives[i] = current + 1;
-            changed = true;
+            questChanged = true;
           }
         }
       }
 
       // 检查是否全部目标完成
-      if (changed) {
-        this.checkQuestCompletion(def, progress);
+      if (questChanged) {
+        changed = true;
+        const becameReady = this.checkQuestCompletion(def, progress);
+        if (becameReady) {
+          this.notifyQuestReady(player, def);
+        }
       }
     }
 
@@ -426,6 +432,7 @@ export class QuestManager {
 
       const def = this.definitions.get(questId);
       if (!def) continue;
+      let questChanged = false;
 
       // deliver 目标：targetId 匹配物品蓝图 ID，且交付给正确的 NPC
       const turnInNpc = def.turnInNpc ?? def.giverNpc;
@@ -437,14 +444,18 @@ export class QuestManager {
           const current = progress.objectives[i] ?? 0;
           if (current < obj.count) {
             progress.objectives[i] = current + 1;
-            changed = true;
+            questChanged = true;
           }
         }
       }
 
       // 检查是否全部目标完成
-      if (changed) {
-        this.checkQuestCompletion(def, progress);
+      if (questChanged) {
+        changed = true;
+        const becameReady = this.checkQuestCompletion(def, progress);
+        if (becameReady) {
+          this.notifyQuestReady(player, def);
+        }
       }
     }
 
@@ -483,6 +494,7 @@ export class QuestManager {
 
       const def = this.definitions.get(questId);
       if (!def) continue;
+      let questChanged = false;
 
       for (let i = 0; i < def.objectives.length; i++) {
         const obj = def.objectives[i];
@@ -492,12 +504,16 @@ export class QuestManager {
         const oldCount = progress.objectives[i] ?? 0;
         if (count !== oldCount) {
           progress.objectives[i] = Math.min(count, obj.count);
-          changed = true;
+          questChanged = true;
         }
       }
 
-      if (changed) {
-        this.checkQuestCompletion(def, progress);
+      if (questChanged) {
+        changed = true;
+        const becameReady = this.checkQuestCompletion(def, progress);
+        if (becameReady) {
+          this.notifyQuestReady(player, def);
+        }
       }
     }
 
@@ -589,9 +605,9 @@ export class QuestManager {
     return item.id.split('#')[0];
   }
 
-  /** 检查任务是否所有目标都已完成，如果是则切换状态到 READY */
-  private checkQuestCompletion(def: QuestDefinition, progress: QuestProgress): void {
-    if (progress.status !== QuestStatus.ACTIVE) return;
+  /** 检查任务是否所有目标都已完成，如果是则切换状态到 READY 并返回 true */
+  private checkQuestCompletion(def: QuestDefinition, progress: QuestProgress): boolean {
+    if (progress.status !== QuestStatus.ACTIVE) return false;
 
     const allComplete = def.objectives.every((obj, i) => {
       const current = progress.objectives[i] ?? 0;
@@ -600,7 +616,10 @@ export class QuestManager {
 
     if (allComplete) {
       progress.status = QuestStatus.READY;
+      return true;
     }
+
+    return false;
   }
 
   /**
@@ -621,16 +640,46 @@ export class QuestManager {
       if (obj.type !== ObjectiveType.COLLECT) continue;
 
       const count = this.countPlayerItems(player, obj.targetId);
-      if (count > 0) {
-        progress.objectives[i] = Math.min(count, obj.count);
+      const oldCount = progress.objectives[i] ?? 0;
+      const nextCount = Math.min(count, obj.count);
+      if (nextCount !== oldCount) {
+        progress.objectives[i] = nextCount;
         changed = true;
       }
     }
 
     if (changed) {
-      this.checkQuestCompletion(def, progress);
+      const becameReady = this.checkQuestCompletion(def, progress);
+      if (becameReady) {
+        this.notifyQuestReady(player, def);
+      }
       this.savePlayerQuestData(player, questData);
     }
+  }
+
+  /** 构建任务接受日志（支持富文本文案） */
+  private buildAcceptMessage(def: QuestDefinition): string {
+    return [def.flavorText?.onAccept, rt('sys', `你接受了任务：${def.name}`)]
+      .filter((line): line is string => !!line && line.trim().length > 0)
+      .join('\n');
+  }
+
+  /** 构建任务完成日志（支持富文本文案） */
+  private buildCompleteMessage(def: QuestDefinition, rewardText: string): string {
+    return [
+      def.flavorText?.onComplete,
+      rt('sys', `任务完成：${def.name}`),
+      rt('sys', `你获得了${rewardText}`),
+    ]
+      .filter((line): line is string => !!line && line.trim().length > 0)
+      .join('\n');
+  }
+
+  /** 任务达成可交付时推送提示文案 */
+  private notifyQuestReady(player: PlayerBase, def: QuestDefinition): void {
+    const readyMessage =
+      def.flavorText?.onReady ?? rt('sys', `任务「${def.name}」目标已达成，可前往交付。`);
+    player.receiveMessage(readyMessage);
   }
 
   /** 统计玩家背包中指定蓝图 ID 物品的数量 */

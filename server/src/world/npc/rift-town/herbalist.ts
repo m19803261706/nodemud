@@ -1,12 +1,17 @@
 /**
  * 白发药师 — 裂隙镇药铺
  * 百蛮退隐高手，隐居裂隙镇开药铺
- * 作为 rift-town-001 任务的交付 NPC，接受任务物品
+ * 新手任务链节点：交付铁匠来信，并继续发布药囊跑腿任务
  */
-import { Factions } from '@packages/core';
+import { Factions, rt } from '@packages/core';
 import { MerchantBase } from '../../../engine/game-objects/merchant-base';
 import type { LivingBase } from '../../../engine/game-objects/living-base';
 import type { ItemBase } from '../../../engine/game-objects/item-base';
+import {
+  type QuestDefinition,
+  ObjectiveType,
+  QuestType,
+} from '../../../engine/quest/quest-definition';
 
 export default class Herbalist extends MerchantBase {
   static virtual = false;
@@ -64,13 +69,53 @@ export default class Herbalist extends MerchantBase {
       minPrice: 1,
       rejectionMessage: '白发药师淡淡道：「老身只收药品与可入药之物，其它拿走。」',
     });
+
+    const questDefs: QuestDefinition[] = [
+      {
+        id: 'rift-town-novice-002',
+        name: '药香入夜',
+        description: '白发药师托你把安神药囊送去断崖酒馆，交到酒保手里。',
+        type: QuestType.DELIVER,
+        giverNpc: 'npc/rift-town/herbalist',
+        turnInNpc: 'npc/rift-town/bartender',
+        prerequisites: { completedQuests: ['rift-town-novice-001'] },
+        objectives: [
+          {
+            type: ObjectiveType.DELIVER,
+            targetId: 'item/quest/herbal-sachet',
+            count: 1,
+            description: '将「安神药囊」交给断崖酒馆酒保',
+          },
+        ],
+        rewards: {
+          exp: 180,
+          silver: 26,
+          potential: 22,
+          score: 10,
+          items: [{ blueprintId: 'item/rift-town/golden-salve', count: 1 }],
+        },
+        giveItems: [{ blueprintId: 'item/quest/herbal-sachet', count: 1 }],
+        flavorText: {
+          onAccept:
+            `${rt('npc', '白发药师')}将药囊系紧递来：「酒保夜里难眠，` +
+            `替老身送去。记住，救人的药，贵在到手及时。」`,
+          onReady:
+            `${rt('npc', '酒保')}已收下药囊。${rt('sys', '你可以当面交付任务。')}`,
+          onComplete:
+            `${rt('npc', '酒保')}把药囊压在掌心，低声道：` +
+            '「人在江湖，总以为硬扛就是本事。可懂得求助，反倒是另一种骨气。」',
+        },
+      },
+    ];
+    this.set('quests', questDefs);
   }
 
   /**
-   * 接收物品钩子 — 接受任务物品（type=quest），拒绝其余
+   * 接收物品钩子 — 只接受铁匠来信，避免误收其他任务道具导致卡任务
    */
   onReceiveItem(_giver: LivingBase, item: ItemBase): { accept: boolean; message?: string } {
-    if (item.getType() === 'quest') {
+    const blueprintId = item.id.split('#')[0];
+    if (blueprintId === 'item/quest/blacksmith-letter') {
       return {
         accept: true,
         message: '白发药师接过信，微微颔首：「嗯，老周的信……老身知道了。多谢你跑这一趟。」',
