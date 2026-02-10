@@ -95,9 +95,9 @@ export class CommandHandler {
         const moved = await player.go(direction);
         this.logger.log(`移动结果: moved=${moved}`);
         if (moved) {
-          // 旧房间广播（移动后 player 已不在旧房间，不需要 exclude）
+          // 旧房间广播（稳妥起见显式排除自己，避免边界场景下自收旁观消息）
           if (oldRoom) {
-            oldRoom.broadcast(`${playerName}向${getDirectionCN(direction)}离去。`);
+            oldRoom.broadcast(`${playerName}向${getDirectionCN(direction)}离去。`, player);
           }
 
           // 新房间广播到达
