@@ -232,6 +232,8 @@ export interface GameState {
   // 任务
   quests: QuestState;
   setQuests: (quests: QuestState) => void;
+  questModalVisible: boolean;
+  setQuestModalVisible: (visible: boolean) => void;
 
   // 指令
   sendCommand: (input: string) => void;
@@ -425,6 +427,8 @@ export const useGameStore = create<GameState>(set => ({
   // 任务
   quests: { active: [], completed: [] },
   setQuests: quests => set({ quests }),
+  questModalVisible: false,
+  setQuestModalVisible: visible => set({ questModalVisible: visible }),
 
   // 指令
   sendCommand: (input: string) => {
