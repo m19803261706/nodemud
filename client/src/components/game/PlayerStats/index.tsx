@@ -1,6 +1,6 @@
 /**
  * 玩家状态栏 — 顶部区域
- * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 6 六维属性 + 攻防行 + 渐变分隔线
+ * 包含：名称徽章 + 3 进度条（气血/内力/精力） + 关键信息行 + 渐变分隔线
  */
 
 import React from 'react';
@@ -9,31 +9,7 @@ import { useGameStore } from '../../../stores/useGameStore';
 import type { ResourceValue } from '../../../stores/useGameStore';
 import { StatBar, GradientDivider } from '../shared';
 import { PlayerNameBadge } from './PlayerNameBadge';
-import { AttrValue } from './AttrValue';
 import { CombatValue } from './CombatValue';
-
-/** 六维属性标签映射 */
-const ATTR_LABELS: {
-  key: keyof ReturnType<typeof useGameStore.getState>['player']['attrs'];
-  label: string;
-}[] = [
-  { key: 'wisdom', label: '慧根' },
-  { key: 'perception', label: '心眼' },
-  { key: 'spirit', label: '气海' },
-  { key: 'meridian', label: '脉络' },
-  { key: 'strength', label: '筋骨' },
-  { key: 'vitality', label: '血气' },
-];
-
-/** 六维属性 key → equipBonus.attrs key 映射 */
-const ATTR_BONUS_KEY: Record<string, string> = {
-  wisdom: 'wisdom',
-  perception: 'perception',
-  spirit: 'spirit',
-  meridian: 'meridian',
-  strength: 'strength',
-  vitality: 'vitality',
-};
 
 /** 资源值 → StatBar 百分比 */
 function resourcePct(res: ResourceValue): number {
@@ -84,26 +60,7 @@ export const PlayerStats = () => {
         />
       </View>
 
-      {/* 第二行：六维属性数值 */}
-      <View style={s.attrRow}>
-        {ATTR_LABELS.map(({ key, label }) => {
-          const bonusKey = ATTR_BONUS_KEY[key];
-          const bonus =
-            (player.equipBonus?.attrs as Record<string, number> | undefined)?.[
-              bonusKey
-            ] ?? 0;
-          return (
-            <AttrValue
-              key={key}
-              label={label}
-              value={player.attrs[key]}
-              bonus={bonus}
-            />
-          );
-        })}
-      </View>
-
-      {/* 第三行：银两 + 攻防数值 */}
+      {/* 第二行：银两 + 攻防数值 */}
       {showMeta && (
         <View style={s.combatRow}>
           <CombatValue label="银两" value={player.silver} />
@@ -131,10 +88,6 @@ const s = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     gap: 8,
-  },
-  attrRow: {
-    flexDirection: 'row',
-    gap: 4,
   },
   combatRow: {
     flexDirection: 'row',
