@@ -4,7 +4,9 @@
 
 import React from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import { MessageFactory } from '@packages/core';
 import { useGameStore } from '../../../stores/useGameStore';
+import { wsService } from '../../../services/WebSocketService';
 import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
 import { ItemCard } from './ItemCard';
@@ -60,6 +62,18 @@ export const NpcList = () => {
         }}
         onGive={(itemName, npcName) => {
           sendCommand(`give ${itemName} to ${npcName}`);
+        }}
+        onQuestAccept={(questId, npcId) => {
+          wsService.send(
+            MessageFactory.create('questAccept', { questId, npcId }),
+          );
+          setNpcDetail(null);
+        }}
+        onQuestComplete={(questId, npcId) => {
+          wsService.send(
+            MessageFactory.create('questComplete', { questId, npcId }),
+          );
+          setNpcDetail(null);
         }}
       />
     </View>

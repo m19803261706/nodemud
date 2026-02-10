@@ -18,6 +18,7 @@ import LinearGradient from '../../LinearGradient';
 import type { NpcDetailData } from '../../../stores/useGameStore';
 import type { InventoryItem } from '@packages/core';
 import { HpBar } from '../shared';
+import { QuestSection } from './QuestSection';
 
 /** 装备槽位 → 叙述动词（MUD 风格） */
 const POSITION_VERB: Record<string, string> = {
@@ -72,6 +73,8 @@ interface NpcInfoModalProps {
   onSell: (itemName: string, npcName: string) => void;
   onAttack: (npcName: string) => void;
   onGive: (itemName: string, npcName: string) => void;
+  onQuestAccept: (questId: string, npcId: string) => void;
+  onQuestComplete: (questId: string, npcId: string) => void;
 }
 
 interface NpcActionButton {
@@ -134,6 +137,8 @@ export const NpcInfoModal = ({
   onSell,
   onAttack,
   onGive,
+  onQuestAccept,
+  onQuestComplete,
 }: NpcInfoModalProps) => {
   const [actionListMode, setActionListMode] = useState<'give' | 'sell' | null>(
     null,
@@ -156,18 +161,25 @@ export const NpcInfoModal = ({
     ? `「${detail.title}」${detail.name}`
     : detail.name;
   const isSelectingItem = actionListMode !== null;
-  const selectingTitle = actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
+  const selectingTitle =
+    actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
   const actionSet = new Set(detail.actions ?? []);
   const hasActions = actionSet.size > 0;
-  const canChat = hasActions ? actionSet.has('chat') : detail.capabilities?.chat ?? true;
+  const canChat = hasActions
+    ? actionSet.has('chat')
+    : (detail.capabilities?.chat ?? true);
   const canShopList = hasActions
     ? actionSet.has('shopList')
-    : detail.capabilities?.shopList ?? detail.capabilities?.shop ?? false;
+    : (detail.capabilities?.shopList ?? detail.capabilities?.shop ?? false);
   const canShopSell = hasActions
     ? actionSet.has('shopSell')
-    : detail.capabilities?.shopSell ?? detail.capabilities?.shop ?? false;
-  const canGive = hasActions ? actionSet.has('give') : detail.capabilities?.give ?? true;
-  const canAttack = hasActions ? actionSet.has('attack') : detail.capabilities?.attack ?? true;
+    : (detail.capabilities?.shopSell ?? detail.capabilities?.shop ?? false);
+  const canGive = hasActions
+    ? actionSet.has('give')
+    : (detail.capabilities?.give ?? true);
+  const canAttack = hasActions
+    ? actionSet.has('attack')
+    : (detail.capabilities?.attack ?? true);
 
   const actionButtons: NpcActionButton[] = [];
 
@@ -329,12 +341,30 @@ export const NpcInfoModal = ({
                   </View>
                 ) : null}
 
+                {/* 任务区域 */}
+                {detail.capabilities?.quests &&
+                  detail.capabilities.quests.length > 0 && (
+                    <View>
+                      <QuestSection
+                        quests={detail.capabilities.quests}
+                        npcId={detail.npcId}
+                        npcName={detail.name}
+                        onAccept={onQuestAccept}
+                        onComplete={onQuestComplete}
+                      />
+                      <Divider />
+                    </View>
+                  )}
+
                 <Divider />
 
                 {/* 按钮（按 NPC 能力动态渲染） */}
                 <View style={s.buttonGrid}>
                   {actionRows.map((row, rowIndex) => (
-                    <View style={s.buttonRow} key={`npc-action-row-${rowIndex}`}>
+                    <View
+                      style={s.buttonRow}
+                      key={`npc-action-row-${rowIndex}`}
+                    >
                       {row.map(button => (
                         <ActionButton
                           key={button.key}

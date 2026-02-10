@@ -39,6 +39,11 @@ export const NpcCard = ({ npc, onPress }: NpcCardProps) => {
       style={[s.card, { borderColor: mainColor + '40' }]}
       onPress={onPress}
     >
+      {/* 任务角标 */}
+      {npc.hasQuestReady && <Text style={s.questBadgeReady}>!</Text>}
+      {npc.hasQuest && !npc.hasQuestReady && (
+        <Text style={s.questBadge}>?</Text>
+      )}
       <View style={s.top}>
         <Text style={[s.name, { color: mainColor }]}>{displayName}</Text>
         <Text style={[s.gender, { color: genderColor }]}>{genderIcon}</Text>
@@ -87,5 +92,25 @@ const s = StyleSheet.create({
     fontSize: 9,
     color: '#6B5D4D',
     fontFamily: 'Noto Sans SC',
+  },
+  questBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 4,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#8B7A5A',
+    fontFamily: 'Noto Sans SC',
+    zIndex: 1,
+  },
+  questBadgeReady: {
+    position: 'absolute',
+    top: 2,
+    right: 4,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#D4A017',
+    fontFamily: 'Noto Sans SC',
+    zIndex: 1,
   },
 });
