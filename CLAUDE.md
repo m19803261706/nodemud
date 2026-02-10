@@ -273,8 +273,6 @@ packages/core/
 - **新增游戏 UI 时**：在 `components/game/` 下创建目录 → 定义 Props → index.tsx 订阅 store → 拆分子组件
 - **状态变更统一走 Zustand store** — 组件不直接调用 WebSocketService，通过 store action 发送
 - **功能规划参考炎黄 MUD** — 在进行 `/cx-scope` 或 `/cx-prd` 规划时，主动参考本地 `参考mud代码/mud/` 目录下的炎黄 MUD 源码（LPC 语言），阅读其对应功能模块的实现和架构（如商店系统看 `feature/vendor.c`，战斗系统看 `feature/attack.c` 等），了解传统 MUD 的成熟方案，作为探讨和设计的参考依据
-- **Codex 使用 CX 工作流** — 统一使用项目内 `.claude/cx/CODEX-WORKFLOW.md`，不要依赖用户级命令目录
-- **开发者隔离** — 当前开发者为 `lude`，工作流状态与文档使用 `.claude/cx/users/lude/` 作为唯一目录
 - **任务/剧情文案必须匹配 NPC 人设** — 语气、立场、用词需符合 NPC 身份与势力背景，禁止所有 NPC 使用同一种“系统口吻”
 - **富文本文案规范** — 对玩家可见的关键文案（任务接取、推进、完成、重要提示）优先使用 `rt()` 语义标签（如 `npc/item/sys/imp/rd`），在保证可读性的前提下灵活使用，不做无意义堆叠
 - **沉浸式文案规范** — 在不偏离剧情目标的前提下，可适度加入符合角色经历的“江湖感悟”与人生金句，但必须服务于当前情境，避免空泛鸡汤与 AI 套话
