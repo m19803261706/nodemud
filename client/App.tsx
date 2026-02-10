@@ -95,6 +95,8 @@ function App(): React.JSX.Element {
             goods: payload.goods,
           });
         }
+        // 货单已由弹窗展示，不再写入日志
+        return;
       }
       // buy 成功结果 → 同步更新当前货单库存
       if (data.success && data.data?.action === 'buy') {

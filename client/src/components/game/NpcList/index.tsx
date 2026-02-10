@@ -84,6 +84,7 @@ export const NpcList = () => {
         onClose={() => setShopListDetail(null)}
         onBuy={(selector, merchantName) => {
           sendCommand(`buy ${selector} from ${merchantName}`);
+          setShopListDetail(null);
         }}
       />
     </View>
