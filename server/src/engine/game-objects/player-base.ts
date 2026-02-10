@@ -3,10 +3,18 @@
  *
  * 所有玩家对象的基类，继承 LivingBase。
  * 绑定 WebSocket Session，提供消息发送、连接管理、权限等能力。
+ * 持有 SkillManager 实例，负责技能生命周期（加载、死亡惩罚、保存）。
  *
  * 对标: LPC user.c / 炎黄 USER
  */
-import { QUALITY_MULTIPLIER, mergeBonus, type EquipmentBonus } from '@packages/core';
+import {
+  QUALITY_MULTIPLIER,
+  mergeBonus,
+  MessageFactory,
+  type EquipmentBonus,
+  type SkillBonusSummary,
+} from '@packages/core';
+import { Logger } from '@nestjs/common';
 import { LivingBase } from './living-base';
 import { RemainsBase } from './remains-base';
 import { RoomBase } from './room-base';
@@ -15,6 +23,7 @@ import { Permission } from '../types/command';
 import { ArmorBase } from './armor-base';
 import { WeaponBase } from './weapon-base';
 import { GameEvents } from '../types/events';
+import { SkillManager } from '../skills/skill-manager';
 
 /** 复活地点 */
 const REVIVE_ROOM = 'area/rift-town/square';
@@ -23,8 +32,13 @@ export class PlayerBase extends LivingBase {
   /** 玩家可克隆（非虚拟对象） */
   static virtual = false;
 
+  private readonly logger = new Logger(PlayerBase.name);
+
   /** WebSocket 发送回调 */
   private _sendCallback: ((data: any) => void) | null = null;
+
+  /** 技能管理器（登录进场后初始化） */
+  public skillManager: SkillManager | null = null;
 
   constructor(id: string) {
     super(id);
@@ -73,6 +87,81 @@ export class PlayerBase extends LivingBase {
     return this.get<number>('permission') ?? Permission.PLAYER;
   }
 
+  // ========== 技能系统集成 ==========
+
+  /**
+   * 初始化技能管理器
+   * 在角色进入游戏时调用，从数据库加载技能并推送 skillList 给客户端
+   * @param characterId 角色 ID
+   */
+  async initSkillManager(characterId: string): Promise<void> {
+    if (!ServiceLocator.skillService || !ServiceLocator.skillRegistry) {
+      this.logger.warn('技能服务未初始化，跳过 SkillManager 加载');
+      return;
+    }
+
+    this.skillManager = new SkillManager(
+      this,
+      ServiceLocator.skillService,
+      ServiceLocator.skillRegistry,
+    );
+
+    // 从数据库加载技能数据
+    await this.skillManager.loadFromDatabase(characterId);
+
+    // 向客户端推送完整技能列表
+    const listData = this.skillManager.buildSkillListData();
+    const msg = MessageFactory.create('skillList', listData);
+    if (msg) {
+      this.sendToClient(MessageFactory.serialize(msg));
+    }
+  }
+
+  /**
+   * 保存技能数据到数据库
+   * 在断线/退出时调用
+   */
+  async saveSkills(): Promise<void> {
+    if (!this.skillManager) return;
+    try {
+      await this.skillManager.saveToDatabase();
+    } catch (err) {
+      this.logger.error('保存技能数据失败:', err);
+    }
+  }
+
+  // ========== 技能查询覆写（委托给 SkillManager） ==========
+
+  /** 获取指定技能的等级（覆写 LivingBase） */
+  getSkillLevel(skillId: string): number {
+    return this.skillManager?.getSkillLevel(skillId) ?? 0;
+  }
+
+  /** 获取指定槽位的有效技能等级（覆写 LivingBase） */
+  getEffectiveLevel(slotType: string): number {
+    return this.skillManager?.getEffectiveLevel(slotType as any) ?? 0;
+  }
+
+  /**
+   * 获取技能属性加成汇总
+   * 如果 skillManager 未初始化，返回全零加成
+   */
+  getSkillBonusSummary(): SkillBonusSummary {
+    if (!this.skillManager) {
+      return {
+        attack: 0,
+        defense: 0,
+        dodge: 0,
+        parry: 0,
+        maxHp: 0,
+        maxMp: 0,
+        critRate: 0,
+        hitRate: 0,
+      };
+    }
+    return this.skillManager.getSkillBonusSummary();
+  }
+
   // ========== 装备加成（仅玩家需要） ==========
 
   /** 汇总所有装备属性加成（含品质系数） */
@@ -110,31 +199,38 @@ export class PlayerBase extends LivingBase {
   // ========== 战斗属性覆写（含装备加成） ==========
 
   /**
-   * 攻击力 = strength*2 + 装备攻击加成
+   * 攻击力 = strength*2 + 装备攻击加成 + 技能攻击加成
    * 玩家的 strength 存储在 dbase 'strength' 中（由角色创建时写入）
    */
   getAttack(): number {
     const base = super.getAttack();
-    const bonus = this.getEquipmentBonus();
-    return base + (bonus.combat?.attack || 0);
+    const equipBonus = this.getEquipmentBonus();
+    const skillBonus = this.getSkillBonusSummary();
+    return base + (equipBonus.combat?.attack || 0) + skillBonus.attack;
   }
 
   /**
-   * 防御力 = vitality*1.5 + 装备防御加成
+   * 防御力 = vitality*1.5 + 装备防御加成 + 技能防御加成
    */
   getDefense(): number {
     const base = super.getDefense();
-    const bonus = this.getEquipmentBonus();
-    return base + (bonus.combat?.defense || 0);
+    const equipBonus = this.getEquipmentBonus();
+    const skillBonus = this.getSkillBonusSummary();
+    return base + (equipBonus.combat?.defense || 0) + skillBonus.defense;
   }
 
   /**
-   * 玩家死亡：标记死亡状态 + 创建空残骸
+   * 玩家死亡：标记死亡状态 + 创建空残骸 + 技能死亡惩罚
    * 不立即复活 — 由 CombatManager.endCombat() 在战斗结束后调用 revive()
    */
   die(): void {
     super.die();
     const env = this.getEnvironment();
+
+    // 技能死亡惩罚（SkillManager 内部会推送 skillUpdate 消息）
+    if (this.skillManager) {
+      this.skillManager.applyDeathPenalty();
+    }
 
     // 创建空残骸（不转移物品，后续版本再定）
     const remainsId = ServiceLocator.objectManager.nextInstanceId('remains');

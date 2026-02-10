@@ -17,8 +17,12 @@ import { SpawnManager } from './spawn-manager';
 import { CombatManager } from './combat/combat-manager';
 import { ExpManager } from './quest/exp-manager';
 import { QuestManager } from './quest/quest-manager';
+import { SkillRegistry } from './skills/skill-registry';
+import { SkillModule } from '../skill/skill.module';
+import { SkillService } from '../skill/skill.service';
 
 @Module({
+  imports: [SkillModule],
   providers: [
     HeartbeatManager,
     ObjectManager,
@@ -31,6 +35,7 @@ import { QuestManager } from './quest/quest-manager';
     CombatManager,
     ExpManager,
     QuestManager,
+    SkillRegistry,
   ],
   exports: [
     HeartbeatManager,
@@ -44,6 +49,7 @@ import { QuestManager } from './quest/quest-manager';
     CombatManager,
     ExpManager,
     QuestManager,
+    SkillRegistry,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -61,6 +67,8 @@ export class EngineModule implements OnModuleInit {
     private readonly combatManager: CombatManager,
     private readonly expManager: ExpManager,
     private readonly questManager: QuestManager,
+    private readonly skillRegistry: SkillRegistry,
+    private readonly skillService: SkillService,
   ) {}
 
   async onModuleInit() {
@@ -76,6 +84,8 @@ export class EngineModule implements OnModuleInit {
       combatManager: this.combatManager,
       expManager: this.expManager,
       questManager: this.questManager,
+      skillService: this.skillService,
+      skillRegistry: this.skillRegistry,
     });
     this.objectManager.startGC();
 

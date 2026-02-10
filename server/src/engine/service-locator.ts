@@ -14,6 +14,8 @@ import type { SpawnManager } from './spawn-manager';
 import type { CombatManager } from './combat/combat-manager';
 import type { ExpManager } from './quest/exp-manager';
 import type { QuestManager } from './quest/quest-manager';
+import type { SkillService } from '../skill/skill.service';
+import type { SkillRegistry } from './skills/skill-registry';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -39,6 +41,10 @@ export class ServiceLocator {
   static expManager: ExpManager;
   static questManager: QuestManager;
 
+  // Layer 7 技能服务
+  static skillService: SkillService;
+  static skillRegistry: SkillRegistry;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -54,6 +60,8 @@ export class ServiceLocator {
     combatManager?: CombatManager;
     expManager?: ExpManager;
     questManager?: QuestManager;
+    skillService?: SkillService;
+    skillRegistry?: SkillRegistry;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -66,6 +74,8 @@ export class ServiceLocator {
     if (providers.combatManager) this.combatManager = providers.combatManager;
     if (providers.expManager) this.expManager = providers.expManager;
     if (providers.questManager) this.questManager = providers.questManager;
+    if (providers.skillService) this.skillService = providers.skillService;
+    if (providers.skillRegistry) this.skillRegistry = providers.skillRegistry;
     this._initialized = true;
   }
 
@@ -88,5 +98,7 @@ export class ServiceLocator {
     this.combatManager = undefined as any;
     this.expManager = undefined as any;
     this.questManager = undefined as any;
+    this.skillService = undefined as any;
+    this.skillRegistry = undefined as any;
   }
 }

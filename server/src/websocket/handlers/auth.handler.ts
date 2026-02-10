@@ -91,6 +91,13 @@ export class AuthHandler {
             } else {
               this.logger.warn(`房间 ${roomId} 和默认房间都不存在`);
             }
+
+            // 初始化技能管理器（从数据库加载技能并推送 skillList）
+            try {
+              await player.initSkillManager(character.id);
+            } catch (skillError) {
+              this.logger.error('初始化技能管理器失败:', skillError);
+            }
           }
         } catch (enterError) {
           this.logger.error('登录进场失败:', enterError);

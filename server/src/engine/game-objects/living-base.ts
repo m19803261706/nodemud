@@ -255,4 +255,28 @@ export class LivingBase extends BaseEntity {
   getCombatState(): string {
     return this.getTemp<string>('combat/state') || 'idle';
   }
+
+  // ========== 技能查询接口（默认实现，PlayerBase 覆写） ==========
+
+  /**
+   * 获取指定技能的等级
+   * 默认返回 0（NPC 不需要完整 SkillManager）
+   * PlayerBase 覆写此方法，委托给 SkillManager
+   * @param skillId 技能 ID
+   * @returns 技能等级，未学习返回 0
+   */
+  getSkillLevel(skillId: string): number {
+    return 0;
+  }
+
+  /**
+   * 获取指定槽位的有效技能等级
+   * 默认返回 0（NPC 不需要完整 SkillManager）
+   * PlayerBase 覆写此方法，委托给 SkillManager
+   * @param slotType 槽位类型（如 'force', 'dodge', 'parry' 等）
+   * @returns 该槽位映射技能的等级，未映射返回 0
+   */
+  getEffectiveLevel(slotType: string): number {
+    return 0;
+  }
 }

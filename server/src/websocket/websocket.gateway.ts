@@ -141,6 +141,13 @@ export class GameGateway
             }
           }
 
+          // 保存技能数据
+          try {
+            await player.saveSkills();
+          } catch (skillError) {
+            this.logger.error('保存技能数据失败:', skillError);
+          }
+
           // 房间广播下线
           if (room) {
             room.broadcast(`${player.getName()}下线了。`, player);
