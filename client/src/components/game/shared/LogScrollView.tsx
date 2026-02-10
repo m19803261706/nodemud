@@ -7,7 +7,7 @@
  * - 自适应行高（长文本自动换行）
  */
 
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import {
   View,
   FlatList,
@@ -22,7 +22,7 @@ import { useGameStore, type LogEntry } from '../../../stores/useGameStore';
 import { RichText } from '../../RichText';
 
 /** 底部判定容差 */
-const BOTTOM_THRESHOLD = 50;
+const BOTTOM_THRESHOLD = 90;
 
 interface LogScrollViewProps {
   style?: ViewStyle;
@@ -43,40 +43,66 @@ export const LogScrollView = ({
 }: LogScrollViewProps) => {
   const gameLog = useGameStore(state => state.gameLog);
   const flatListRef = useRef<FlatList<LogEntry>>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const isAtBottomRef = useRef(true);
+  const lastLogCountRef = useRef(gameLog.length);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+
+  /** 将是否贴底状态写入 ref，避免异步 state 误判 */
+  const setBottomState = useCallback((atBottom: boolean) => {
+    isAtBottomRef.current = atBottom;
+    if (atBottom) {
+      setHasNewMessage(false);
+    }
+  }, []);
+
+  /** 安排滚动到底部（双帧，等待多行文本完成布局） */
+  const scheduleScrollToEnd = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToEnd({ animated });
+      });
+    });
+  }, []);
 
   /** 滚动事件 — 判断是否在底部 */
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-      const atBottom =
-        contentOffset.y + layoutMeasurement.height >=
-        contentSize.height - BOTTOM_THRESHOLD;
-      setIsAtBottom(atBottom);
-      if (atBottom) setHasNewMessage(false);
+      const distanceFromBottom =
+        contentSize.height - (contentOffset.y + layoutMeasurement.height);
+      const atBottom = distanceFromBottom <= BOTTOM_THRESHOLD;
+      setBottomState(atBottom);
     },
-    [],
+    [setBottomState],
   );
 
-  /** 内容变化时：在底部则自动滚动，不在底部则显示浮标 */
+  /** 内容高度变化：贴底时继续跟随到底部 */
   const handleContentSizeChange = useCallback(() => {
-    if (isAtBottom) {
-      // 延迟滚动：等待多行文本完成布局再滚动，避免滚动位置不足
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 80);
+    if (isAtBottomRef.current) {
+      scheduleScrollToEnd(true);
+    }
+  }, [scheduleScrollToEnd]);
+
+  /** 兜底：日志条数变化时，按贴底状态决定自动滚动或显示新消息 */
+  useEffect(() => {
+    const prevCount = lastLogCountRef.current;
+    if (gameLog.length === prevCount) return;
+    const appended = gameLog.length > prevCount;
+    lastLogCountRef.current = gameLog.length;
+
+    if (!appended) return;
+    if (isAtBottomRef.current) {
+      scheduleScrollToEnd(true);
     } else {
       setHasNewMessage(true);
     }
-  }, [isAtBottom]);
+  }, [gameLog.length, scheduleScrollToEnd]);
 
   /** 点击浮标 → 滚动到底部 */
   const scrollToBottom = useCallback(() => {
-    flatListRef.current?.scrollToEnd({ animated: true });
-    setIsAtBottom(true);
-    setHasNewMessage(false);
-  }, []);
+    setBottomState(true);
+    scheduleScrollToEnd(true);
+  }, [scheduleScrollToEnd, setBottomState]);
 
   const keyExtractor = useCallback((item: LogEntry) => String(item.id), []);
 
@@ -89,6 +115,11 @@ export const LogScrollView = ({
         keyExtractor={keyExtractor}
         onScroll={handleScroll}
         onContentSizeChange={handleContentSizeChange}
+        onLayout={() => {
+          if (isAtBottomRef.current) {
+            scheduleScrollToEnd(false);
+          }
+        }}
         scrollEventThrottle={100}
         initialNumToRender={20}
         maxToRenderPerBatch={10}
