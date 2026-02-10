@@ -547,7 +547,9 @@ export const useGameStore = create<GameState>(set => ({
             : null,
           log: [...state.combat.log, ...data.actions],
           // 仅在玩家本轮行动已结算时清理等待状态，避免心跳空包误清
-          awaitingAction: resolvedPlayerAction ? false : state.combat.awaitingAction,
+          awaitingAction: resolvedPlayerAction
+            ? false
+            : state.combat.awaitingAction,
           availableActions: resolvedPlayerAction
             ? []
             : state.combat.availableActions,
