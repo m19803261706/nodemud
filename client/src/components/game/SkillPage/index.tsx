@@ -167,10 +167,7 @@ export const SkillPage = () => {
 
         {/* 分类 Tab */}
         <View style={s.tabsWrap}>
-          <SkillCategoryTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <SkillCategoryTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </View>
 
         {/* 技能列表 */}

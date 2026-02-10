@@ -45,7 +45,9 @@ export const SkillDetailModal = ({
   /** 装配/卸下操作 */
   const handleEquipToggle = () => {
     if (!currentSkill) return;
-    const cmd = isMapped ? `disable ${currentSkill.skillName}` : `enable ${currentSkill.skillName}`;
+    const cmd = isMapped
+      ? `disable ${currentSkill.skillName}`
+      : `enable ${currentSkill.skillName}`;
     sendCommand(cmd);
   };
 
@@ -126,11 +128,19 @@ export const SkillDetailModal = ({
                 {currentSkill && !currentSkill.isLocked ? (
                   <View style={s.equipRow}>
                     <TouchableOpacity
-                      style={[s.equipBtn, isMapped ? s.equipBtnUnmap : undefined]}
+                      style={[
+                        s.equipBtn,
+                        isMapped ? s.equipBtnUnmap : undefined,
+                      ]}
                       onPress={handleEquipToggle}
                       activeOpacity={0.7}
                     >
-                      <Text style={[s.equipBtnText, isMapped ? s.equipBtnTextUnmap : undefined]}>
+                      <Text
+                        style={[
+                          s.equipBtnText,
+                          isMapped ? s.equipBtnTextUnmap : undefined,
+                        ]}
+                      >
                         {isMapped ? '卸下技能' : '装配技能'}
                       </Text>
                     </TouchableOpacity>

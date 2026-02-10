@@ -45,7 +45,13 @@ export const GameHomeScreen = ({ route: _route }: any) => {
         {isInventory || isCharacter || isSkill ? (
           /* 全屏功能页：替换 LocationHeader + mainContent */
           <View style={s.fullContent}>
-            {isInventory ? <InventoryPage /> : isCharacter ? <CharacterPage /> : <SkillPage />}
+            {isInventory ? (
+              <InventoryPage />
+            ) : isCharacter ? (
+              <CharacterPage />
+            ) : (
+              <SkillPage />
+            )}
           </View>
         ) : (
           /* 默认左右分栏布局 — 用 View 包裹避免 Fragment 导致 Fabric 视图回收崩溃 */

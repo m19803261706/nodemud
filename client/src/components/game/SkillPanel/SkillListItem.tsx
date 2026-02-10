@@ -15,7 +15,11 @@ interface SkillListItemProps {
   onEquipToggle?: (skill: PlayerSkillInfo) => void;
 }
 
-export const SkillListItem = ({ skill, onPress, onEquipToggle }: SkillListItemProps) => {
+export const SkillListItem = ({
+  skill,
+  onPress,
+  onEquipToggle,
+}: SkillListItemProps) => {
   /** 经验进度百分比 */
   const expPct =
     skill.learnedMax > 0
@@ -57,7 +61,12 @@ export const SkillListItem = ({ skill, onPress, onEquipToggle }: SkillListItemPr
             activeOpacity={0.7}
             hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
-            <Text style={[s.equipBtnText, skill.isMapped ? s.equipBtnTextActive : undefined]}>
+            <Text
+              style={[
+                s.equipBtnText,
+                skill.isMapped ? s.equipBtnTextActive : undefined,
+              ]}
+            >
               {skill.isMapped ? '卸下' : '装配'}
             </Text>
           </TouchableOpacity>
