@@ -1,5 +1,6 @@
 import { PlayerBase } from '../../../engine/game-objects/player-base';
 import type { Character } from '../../../character/character.entity';
+import { PuzzleStepState } from '../../../engine/sect/types';
 import { derivePlayerStats, loadCharacterToPlayer, savePlayerData } from '../stats.utils';
 
 function makeCharacter(partial?: Partial<Character>): Character {
@@ -195,6 +196,22 @@ describe('stats.utils derivePlayerStats', () => {
         },
         restrictions: { bannedSectIds: ['yunyue'], cooldownUntil: null },
         daily: { dateKey: '2026-02-10', sparCount: 1 },
+        songyangSkill: {
+          puzzle: {
+            canjuCollected: 3,
+            canjuState: PuzzleStepState.COMPLETED,
+            duanjuState: PuzzleStepState.COMPLETED,
+            shiyanState: PuzzleStepState.IN_PROGRESS,
+          },
+          challenges: {
+            chiefDiscipleWin: true,
+            sparStreakWin: false,
+            masterApproval: false,
+          },
+          legacy: {
+            canonCrippled: false,
+          },
+        },
       },
     });
 
@@ -205,6 +222,9 @@ describe('stats.utils derivePlayerStats', () => {
     expect(sect.current.contribution).toBe(120);
     expect(sect.restrictions.bannedSectIds).toEqual(['yunyue']);
     expect(sect.daily.sparCount).toBe(1);
+    expect(sect.songyangSkill.puzzle.canjuCollected).toBe(3);
+    expect(sect.songyangSkill.puzzle.shiyanState).toBe(PuzzleStepState.IN_PROGRESS);
+    expect(sect.songyangSkill.challenges.chiefDiscipleWin).toBe(true);
   });
 
   it('保存玩家数据应回写 sect 状态', () => {
@@ -222,6 +242,16 @@ describe('stats.utils derivePlayerStats', () => {
       },
       restrictions: { bannedSectIds: ['tianlie'], cooldownUntil: null },
       daily: { dateKey: '2026-02-10', sparCount: 0 },
+      songyangSkill: {
+        puzzle: {
+          canjuCollected: 1,
+          canjuState: PuzzleStepState.IN_PROGRESS,
+          duanjuState: PuzzleStepState.NOT_STARTED,
+          shiyanState: PuzzleStepState.NOT_STARTED,
+        },
+        challenges: { chiefDiscipleWin: false, sparStreakWin: false, masterApproval: false },
+        legacy: { canonCrippled: true },
+      },
     });
 
     savePlayerData(player, character);
@@ -230,5 +260,36 @@ describe('stats.utils derivePlayerStats', () => {
     expect(character.sectData?.current?.rank).toBe('内门弟子');
     expect(character.sectData?.current?.contribution).toBe(360);
     expect(character.sectData?.restrictions.bannedSectIds).toEqual(['tianlie']);
+    expect(character.sectData?.songyangSkill?.legacy.canonCrippled).toBe(true);
+  });
+
+  it('旧版 songyangSkill 布尔存档在 load/save 链路会被兼容归一化', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({
+      sectData: {
+        current: null,
+        restrictions: { bannedSectIds: [], cooldownUntil: null },
+        daily: { dateKey: '', sparCount: 0 },
+        songyangSkill: {
+          puzzle: {
+            canjuCollected: 2,
+            duanjuPassed: true,
+          },
+          legacy: { canonCrippled: false },
+        },
+      } as any,
+    });
+
+    loadCharacterToPlayer(player, character);
+    const normalized = player.get<any>('sect');
+
+    expect(normalized.songyangSkill.puzzle.canjuState).toBe(PuzzleStepState.IN_PROGRESS);
+    expect(normalized.songyangSkill.puzzle.duanjuState).toBe(PuzzleStepState.COMPLETED);
+    expect(normalized.songyangSkill.puzzle.shiyanState).toBe(PuzzleStepState.NOT_STARTED);
+
+    savePlayerData(player, character);
+    expect(character.sectData?.songyangSkill?.puzzle.canjuCollected).toBe(2);
+    expect(character.sectData?.songyangSkill?.puzzle.duanjuState).toBe(PuzzleStepState.COMPLETED);
+    expect(character.sectData?.songyangSkill?.challenges.masterApproval).toBe(false);
   });
 });
