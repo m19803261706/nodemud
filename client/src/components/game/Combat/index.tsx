@@ -13,6 +13,7 @@ import { CombatHeader } from './CombatHeader';
 import { FighterPanel } from './FighterPanel';
 import { CombatLog } from './CombatLog';
 import { FleeButton } from './FleeButton';
+import { CombatActions } from '../CombatActions';
 
 /** 结算原因 → 显示文本 */
 const RESULT_LABEL: Record<string, string> = {
@@ -83,6 +84,9 @@ export const Combat = () => {
 
       {/* 战斗日志 */}
       <CombatLog actions={log} />
+
+      {/* 选招快捷栏（ATB 满时显示） */}
+      <CombatActions />
 
       {/* 逃跑按钮（战斗结束时禁用） */}
       <FleeButton onFlee={handleFlee} disabled={result !== null} />

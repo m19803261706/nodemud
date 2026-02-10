@@ -532,20 +532,28 @@ export const useGameStore = create<GameState>(set => ({
     }),
   setCombatUpdate: data =>
     set(state => ({
-      combat: {
-        ...state.combat,
-        player: state.combat.player
-          ? { ...state.combat.player, ...data.player }
-          : null,
-        enemy: state.combat.enemy
-          ? { ...state.combat.enemy, ...data.enemy }
-          : null,
-        log: [...state.combat.log, ...data.actions],
-        // 收到战斗更新时清除等待行动状态（本轮行动已执行）
-        awaitingAction: false,
-        availableActions: [],
-        actionTimeout: 0,
-      },
+      combat: (() => {
+        const resolvedPlayerAction =
+          state.combat.awaitingAction &&
+          data.actions.some(action => action.attacker === 'player');
+
+        return {
+          ...state.combat,
+          player: state.combat.player
+            ? { ...state.combat.player, ...data.player }
+            : null,
+          enemy: state.combat.enemy
+            ? { ...state.combat.enemy, ...data.enemy }
+            : null,
+          log: [...state.combat.log, ...data.actions],
+          // 仅在玩家本轮行动已结算时清理等待状态，避免心跳空包误清
+          awaitingAction: resolvedPlayerAction ? false : state.combat.awaitingAction,
+          availableActions: resolvedPlayerAction
+            ? []
+            : state.combat.availableActions,
+          actionTimeout: resolvedPlayerAction ? 0 : state.combat.actionTimeout,
+        };
+      })(),
     })),
   setCombatEnd: data =>
     set(state => ({

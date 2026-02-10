@@ -217,6 +217,8 @@ export const useSkillStore = create<SkillState>((set, get) => ({
   // 更新学艺结果
   applyLearnResult: (data: SkillLearnResultData) =>
     set(state => {
+      if (!data.success) return state;
+
       // 同步更新技能列表中对应技能的经验数据
       const skills = state.skills.map(s =>
         s.skillId === data.skillId

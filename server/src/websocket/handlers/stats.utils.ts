@@ -41,9 +41,12 @@ function resolveSilver(player: PlayerBase, character: Character): number {
 /** 从 Character 实体 + 玩家装备推导 playerStats 消息数据 */
 export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
+  const skillBonus = player.getSkillBonusSummary();
 
-  const hpMax = character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0);
-  const mpMax = character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0);
+  const hpMax =
+    character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0) + (skillBonus.maxHp ?? 0);
+  const mpMax =
+    character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0) + (skillBonus.maxMp ?? 0);
   const energyMax =
     (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
 
@@ -122,11 +125,27 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   // HP 上限 = 血气 * 100 + 装备加成
   const equipBonus = player.getEquipmentBonus();
   const maxHp = character.vitality * 100 + (equipBonus.resources?.maxHp ?? 0);
+  const maxMp = character.spirit * 80 + (equipBonus.resources?.maxMp ?? 0);
+  const maxEnergy =
+    (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
   player.set('max_hp', maxHp);
+  player.set('max_mp', maxMp);
+  player.set('max_energy', maxEnergy);
   // 登录时满血（若已有当前 HP 则保留）
   if (player.get<number>('hp') == null) {
     player.set('hp', maxHp);
   }
+  if (player.get<number>('mp') == null) {
+    player.set('mp', maxMp);
+  }
+  if (player.get<number>('energy') == null) {
+    player.set('energy', maxEnergy);
+  }
+
+  // 兼容旧字段：保持 legacy *_current 与运行时字段一致
+  player.set('hp_current', player.get<number>('hp') ?? maxHp);
+  player.set('mp_current', player.get<number>('mp') ?? maxMp);
+  player.set('energy_current', player.get<number>('energy') ?? maxEnergy);
 
   // 银两
   player.set('silver', Math.max(0, Math.floor(character.silver ?? 0)));

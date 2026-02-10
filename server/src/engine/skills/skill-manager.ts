@@ -442,6 +442,7 @@ export class SkillManager {
     }
 
     const data = this.skills.get(skillId);
+    let forceDeactivated = false;
     if (data) {
       data.isMapped = false;
       data.mappedSlot = null;
@@ -451,6 +452,7 @@ export class SkillManager {
       if (slotType === SkillSlotType.FORCE && data.isActiveForce) {
         data.isActiveForce = false;
         this.activeForce = null;
+        forceDeactivated = true;
       }
     }
 
@@ -461,6 +463,7 @@ export class SkillManager {
       {
         isMapped: false,
         mappedSlot: null,
+        ...(forceDeactivated ? { isActiveForce: false } : {}),
       },
       SkillUpdateReason.UNMAPPED,
     );
@@ -480,7 +483,7 @@ export class SkillManager {
    * 4. 保持 activeForce 不变
    */
   applyDeathPenalty(): void {
-    const changedSkills: string[] = [];
+    const changedSkills = new Set<string>();
 
     for (const [skillId, data] of this.skills) {
       const skillDef = this.skillRegistry.get(skillId);
@@ -494,14 +497,14 @@ export class SkillManager {
         // 保护触发: 不降级，只清零 learned
         data.learned = 0;
         data.dirty = true;
-        changedSkills.push(skillId);
+        changedSkills.add(skillId);
       } else {
         // 正常降级
         const newLevel = skillDef.onDeathPenalty(this.player, data.level);
         if (newLevel !== oldLevel) {
           data.level = newLevel;
           data.dirty = true;
-          changedSkills.push(skillId);
+          changedSkills.add(skillId);
         }
       }
     }
@@ -513,6 +516,7 @@ export class SkillManager {
         data.isMapped = false;
         data.mappedSlot = null;
         data.dirty = true;
+        changedSkills.add(skillId);
 
         // 保持 activeForce 标记不变
         // isActiveForce 不清除，仅清除映射状态
@@ -532,13 +536,14 @@ export class SkillManager {
             learnedMax: Math.pow(data.level + 1, 2),
             isMapped: false,
             mappedSlot: null,
+            isActiveForce: data.isActiveForce,
           },
           SkillUpdateReason.DEATH_PENALTY,
         );
       }
     }
 
-    this.logger.debug(`玩家 ${this.player.getName()} 死亡惩罚: ${changedSkills.length} 个技能降级`);
+    this.logger.debug(`玩家 ${this.player.getName()} 死亡惩罚: ${changedSkills.size} 个技能变更`);
   }
 
   // ================================================================
@@ -708,6 +713,7 @@ export class SkillManager {
    */
   async saveToDatabase(): Promise<void> {
     const updates: { id: string; data: any }[] = [];
+    const dirtyRecords: PlayerSkillData[] = [];
 
     for (const [, data] of this.skills) {
       if (!data.dirty || !data.dbId) continue;
@@ -723,12 +729,14 @@ export class SkillManager {
           isLocked: data.isLocked,
         },
       });
-
-      data.dirty = false;
+      dirtyRecords.push(data);
     }
 
     if (updates.length > 0) {
       await this.skillService.updateMany(updates);
+      for (const data of dirtyRecords) {
+        data.dirty = false;
+      }
       this.logger.debug(`玩家 ${this.player.getName()} 保存 ${updates.length} 个技能`);
     }
   }

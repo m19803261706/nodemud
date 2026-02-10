@@ -30,6 +30,7 @@ import type { RoomBase } from '../../engine/game-objects/room-base';
 import { NpcBase } from '../../engine/game-objects/npc-base';
 import type { Session } from '../types/session';
 import type { SkillAction } from '../../engine/skills/types';
+import type { SkillManager } from '../../engine/skills/skill-manager';
 
 @Injectable()
 export class SkillHandler {
@@ -246,15 +247,16 @@ export class SkillHandler {
         const currentSilver = player.getSilver();
         if (currentSilver < learnCost) {
           if (timesCompleted === 0) {
+            const progress = this.getSkillProgress(skillManager, data.skillId);
             this.sendSkillLearnResult(player, {
               success: false,
               skillId: data.skillId,
               skillName: skillDef.skillName,
               timesCompleted: 0,
               timesRequested: times,
-              currentLevel: 0,
-              learned: 0,
-              learnedMax: 1,
+              currentLevel: progress.currentLevel,
+              learned: progress.learned,
+              learnedMax: progress.learnedMax,
               levelUp: false,
               message: '银两不足，无法继续学习。',
               reason: 'insufficient_silver',
@@ -268,15 +270,16 @@ export class SkillHandler {
         const currentEnergy = player.get<number>('energy') ?? 0;
         if (currentEnergy < 5) {
           if (timesCompleted === 0) {
+            const progress = this.getSkillProgress(skillManager, data.skillId);
             this.sendSkillLearnResult(player, {
               success: false,
               skillId: data.skillId,
               skillName: skillDef.skillName,
               timesCompleted: 0,
               timesRequested: times,
-              currentLevel: 0,
-              learned: 0,
-              learnedMax: 1,
+              currentLevel: progress.currentLevel,
+              learned: progress.learned,
+              learnedMax: progress.learnedMax,
               levelUp: false,
               message: '精力不足，无法继续学习。',
               reason: 'insufficient_energy',
@@ -286,22 +289,46 @@ export class SkillHandler {
           break;
         }
 
+        const before = this.getSkillProgress(skillManager, data.skillId);
+
         // 扣除资源
         player.spendSilver(learnCost);
         player.set('energy', currentEnergy - 5);
 
         // 提升技能
         const improved = skillManager.improveSkill(data.skillId, 1);
+        const after = this.getSkillProgress(skillManager, data.skillId);
+        const progressed =
+          after.currentLevel !== before.currentLevel || after.learned !== before.learned;
+
+        // 未发生任何成长（如达到上限/门槛不足）时，回滚本次消耗并结束循环
+        if (!progressed) {
+          player.addSilver(learnCost);
+          player.set('energy', currentEnergy);
+          if (timesCompleted === 0) {
+            this.sendSkillLearnResult(player, {
+              success: false,
+              skillId: data.skillId,
+              skillName: skillDef.skillName,
+              timesCompleted: 0,
+              timesRequested: times,
+              currentLevel: after.currentLevel,
+              learned: after.learned,
+              learnedMax: after.learnedMax,
+              levelUp: false,
+              message: '你当前境界无法继续从此法门精进。',
+              reason: 'cannot_improve',
+            });
+            return;
+          }
+          break;
+        }
+
         if (improved) {
           didLevelUp = true;
         }
 
         timesCompleted++;
-
-        // W-5: 如果技能已满级或无法继续提升，提前结束避免浪费资源
-        if (!improved && timesCompleted > 1) {
-          break;
-        }
       }
 
       // 获取最终技能数据
@@ -399,6 +426,21 @@ export class SkillHandler {
     if (msg) {
       player.sendToClient(MessageFactory.serialize(msg));
     }
+  }
+
+  /** 读取技能当前进度（统一返回，避免失败分支误填 0） */
+  private getSkillProgress(
+    skillManager: SkillManager,
+    skillId: string,
+  ): { currentLevel: number; learned: number; learnedMax: number } {
+    const data = skillManager.getAllSkills().find((s) => s.skillId === skillId);
+    const currentLevel = data?.level ?? 0;
+    const learned = data?.learned ?? 0;
+    return {
+      currentLevel,
+      learned,
+      learnedMax: Math.pow(currentLevel + 1, 2),
+    };
   }
 
   /**
