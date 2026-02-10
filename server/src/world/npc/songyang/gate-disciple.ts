@@ -61,7 +61,7 @@ export default class SongyangGateDisciple extends NpcBase {
       return;
     }
 
-    // 给外来者发放短时一次性通行许可，由 go 指令在进山时消耗。
+    // 给外来者发放短时一次性通行许可，由山道房间 PRE_LEAVE 事件在进山时消耗。
     const passUntil = Date.now() + 3 * 60 * 1000;
     speaker.setTemp('sect/songyang_gate_pass_until', passUntil);
     speaker.receiveMessage('守山弟子侧身让出半步：「可入山门一次，办完事速退。」');
