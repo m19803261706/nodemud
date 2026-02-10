@@ -10,6 +10,7 @@ import type { BlueprintLoader } from './blueprint-loader';
 import type { BlueprintFactory } from './blueprint-factory';
 import type { CommandManager } from './command-manager';
 import type { CommandLoader } from './command-loader';
+import type { SpawnManager } from './spawn-manager';
 import type { CombatManager } from './combat/combat-manager';
 import type { ExpManager } from './quest/exp-manager';
 import type { QuestManager } from './quest/quest-manager';
@@ -27,6 +28,9 @@ export class ServiceLocator {
   // Layer 4 服务
   static commandManager: CommandManager;
   static commandLoader: CommandLoader;
+
+  // Layer 4.5 刷新服务
+  static spawnManager: SpawnManager;
 
   // Layer 5 战斗服务
   static combatManager: CombatManager;
@@ -46,6 +50,7 @@ export class ServiceLocator {
     blueprintFactory?: BlueprintFactory;
     commandManager?: CommandManager;
     commandLoader?: CommandLoader;
+    spawnManager?: SpawnManager;
     combatManager?: CombatManager;
     expManager?: ExpManager;
     questManager?: QuestManager;
@@ -57,6 +62,7 @@ export class ServiceLocator {
     if (providers.blueprintFactory) this.blueprintFactory = providers.blueprintFactory;
     if (providers.commandManager) this.commandManager = providers.commandManager;
     if (providers.commandLoader) this.commandLoader = providers.commandLoader;
+    if (providers.spawnManager) this.spawnManager = providers.spawnManager;
     if (providers.combatManager) this.combatManager = providers.combatManager;
     if (providers.expManager) this.expManager = providers.expManager;
     if (providers.questManager) this.questManager = providers.questManager;
@@ -78,6 +84,7 @@ export class ServiceLocator {
     this.blueprintFactory = undefined as any;
     this.commandManager = undefined as any;
     this.commandLoader = undefined as any;
+    this.spawnManager = undefined as any;
     this.combatManager = undefined as any;
     this.expManager = undefined as any;
     this.questManager = undefined as any;

@@ -17,6 +17,7 @@ import { NpcList } from '../components/game/NpcList';
 import { ItemInfoModal } from '../components/game/NpcList/ItemInfoModal';
 import { InventoryPage } from '../components/game/Inventory';
 import { BottomNavBar } from '../components/game/BottomNavBar';
+import { QuestListModal } from '../components/game/QuestListModal';
 
 export const GameHomeScreen = ({ route: _route }: any) => {
   const insets = useSafeAreaInsets();
@@ -57,6 +58,7 @@ export const GameHomeScreen = ({ route: _route }: any) => {
           </View>
         )}
         <BottomNavBar />
+        <QuestListModal />
         <ItemInfoModal
           detail={itemDetail}
           onClose={() => setItemDetail(null)}

@@ -78,6 +78,9 @@ export class NpcBase extends LivingBase {
   die(): void {
     super.die();
     const env = this.getEnvironment();
+    const spawnBlueprintId = this.getTemp<string>('spawn/blueprintId');
+    const spawnRoomId = this.getTemp<string>('spawn/roomId') ?? (env ? env.id : undefined);
+    const spawnInterval = this.getTemp<number>('spawn/interval');
 
     // 创建残骸
     const remainsId = ServiceLocator.objectManager.nextInstanceId('remains');
@@ -104,6 +107,13 @@ export class NpcBase extends LivingBase {
     if (env && env instanceof RoomBase) {
       remains.moveTo(env, { quiet: true });
       env.broadcast(`[npc]${this.getName()}[/npc]倒在了地上，留下了一具残骸。`);
+    }
+
+    // 通过 SpawnManager 刷新的 NPC 死亡后自动重生，避免任务怪被长期打空
+    if (spawnBlueprintId && spawnRoomId && ServiceLocator.initialized && ServiceLocator.spawnManager) {
+      const delayMs =
+        typeof spawnInterval === 'number' && spawnInterval > 0 ? Math.floor(spawnInterval) : 60000;
+      ServiceLocator.spawnManager.scheduleRespawn(spawnBlueprintId, spawnRoomId, delayMs);
     }
 
     // 销毁 NPC（inventory 已清空，不会散落物品）

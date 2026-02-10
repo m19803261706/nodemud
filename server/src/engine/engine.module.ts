@@ -72,6 +72,7 @@ export class EngineModule implements OnModuleInit {
       blueprintFactory: this.blueprintFactory,
       commandManager: this.commandManager,
       commandLoader: this.commandLoader,
+      spawnManager: this.spawnManager,
       combatManager: this.combatManager,
       expManager: this.expManager,
       questManager: this.questManager,

@@ -80,6 +80,11 @@ export class SpawnManager {
           }
         }
 
+        // 记录出生点与重生间隔，供死亡后自动重生使用
+        npc.setTemp('spawn/blueprintId', rule.blueprintId);
+        npc.setTemp('spawn/roomId', rule.roomId);
+        npc.setTemp('spawn/interval', rule.interval);
+
         npc.moveTo(room, { quiet: true });
         npc.enableHeartbeat(NPC_HEARTBEAT_INTERVAL);
 
@@ -104,7 +109,7 @@ export class SpawnManager {
   scheduleRespawn(blueprintId: string, roomId: string, delayMs: number): void {
     this.logger.log(`计划重生: ${blueprintId} → ${roomId} (${delayMs}ms 后)`);
     setTimeout(() => {
-      this.respawnNpc(blueprintId, roomId);
+      this.respawnNpc(blueprintId, roomId, delayMs);
     }, delayMs);
   }
 
@@ -114,7 +119,7 @@ export class SpawnManager {
    * @param blueprintId 蓝图 ID
    * @param roomId 目标房间 ID
    */
-  respawnNpc(blueprintId: string, roomId: string): void {
+  respawnNpc(blueprintId: string, roomId: string, intervalMs?: number): void {
     try {
       const npc = this.blueprintFactory.clone(blueprintId);
       const room = this.objectManager.findById(roomId);
@@ -137,6 +142,13 @@ export class SpawnManager {
             this.logger.warn(`重生 NPC 装备初始化失败: ${eqBlueprintId} → ${err}`);
           }
         }
+      }
+
+      // 记录重生元数据，确保下一次死亡仍能继续调度
+      npc.setTemp('spawn/blueprintId', blueprintId);
+      npc.setTemp('spawn/roomId', roomId);
+      if (typeof intervalMs === 'number' && intervalMs > 0) {
+        npc.setTemp('spawn/interval', intervalMs);
       }
 
       npc.moveTo(room, { quiet: true });

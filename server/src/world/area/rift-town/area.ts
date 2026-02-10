@@ -94,8 +94,9 @@ export default class RiftTownArea extends Area {
       {
         blueprintId: 'npc/rift-town/bandit',
         roomId: 'area/rift-town/north-road',
-        count: 1,
-        interval: 300000,
+        // 任务怪提高基线数量并缩短重生时间，支持多人并发完成新手任务
+        count: 3,
+        interval: 45000,
       },
     ]);
 

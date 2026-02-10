@@ -17,11 +17,14 @@ export const LocationHeader = () => {
   const setQuestModalVisible = useGameStore(
     state => state.setQuestModalVisible,
   );
+  const sendCommand = useGameStore(state => state.sendCommand);
 
   /** 处理操作按钮点击 */
   const handleActionPress = (label: string) => {
     if (label === '任务') {
       setQuestModalVisible(true);
+      // 每次打开任务面板都主动拉取一次最新任务快照
+      sendCommand('quest');
     }
   };
 
