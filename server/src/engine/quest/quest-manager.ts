@@ -126,7 +126,7 @@ export class QuestManager {
    * 只返回满足前置条件、且未完成/未在进行中的任务定义
    */
   getAvailableQuests(player: PlayerBase, npcBlueprintId: string): QuestDefinition[] {
-    const questIds = this.npcQuestIndex.get(npcBlueprintId) ?? [];
+    const questIds = this.getQuestIdsForNpc(npcBlueprintId);
     const result: QuestDefinition[] = [];
 
     for (const questId of questIds) {
@@ -145,7 +145,7 @@ export class QuestManager {
    * 包含三种状态: available / active / ready
    */
   getNpcQuestBriefs(player: PlayerBase, npcBlueprintId: string): NpcQuestBrief[] {
-    const questIds = this.npcQuestIndex.get(npcBlueprintId) ?? [];
+    const questIds = this.getQuestIdsForNpc(npcBlueprintId);
     const questData = this.getPlayerQuestData(player);
     const briefs: NpcQuestBrief[] = [];
 
@@ -606,6 +606,21 @@ export class QuestManager {
     this.npcQuestIndex.set(npcBlueprintId, existing);
   }
 
+  /**
+   * 获取 NPC 相关任务 ID（含索引 + 定义扫描兜底）
+   * 兜底扫描可避免「旧注册索引缺 turnInNpc」导致的交付按钮缺失
+   */
+  private getQuestIdsForNpc(npcBlueprintId: string): string[] {
+    const ids = new Set<string>(this.npcQuestIndex.get(npcBlueprintId) ?? []);
+    for (const def of this.definitions.values()) {
+      const turnInNpc = def.turnInNpc ?? def.giverNpc;
+      if (def.giverNpc === npcBlueprintId || turnInNpc === npcBlueprintId) {
+        ids.add(def.id);
+      }
+    }
+    return [...ids];
+  }
+
   /** 从实例 ID 提取蓝图 ID（如 "npc/guard#1" → "npc/guard"） */
   private getBlueprintId(entity: NpcBase | LivingBase): string {
     return entity.id.split('#')[0];
@@ -688,8 +703,11 @@ export class QuestManager {
 
   /** 任务达成可交付时推送提示文案 */
   private notifyQuestReady(player: PlayerBase, def: QuestDefinition): void {
+    const turnInNpc = def.turnInNpc ?? def.giverNpc;
+    const turnInNpcName = this.resolveNpcName(turnInNpc);
     const readyMessage =
-      def.flavorText?.onReady ?? rt('sys', `任务「${def.name}」目标已达成，可前往交付。`);
+      def.flavorText?.onReady ??
+      rt('sys', `任务「${def.name}」目标已达成，请前往${turnInNpcName}处交付。`);
     player.receiveMessage(readyMessage);
   }
 
