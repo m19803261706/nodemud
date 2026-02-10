@@ -69,8 +69,29 @@ describe('嵩阳山门门禁事件', () => {
     expect(outsider.getEnvironment()).toBe(gate);
   });
 
-  async function spawnGuardInMountainPath(): Promise<SongyangGateDisciple> {
-    const guard = new SongyangGateDisciple('npc/songyang/gate-disciple#1');
+  it('守山弟子忙于缠斗时，外来者可趁隙通过', async () => {
+    const guard = await spawnGuardInMountainPath();
+    guard.setTemp('combat/state', 'fighting');
+
+    const moved = await outsider.moveTo(gate);
+
+    expect(moved).toBe(true);
+    expect(outsider.getEnvironment()).toBe(gate);
+  });
+
+  it('若仍有空闲值守弟子在场，应继续拦截外来者', async () => {
+    const fightingGuard = await spawnGuardInMountainPath('1');
+    fightingGuard.setTemp('combat/state', 'fighting');
+    await spawnGuardInMountainPath('2');
+
+    const moved = await outsider.moveTo(gate);
+
+    expect(moved).toBe(false);
+    expect(outsider.getEnvironment()).toBe(mountainPath);
+  });
+
+  async function spawnGuardInMountainPath(suffix = '1'): Promise<SongyangGateDisciple> {
+    const guard = new SongyangGateDisciple(`npc/songyang/gate-disciple#${suffix}`);
     guard.create();
     await guard.moveTo(mountainPath, { quiet: true });
     return guard;

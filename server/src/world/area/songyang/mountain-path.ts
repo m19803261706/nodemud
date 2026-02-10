@@ -4,6 +4,7 @@
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
 import { PlayerBase } from '../../../engine/game-objects/player-base';
+import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { GameEvents, type CancellableEvent, type MoveEventData } from '../../../engine/types/events';
 
 const SONGYANG_GATE_ROOM_ID = 'area/songyang/gate';
@@ -34,6 +35,7 @@ export default class SongyangMountainPath extends RoomBase {
    * 山门拦路规则（事件驱动）：
    * - 仅在“嵩阳山道 -> 山门”时触发
    * - 守山弟子在场才会拦路；被击杀/离场则不触发
+   * - 守山弟子若正被缠斗（fighting），可被趁隙通过
    * - 同门放行，外来者需一次性通行许可
    */
   private checkSongyangGateCheckpoint(event: CancellableEvent & MoveEventData): void {
@@ -60,6 +62,10 @@ export default class SongyangMountainPath extends RoomBase {
   }
 
   private hasActiveGateGuard(): boolean {
-    return this.getInventory().some((entity) => entity.id.startsWith(GATE_GUARD_ID_PREFIX));
+    return this.getInventory().some((entity) => {
+      if (!(entity instanceof NpcBase)) return false;
+      if (!entity.id.startsWith(GATE_GUARD_ID_PREFIX)) return false;
+      return !entity.isInCombat() && entity.getCombatState() !== 'dead';
+    });
   }
 }
