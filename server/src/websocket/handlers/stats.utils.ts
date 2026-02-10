@@ -53,9 +53,24 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const energyCurrent = resolveCurrentValue(player, 'energy', 'energy_current', energyMax);
   const silver = resolveSilver(player, character);
 
+  // 经验与等级数据（优先从 dbase 读取运行时值）
+  const level = player.get<number>('level') ?? character.level ?? 1;
+  const exp = player.get<number>('exp') ?? character.exp ?? 0;
+  const potential = player.get<number>('potential') ?? character.potential ?? 0;
+  const score = player.get<number>('score') ?? character.score ?? 0;
+  const freePoints = player.get<number>('free_points') ?? character.freePoints ?? 0;
+
+  // 下一级所需经验（通过 ExpManager 计算）
+  let expToNextLevel = 0;
+  if (ServiceLocator.initialized && ServiceLocator.expManager) {
+    const nextLevelExp = ServiceLocator.expManager.getExpForLevel(level + 1);
+    expToNextLevel = Math.max(0, nextLevelExp - exp);
+  }
+
   return {
     name: character.name,
-    level: getLevelText(character.level ?? 1),
+    level,
+    levelTitle: getLevelText(level),
     silver,
     hp: { current: hpCurrent, max: hpMax },
     mp: { current: mpCurrent, max: mpMax },
@@ -73,6 +88,11 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
       attack: equipBonus.combat?.attack ?? 0,
       defense: equipBonus.combat?.defense ?? 0,
     },
+    exp,
+    expToNextLevel,
+    potential,
+    score,
+    freePoints,
   };
 }
 

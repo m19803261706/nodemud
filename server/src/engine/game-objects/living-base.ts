@@ -10,6 +10,7 @@ import { BaseEntity } from '../base-entity';
 import { ServiceLocator } from '../service-locator';
 import type { CommandResult } from '../types/command';
 import { Permission } from '../types/command';
+import { GameEvents } from '../types/events';
 import type { ItemBase } from './item-base';
 
 /** 装备槽位常量 */
@@ -238,10 +239,11 @@ export class LivingBase extends BaseEntity {
 
   /**
    * 死亡处理（子类覆写实现具体逻辑）
-   * 基础实现：将战斗状态设为 dead
+   * 基础实现：将战斗状态设为 dead，触发 DEATH 事件
    */
   die(): void {
     this.setTemp('combat/state', 'dead');
+    this.emit(GameEvents.DEATH, { victim: this });
   }
 
   /** 检查是否在战斗中 */

@@ -28,14 +28,7 @@ const HP_PER_LEVEL = 50;
 const MP_PER_LEVEL = 30;
 
 /** 六维属性名称列表 */
-const ATTR_KEYS = [
-  'wisdom',
-  'perception',
-  'spirit',
-  'meridian',
-  'strength',
-  'vitality',
-] as const;
+const ATTR_KEYS = ['wisdom', 'perception', 'spirit', 'meridian', 'strength', 'vitality'] as const;
 
 /** 六维属性对应的上限字段名（Character 实体中的字段） */
 const ATTR_CAP_MAP: Record<string, string> = {
@@ -161,6 +154,30 @@ export class ExpManager {
     character.score = newVal;
   }
 
+  /**
+   * 战斗经验获取（轻量版，不依赖 Character 实体）
+   * 由 CombatManager 击杀 NPC 后直接调用，仅操作 dbase。
+   * playerStats 推送由 Gateway 的 broadcastPlayerStats 每秒同步。
+   * @param player 玩家对象
+   * @param amount 获得的经验值（正数）
+   * @returns 是否发生了升级
+   */
+  gainCombatExp(player: PlayerBase, amount: number): boolean {
+    if (amount <= 0) return false;
+
+    const oldExp = player.get<number>('exp') ?? 0;
+    const newExp = oldExp + amount;
+    player.set('exp', newExp);
+
+    // 检查升级（仅操作 dbase）
+    const didLevelUp = this.checkLevelUpDbase(player);
+
+    // 通知玩家获得经验
+    player.receiveMessage(`你获得了 ${amount} 点经验。`);
+
+    return didLevelUp;
+  }
+
   // ================================================================
   //  升级检查
   // ================================================================
@@ -209,6 +226,65 @@ export class ExpManager {
     player.set('max_mp', newMaxMp);
 
     // 升级时回满 MP
+    player.set('mp', newMaxMp);
+
+    // 升级通知
+    const title = this.getLevelTitle(targetLevel);
+    if (levelsGained === 1) {
+      player.receiveMessage(
+        `[important]恭喜！你升到了 ${targetLevel} 级！[/important]（${title}）\n` +
+          `获得 ${pointsGained} 个属性点，生命上限 +${hpGained}，内力上限 +${mpGained}。`,
+      );
+    } else {
+      player.receiveMessage(
+        `[important]恭喜！你连升 ${levelsGained} 级，达到 ${targetLevel} 级！[/important]（${title}）\n` +
+          `获得 ${pointsGained} 个属性点，生命上限 +${hpGained}，内力上限 +${mpGained}。`,
+      );
+    }
+
+    this.logger.log(
+      `玩家 ${player.getName()} 升级: ${currentLevel} -> ${targetLevel}（exp=${exp}）`,
+    );
+
+    return true;
+  }
+
+  /**
+   * 仅基于 dbase 的升级检查（不依赖 Character 实体）
+   * 用于 CombatManager 击杀奖励场景，数据会在 broadcastPlayerStats 中同步到 Character
+   * @returns 是否发生了升级
+   */
+  private checkLevelUpDbase(player: PlayerBase): boolean {
+    const exp = player.get<number>('exp') ?? 0;
+    const currentLevel = player.get<number>('level') ?? 1;
+    const targetLevel = this.getLevelForExp(exp);
+
+    if (targetLevel <= currentLevel) return false;
+
+    const levelsGained = targetLevel - currentLevel;
+
+    // 更新等级（仅 dbase）
+    player.set('level', targetLevel);
+
+    // 累加升级奖励
+    const pointsGained = levelsGained * POINTS_PER_LEVEL;
+    const hpGained = levelsGained * HP_PER_LEVEL;
+    const mpGained = levelsGained * MP_PER_LEVEL;
+
+    // free_points
+    const currentPoints = player.get<number>('free_points') ?? 0;
+    player.set('free_points', currentPoints + pointsGained);
+
+    // max_hp / hp
+    const currentMaxHp = player.get<number>('max_hp') ?? 100;
+    const newMaxHp = currentMaxHp + hpGained;
+    player.set('max_hp', newMaxHp);
+    player.set('hp', newMaxHp);
+
+    // max_mp / mp
+    const currentMaxMp = player.get<number>('max_mp') ?? 80;
+    const newMaxMp = currentMaxMp + mpGained;
+    player.set('max_mp', newMaxMp);
     player.set('mp', newMaxMp);
 
     // 升级通知

@@ -8,8 +8,11 @@ import { MessageFactory } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { CharacterService } from '../../character/character.service';
+import { ServiceLocator } from '../../engine/service-locator';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
+import { NpcBase } from '../../engine/game-objects/npc-base';
+import { ItemBase } from '../../engine/game-objects/item-base';
 import {
   sendRoomInfo,
   sendInventoryUpdate,
@@ -105,6 +108,11 @@ export class CommandHandler {
               player,
             );
             sendRoomInfo(player, newRoom, this.blueprintFactory);
+
+            // 任务系统：检查新房间 NPC 可接任务
+            if (ServiceLocator.questManager) {
+              ServiceLocator.questManager.onPlayerEnterRoom(player, newRoom);
+            }
           }
         }
       } catch (moveError) {
@@ -210,6 +218,37 @@ export class CommandHandler {
         } catch {
           // 查询失败不阻塞主流程
         }
+      }
+    }
+
+    // give 命令成功且 NPC 接受后：任务系统检查 deliver 类进度
+    if (result.success && result.data?.action === 'give' && result.data?.accepted) {
+      sendInventoryUpdate(player);
+      if (ServiceLocator.questManager) {
+        // 从 result.data 中获取 NPC 和物品信息
+        const npcId = result.data.npcId as string;
+        const itemId = result.data.itemId as string;
+        const npc = this.objectManager.findById(npcId);
+        const item = this.objectManager.findById(itemId);
+        if (npc instanceof NpcBase && item instanceof ItemBase) {
+          ServiceLocator.questManager.onItemDelivered(npc, player, item);
+        }
+      }
+    }
+
+    // 背包变更通知任务系统检查 collect 类进度
+    // 只要背包物品发生变化，就检查任务进度
+    if (result.success && ServiceLocator.questManager) {
+      const inventoryActions = [
+        'get', 'drop', 'get_from', 'put', 'buy', 'sell',
+        'wear', 'wield', 'remove', 'give',
+      ];
+      if (inventoryActions.includes(result.data?.action)) {
+        ServiceLocator.questManager.onInventoryChange(player);
+      }
+      // use 命令消耗物品时也检查
+      if (result.data?.action === 'use' && result.data?.consumed) {
+        ServiceLocator.questManager.onInventoryChange(player);
       }
     }
   }

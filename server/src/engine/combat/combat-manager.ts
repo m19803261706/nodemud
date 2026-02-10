@@ -26,6 +26,7 @@ import { HeartbeatManager } from '../heartbeat-manager';
 import { ServiceLocator } from '../service-locator';
 import type { LivingBase } from '../game-objects/living-base';
 import { PlayerBase } from '../game-objects/player-base';
+import { NpcBase } from '../game-objects/npc-base';
 import type { RoomBase } from '../game-objects/room-base';
 import { DamageEngine } from './damage-engine';
 import { sendRoomInfo } from '../../websocket/handlers/room-utils';
@@ -155,6 +156,11 @@ export class CombatManager implements OnModuleInit {
 
     // 清理战斗状态（同步，确保后续 tick 不再处理此战斗）
     this.cleanupCombat(combat);
+
+    // 玩家胜利后：经验奖励 + 任务进度
+    if (reason === 'victory' && player instanceof PlayerBase && enemy instanceof NpcBase) {
+      this.handleVictoryRewards(player, enemy);
+    }
 
     // 玩家战败后：复活 + 传送广场 + 推送房间信息
     if (reason === 'defeat' && player instanceof PlayerBase) {
@@ -341,6 +347,33 @@ export class CombatManager implements OnModuleInit {
       maxHp: entity.get<number>('max_hp') ?? 100,
       atbPct: Math.floor((participant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
     };
+  }
+
+  // ================================================================
+  //  胜利奖励
+  // ================================================================
+
+  /**
+   * 击杀 NPC 后的奖励处理
+   * - 通过 ExpManager 发放战斗经验（含等级差衰减）
+   * - 通过 QuestManager 更新 kill 类任务进度
+   */
+  private handleVictoryRewards(player: PlayerBase, npc: NpcBase): void {
+    // 经验奖励
+    if (ServiceLocator.expManager) {
+      const npcLevel = npc.get<number>('level') ?? 1;
+      const playerLevel = player.get<number>('level') ?? 1;
+      const baseExp = npc.get<number>('combat_exp') ?? npcLevel * 10;
+      const finalExp = ServiceLocator.expManager.calculateCombatExp(playerLevel, npcLevel, baseExp);
+      if (finalExp > 0) {
+        ServiceLocator.expManager.gainCombatExp(player, finalExp);
+      }
+    }
+
+    // 任务进度：kill 类目标
+    if (ServiceLocator.questManager) {
+      ServiceLocator.questManager.onNpcDeath(npc, player);
+    }
   }
 
   // ================================================================
