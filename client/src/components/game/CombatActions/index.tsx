@@ -16,9 +16,7 @@ import { ActionExpandModal } from './ActionExpandModal';
 export const CombatActions = () => {
   /* ─── 从 store 取数据 ─── */
   const awaitingAction = useGameStore(state => state.combat.awaitingAction);
-  const availableActions = useGameStore(
-    state => state.combat.availableActions,
-  );
+  const availableActions = useGameStore(state => state.combat.availableActions);
   const actionTimeout = useGameStore(state => state.combat.actionTimeout);
   const combatId = useGameStore(state => state.combat.combatId);
 

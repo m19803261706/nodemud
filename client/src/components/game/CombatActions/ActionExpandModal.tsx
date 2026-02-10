@@ -129,10 +129,7 @@ export const ActionExpandModal = ({
                 />
 
                 {/* 招式列表 */}
-                <ScrollView
-                  style={s.list}
-                  showsVerticalScrollIndicator={false}
-                >
+                <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
                   {actions.map(action => (
                     <ActionRow
                       key={action.index}

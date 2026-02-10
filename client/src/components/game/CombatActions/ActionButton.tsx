@@ -65,7 +65,11 @@ interface MoreButtonProps {
 }
 
 export const MoreButton = ({ onPress }: MoreButtonProps) => (
-  <TouchableOpacity style={[s.button, s.moreBtn]} onPress={onPress} activeOpacity={0.7}>
+  <TouchableOpacity
+    style={[s.button, s.moreBtn]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
     <Text style={s.moreName}>更多</Text>
     <Text style={s.moreIcon}>...</Text>
   </TouchableOpacity>
