@@ -55,6 +55,7 @@ function App(): React.JSX.Element {
       setDirections(exitsToDirections(data.exits, shortName, data.exitNames));
       setNpcs(data.npcs ?? []);
       setGroundItems(data.items ?? []);
+      useGameStore.getState().setShopListDetail(null);
     };
 
     const handleInventoryUpdate = (data: any) => {
@@ -79,6 +80,25 @@ function App(): React.JSX.Element {
       ) {
         useGameStore.getState().setItemDetail(data.data);
         return;
+      }
+      // list 货单结果 → 货单弹窗
+      if (data.success && data.data?.action === 'list_goods') {
+        const payload = data.data;
+        if (
+          payload.merchantId &&
+          payload.merchantName &&
+          Array.isArray(payload.goods)
+        ) {
+          useGameStore.getState().setShopListDetail({
+            merchantId: payload.merchantId,
+            merchantName: payload.merchantName,
+            goods: payload.goods,
+          });
+        }
+      }
+      // buy 成功结果 → 同步更新当前货单库存
+      if (data.success && data.data?.action === 'buy') {
+        useGameStore.getState().applyShopBuyResult(data.data);
       }
       // 有消息 → 写入日志（失败红色，成功默认色）
       if (data.message) {

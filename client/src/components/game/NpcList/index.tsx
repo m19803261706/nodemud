@@ -10,12 +10,15 @@ import { wsService } from '../../../services/WebSocketService';
 import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
 import { ItemCard } from './ItemCard';
+import { ShopListModal } from './ShopListModal';
 
 export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
   const npcDetail = useGameStore(state => state.npcDetail);
+  const shopListDetail = useGameStore(state => state.shopListDetail);
   const inventory = useGameStore(state => state.inventory);
   const setNpcDetail = useGameStore(state => state.setNpcDetail);
+  const setShopListDetail = useGameStore(state => state.setShopListDetail);
   const groundItems = useGameStore(state => state.groundItems);
   const sendCommand = useGameStore(state => state.sendCommand);
 
@@ -74,6 +77,13 @@ export const NpcList = () => {
             MessageFactory.create('questComplete', { questId, npcId }),
           );
           setNpcDetail(null);
+        }}
+      />
+      <ShopListModal
+        detail={shopListDetail}
+        onClose={() => setShopListDetail(null)}
+        onBuy={(selector, merchantName) => {
+          sendCommand(`buy ${selector} from ${merchantName}`);
         }}
       />
     </View>

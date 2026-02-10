@@ -128,6 +128,23 @@ export interface NpcQuestBrief {
   objectives?: QuestObjectiveProgress[];
 }
 
+/** 商店货单条目 */
+export interface ShopGoodView {
+  index: number;
+  blueprintId: string;
+  name: string;
+  short: string;
+  price: number;
+  stock: number;
+}
+
+/** 货单详情（list 指令返回） */
+export interface ShopListDetail {
+  merchantId: string;
+  merchantName: string;
+  goods: ShopGoodView[];
+}
+
 /** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
 export interface NpcDetailData {
   npcId: string;
@@ -212,6 +229,15 @@ export interface GameState {
   // NPC 详情弹窗
   npcDetail: NpcDetailData | null;
   setNpcDetail: (detail: NpcDetailData | null) => void;
+
+  // 货单弹窗
+  shopListDetail: ShopListDetail | null;
+  setShopListDetail: (detail: ShopListDetail | null) => void;
+  applyShopBuyResult: (data: {
+    merchantId?: string;
+    blueprintId?: string;
+    stockLeft?: number;
+  }) => void;
 
   // 背包
   inventory: InventoryItem[];
@@ -398,6 +424,32 @@ export const useGameStore = create<GameState>(set => ({
   // NPC 详情弹窗
   npcDetail: null,
   setNpcDetail: detail => set({ npcDetail: detail }),
+
+  // 货单弹窗
+  shopListDetail: null,
+  setShopListDetail: detail => set({ shopListDetail: detail }),
+  applyShopBuyResult: data =>
+    set(state => {
+      const current = state.shopListDetail;
+      if (!current || !data.merchantId || current.merchantId !== data.merchantId) {
+        return state;
+      }
+      if (!data.blueprintId || typeof data.stockLeft !== 'number') {
+        return state;
+      }
+
+      let updated = false;
+      const goods = current.goods.map(good => {
+        if (!updated && good.blueprintId === data.blueprintId) {
+          updated = true;
+          return { ...good, stock: data.stockLeft! };
+        }
+        return good;
+      });
+
+      if (!updated) return state;
+      return { shopListDetail: { ...current, goods } };
+    }),
 
   // 背包
   inventory: [],
