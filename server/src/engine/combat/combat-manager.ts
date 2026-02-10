@@ -135,6 +135,14 @@ export class CombatManager implements OnModuleInit {
   }
 
   /**
+   * 发起演武战斗
+   * 当前先复用普通战斗入口，后续在模式结算中区分演武规则。
+   */
+  startSparCombat(attacker: LivingBase, defender: LivingBase): string {
+    return this.startCombat(attacker, defender);
+  }
+
+  /**
    * 结束战斗
    * @param combatId 战斗 ID
    * @param reason 结束原因

@@ -57,6 +57,21 @@ export const NpcList = () => {
           sendCommand(`list ${name}`);
           setNpcDetail(null);
         }}
+        onApprentice={name => {
+          sendCommand(`apprentice ${name}`);
+          setNpcDetail(null);
+        }}
+        onDonate={(itemName, npcName) => {
+          sendCommand(`donate ${itemName} to ${npcName}`);
+        }}
+        onSpar={name => {
+          sendCommand(`spar ${name}`);
+          setNpcDetail(null);
+        }}
+        onBetray={name => {
+          sendCommand(`betray ${name}`);
+          setNpcDetail(null);
+        }}
         onSell={(itemName, npcName) => {
           sendCommand(`sell ${itemName} to ${npcName}`);
         }}

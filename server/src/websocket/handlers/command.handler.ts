@@ -274,6 +274,11 @@ export class CommandHandler {
       }
     }
 
+    // donate 命令成功后：推送背包刷新（捐献物品已移除）
+    if (result.success && result.data?.action === 'donate') {
+      sendInventoryUpdate(player);
+    }
+
     // enable/disable 命令成功后：推送 skillMapResult 同步前端技能面板
     if (result.success && (result.data?.action === 'enable' || result.data?.action === 'disable')) {
       const skillManager = player.skillManager;
@@ -307,6 +312,7 @@ export class CommandHandler {
         'wield',
         'remove',
         'give',
+        'donate',
       ];
       if (inventoryActions.includes(result.data?.action)) {
         ServiceLocator.questManager.onInventoryChange(player);

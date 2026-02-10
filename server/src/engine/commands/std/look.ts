@@ -245,6 +245,14 @@ export class LookCommand implements ICommand {
     if (canShopSell) actions.push('shopSell');
     if (canGive) actions.push('give');
     if (canAttack) actions.push('attack');
+
+    // 门派交互按钮（简单 if/if 颗粒度控制）
+    const sectActions = this.getNpcSectActions(npc, executor);
+    if (sectActions.includes('apprentice')) actions.push('apprentice');
+    if (sectActions.includes('donate')) actions.push('donate');
+    if (sectActions.includes('spar')) actions.push('spar');
+    if (sectActions.includes('betray')) actions.push('betray');
+
     actions.push('close');
 
     const header = title ? `${title}·${name}` : name;
@@ -325,5 +333,12 @@ export class LookCommand implements ICommand {
 
     const npcBlueprintId = npc.id.split('#')[0];
     return ServiceLocator.questManager.getNpcQuestBriefs(executor as PlayerBase, npcBlueprintId);
+  }
+
+  /** 获取 NPC 的门派交互动作列表 */
+  private getNpcSectActions(npc: NpcBase, executor?: LivingBase): string[] {
+    if (!executor || !(executor instanceof PlayerBase)) return [];
+    if (!ServiceLocator.sectManager) return [];
+    return ServiceLocator.sectManager.getNpcAvailableActions(executor, npc);
   }
 }

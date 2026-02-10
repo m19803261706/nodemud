@@ -70,6 +70,10 @@ interface NpcInfoModalProps {
   onClose: () => void;
   onChat: (npcName: string) => void;
   onShop: (npcName: string) => void;
+  onApprentice: (npcName: string) => void;
+  onDonate: (itemName: string, npcName: string) => void;
+  onSpar: (npcName: string) => void;
+  onBetray: (npcName: string) => void;
   onSell: (itemName: string, npcName: string) => void;
   onAttack: (npcName: string) => void;
   onGive: (itemName: string, npcName: string) => void;
@@ -134,15 +138,19 @@ export const NpcInfoModal = ({
   onClose,
   onChat,
   onShop,
+  onApprentice,
+  onDonate,
+  onSpar,
+  onBetray,
   onSell,
   onAttack,
   onGive,
   onQuestAccept,
   onQuestComplete,
 }: NpcInfoModalProps) => {
-  const [actionListMode, setActionListMode] = useState<'give' | 'sell' | null>(
-    null,
-  );
+  const [actionListMode, setActionListMode] = useState<
+    'give' | 'sell' | 'donate' | null
+  >(null);
 
   /** 关闭时重置交易选择状态 */
   const handleClose = () => {
@@ -162,7 +170,11 @@ export const NpcInfoModal = ({
     : detail.name;
   const isSelectingItem = actionListMode !== null;
   const selectingTitle =
-    actionListMode === 'sell' ? '选择出售物品' : '选择给予物品';
+    actionListMode === 'sell'
+      ? '选择出售物品'
+      : actionListMode === 'donate'
+        ? '选择捐献物品'
+        : '选择给予物品';
   const actionSet = new Set(detail.actions ?? []);
   const hasActions = actionSet.size > 0;
   const canChat = hasActions
@@ -177,6 +189,10 @@ export const NpcInfoModal = ({
   const canGive = hasActions
     ? actionSet.has('give')
     : (detail.capabilities?.give ?? true);
+  const canApprentice = hasActions ? actionSet.has('apprentice') : false;
+  const canDonate = hasActions ? actionSet.has('donate') : false;
+  const canSpar = hasActions ? actionSet.has('spar') : false;
+  const canBetray = hasActions ? actionSet.has('betray') : false;
   const canAttack = hasActions
     ? actionSet.has('attack')
     : (detail.capabilities?.attack ?? true);
@@ -215,6 +231,48 @@ export const NpcInfoModal = ({
       key: 'give',
       label: '给予',
       onPress: () => setActionListMode('give'),
+    });
+  }
+
+  if (canApprentice) {
+    actionButtons.push({
+      key: 'apprentice',
+      label: '拜师',
+      onPress: () => {
+        onApprentice(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  if (canDonate) {
+    actionButtons.push({
+      key: 'donate',
+      label: '捐献',
+      onPress: () => setActionListMode('donate'),
+    });
+  }
+
+  if (canSpar) {
+    actionButtons.push({
+      key: 'spar',
+      label: '演武',
+      onPress: () => {
+        onSpar(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  if (canBetray) {
+    actionButtons.push({
+      key: 'betray',
+      label: '叛门',
+      variant: 'danger',
+      onPress: () => {
+        onBetray(detail.name);
+        handleClose();
+      },
     });
   }
 
@@ -402,6 +460,8 @@ export const NpcInfoModal = ({
                             onPress={() => {
                               if (actionListMode === 'sell') {
                                 onSell(item.name, detail.name);
+                              } else if (actionListMode === 'donate') {
+                                onDonate(item.name, detail.name);
                               } else {
                                 onGive(item.name, detail.name);
                               }
