@@ -74,8 +74,7 @@ export default class Bartender extends NpcBase {
           onAccept:
             `${rt('npc', '酒保')}把一枚铜板推到你面前：「北道守夜的弟兄穷，` +
             `你去杂货铺置两份干粮。江湖讲义气，不只在刀上，也在饭上。」`,
-          onReady:
-            `${rt('sys', '干粮已经备齐。去断崖酒馆找酒保交付任务。')}`,
+          onReady: `${rt('sys', '干粮已经备齐。去断崖酒馆找酒保交付任务。')}`,
           onComplete:
             `${rt('npc', '酒保')}收起账本，声音仍旧平：「今天你给别人一口饭，` +
             `明天真落难，也会有人给你留盏灯。」`,
@@ -93,8 +92,7 @@ export default class Bartender extends NpcBase {
     if (blueprintId === 'item/quest/herbal-sachet') {
       return {
         accept: true,
-        message:
-          '酒保把药囊系在腰间，长出一口气：「她还是记着这点旧病。替我谢谢药师。」',
+        message: '酒保把药囊系在腰间，长出一口气：「她还是记着这点旧病。替我谢谢药师。」',
       };
     }
     return {

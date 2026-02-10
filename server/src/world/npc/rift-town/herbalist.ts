@@ -99,8 +99,7 @@ export default class Herbalist extends MerchantBase {
           onAccept:
             `${rt('npc', '白发药师')}将药囊系紧递来：「酒保夜里难眠，` +
             `替老身送去。记住，救人的药，贵在到手及时。」`,
-          onReady:
-            `${rt('npc', '酒保')}已收下药囊。${rt('sys', '你可以当面交付任务。')}`,
+          onReady: `${rt('npc', '酒保')}已收下药囊。${rt('sys', '你可以当面交付任务。')}`,
           onComplete:
             `${rt('npc', '酒保')}把药囊压在掌心，低声道：` +
             '「人在江湖，总以为硬扛就是本事。可懂得求助，反倒是另一种骨气。」',

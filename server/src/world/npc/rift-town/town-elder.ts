@@ -77,8 +77,7 @@ export default class TownElder extends NpcBase {
           onAccept:
             `${rt('npc', '老镇长')}拄杖望北，声音不高却有力：` +
             '「侠字不在嘴上，在脚下。去北道走一遭，把那几股匪患压下去。」',
-          onReady:
-            `${rt('sys', '北道盗匪已被震慑，回镇中广场向老镇长复命。')}`,
+          onReady: `${rt('sys', '北道盗匪已被震慑，回镇中广场向老镇长复命。')}`,
           onComplete:
             `${rt('npc', '老镇长')}轻叹道：「江湖从不缺刀，缺的是肯替旁人挡刀的人。` +
             `记住今日这口气，往后路越远，心越要稳。」`,
