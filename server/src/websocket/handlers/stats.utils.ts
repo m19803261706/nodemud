@@ -176,7 +176,10 @@ export function savePlayerData(player: PlayerBase, character: Character): void {
   character.level = Math.max(1, toSafeInt(player.get<number>('level') ?? character.level ?? 1, 1));
   character.potential = toSafeInt(player.get<number>('potential') ?? character.potential ?? 0, 0);
   character.score = toSafeInt(player.get<number>('score') ?? character.score ?? 0, 0);
-  character.freePoints = toSafeInt(player.get<number>('free_points') ?? character.freePoints ?? 0, 0);
+  character.freePoints = toSafeInt(
+    player.get<number>('free_points') ?? character.freePoints ?? 0,
+    0,
+  );
 
   // 任务数据
   character.questData = player.get<PlayerQuestData>('quests') ?? character.questData ?? null;
