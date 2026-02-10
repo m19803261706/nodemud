@@ -107,6 +107,21 @@ describe('PlayerBase', () => {
     });
   });
 
+  describe('message 事件桥接', () => {
+    it('收到 message 事件时自动转发到客户端', () => {
+      const player = new PlayerBase('player/test');
+      const callback = jest.fn();
+      player.bindConnection(callback);
+
+      player.emit('message', { message: '远处传来钟声。' });
+
+      expect(callback).toHaveBeenCalledWith({
+        type: 'message',
+        data: { content: '远处传来钟声。' },
+      });
+    });
+  });
+
   // ========== getPermission ==========
 
   describe('getPermission()', () => {

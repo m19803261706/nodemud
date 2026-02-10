@@ -10,6 +10,7 @@
  */
 import { RoomBase } from '../game-objects/room-base';
 import { BaseEntity } from '../base-entity';
+import { PlayerBase } from '../game-objects/player-base';
 
 describe('RoomBase', () => {
   let room: RoomBase;
@@ -135,6 +136,22 @@ describe('RoomBase', () => {
 
     it('空房间广播不报错', () => {
       expect(() => room.broadcast('寂静无声。')).not.toThrow();
+    });
+
+    it('对玩家广播会转发到客户端消息', async () => {
+      const player = new PlayerBase('player/test');
+      const sent: any[] = [];
+      player.bindConnection((data) => sent.push(data));
+      await player.moveTo(room, { quiet: true });
+
+      room.broadcast('有人从远处走来。');
+
+      expect(sent).toEqual([
+        {
+          type: 'message',
+          data: { content: '有人从远处走来。' },
+        },
+      ]);
     });
   });
 });

@@ -12,6 +12,19 @@ function getLevelText(): string {
   return '初入江湖';
 }
 
+/** 资源当前值读取（优先 runtime 字段，兼容 legacy *_current 字段） */
+function resolveCurrentValue(
+  player: PlayerBase,
+  runtimeKey: 'hp' | 'mp' | 'energy',
+  legacyKey: 'hp_current' | 'mp_current' | 'energy_current',
+  max: number,
+): number {
+  const runtimeVal = player.get<number>(runtimeKey);
+  const legacyVal = player.get<number>(legacyKey);
+  const current = runtimeVal ?? legacyVal ?? max;
+  return Math.min(Math.max(current, 0), max);
+}
+
 /** 从 Character 实体 + 玩家装备推导 playerStats 消息数据 */
 export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
@@ -21,10 +34,10 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const energyMax =
     (character.wisdom + character.perception) * 50 + (equipBonus.resources?.maxEnergy ?? 0);
 
-  // 资源当前值钳制（脱装备降低上限时不超过新上限）
-  const hpCurrent = Math.min(player.get<number>('hp_current') ?? hpMax, hpMax);
-  const mpCurrent = Math.min(player.get<number>('mp_current') ?? mpMax, mpMax);
-  const energyCurrent = Math.min(player.get<number>('energy_current') ?? energyMax, energyMax);
+  // 资源当前值（优先运行时字段，兼容旧字段）
+  const hpCurrent = resolveCurrentValue(player, 'hp', 'hp_current', hpMax);
+  const mpCurrent = resolveCurrentValue(player, 'mp', 'mp_current', mpMax);
+  const energyCurrent = resolveCurrentValue(player, 'energy', 'energy_current', energyMax);
 
   return {
     name: character.name,

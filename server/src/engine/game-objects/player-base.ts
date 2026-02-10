@@ -14,6 +14,7 @@ import { ServiceLocator } from '../service-locator';
 import { Permission } from '../types/command';
 import { ArmorBase } from './armor-base';
 import { WeaponBase } from './weapon-base';
+import { GameEvents } from '../types/events';
 
 /** 复活地点 */
 const REVIVE_ROOM = 'area/rift-town/square';
@@ -24,6 +25,21 @@ export class PlayerBase extends LivingBase {
 
   /** WebSocket 发送回调 */
   private _sendCallback: ((data: any) => void) | null = null;
+
+  constructor(id: string) {
+    super(id);
+    // 统一桥接房间广播事件到客户端消息
+    this.on(GameEvents.MESSAGE, (payload: { message?: string } | string) => {
+      if (typeof payload === 'string') {
+        this.receiveMessage(payload);
+        return;
+      }
+      const message = payload?.message;
+      if (typeof message === 'string') {
+        this.receiveMessage(message);
+      }
+    });
+  }
 
   /** 绑定连接（玩家上线时调用） */
   bindConnection(sendCallback: (data: any) => void): void {

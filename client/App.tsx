@@ -88,6 +88,13 @@ function App(): React.JSX.Element {
       }
     };
 
+    const handleMessage = (data: any) => {
+      const content =
+        typeof data === 'string' ? data : data?.content || data?.message;
+      if (!content) return;
+      useGameStore.getState().appendLog({ text: content, color: '#5A5048' });
+    };
+
     const handlePlayerStats = (data: any) => {
       const { updatePlayer } = useGameStore.getState();
       updatePlayer(data);
@@ -135,6 +142,7 @@ function App(): React.JSX.Element {
 
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
+    wsService.on('message', handleMessage);
     wsService.on('playerStats', handlePlayerStats);
     wsService.on('inventoryUpdate', handleInventoryUpdate);
     wsService.on('equipmentUpdate', handleEquipmentUpdate);
@@ -145,6 +153,7 @@ function App(): React.JSX.Element {
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
       wsService.off('commandResult', handleCommandResult);
+      wsService.off('message', handleMessage);
       wsService.off('playerStats', handlePlayerStats);
       wsService.off('inventoryUpdate', handleInventoryUpdate);
       wsService.off('equipmentUpdate', handleEquipmentUpdate);
