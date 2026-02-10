@@ -46,6 +46,7 @@ export class ListCommand implements ICommand {
       );
     }
     lines.push(`\n可用: buy <序号|名称> from ${merchant.getName()}`);
+    lines.push(`      sell <物品名> to ${merchant.getName()}`);
 
     return {
       success: true,

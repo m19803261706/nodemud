@@ -52,5 +52,14 @@ export default class Herbalist extends MerchantBase {
         stock: -1,
       },
     ]);
+    this.set('shop_recycle', {
+      enabled: true,
+      // 药师只收药材/药品/可入药食材，不收兵器甲胄
+      allowedTypes: ['medicine', 'food'],
+      deniedTypes: ['weapon', 'armor', 'book', 'container', 'key', 'misc'],
+      priceRate: 0.55,
+      minPrice: 1,
+      rejectionMessage: '白发药师淡淡道：「老身只收药品与可入药之物，其它拿走。」',
+    });
   }
 }

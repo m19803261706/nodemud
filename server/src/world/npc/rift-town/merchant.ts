@@ -62,5 +62,14 @@ export default class Merchant extends MerchantBase {
         stock: 2,
       },
     ]);
+    this.set('shop_recycle', {
+      enabled: true,
+      // 杂货商只收日用杂货，不收武器防具与秘籍
+      allowedTypes: ['food', 'container', 'misc', 'key'],
+      deniedTypes: ['weapon', 'armor', 'book'],
+      priceRate: 0.45,
+      minPrice: 1,
+      rejectionMessage: '杂货商摆手道：「刀剑甲胄你去铁匠那边问吧，我这里只收杂货。」',
+    });
   }
 }
