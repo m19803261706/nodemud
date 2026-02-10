@@ -38,6 +38,21 @@ import './handlers/questAccept';
 import './handlers/questAbandon';
 import './handlers/questComplete';
 import './handlers/allocatePoints';
+// 技能系统消息
+import './handlers/skillList';
+import './handlers/skillUpdate';
+import './handlers/skillLearn';
+import './handlers/combatAwaitAction';
+import './handlers/skillUse';
+import './handlers/skillMapRequest';
+import './handlers/skillMapResult';
+import './handlers/skillPanelRequest';
+import './handlers/skillPanelData';
+import './handlers/practiceStart';
+import './handlers/practiceEnd';
+import './handlers/practiceUpdate';
+import './handlers/skillLearnRequest';
+import './handlers/skillLearnResult';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';
