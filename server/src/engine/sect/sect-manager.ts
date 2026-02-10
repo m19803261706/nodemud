@@ -157,6 +157,11 @@ export class SectManager {
       return { success: false, message: '你并非本门弟子，不能在此捐献。' };
     }
 
+    const equipped = player.findEquipped((equippedItem) => equippedItem.id === item.id);
+    if (equipped) {
+      return { success: false, message: `你正装备着${item.getName()}，请先卸下再捐献。` };
+    }
+
     const evaluate = policy.evaluateDonation(player, deacon, item);
     if (!evaluate.allowed || evaluate.contribution <= 0) {
       return {

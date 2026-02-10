@@ -55,6 +55,11 @@ export class DonateCommand implements ICommand {
       return { success: false, message: '你没有这件物品。' };
     }
 
+    const equipped = executor.findEquipped((equippedItem) => equippedItem.id === item.id);
+    if (equipped) {
+      return { success: false, message: `你正装备着${item.getName()}，请先卸下再捐献。` };
+    }
+
     const npc = env
       .getInventory()
       .find((e) => e instanceof NpcBase && (e as NpcBase).getName().includes(npcName)) as

@@ -58,6 +58,28 @@ describe('门派指令', () => {
     expect(donate).toHaveBeenCalledWith(player, npc, item);
   });
 
+  it('donate 指令应拒绝已装备物品', async () => {
+    const npc = new NpcBase('npc/songyang/deacon-zhao#1');
+    npc.set('name', '赵执事');
+    await npc.moveTo(room, { quiet: true });
+
+    const item = new ItemBase('item/test/sword');
+    item.set('name', '练功剑');
+    item.set('type', 'weapon');
+    await item.moveTo(player, { quiet: true });
+    player.equip(item, 'weapon');
+
+    const donate = jest.fn().mockReturnValue({ success: true, message: 'ok' });
+    (ServiceLocator as any).sectManager = { donate };
+
+    const cmd = new DonateCommand();
+    const result = cmd.execute(player, ['练功剑', 'to', '赵执事']);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('请先卸下再捐献');
+    expect(donate).not.toHaveBeenCalled();
+  });
+
   it('spar 指令成功时应消耗次数并启动演武战斗', async () => {
     const npc = new NpcBase('npc/songyang/sparring-disciple#1');
     npc.set('name', '陪练弟子');

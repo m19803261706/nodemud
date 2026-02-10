@@ -64,6 +64,30 @@ describe('SectManager', () => {
     expect(data.current?.rank).toBe('内门弟子');
   });
 
+  it('已装备物品不能捐献，且不变更贡献', async () => {
+    const player = createPlayer();
+    const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
+    const deacon = createSongyangNpc('npc/songyang/deacon-zhao', '赵执事', 'deacon');
+    manager.apprentice(player, master);
+
+    const sword = new ItemBase('item/test/sword');
+    sword.set('name', '练功剑');
+    sword.set('type', 'weapon');
+    sword.set('value', 200);
+    sword.set('weight', 10);
+    await sword.moveTo(player, { quiet: true });
+    player.equip(sword, 'weapon');
+
+    const result = manager.donate(player, deacon, sword);
+    const data = manager.getPlayerSectData(player);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('请先卸下再捐献');
+    expect(data.current?.contribution).toBe(0);
+    expect(player.getInventory().includes(sword)).toBe(true);
+    expect(player.getEquipment().get('weapon')).toBe(sword);
+  });
+
   it('演武每日仅一次，结算后增加贡献', () => {
     const player = createPlayer();
     const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
