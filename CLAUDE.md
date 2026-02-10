@@ -263,15 +263,17 @@ packages/core/
 
 - 修改 `packages/core/` 下的类型或工厂后，提醒用户需要 `pnpm build`
 - 添加新消息类型时，需要在 `packages/core/src/factory/handlers/` 添加处理器并用 `@MessageHandler` 装饰器注册
-- 添加新的 WebSocket 消息处理时，需要在 `websocket.gateway.ts` 的 switch 中添加路由
+- 添加新的 WebSocket 消息处理时，需要在 `websocket.gateway.ts` 的 switch 中添加路由（当前已有: login, register, createCharacterStep1, createCharacterConfirm, command, questAccept, questAbandon, questComplete, allocatePoints, ping）
 - 前端新页面需要在 `client/App.tsx` 的 Stack.Navigator 中注册路由
 - 数据库新实体需要在对应模块中 `TypeOrmModule.forFeature([Entity])` 注册
 - **前端组件必须遵循 Unity3D 组件模型**：极细粒度拆分，一个组件一个文件，区域容器从 store 取数据，子组件通过 props 接收
 - **禁止在 Screen 文件中堆积业务逻辑** — Screen 只做布局组合（< 50 行）
 - **新增游戏 UI 时**：在 `components/game/` 下创建目录 → 定义 Props → index.tsx 订阅 store → 拆分子组件
 - **状态变更统一走 Zustand store** — 组件不直接调用 WebSocketService，通过 store action 发送
+- **功能规划参考炎黄 MUD** — 在进行 `/cx-scope` 或 `/cx-prd` 规划时，主动参考本地 `参考mud代码/mud/` 目录下的炎黄 MUD 源码（LPC 语言），阅读其对应功能模块的实现和架构（如商店系统看 `feature/vendor.c`，战斗系统看 `feature/attack.c` 等），了解传统 MUD 的成熟方案，作为探讨和设计的参考依据
 
 ## 变更记录 (Changelog)
 
+- **2026-02-10**: 任务系统 + 经验升级体系完成（Epic #220，10 个任务，3588 行新增代码）
 - **2026-02-04**: 新增 Unity3D 组件模型前端架构规范，Zustand 状态管理
 - **2026-02-02**: 初始化项目 CLAUDE.md，记录项目架构、开发指南、编码规范
