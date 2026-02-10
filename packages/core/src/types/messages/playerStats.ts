@@ -27,7 +27,8 @@ export interface PlayerStatsMessage extends ServerMessage {
   type: 'playerStats';
   data: {
     name: string; // 角色名
-    level: string; // 中文等级（如 "初入江湖"）
+    level: number; // 数字等级
+    levelTitle: string; // 中文等级称号（如 "初入江湖"）
     silver: number; // 银两
     hp: ResourceValue; // 气血
     mp: ResourceValue; // 内力
@@ -35,5 +36,10 @@ export interface PlayerStatsMessage extends ServerMessage {
     attrs: CharacterAttrs; // 六维属性
     equipBonus: EquipmentBonus; // 装备加成汇总
     combat: { attack: number; defense: number }; // 最终攻防值
+    exp: number; // 当前经验值
+    expToNextLevel: number; // 升级所需经验值
+    potential: number; // 潜能值
+    score: number; // 江湖评分
+    freePoints: number; // 可分配属性点
   };
 }

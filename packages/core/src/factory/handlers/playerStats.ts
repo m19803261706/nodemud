@@ -19,7 +19,8 @@ export class PlayerStatsHandler implements IMessageHandler {
   validate(data: any): boolean {
     return (
       typeof data.name === 'string' &&
-      typeof data.level === 'string' &&
+      typeof data.level === 'number' &&
+      typeof data.levelTitle === 'string' &&
       typeof data.silver === 'number' &&
       !!data.hp &&
       typeof data.hp.current === 'number' &&
@@ -36,7 +37,12 @@ export class PlayerStatsHandler implements IMessageHandler {
       typeof data.attrs.spirit === 'number' &&
       typeof data.attrs.meridian === 'number' &&
       typeof data.attrs.strength === 'number' &&
-      typeof data.attrs.vitality === 'number'
+      typeof data.attrs.vitality === 'number' &&
+      typeof data.exp === 'number' &&
+      typeof data.expToNextLevel === 'number' &&
+      typeof data.potential === 'number' &&
+      typeof data.score === 'number' &&
+      typeof data.freePoints === 'number'
     );
   }
 }

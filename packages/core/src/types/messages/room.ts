@@ -23,6 +23,8 @@ export interface NpcBrief {
   level: number;
   hpPct: number;
   attitude: string;
+  hasQuest?: boolean; // 是否有可接任务
+  hasQuestReady?: boolean; // 是否有可交付任务
 }
 
 /** 房间信息消息（服务端 → 客户端） */
