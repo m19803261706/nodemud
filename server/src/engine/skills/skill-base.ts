@@ -85,6 +85,16 @@ export abstract class SkillBase {
   }
 
   /**
+   * 获取技能描述文本
+   * 子类可覆写此方法，根据等级返回不同描述
+   * @param level 当前技能等级
+   * @returns 技能描述文本
+   */
+  getDescription(level: number): string {
+    return '';
+  }
+
+  /**
    * 所需门派（null 表示不限门派）
    */
   get factionRequired(): string | null {

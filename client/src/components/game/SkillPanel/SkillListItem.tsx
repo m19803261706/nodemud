@@ -12,9 +12,10 @@ import type { PlayerSkillInfo } from '@packages/core';
 interface SkillListItemProps {
   skill: PlayerSkillInfo;
   onPress: (skillId: string) => void;
+  onEquipToggle?: (skill: PlayerSkillInfo) => void;
 }
 
-export const SkillListItem = ({ skill, onPress }: SkillListItemProps) => {
+export const SkillListItem = ({ skill, onPress, onEquipToggle }: SkillListItemProps) => {
   /** 经验进度百分比 */
   const expPct =
     skill.learnedMax > 0
@@ -44,10 +45,24 @@ export const SkillListItem = ({ skill, onPress }: SkillListItemProps) => {
         ) : null}
       </View>
 
-      {/* 右侧: 等级 */}
-      <Text style={[s.level, skill.isLocked ? s.textLocked : undefined]}>
-        Lv.{skill.level}
-      </Text>
+      {/* 右侧: 等级 + 装配/卸下按钮 */}
+      <View style={s.rightRow}>
+        <Text style={[s.level, skill.isLocked ? s.textLocked : undefined]}>
+          Lv.{skill.level}
+        </Text>
+        {onEquipToggle && !skill.isLocked ? (
+          <TouchableOpacity
+            style={[s.equipBtn, skill.isMapped ? s.equipBtnActive : undefined]}
+            onPress={() => onEquipToggle(skill)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+          >
+            <Text style={[s.equipBtnText, skill.isMapped ? s.equipBtnTextActive : undefined]}>
+              {skill.isMapped ? '卸下' : '装配'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
       {/* 底部: 经验进度条 */}
       <View style={s.expBarOuter}>
@@ -114,14 +129,40 @@ const s = StyleSheet.create({
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
   },
-  level: {
+  rightRow: {
     position: 'absolute',
     right: 4,
-    top: 8,
+    top: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  level: {
     fontSize: 12,
     fontWeight: '600',
     color: '#8B7A5A',
     fontFamily: 'Noto Sans SC',
+  },
+  equipBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A60',
+    backgroundColor: '#F5F0E8',
+  },
+  equipBtnActive: {
+    borderColor: '#4CAF5060',
+    backgroundColor: '#4CAF5010',
+  },
+  equipBtnText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+  },
+  equipBtnTextActive: {
+    color: '#4CAF50',
   },
   expBarOuter: {
     flexDirection: 'row',

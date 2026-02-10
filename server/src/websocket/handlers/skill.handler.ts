@@ -457,8 +457,8 @@ export class SkillHandler {
     const skillData = skillManager.getAllSkills().find((s) => s.skillId === skillId);
     if (!skillData) return null;
 
-    // 获取技能描述（如果有）
-    const description = (skillDef as any).description ?? '';
+    // 获取技能描述
+    const description = skillDef.getDescription(skillData.level);
 
     // 获取招式列表（武学和内功都有 actions 属性）
     const rawActions: SkillAction[] = (skillDef as any).actions ?? [];

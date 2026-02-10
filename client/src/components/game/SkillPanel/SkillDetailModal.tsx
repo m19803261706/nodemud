@@ -20,6 +20,7 @@ import { MessageFactory } from '@packages/core';
 import type { ActionDetailInfo } from '@packages/core';
 import { wsService } from '../../../services/WebSocketService';
 import { useSkillStore } from '../../../stores/useSkillStore';
+import { useGameStore } from '../../../stores/useGameStore';
 import { ActionListItem } from './ActionListItem';
 
 interface SkillDetailModalProps {
@@ -34,6 +35,19 @@ export const SkillDetailModal = ({
   skillId,
 }: SkillDetailModalProps) => {
   const skillDetail = useSkillStore(state => state.skillDetail);
+  const skills = useSkillStore(state => state.skills);
+  const sendCommand = useGameStore(state => state.sendCommand);
+
+  /** 当前技能的映射状态 */
+  const currentSkill = skillId ? skills.find(s => s.skillId === skillId) : null;
+  const isMapped = currentSkill?.isMapped ?? false;
+
+  /** 装配/卸下操作 */
+  const handleEquipToggle = () => {
+    if (!currentSkill) return;
+    const cmd = isMapped ? `disable ${currentSkill.skillName}` : `enable ${currentSkill.skillName}`;
+    sendCommand(cmd);
+  };
 
   /** 打开时请求技能详情 */
   useEffect(() => {
@@ -102,6 +116,24 @@ export const SkillDetailModal = ({
                 {skillDetail?.description ? (
                   <View>
                     <Text style={s.desc}>{skillDetail.description}</Text>
+                    <View style={s.dividerWrap}>
+                      <GradientDivider />
+                    </View>
+                  </View>
+                ) : null}
+
+                {/* 装配/卸下按钮 */}
+                {currentSkill && !currentSkill.isLocked ? (
+                  <View style={s.equipRow}>
+                    <TouchableOpacity
+                      style={[s.equipBtn, isMapped ? s.equipBtnUnmap : undefined]}
+                      onPress={handleEquipToggle}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.equipBtnText, isMapped ? s.equipBtnTextUnmap : undefined]}>
+                        {isMapped ? '卸下技能' : '装配技能'}
+                      </Text>
+                    </TouchableOpacity>
                     <View style={s.dividerWrap}>
                       <GradientDivider />
                     </View>
@@ -200,6 +232,32 @@ const s = StyleSheet.create({
   },
   actionList: {
     maxHeight: 280,
+  },
+  equipRow: {
+    marginBottom: 2,
+  },
+  equipBtn: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A60',
+    backgroundColor: '#8B7A5A10',
+    marginBottom: 8,
+  },
+  equipBtnUnmap: {
+    borderColor: '#D4604060',
+    backgroundColor: '#D4604010',
+  },
+  equipBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6B5D4D',
+    fontFamily: 'Noto Serif SC',
+  },
+  equipBtnTextUnmap: {
+    color: '#D46040',
   },
   emptyText: {
     textAlign: 'center',
