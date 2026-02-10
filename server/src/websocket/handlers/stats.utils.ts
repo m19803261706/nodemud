@@ -25,6 +25,14 @@ function resolveCurrentValue(
   return Math.min(Math.max(current, 0), max);
 }
 
+/** 货币当前值读取（优先 runtime 字段） */
+function resolveSilver(player: PlayerBase, character: Character): number {
+  const runtimeVal = player.get<number>('silver');
+  const base = runtimeVal ?? character.silver ?? 0;
+  if (!Number.isFinite(base)) return 0;
+  return Math.max(0, Math.floor(base));
+}
+
 /** 从 Character 实体 + 玩家装备推导 playerStats 消息数据 */
 export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
@@ -38,10 +46,12 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const hpCurrent = resolveCurrentValue(player, 'hp', 'hp_current', hpMax);
   const mpCurrent = resolveCurrentValue(player, 'mp', 'mp_current', mpMax);
   const energyCurrent = resolveCurrentValue(player, 'energy', 'energy_current', energyMax);
+  const silver = resolveSilver(player, character);
 
   return {
     name: character.name,
     level: getLevelText(),
+    silver,
     hp: { current: hpCurrent, max: hpMax },
     mp: { current: mpCurrent, max: mpMax },
     energy: { current: energyCurrent, max: energyMax },
@@ -85,6 +95,9 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   if (player.get<number>('hp') == null) {
     player.set('hp', maxHp);
   }
+
+  // 银两
+  player.set('silver', Math.max(0, Math.floor(character.silver ?? 0)));
 }
 
 /** 推送 playerStats 到客户端 */

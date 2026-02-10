@@ -53,6 +53,7 @@ export const PlayerStats = () => {
 
   /** 是否有任何攻防值 */
   const hasCombat = player.combat.attack > 0 || player.combat.defense > 0;
+  const showMeta = hasCombat || player.silver > 0;
 
   return (
     <View style={s.container}>
@@ -102,11 +103,12 @@ export const PlayerStats = () => {
         })}
       </View>
 
-      {/* 第三行：攻防数值（有装备加成时显示） */}
-      {hasCombat && (
+      {/* 第三行：银两 + 攻防数值 */}
+      {showMeta && (
         <View style={s.combatRow}>
-          <CombatValue label="攻击" value={player.combat.attack} />
-          <CombatValue label="防御" value={player.combat.defense} />
+          <CombatValue label="银两" value={player.silver} />
+          {hasCombat ? <CombatValue label="攻击" value={player.combat.attack} /> : null}
+          {hasCombat ? <CombatValue label="防御" value={player.combat.defense} /> : null}
         </View>
       )}
 

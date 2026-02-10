@@ -166,6 +166,32 @@ export class LivingBase extends BaseEntity {
     return Math.max(calculated, level * 3);
   }
 
+  /** 获取银两（最小为 0，按整数处理） */
+  getSilver(): number {
+    const value = this.get<number>('silver') ?? 0;
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.floor(value));
+  }
+
+  /** 增减银两，返回变更后余额 */
+  addSilver(delta: number): number {
+    if (!Number.isFinite(delta) || delta === 0) return this.getSilver();
+    const next = Math.max(0, this.getSilver() + Math.floor(delta));
+    this.set('silver', next);
+    return next;
+  }
+
+  /** 扣除银两（余额不足返回 false） */
+  spendSilver(amount: number): boolean {
+    if (!Number.isFinite(amount)) return false;
+    const cost = Math.max(0, Math.floor(amount));
+    if (cost === 0) return true;
+    const current = this.getSilver();
+    if (current < cost) return false;
+    this.set('silver', current - cost);
+    return true;
+  }
+
   /** 恢复生命值（返回实际恢复量） */
   recoverHp(amount: number): number {
     return this.recoverResource('hp', 'max_hp', amount);

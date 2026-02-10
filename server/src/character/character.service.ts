@@ -38,6 +38,7 @@ export interface CreateCharacterData {
   wuxingju: string;
   mingzhuStar: string;
   shenzhuStar: string;
+  silver: number;
 }
 
 @Injectable()
@@ -75,5 +76,10 @@ export class CharacterService {
   /** 更新角色最后所在房间 */
   async updateLastRoom(id: string, roomId: string): Promise<void> {
     await this.characterRepository.update(id, { lastRoom: roomId });
+  }
+
+  /** 更新角色银两 */
+  async updateSilver(id: string, silver: number): Promise<void> {
+    await this.characterRepository.update(id, { silver: Math.max(0, Math.floor(silver)) });
   }
 }

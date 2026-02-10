@@ -180,5 +180,21 @@ export class CommandHandler {
       sendInventoryUpdate(player);
       if (room) sendRoomInfo(player, room, this.blueprintFactory);
     }
+
+    // buy 命令成功后：
+    // - 推送 inventoryUpdate
+    // - 持久化银两并推送 playerStats
+    if (result.success && result.data?.action === 'buy') {
+      sendInventoryUpdate(player);
+      if (session.characterId) {
+        try {
+          await this.characterService.updateSilver(session.characterId, player.getSilver());
+          const character = await this.characterService.findById(session.characterId);
+          if (character) sendPlayerStats(player, character);
+        } catch {
+          // 查询失败不阻塞主流程
+        }
+      }
+    }
   }
 }

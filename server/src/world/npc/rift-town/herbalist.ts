@@ -2,10 +2,10 @@
  * 白发药师 — 裂隙镇药铺
  * 百蛮退隐高手，隐居裂隙镇开药铺
  */
-import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import { MerchantBase } from '../../../engine/game-objects/merchant-base';
 
-export default class Herbalist extends NpcBase {
+export default class Herbalist extends MerchantBase {
   static virtual = false;
 
   create() {
@@ -42,6 +42,15 @@ export default class Herbalist extends NpcBase {
     this.set('equipment', [
       { blueprintId: 'item/rift-town/herb-shirt', position: 'body' },
       { blueprintId: 'item/rift-town/herb-bracelet', position: 'wrist' },
+    ]);
+    this.set('shop_goods', [
+      {
+        blueprintId: 'item/rift-town/golden-salve',
+        name: '金疮药',
+        short: '常见外伤药，止血消肿',
+        price: 28,
+        stock: -1,
+      },
     ]);
   }
 }

@@ -2,10 +2,10 @@
  * 杂货商 — 裂隙镇杂货铺
  * 东海散盟的商人，经营日常用品
  */
-import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import { MerchantBase } from '../../../engine/game-objects/merchant-base';
 
-export default class Merchant extends NpcBase {
+export default class Merchant extends MerchantBase {
   static virtual = false;
 
   create() {
@@ -39,5 +39,28 @@ export default class Merchant extends NpcBase {
       消息: '杂货商压低嗓门：「最近从北边来的商队少了不少，好像是那边出了什么事。货少了价格就高了，你要买什么趁早。」',
       default: '杂货商摊摊手：「这个嘛，不是小人能说上话的事情。客官不如看看咱的货？」',
     });
+    this.set('shop_goods', [
+      {
+        blueprintId: 'item/rift-town/dry-rations',
+        name: '干粮',
+        short: '一包便于携带的干粮',
+        price: 12,
+        stock: -1,
+      },
+      {
+        blueprintId: 'item/rift-town/small-pouch',
+        name: '小包裹',
+        short: '一个结实的小布包，可收纳随身杂物',
+        price: 45,
+        stock: 3,
+      },
+      {
+        blueprintId: 'item/rift-town/cloth-armor',
+        name: '布衣',
+        short: '普通旅人常穿的布衣',
+        price: 80,
+        stock: 2,
+      },
+    ]);
   }
 }

@@ -6,6 +6,7 @@ export { RoomBase } from './room-base';
 export { Area } from './area';
 export type { SpawnRule } from './area';
 export { NpcBase } from './npc-base';
+export { MerchantBase } from './merchant-base';
 export { ItemBase } from './item-base';
 export { WeaponBase } from './weapon-base';
 export { ArmorBase } from './armor-base';

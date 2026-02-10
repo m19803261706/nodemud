@@ -204,6 +204,14 @@ export class Character {
   })
   lastRoom: string;
 
+  @Column({
+    type: 'int',
+    unsigned: true,
+    default: 100,
+    comment: '当前银两',
+  })
+  silver: number;
+
   // ========== 时间 ==========
 
   @CreateDateColumn({

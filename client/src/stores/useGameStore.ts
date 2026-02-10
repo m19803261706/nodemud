@@ -45,6 +45,7 @@ export interface CombatData {
 export interface PlayerData {
   name: string;
   level: string;
+  silver: number;
   hp: ResourceValue;
   mp: ResourceValue;
   energy: ResourceValue;
@@ -211,6 +212,7 @@ const EMPTY_ATTRS: CharacterAttrs = {
 const INITIAL_PLAYER: PlayerData = {
   name: '',
   level: '',
+  silver: 0,
   hp: { current: 0, max: 0 },
   mp: { current: 0, max: 0 },
   energy: { current: 0, max: 0 },

@@ -28,6 +28,7 @@ export interface PlayerStatsMessage extends ServerMessage {
   data: {
     name: string; // 角色名
     level: string; // 中文等级（如 "初入江湖"）
+    silver: number; // 银两
     hp: ResourceValue; // 气血
     mp: ResourceValue; // 内力
     energy: ResourceValue; // 精力

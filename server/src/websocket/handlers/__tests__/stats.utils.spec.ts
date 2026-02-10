@@ -33,6 +33,7 @@ function makeCharacter(partial?: Partial<Character>): Character {
     mingzhuStar: '天机',
     shenzhuStar: '天梁',
     lastRoom: 'area/rift-town/square',
+    silver: 150,
     createdAt: new Date(),
     ...partial,
   } as Character;
@@ -79,5 +80,18 @@ describe('stats.utils derivePlayerStats', () => {
     expect(stats.hp.current).toBe(0);
     expect(stats.mp.current).toBe(320);
     expect(stats.energy.current).toBe(300);
+  });
+
+  it('银两优先使用运行时字段，并保证非负整数', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ silver: 200 });
+
+    player.set('silver', -8.9);
+    let stats = derivePlayerStats(character, player);
+    expect(stats.silver).toBe(0);
+
+    player.set('silver', 123.9);
+    stats = derivePlayerStats(character, player);
+    expect(stats.silver).toBe(123);
   });
 });

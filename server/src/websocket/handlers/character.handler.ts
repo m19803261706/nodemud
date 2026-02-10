@@ -46,6 +46,16 @@ const ATTR_KEYS: (keyof CharacterAttributes)[] = [
 /** 默认出生房间 */
 const DEFAULT_ROOM = 'area/rift-town/square';
 
+/** 出身初始银两（单位：两） */
+const ORIGIN_INITIAL_SILVER: Record<CharacterOrigin, number> = {
+  noble: 140,
+  wanderer: 180,
+  scholar: 100,
+  soldier: 120,
+  herbalist: 110,
+  beggar: 80,
+};
+
 @Injectable()
 export class CharacterHandler {
   private readonly logger = new Logger(CharacterHandler.name);
@@ -237,6 +247,7 @@ export class CharacterHandler {
         wuxingju: pending.wuxingju,
         mingzhuStar: pending.mingzhuStar,
         shenzhuStar: pending.shenzhuStar,
+        silver: this.getInitialSilver(data.origin),
       });
 
       // 清除临时数据
@@ -343,6 +354,11 @@ export class CharacterHandler {
     }
 
     return result;
+  }
+
+  /** 计算初始银两 */
+  private getInitialSilver(origin: CharacterOrigin): number {
+    return ORIGIN_INITIAL_SILVER[origin] ?? 100;
   }
 
   /** 发送创建失败消息 */

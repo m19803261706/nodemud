@@ -20,6 +20,7 @@ export class PlayerStatsHandler implements IMessageHandler {
     return (
       typeof data.name === 'string' &&
       typeof data.level === 'string' &&
+      typeof data.silver === 'number' &&
       !!data.hp &&
       typeof data.hp.current === 'number' &&
       typeof data.hp.max === 'number' &&
