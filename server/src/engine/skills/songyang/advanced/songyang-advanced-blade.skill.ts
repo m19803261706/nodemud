@@ -6,7 +6,7 @@ import type { SkillAction } from '../../types';
 import { BladeSkillBase } from '../../martial/weapon/blade-skill-base';
 import { SONGYANG_SKILL_IDS } from '../songyang-skill-ids';
 import { SONGYANG_FACTION_ID, getSongyangSkillMeta } from '../songyang-skill-meta';
-import { createSongyangPlaceholderAction } from '../songyang-skill-utils';
+import { buildSongyangSkillDescription, getSongyangSkillActions } from '../songyang-skill-utils';
 import { validateSongyangSkillLearn } from '../songyang-unlock-evaluator';
 
 const META = getSongyangSkillMeta(SONGYANG_SKILL_IDS.ADVANCED_BLADE);
@@ -29,6 +29,10 @@ export class SongyangAdvancedBladeSkill extends BladeSkillBase {
   }
 
   get actions(): SkillAction[] {
-    return [createSongyangPlaceholderAction('断岳斜劈')];
+    return getSongyangSkillActions(META.skillId);
+  }
+
+  getDescription(level: number): string {
+    return buildSongyangSkillDescription(META.skillId, level);
   }
 }

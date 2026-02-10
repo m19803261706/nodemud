@@ -6,7 +6,7 @@ import type { CharacterAttrs, SkillAction } from '../../types';
 import { QiInternalBase } from '../../internal/qi-internal-base';
 import { SONGYANG_SKILL_IDS } from '../songyang-skill-ids';
 import { SONGYANG_FACTION_ID, getSongyangSkillMeta } from '../songyang-skill-meta';
-import { createSongyangPlaceholderAction } from '../songyang-skill-utils';
+import { buildSongyangSkillDescription, getSongyangSkillActions } from '../songyang-skill-utils';
 import { validateSongyangSkillLearn } from '../songyang-unlock-evaluator';
 
 const META = getSongyangSkillMeta(SONGYANG_SKILL_IDS.ULTIMATE_FORCE);
@@ -29,7 +29,11 @@ export class SongyangUltimateForceSkill extends QiInternalBase {
   }
 
   get actions(): SkillAction[] {
-    return [createSongyangPlaceholderAction('乾元引气')];
+    return getSongyangSkillActions(META.skillId);
+  }
+
+  getDescription(level: number): string {
+    return buildSongyangSkillDescription(META.skillId, level);
   }
 
   getAttributeBonus(level: number): Partial<CharacterAttrs> {

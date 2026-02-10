@@ -209,6 +209,54 @@ function evaluateByRules(
   };
 }
 
+export function describeSongyangUnlockRules(skillId: SongyangSkillId): string[] {
+  const rules = SONGYANG_SKILL_META[skillId].unlockRules;
+  const lines: string[] = ['需为嵩阳宗弟子。'];
+
+  if (rules.minRank) {
+    const requiredContribution = getMinContributionByRank(rules.minRank);
+    const thresholdText =
+      requiredContribution == null ? '' : `（贡献至少 ${requiredContribution}）`;
+    lines.push(`门中职位需达到「${rules.minRank}」${thresholdText}。`);
+  }
+
+  if (rules.minAttrs) {
+    const attrParts = Object.entries(rules.minAttrs).map(
+      ([key, value]) => `${ATTR_NAME_MAP[key as SongyangAttrKey]}≥${value}`,
+    );
+    if (attrParts.length > 0) {
+      lines.push(`属性要求：${attrParts.join('、')}。`);
+    }
+  }
+
+  if (rules.preSkills) {
+    const preSkillParts = Object.entries(rules.preSkills).map(([id, level]) => {
+      const meta = SONGYANG_SKILL_META[id as SongyangSkillId];
+      const skillName = meta?.skillName ?? id;
+      return `${skillName}≥${level}级`;
+    });
+    if (preSkillParts.length > 0) {
+      lines.push(`前置要求：${preSkillParts.join('、')}。`);
+    }
+  }
+
+  if (rules.puzzle && rules.puzzle.length > 0) {
+    const puzzleText = rules.puzzle.map((x) => PUZZLE_NAME_MAP[x]).join('、');
+    lines.push(`解密链：${puzzleText}。`);
+  }
+
+  if (rules.challenges && rules.challenges.length > 0) {
+    const challengeText = rules.challenges.map((x) => CHALLENGE_NAME_MAP[x]).join('、');
+    lines.push(`挑战要求：${challengeText}。`);
+  }
+
+  if (skillId === SONGYANG_SKILL_IDS.CANON_ESSENCE) {
+    lines.push('若传承残缺（canonCrippled=true），此法不可再精进。');
+  }
+
+  return lines;
+}
+
 export function evaluateSongyangSkillUnlock(
   player: LivingBase,
   skillId: SongyangSkillId,
