@@ -11,8 +11,9 @@
  *   baseDamage = attack * randomFactor(0.8~1.2)
  *   最终伤害 >= COMBAT_CONSTANTS.MIN_DAMAGE
  */
-import { COMBAT_CONSTANTS } from '@packages/core';
+import { COMBAT_CONSTANTS, SKILL_CONSTANTS } from '@packages/core';
 import type { LivingBase } from '../game-objects/living-base';
+import type { SkillAction } from '../skills/types';
 
 /** 单次攻击结果 */
 export interface AttackResult {
@@ -24,6 +25,14 @@ export interface AttackResult {
   isCrit: boolean;
   /** 富文本战斗描述 */
   description: string;
+}
+
+/** 招式攻击选项 */
+export interface SkillAttackOptions {
+  /** 使用的招式（undefined 则为普通攻击） */
+  action?: SkillAction;
+  /** 武器是否不匹配（兵刃武学装备了错误类型武器） */
+  weaponMismatch?: boolean;
 }
 
 /**
@@ -111,6 +120,67 @@ export class DamageEngine {
   }
 
   /**
+   * 带招式修正的攻击计算
+   * 在基础伤害公式上叠加招式的 modifiers 和武器匹配检查
+   *
+   * @param attacker 攻击方
+   * @param defender 防御方
+   * @param options  招式选项（action 和武器匹配标记）
+   * @returns 攻击结果
+   */
+  static calculateWithAction(
+    attacker: LivingBase,
+    defender: LivingBase,
+    options?: SkillAttackOptions,
+  ): AttackResult {
+    const action = options?.action;
+    const weaponMismatch = options?.weaponMismatch ?? false;
+
+    // 无招式时退化为普通攻击
+    if (!action) {
+      return this.calculate(attacker, defender);
+    }
+
+    // 叠加招式攻击修正
+    const baseAttack = attacker.getAttack();
+    const effectiveAttack = baseAttack + (action.modifiers.attack ?? 0);
+    const defense = defender.getDefense();
+
+    const isCrit = false;
+
+    // 使用修正后的攻击力计算基础伤害
+    let damage = this.calculateDamage(effectiveAttack, defense);
+
+    // 叠加招式伤害修正
+    damage += action.modifiers.damage ?? 0;
+
+    // 武器不匹配惩罚
+    if (weaponMismatch) {
+      damage = Math.floor(damage * SKILL_CONSTANTS.WEAPON_MISMATCH_FACTOR);
+    }
+
+    // 保底伤害
+    damage = Math.max(COMBAT_CONSTANTS.MIN_DAMAGE, damage);
+
+    const defenderMaxHp = defender.get<number>('max_hp') || 100;
+    const description = this.generateSkillDescription(
+      attacker,
+      defender,
+      action,
+      damage,
+      isCrit,
+      weaponMismatch,
+    );
+
+    return {
+      type: isCrit ? 'crit' : 'attack',
+      damage,
+      isCrit,
+      description,
+    };
+  }
+
+  /**
    * 生成战斗描述（富文本）
    * 使用 SemanticTag 格式：[combat]...[/combat]、[damage]...[/damage]
    *
@@ -138,5 +208,40 @@ export class DamageEngine {
       `[combat]${defenderName}[/combat]，` +
       `造成 [damage]${damage}[/damage] 点伤害。`
     );
+  }
+
+  /**
+   * 生成招式攻击描述（富文本）
+   * 显示招式名称和伤害信息
+   *
+   * @param attacker      攻击方
+   * @param defender      防御方
+   * @param action        使用的招式
+   * @param damage        伤害值
+   * @param _isCrit       是否暴击
+   * @param weaponMismatch 是否武器不匹配
+   * @returns 富文本战斗描述
+   */
+  private static generateSkillDescription(
+    attacker: LivingBase,
+    defender: LivingBase,
+    action: SkillAction,
+    damage: number,
+    _isCrit: boolean,
+    weaponMismatch: boolean,
+  ): string {
+    const attackerName = attacker.getName();
+    const defenderName = defender.getName();
+
+    let desc =
+      `[combat]${attackerName}[/combat]使出「${action.name}」攻击` +
+      `[combat]${defenderName}[/combat]，` +
+      `造成 [damage]${damage}[/damage] 点伤害。`;
+
+    if (weaponMismatch) {
+      desc += '（武器不合，威力大减）';
+    }
+
+    return desc;
   }
 }

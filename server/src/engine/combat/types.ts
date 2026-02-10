@@ -4,6 +4,7 @@
  */
 import type { LivingBase } from '../game-objects/living-base';
 import type { CombatSide } from '@packages/core';
+import { CombatParticipantState } from '@packages/core';
 
 /** 战斗参与者 */
 export interface CombatParticipant {
@@ -15,6 +16,10 @@ export interface CombatParticipant {
   gauge: number;
   /** 攻击目标 */
   target: LivingBase;
+  /** 参与者状态（蓄力 / 等待行动 / 执行中） */
+  state: CombatParticipantState;
+  /** 选招超时定时器（仅玩家使用） */
+  actionTimeout?: ReturnType<typeof setTimeout>;
 }
 
 /** 战斗实例 */
