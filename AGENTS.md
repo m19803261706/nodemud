@@ -10,8 +10,15 @@
 2. 后端细则：`server/CLAUDE.md`
 3. 前端细则：`client/CLAUDE.md`
 4. 共享包细则：`packages/core/CLAUDE.md`
+5. Codex 本地工作流：`.claude/cx/CODEX-WORKFLOW.md`
 
 如有冲突，优先遵循更具体目录下的规范文件。
+
+## Developer Identity
+
+1. 当前仓库默认开发者为 `lude`（见 `.claude/cx/config.json`）。
+2. CX 工作流文档和状态必须按开发者隔离，目录规范：`.claude/cx/users/<developer_id>/...`。
+3. 禁止把 `cx` 或其他开发者的本地状态写入 `lude` 目录。
 
 ## Execution Rules
 
@@ -29,7 +36,7 @@
 
 ## Research-First Rules (Critical)
 
-1. 当用户要求“实现新任务”或“探讨任务规划”时，必须先检索本地参考仓库：`/Users/cx/Documents/code/nextjs/renzaiGame/参考mud代码`。
+1. 当用户要求“实现新任务”或“探讨任务规划”时，必须先检索本地参考仓库：优先 `参考mud代码/`（项目内或本机本地路径），不要硬编码 `cx` 用户目录。
 2. 检索参考仓库时，优先定位与当前需求直接相关的功能实现与架构写法，再结合本项目风格提出方案。
 3. 在给出实现方案或开始编码前，必须同步检索本项目中是否已有相关实现（包括可复用模块、消息类型、链路与测试），避免重复造轮子和架构冲突。
 
