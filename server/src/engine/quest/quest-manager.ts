@@ -418,15 +418,16 @@ export class QuestManager {
    * 物品交付回调
    * 更新 deliver 类型目标的计数
    */
-  onItemDelivered(npc: NpcBase, giver: LivingBase, item: ItemBase): void {
+  onItemDelivered(npc: NpcBase, giver: LivingBase, item: ItemBase): CommandResult[] {
     // 只处理玩家交付
     const { PlayerBase: PlayerBaseClass } = require('../game-objects/player-base');
-    if (!(giver instanceof PlayerBaseClass)) return;
+    if (!(giver instanceof PlayerBaseClass)) return [];
 
     const player = giver as PlayerBase;
     const npcBlueprintId = this.getBlueprintId(npc);
     const itemBlueprintId = this.getItemBlueprintId(item);
     const questData = this.getPlayerQuestData(player);
+    const autoCompleteResults: CommandResult[] = [];
     let changed = false;
 
     for (const [questId, progress] of Object.entries(questData.active)) {
@@ -456,7 +457,8 @@ export class QuestManager {
         changed = true;
         const becameReady = this.checkQuestCompletion(def, progress);
         if (becameReady) {
-          this.notifyQuestReady(player, def);
+          // deliver 类目标在正确交付 NPC 处达成后，直接自动完成
+          autoCompleteResults.push(this.completeQuest(player, questId, npc));
         }
       }
     }
@@ -465,6 +467,8 @@ export class QuestManager {
       this.savePlayerQuestData(player, questData);
       this.sendQuestUpdate(player);
     }
+
+    return autoCompleteResults;
   }
 
   /**

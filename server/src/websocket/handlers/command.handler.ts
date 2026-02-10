@@ -231,7 +231,41 @@ export class CommandHandler {
         const npc = this.objectManager.findById(npcId);
         const item = this.objectManager.findById(itemId);
         if (npc instanceof NpcBase && item instanceof ItemBase) {
-          ServiceLocator.questManager.onItemDelivered(npc, player, item);
+          const autoCompleteResults = ServiceLocator.questManager.onItemDelivered(npc, player, item);
+
+          for (const autoCompleteResult of autoCompleteResults) {
+            if (autoCompleteResult.message) {
+              player.receiveMessage(autoCompleteResult.message);
+            }
+          }
+
+          const completedByDelivery = autoCompleteResults.some((r) => r.success);
+          if (completedByDelivery) {
+            // 自动完成可能发放奖励物品，需再次刷新背包
+            sendInventoryUpdate(player);
+
+            // 自动完成可能获得经验，复用 questComplete 的升级/属性/持久化链路
+            if (session.characterId) {
+              try {
+                const character = await this.characterService.findById(session.characterId);
+                if (character) {
+                  const beforeLevel = player.get<number>('level') ?? character.level ?? 1;
+                  if (ServiceLocator.expManager) {
+                    ServiceLocator.expManager.checkLevelUp(player, character);
+                  }
+                  const afterLevel = player.get<number>('level') ?? beforeLevel;
+
+                  if (afterLevel <= beforeLevel) {
+                    sendPlayerStats(player, character);
+                  }
+
+                  await this.characterService.savePlayerDataToDB(player, session.characterId);
+                }
+              } catch {
+                // 查询失败不阻塞主流程
+              }
+            }
+          }
         }
       }
     }
@@ -240,8 +274,16 @@ export class CommandHandler {
     // 只要背包物品发生变化，就检查任务进度
     if (result.success && ServiceLocator.questManager) {
       const inventoryActions = [
-        'get', 'drop', 'get_from', 'put', 'buy', 'sell',
-        'wear', 'wield', 'remove', 'give',
+        'get',
+        'drop',
+        'get_from',
+        'put',
+        'buy',
+        'sell',
+        'wear',
+        'wield',
+        'remove',
+        'give',
       ];
       if (inventoryActions.includes(result.data?.action)) {
         ServiceLocator.questManager.onInventoryChange(player);

@@ -104,4 +104,27 @@ describe('裂隙镇新手任务链', () => {
     const readyAtTurnIn = questManager.getNpcQuestBriefs(player, 'npc/rift-town/herbalist');
     expect(readyAtTurnIn.some((q) => q.questId === q1!.id && q.state === 'ready')).toBe(true);
   });
+
+  it('把信件交给药师后应自动完成任务', () => {
+    const questManager = new QuestManager();
+    const player = new PlayerBase('player/quest-auto-complete');
+    player.set('name', '测试玩家');
+
+    const q1 = (blacksmith.get<QuestDefinition[]>('quests') ?? [])[0];
+    expect(q1).toBeDefined();
+    questManager.registerQuest(q1!);
+
+    const accept = questManager.acceptQuest(player, q1!.id, blacksmith);
+    expect(accept.success).toBe(true);
+
+    const letter = new BlacksmithLetter('item/quest/blacksmith-letter#auto-complete');
+    letter.create();
+
+    const autoCompleteResults = questManager.onItemDelivered(herbalist, player, letter);
+    expect(autoCompleteResults.some((r) => r.success)).toBe(true);
+
+    const questData = player.get<any>('quests');
+    expect(questData.active[q1!.id]).toBeUndefined();
+    expect(questData.completed).toContain(q1!.id);
+  });
 });
