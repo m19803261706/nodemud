@@ -1,6 +1,6 @@
 /**
  * ItemRow -- 背包物品行
- * 显示物品名称、类型标签、重量、数量
+ * 显示物品名称、描述、类型、重量、价值、数量
  * 支持点击选中（触发操作弹窗）
  */
 
@@ -34,19 +34,25 @@ export const ItemRow = React.memo(({ item, onPress }: ItemRowProps) => {
       onPress={() => onPress(item)}
       activeOpacity={0.6}
     >
-      {/* 物品名 + 数量 */}
-      <Text style={s.name} numberOfLines={1}>
-        {item.name}
-        {item.count > 1 ? ` x${item.count}` : ''}
-      </Text>
-
-      {/* 类型标签 */}
-      <View style={s.typeBadge}>
-        <Text style={s.typeText}>{typeLabel}</Text>
+      <View style={s.main}>
+        <View style={s.nameRow}>
+          <Text style={s.name} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {item.count > 1 ? <Text style={s.countBadge}>x{item.count}</Text> : null}
+        </View>
+        <Text style={s.short} numberOfLines={1}>
+          {item.short}
+        </Text>
       </View>
 
-      {/* 重量 */}
-      <Text style={s.weight}>{item.weight}</Text>
+      <View style={s.meta}>
+        <View style={s.typeBadge}>
+          <Text style={s.typeText}>{typeLabel}</Text>
+        </View>
+        <Text style={s.metaText}>{item.weight}重</Text>
+        <Text style={s.metaText}>{item.value}银</Text>
+      </View>
     </TouchableOpacity>
   );
 });
@@ -54,19 +60,47 @@ export const ItemRow = React.memo(({ item, onPress }: ItemRowProps) => {
 const s = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 7,
-    paddingHorizontal: 8,
+    alignItems: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#8B7A5A15',
+    gap: 8,
+  },
+  main: {
+    flex: 1,
+    gap: 2,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
   name: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  short: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  countBadge: {
+    fontSize: 10,
+    color: '#5B503F',
+    fontFamily: 'Noto Sans SC',
+    fontWeight: '700',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    backgroundColor: '#8B7A5A20',
+    borderRadius: 8,
+  },
+  meta: {
+    alignItems: 'flex-end',
+    gap: 3,
   },
   typeBadge: {
     paddingHorizontal: 5,
@@ -79,11 +113,9 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Sans SC',
   },
-  weight: {
-    fontSize: 11,
+  metaText: {
+    fontSize: 10,
     color: '#6B5D4D',
     fontFamily: 'Noto Sans SC',
-    width: 28,
-    textAlign: 'right',
   },
 });

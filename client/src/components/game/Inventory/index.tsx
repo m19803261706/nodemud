@@ -1,7 +1,7 @@
 /**
  * InventoryPage -- 全屏背包页面
  * 上下布局：物品区域(flex:3) + LogScrollView(flex:2)
- * 包含分类 Tab 切换、物品列表/装备视图、物品操作弹窗
+ * 包含分类/搜索/排序、物品列表/装备视图、物品操作弹窗
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -13,6 +13,7 @@ import { CategoryTabs, type CategoryKey } from './CategoryTabs';
 import { ItemList } from './ItemList';
 import { EquipmentView } from './EquipmentView';
 import { ItemActionSheet } from './ItemActionSheet';
+import { InventoryToolbar, type InventorySortKey } from './InventoryToolbar';
 
 /** 分类过滤规则 */
 function filterByCategory(
@@ -41,19 +42,90 @@ function filterByCategory(
   }
 }
 
+function sortItems(
+  items: InventoryItem[],
+  sortKey: InventorySortKey,
+): InventoryItem[] {
+  const cloned = [...items];
+  switch (sortKey) {
+    case 'name':
+      return cloned.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+    case 'weight':
+      return cloned.sort((a, b) => b.weight - a.weight);
+    case 'value':
+      return cloned.sort((a, b) => b.value - a.value);
+    default:
+      return cloned;
+  }
+}
+
 export const InventoryPage = () => {
   const inventory = useGameStore(state => state.inventory);
+  const equipment = useGameStore(state => state.equipment);
 
   /** 当前选中分类 */
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
+  const [keyword, setKeyword] = useState('');
+  const [sortKey, setSortKey] = useState<InventorySortKey>('default');
 
   /** 选中的物品（弹窗用） */
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
-  /** 过滤后的物品列表 */
-  const filteredItems = useMemo(
-    () => filterByCategory(inventory, activeCategory),
-    [inventory, activeCategory],
+  /** 分类计数（按可见件数统计） */
+  const categoryCounts = useMemo(() => {
+    const counts: Record<CategoryKey, number> = {
+      equipment: 0,
+      all: 0,
+      weapon: 0,
+      armor: 0,
+      medicine: 0,
+      misc: 0,
+    };
+
+    for (const item of inventory) {
+      counts.all += item.count;
+      if (item.type === 'weapon') counts.weapon += item.count;
+      else if (item.type === 'armor') counts.armor += item.count;
+      else if (item.type === 'medicine' || item.type === 'food')
+        counts.medicine += item.count;
+      else counts.misc += item.count;
+    }
+
+    counts.equipment = Object.values(equipment).filter(Boolean).length;
+    return counts;
+  }, [inventory, equipment]);
+
+  /** 过滤 + 关键词 + 排序后的物品列表 */
+  const filteredItems = useMemo(() => {
+    let result = filterByCategory(inventory, activeCategory);
+
+    const normalizedKeyword = keyword.trim().toLowerCase();
+    if (normalizedKeyword.length > 0) {
+      result = result.filter(item => {
+        return (
+          item.name.toLowerCase().includes(normalizedKeyword) ||
+          item.short.toLowerCase().includes(normalizedKeyword) ||
+          item.type.toLowerCase().includes(normalizedKeyword)
+        );
+      });
+    }
+
+    return sortItems(result, sortKey);
+  }, [inventory, activeCategory, keyword, sortKey]);
+
+  const totalCount = useMemo(
+    () => inventory.reduce((sum, item) => sum + item.count, 0),
+    [inventory],
+  );
+
+  const totalWeight = useMemo(
+    () => inventory.reduce((sum, item) => sum + item.weight * item.count, 0),
+    [inventory],
+  );
+
+  const visibleCount = useMemo(
+    () => filteredItems.reduce((sum, item) => sum + item.count, 0),
+    [filteredItems],
   );
 
   /** 点击物品行 */
@@ -76,11 +148,31 @@ export const InventoryPage = () => {
         <CategoryTabs
           activeCategory={activeCategory}
           onSelect={setActiveCategory}
+          counts={categoryCounts}
         />
         {isEquipmentTab ? (
           <EquipmentView />
         ) : (
-          <ItemList items={filteredItems} onItemPress={handleItemPress} />
+          <>
+            <InventoryToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              sortKey={sortKey}
+              onSortChange={setSortKey}
+              visibleCount={visibleCount}
+              totalCount={totalCount}
+              totalWeight={totalWeight}
+            />
+            <ItemList
+              items={filteredItems}
+              onItemPress={handleItemPress}
+              emptyText={
+                keyword.trim().length > 0
+                  ? '没有匹配到符合条件的物品'
+                  : '背包空空如也'
+              }
+            />
+          </>
         )}
       </View>
 
