@@ -18,6 +18,7 @@ import { CombatManager } from './combat/combat-manager';
 import { ExpManager } from './quest/exp-manager';
 import { QuestManager } from './quest/quest-manager';
 import { SkillRegistry } from './skills/skill-registry';
+import { PracticeManager } from './skills/practice-manager';
 import { SkillModule } from '../skill/skill.module';
 import { SkillService } from '../skill/skill.service';
 
@@ -36,6 +37,7 @@ import { SkillService } from '../skill/skill.service';
     ExpManager,
     QuestManager,
     SkillRegistry,
+    PracticeManager,
   ],
   exports: [
     HeartbeatManager,
@@ -50,6 +52,7 @@ import { SkillService } from '../skill/skill.service';
     ExpManager,
     QuestManager,
     SkillRegistry,
+    PracticeManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -68,6 +71,7 @@ export class EngineModule implements OnModuleInit {
     private readonly expManager: ExpManager,
     private readonly questManager: QuestManager,
     private readonly skillRegistry: SkillRegistry,
+    private readonly practiceManager: PracticeManager,
     private readonly skillService: SkillService,
   ) {}
 
@@ -87,6 +91,9 @@ export class EngineModule implements OnModuleInit {
       skillService: this.skillService,
       skillRegistry: this.skillRegistry,
     });
+    // 设置 PracticeManager 的技能注册表引用
+    this.practiceManager.setSkillRegistry(this.skillRegistry);
+
     this.objectManager.startGC();
 
     // 扫描加载蓝图（world/ 目录在编译后的 dist/ 下）

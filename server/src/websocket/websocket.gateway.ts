@@ -21,6 +21,7 @@ import type { Session } from './types/session';
 import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
+import { SkillHandler } from './handlers/skill.handler';
 import { sendPlayerStats } from './handlers/stats.utils';
 import { sendInventoryUpdate } from './handlers/room-utils';
 import { CharacterService } from '../character/character.service';
@@ -46,6 +47,7 @@ export class GameGateway
     private readonly authHandler: AuthHandler,
     private readonly characterHandler: CharacterHandler,
     private readonly commandHandler: CommandHandler,
+    private readonly skillHandler: SkillHandler,
     private readonly characterService: CharacterService,
     private readonly objectManager: ObjectManager,
   ) {}
@@ -223,6 +225,24 @@ export class GameGateway
         break;
       case 'allocatePoints':
         await this.handleAllocatePoints(client, session, message.data as any);
+        break;
+      case 'skillUse':
+        await this.skillHandler.handleSkillUse(session, message.data as any);
+        break;
+      case 'skillMapRequest':
+        await this.skillHandler.handleSkillMapRequest(session, message.data as any);
+        break;
+      case 'skillPanelRequest':
+        await this.skillHandler.handleSkillPanelRequest(session, message.data as any);
+        break;
+      case 'skillLearnRequest':
+        await this.skillHandler.handleSkillLearnRequest(session, message.data as any);
+        break;
+      case 'practiceStart':
+        await this.skillHandler.handlePracticeStart(session, message.data as any);
+        break;
+      case 'practiceEnd':
+        await this.skillHandler.handlePracticeEnd(session, message.data as any);
         break;
       case 'ping':
         // 心跳，无需处理
