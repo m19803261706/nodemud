@@ -11,6 +11,8 @@ import type { NpcBase } from '../game-objects/npc-base';
 import { PlayerBase } from '../game-objects/player-base';
 import type { PlayerSectData } from './types';
 import { clonePlayerSectData, normalizePlayerSectData } from './types';
+import { SONGYANG_SKILL_IDS } from '../skills/songyang/songyang-skill-ids';
+import { SONGYANG_FACTION_ID } from '../skills/songyang/songyang-skill-meta';
 import { SectRegistry } from './sect-registry';
 import type { SectPolicy } from './policies/sect-policy';
 
@@ -274,9 +276,15 @@ export class SectManager {
     const penalty = policy.applyBetrayalPenalty(player, witness, data);
     const current = data.current;
     let removedSkills: string[] = [];
+    let canonCrippledRetained = false;
 
     if (penalty.removeFactionSkills && player.skillManager) {
       removedSkills = player.skillManager.removeSkillsByFaction(policy.factionRequired);
+      if (currentSectId === SONGYANG_FACTION_ID) {
+        canonCrippledRetained = player.skillManager
+          .getAllSkills()
+          .some((skill) => skill.skillId === SONGYANG_SKILL_IDS.CANON_ESSENCE && skill.isLocked);
+      }
     }
 
     if (penalty.clearContribution) {
@@ -294,6 +302,9 @@ export class SectManager {
     } else {
       data.restrictions.cooldownUntil = null;
     }
+    if (currentSectId === SONGYANG_FACTION_ID && data.songyangSkill) {
+      data.songyangSkill.legacy.canonCrippled = canonCrippledRetained;
+    }
 
     data.current = null;
     this.savePlayerSectData(player, data);
@@ -304,10 +315,13 @@ export class SectManager {
         : '你虽离门，身上并无本门技艺可废。';
 
     const summary = penalty.summary || `${policy.sectName}门籍已除，永不录入。`;
+    const crippledHint = canonCrippledRetained
+      ? '\n守正真意已成残篇：不可再运使、不可再精进，但仍保留二成习艺心得。'
+      : '';
 
     return {
       success: true,
-      message: `${summary}\n${removedText}`,
+      message: `${summary}\n${removedText}${crippledHint}`,
       data: {
         action: 'betray',
         sectId: currentSectId,

@@ -4,6 +4,7 @@ import { PlayerBase } from '../game-objects/player-base';
 import { SongyangPolicy } from '../sect/policies/songyang.policy';
 import { SectManager } from '../sect/sect-manager';
 import { SectRegistry } from '../sect/sect-registry';
+import { SONGYANG_SKILL_IDS } from '../skills/songyang/songyang-skill-ids';
 
 function createPlayer(id = 'player/test'): PlayerBase {
   const player = new PlayerBase(id);
@@ -131,7 +132,13 @@ describe('SectManager', () => {
     manager.apprentice(player, mentor);
 
     const removeSkillsByFaction = jest.fn().mockReturnValue(['songyang-strike', 'songyang-force']);
-    player.skillManager = { removeSkillsByFaction } as any;
+    const getAllSkills = jest.fn().mockReturnValue([
+      {
+        skillId: SONGYANG_SKILL_IDS.CANON_ESSENCE,
+        isLocked: true,
+      },
+    ]);
+    player.skillManager = { removeSkillsByFaction, getAllSkills } as any;
 
     const result = manager.betray(player, deacon);
     const data = manager.getPlayerSectData(player);
@@ -140,6 +147,8 @@ describe('SectManager', () => {
     expect(removeSkillsByFaction).toHaveBeenCalledWith('songyang');
     expect(data.current).toBeNull();
     expect(data.restrictions.bannedSectIds).toContain('songyang');
+    expect(data.songyangSkill?.legacy.canonCrippled).toBe(true);
+    expect(result.message).toContain('保留二成习艺心得');
   });
 
   it('NPC 动作按身份精细显示', () => {

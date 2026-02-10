@@ -30,6 +30,9 @@ import type { SkillRegistry } from './skill-registry';
 import type { SkillBase } from './skill-base';
 import type { MartialSkillBase } from './martial/martial-skill-base';
 import type { InternalSkillBase } from './internal/internal-skill-base';
+import { normalizePlayerSectData } from '../sect/types';
+import { SONGYANG_SKILL_IDS } from './songyang/songyang-skill-ids';
+import { SONGYANG_FACTION_ID } from './songyang/songyang-skill-meta';
 
 // ========== 内部数据结构 ==========
 
@@ -257,6 +260,8 @@ export class SkillManager {
     const data = this.skills.get(skillId);
     if (!data) return false;
 
+    if (data.isLocked) return false;
+
     const skillDef = this.skillRegistry.get(skillId);
     if (!skillDef) return false;
 
@@ -285,6 +290,10 @@ export class SkillManager {
     if (!weakMode) {
       const cognizeLevel = this.getSkillLevel('cognize', true);
       effectiveAmount = amount * (1 + cognizeLevel / SKILL_CONSTANTS.COGNIZE_FACTOR);
+      const crippledBonusRatio = this.getCrippledCanonLearningBonusRatio(skillId);
+      if (crippledBonusRatio > 0) {
+        effectiveAmount *= 1 + crippledBonusRatio;
+      }
     }
 
     // 属性影响 -- 使用技能对应的主属性
@@ -376,6 +385,13 @@ export class SkillManager {
     const data = this.skills.get(skillId);
     if (!data) {
       return '你还没有学会这个技能。';
+    }
+
+    if (data.isLocked) {
+      if (skillId === SONGYANG_SKILL_IDS.CANON_ESSENCE) {
+        return '此传承已残缺，无法再运使。';
+      }
+      return '该技能已被锁定，无法装配。';
     }
 
     // 获取技能定义
@@ -803,10 +819,47 @@ export class SkillManager {
 
     const removedSkillIds: string[] = [];
     const removedDbIds: string[] = [];
+    const lockedUpdates: { id: string; data: any }[] = [];
+    let hasStateChange = false;
 
     for (const [skillId, data] of this.skills) {
       const skillDef = this.skillRegistry.get(skillId);
       if (!skillDef || skillDef.factionRequired !== factionRequired) continue;
+
+      const shouldKeepAsCrippledCanon =
+        factionRequired === SONGYANG_FACTION_ID && skillId === SONGYANG_SKILL_IDS.CANON_ESSENCE;
+
+      if (shouldKeepAsCrippledCanon) {
+        // 残篇保留：强制卸下并锁定，不再可装配/提升。
+        if (data.mappedSlot) {
+          this.skillMap.delete(data.mappedSlot);
+        }
+        if (this.activeForce === skillId) {
+          this.activeForce = null;
+        }
+
+        data.isMapped = false;
+        data.mappedSlot = null;
+        data.isActiveForce = false;
+        data.isLocked = true;
+        data.dirty = true;
+        hasStateChange = true;
+
+        if (data.dbId) {
+          lockedUpdates.push({
+            id: data.dbId,
+            data: {
+              level: data.level,
+              learned: data.learned,
+              isMapped: false,
+              mappedSlot: null,
+              isActiveForce: false,
+              isLocked: true,
+            },
+          });
+        }
+        continue;
+      }
 
       // 清理映射
       if (data.mappedSlot) {
@@ -821,10 +874,11 @@ export class SkillManager {
         removedDbIds.push(data.dbId);
       }
       this.skills.delete(skillId);
+      hasStateChange = true;
     }
 
     // 异步清理数据库，避免阻塞指令执行
-    if (removedDbIds.length > 0) {
+    if (removedDbIds.length > 0 || lockedUpdates.length > 0) {
       void (async () => {
         for (const id of removedDbIds) {
           try {
@@ -833,10 +887,18 @@ export class SkillManager {
             this.logger.error(`删除门派技能记录失败: ${id} => ${err}`);
           }
         }
+
+        if (lockedUpdates.length > 0) {
+          try {
+            await this.skillService.updateMany(lockedUpdates);
+          } catch (err) {
+            this.logger.error(`写入残篇锁定状态失败: ${err}`);
+          }
+        }
       })();
     }
 
-    if (removedSkillIds.length > 0) {
+    if (hasStateChange) {
       this.player.normalizeResourcesToCaps();
 
       // 推送完整技能列表快照，前端直接按新列表刷新
@@ -940,6 +1002,22 @@ export class SkillManager {
   // ================================================================
   //  辅助方法
   // ================================================================
+
+  /**
+   * 叛门后嵩阳总纲残篇的学习效率残留
+   * 仅在 canonCrippled=true 且总纲被锁定时生效，保留原倍率的 20%。
+   */
+  private getCrippledCanonLearningBonusRatio(targetSkillId: string): number {
+    if (targetSkillId === SONGYANG_SKILL_IDS.CANON_ESSENCE) return 0;
+
+    const canonData = this.skills.get(SONGYANG_SKILL_IDS.CANON_ESSENCE);
+    if (!canonData || !canonData.isLocked || canonData.level <= 0) return 0;
+
+    const sectData = normalizePlayerSectData(this.player.get('sect') ?? null);
+    if (!sectData.songyangSkill?.legacy.canonCrippled) return 0;
+
+    return (canonData.level / SKILL_CONSTANTS.COGNIZE_FACTOR) * 0.2;
+  }
 
   /**
    * 发送 skillUpdate 消息到客户端
