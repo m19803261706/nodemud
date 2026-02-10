@@ -22,6 +22,7 @@ import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
 import { sendPlayerStats } from './handlers/stats.utils';
+import { sendInventoryUpdate } from './handlers/room-utils';
 import { CharacterService } from '../character/character.service';
 import { ObjectManager } from '../engine/object-manager';
 import { ServiceLocator } from '../engine/service-locator';
@@ -255,13 +256,15 @@ export class GameGateway
     if (result.message) {
       player.receiveMessage(result.message);
     }
+
+    // 接受任务可能获得任务道具，需立即刷新背包
+    if (result.success) {
+      sendInventoryUpdate(player);
+    }
   }
 
   /** 放弃任务 */
-  private async handleQuestAbandon(
-    session: Session,
-    data: { questId: string },
-  ): Promise<void> {
+  private async handleQuestAbandon(session: Session, data: { questId: string }): Promise<void> {
     const player = this.getPlayerFromSession(session);
     if (!player) return;
 
@@ -294,12 +297,27 @@ export class GameGateway
       player.receiveMessage(result.message);
     }
 
+    // 完成任务可能发放物品奖励，需立即刷新背包
+    if (result.success) {
+      sendInventoryUpdate(player);
+    }
+
     // 完成任务可能获得经验，检查升级
-    if (result.success && ServiceLocator.expManager && session.characterId) {
+    if (result.success && session.characterId) {
       try {
         const character = await this.characterService.findById(session.characterId);
         if (character) {
-          ServiceLocator.expManager.checkLevelUp(player, character);
+          const beforeLevel = player.get<number>('level') ?? character.level ?? 1;
+          if (ServiceLocator.expManager) {
+            ServiceLocator.expManager.checkLevelUp(player, character);
+          }
+          const afterLevel = player.get<number>('level') ?? beforeLevel;
+
+          // 非升级场景主动推一次属性，避免奖励银两等信息延迟到下一轮定时推送
+          if (afterLevel <= beforeLevel) {
+            sendPlayerStats(player, character);
+          }
+
           // 持久化玩家数据
           await this.characterService.savePlayerDataToDB(player, session.characterId);
         }
@@ -356,9 +374,9 @@ export class GameGateway
     const room = player.getEnvironment() as RoomBase | null;
     if (!room) return undefined;
 
-    return room
-      .getInventory()
-      .find((e): e is NpcBase => e instanceof NpcBase && e.id === npcId) as NpcBase | undefined;
+    return room.getInventory().find((e): e is NpcBase => e instanceof NpcBase && e.id === npcId) as
+      | NpcBase
+      | undefined;
   }
 
   /** 获取 Session */
