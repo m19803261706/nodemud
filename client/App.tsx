@@ -251,6 +251,14 @@ function App(): React.JSX.Element {
       }
     };
 
+    /** 运功结果 → 写入日志 */
+    const handleExertResult = (data: any) => {
+      if (data.message) {
+        const color = data.success ? '#4A6B4A' : '#8B3A3A';
+        useGameStore.getState().appendLog({ text: data.message, color });
+      }
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -269,6 +277,7 @@ function App(): React.JSX.Element {
     wsService.on('skillPanelData', handleSkillPanelData);
     wsService.on('practiceUpdate', handlePracticeUpdate);
     wsService.on('skillLearnResult', handleSkillLearnResult);
+    wsService.on('exertResult', handleExertResult);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -289,6 +298,7 @@ function App(): React.JSX.Element {
       wsService.off('skillPanelData', handleSkillPanelData);
       wsService.off('practiceUpdate', handlePracticeUpdate);
       wsService.off('skillLearnResult', handleSkillLearnResult);
+      wsService.off('exertResult', handleExertResult);
     };
   }, []);
 

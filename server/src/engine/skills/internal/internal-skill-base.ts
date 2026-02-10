@@ -60,4 +60,13 @@ export abstract class InternalSkillBase extends SkillBase {
   getPracticeCost(player: LivingBase): ResourceCost {
     return { resource: 'energy', amount: 15 };
   }
+
+  /**
+   * 获取该内功支持的特殊运功效果列表
+   * 子类覆写以声明支持的特殊效果（如 shield、powerup）
+   * @returns 效果名称数组（对应 ExertEffectType 的值）
+   */
+  getExertEffects(): string[] {
+    return [];
+  }
 }

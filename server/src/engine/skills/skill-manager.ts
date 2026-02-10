@@ -644,6 +644,23 @@ export class SkillManager {
       }
     }
 
+    // 读取运功 buff 加成
+    const shieldBonus = this.player.getTemp<number>('exert/shield');
+    if (shieldBonus) {
+      summary.defense += shieldBonus;
+    }
+
+    const powerupBonus = this.player.getTemp<{
+      attack: number;
+      dodge: number;
+      parry: number;
+    }>('exert/powerup');
+    if (powerupBonus) {
+      summary.attack += powerupBonus.attack;
+      summary.dodge += powerupBonus.dodge;
+      summary.parry += powerupBonus.parry;
+    }
+
     return summary;
   }
 
