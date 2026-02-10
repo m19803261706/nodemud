@@ -14,12 +14,16 @@ import { GameLog } from '../components/game/GameLog';
 import { ChatPanel } from '../components/game/ChatPanel';
 import { MapNavigation } from '../components/game/MapNavigation';
 import { NpcList } from '../components/game/NpcList';
+import { ItemInfoModal } from '../components/game/NpcList/ItemInfoModal';
 import { InventoryPage } from '../components/game/Inventory';
 import { BottomNavBar } from '../components/game/BottomNavBar';
 
-export const GameHomeScreen = ({ route }: any) => {
+export const GameHomeScreen = ({ route: _route }: any) => {
   const insets = useSafeAreaInsets();
   const activeTab = useGameStore(state => state.activeTab);
+  const itemDetail = useGameStore(state => state.itemDetail);
+  const setItemDetail = useGameStore(state => state.setItemDetail);
+  const sendCommand = useGameStore(state => state.sendCommand);
 
   const isInventory = activeTab === '背包';
 
@@ -53,6 +57,19 @@ export const GameHomeScreen = ({ route }: any) => {
           </View>
         )}
         <BottomNavBar />
+        <ItemInfoModal
+          detail={itemDetail}
+          onClose={() => setItemDetail(null)}
+          onGet={name => {
+            sendCommand(`get ${name}`);
+          }}
+          onGetFrom={(itemName, containerName) => {
+            sendCommand(`get ${itemName} from ${containerName}`);
+          }}
+          onExamine={name => {
+            sendCommand(`examine ${name}`);
+          }}
+        />
       </View>
     </LinearGradient>
   );

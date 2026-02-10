@@ -8,7 +8,6 @@ import { useGameStore } from '../../../stores/useGameStore';
 import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
 import { ItemCard } from './ItemCard';
-import { ItemInfoModal } from './ItemInfoModal';
 
 export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
@@ -16,8 +15,6 @@ export const NpcList = () => {
   const inventory = useGameStore(state => state.inventory);
   const setNpcDetail = useGameStore(state => state.setNpcDetail);
   const groundItems = useGameStore(state => state.groundItems);
-  const itemDetail = useGameStore(state => state.itemDetail);
-  const setItemDetail = useGameStore(state => state.setItemDetail);
   const sendCommand = useGameStore(state => state.sendCommand);
 
   return (
@@ -63,19 +60,6 @@ export const NpcList = () => {
         }}
         onGive={(itemName, npcName) => {
           sendCommand(`give ${itemName} to ${npcName}`);
-        }}
-      />
-      <ItemInfoModal
-        detail={itemDetail}
-        onClose={() => setItemDetail(null)}
-        onGet={name => {
-          sendCommand(`get ${name}`);
-        }}
-        onGetFrom={(itemName, containerName) => {
-          sendCommand(`get ${itemName} from ${containerName}`);
-        }}
-        onExamine={name => {
-          sendCommand(`examine ${name}`);
         }}
       />
     </View>
