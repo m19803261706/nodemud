@@ -70,7 +70,7 @@ export abstract class MartialSkillBase extends SkillBase {
    * @returns 是否满足提升条件
    */
   canImprove(player: LivingBase, currentLevel: number): boolean {
-    const combatExp = player.get<number>('combat_exp') ?? 0;
+    const combatExp = player.get<number>('combat_exp') ?? player.get<number>('exp') ?? 0;
     const threshold = Math.pow(currentLevel, 3) / SKILL_CONSTANTS.EXP_THRESHOLD_DIVISOR;
     return combatExp >= threshold;
   }

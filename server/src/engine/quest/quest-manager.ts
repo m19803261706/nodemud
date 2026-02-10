@@ -315,7 +315,10 @@ export class QuestManager {
     // 直接修改 dbase，升级检查由 ExpManager 在 gateway 层统一处理
     if (rewards.exp && rewards.exp > 0) {
       const currentExp = player.get<number>('exp') ?? 0;
-      player.set('exp', currentExp + rewards.exp);
+      const nextExp = currentExp + rewards.exp;
+      player.set('exp', nextExp);
+      // 兼容武学门槛读取的 combat_exp 字段
+      player.set('combat_exp', nextExp);
       rewardParts.push(`经验 ${rewards.exp}`);
     }
 

@@ -105,6 +105,8 @@ export class ExpManager {
     const oldExp = player.get<number>('exp') ?? 0;
     const newExp = oldExp + amount;
     player.set('exp', newExp);
+    // 兼容武学门槛读取的 combat_exp 字段
+    player.set('combat_exp', newExp);
 
     // 同步到 Character 实体
     character.exp = newExp;
@@ -168,6 +170,8 @@ export class ExpManager {
     const oldExp = player.get<number>('exp') ?? 0;
     const newExp = oldExp + amount;
     player.set('exp', newExp);
+    // 兼容武学门槛读取的 combat_exp 字段
+    player.set('combat_exp', newExp);
 
     // 检查升级（仅操作 dbase）
     const didLevelUp = this.checkLevelUpDbase(player);

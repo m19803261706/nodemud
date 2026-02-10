@@ -1,6 +1,6 @@
 import { PlayerBase } from '../../../engine/game-objects/player-base';
 import type { Character } from '../../../character/character.entity';
-import { derivePlayerStats } from '../stats.utils';
+import { derivePlayerStats, loadCharacterToPlayer, savePlayerData } from '../stats.utils';
 
 function makeCharacter(partial?: Partial<Character>): Character {
   return {
@@ -34,6 +34,12 @@ function makeCharacter(partial?: Partial<Character>): Character {
     shenzhuStar: '天梁',
     lastRoom: 'area/rift-town/square',
     silver: 150,
+    exp: 200,
+    level: 3,
+    potential: 40,
+    score: 12,
+    freePoints: 2,
+    questData: null,
     createdAt: new Date(),
     ...partial,
   } as Character;
@@ -93,5 +99,49 @@ describe('stats.utils derivePlayerStats', () => {
     player.set('silver', 123.9);
     stats = derivePlayerStats(character, player);
     expect(stats.silver).toBe(123);
+  });
+
+  it('登录加载会补齐关键运行时字段并规范化资源', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({
+      id: 'char-99',
+      name: '泡泡',
+      vitality: 5,
+      spirit: 4,
+      wisdom: 3,
+      perception: 3,
+      exp: 456,
+      silver: 188.8,
+      questData: { active: {}, completed: [] },
+    });
+
+    player.set('hp', 999);
+    player.set('mp', -3);
+    player.set('energy', 999);
+
+    loadCharacterToPlayer(player, character);
+
+    expect(player.get<string>('name')).toBe('泡泡');
+    expect(player.get<string>('characterId')).toBe('char-99');
+    expect(player.get<number>('exp')).toBe(456);
+    expect(player.get<number>('combat_exp')).toBe(456);
+    expect(player.get<number>('hp')).toBe(500);
+    expect(player.get<number>('mp')).toBe(0);
+    expect(player.get<number>('energy')).toBe(300);
+    expect(player.get<number>('hp_current')).toBe(500);
+    expect(player.get<number>('mp_current')).toBe(0);
+    expect(player.get<number>('energy_current')).toBe(300);
+    expect(player.get<number>('silver')).toBe(188);
+    expect(player.get<any>('quests')).toEqual({ active: {}, completed: [] });
+  });
+
+  it('保存玩家数据时 exp 缺失会回退 combat_exp', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ exp: 10 });
+
+    player.set('combat_exp', 888);
+    savePlayerData(player, character);
+
+    expect(character.exp).toBe(888);
   });
 });

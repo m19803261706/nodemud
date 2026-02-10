@@ -38,6 +38,12 @@ function resolveSilver(player: PlayerBase, character: Character): number {
   return Math.max(0, Math.floor(base));
 }
 
+/** 数值规范化：转非负整数 */
+function toSafeInt(value: unknown, fallback = 0): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+  return Math.max(0, Math.floor(value));
+}
+
 /** 从 Character 实体 + 玩家装备推导 playerStats 消息数据 */
 export function derivePlayerStats(character: Character, player: PlayerBase) {
   const equipBonus = player.getEquipmentBonus();
@@ -101,9 +107,13 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
 
 /**
  * 将 Character 实体的属性加载到 PlayerBase 的 dbase
- * 登录 / 创建角色进场时必须调用，确保战斗系统能读取到四维属性和 HP
+ * 登录 / 创建角色进场时必须调用，确保运行时关键字段一次性完整初始化
  */
 export function loadCharacterToPlayer(player: PlayerBase, character: Character): void {
+  // 角色标识与展示字段
+  player.set('name', character.name);
+  player.set('characterId', character.id);
+
   // 六维属性
   player.set('wisdom', character.wisdom);
   player.set('perception', character.perception);
@@ -113,11 +123,15 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   player.set('vitality', character.vitality);
 
   // 等级与经验
-  player.set('level', character.level ?? 1);
-  player.set('exp', character.exp ?? 0);
-  player.set('potential', character.potential ?? 0);
-  player.set('score', character.score ?? 0);
-  player.set('free_points', character.freePoints ?? 0);
+  const level = Math.max(1, toSafeInt(character.level, 1));
+  const exp = toSafeInt(character.exp, 0);
+  player.set('level', level);
+  player.set('exp', exp);
+  // 兼容传统武学门槛字段，统一与 exp 同步
+  player.set('combat_exp', exp);
+  player.set('potential', toSafeInt(character.potential, 0));
+  player.set('score', toSafeInt(character.score, 0));
+  player.set('free_points', toSafeInt(character.freePoints, 0));
 
   // 任务数据
   player.set('quests', character.questData ?? null);
@@ -131,37 +145,38 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   player.set('max_hp', maxHp);
   player.set('max_mp', maxMp);
   player.set('max_energy', maxEnergy);
-  // 登录时满血（若已有当前 HP 则保留）
-  if (player.get<number>('hp') == null) {
-    player.set('hp', maxHp);
-  }
-  if (player.get<number>('mp') == null) {
-    player.set('mp', maxMp);
-  }
-  if (player.get<number>('energy') == null) {
-    player.set('energy', maxEnergy);
-  }
+
+  // 登录时资源值统一规范化并钳制到当前上限
+  const hp = Math.min(Math.max(player.get<number>('hp') ?? maxHp, 0), maxHp);
+  const mp = Math.min(Math.max(player.get<number>('mp') ?? maxMp, 0), maxMp);
+  const energy = Math.min(Math.max(player.get<number>('energy') ?? maxEnergy, 0), maxEnergy);
+  player.set('hp', hp);
+  player.set('mp', mp);
+  player.set('energy', energy);
 
   // 兼容旧字段：保持 legacy *_current 与运行时字段一致
-  player.set('hp_current', player.get<number>('hp') ?? maxHp);
-  player.set('mp_current', player.get<number>('mp') ?? maxMp);
-  player.set('energy_current', player.get<number>('energy') ?? maxEnergy);
+  player.set('hp_current', hp);
+  player.set('mp_current', mp);
+  player.set('energy_current', energy);
 
   // 银两
-  player.set('silver', Math.max(0, Math.floor(character.silver ?? 0)));
+  player.set('silver', toSafeInt(character.silver, 0));
 }
 
 /**
  * 将 PlayerBase 的 dbase 运行时数据保存回 Character 实体
- * 断线 / 定期存档时调用，确保 exp/level/potential/score/free_points/quests 持久化
+ * 断线 / 定期存档时调用，确保 exp/level/potential/score/free_points/quests/silver 持久化
  */
 export function savePlayerData(player: PlayerBase, character: Character): void {
   // 经验与等级
-  character.exp = player.get<number>('exp') ?? character.exp ?? 0;
-  character.level = player.get<number>('level') ?? character.level ?? 1;
-  character.potential = player.get<number>('potential') ?? character.potential ?? 0;
-  character.score = player.get<number>('score') ?? character.score ?? 0;
-  character.freePoints = player.get<number>('free_points') ?? character.freePoints ?? 0;
+  character.exp = toSafeInt(
+    player.get<number>('exp') ?? player.get<number>('combat_exp') ?? character.exp ?? 0,
+    0,
+  );
+  character.level = Math.max(1, toSafeInt(player.get<number>('level') ?? character.level ?? 1, 1));
+  character.potential = toSafeInt(player.get<number>('potential') ?? character.potential ?? 0, 0);
+  character.score = toSafeInt(player.get<number>('score') ?? character.score ?? 0, 0);
+  character.freePoints = toSafeInt(player.get<number>('free_points') ?? character.freePoints ?? 0, 0);
 
   // 任务数据
   character.questData = player.get<PlayerQuestData>('quests') ?? character.questData ?? null;

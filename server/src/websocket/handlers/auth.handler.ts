@@ -64,7 +64,6 @@ export class AuthHandler {
             const playerId = this.objectManager.nextInstanceId('player');
             const player = new PlayerBase(playerId);
             this.objectManager.register(player);
-            player.set('name', character.name);
             loadCharacterToPlayer(player, character);
 
             // 绑定 WebSocket 连接
