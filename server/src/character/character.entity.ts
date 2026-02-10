@@ -4,6 +4,7 @@
  */
 
 import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
+import type { PlayerQuestData } from '../engine/quest';
 
 /** 出身枚举 */
 export type CharacterOriginType =
@@ -211,6 +212,39 @@ export class Character {
     comment: '当前银两',
   })
   silver: number;
+
+  // ========== 经验与等级 ==========
+
+  @Column({ type: 'int', unsigned: true, default: 0, comment: '经验值' })
+  exp: number;
+
+  @Column({ type: 'int', unsigned: true, default: 1, comment: '等级' })
+  level: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0, comment: '潜能点' })
+  potential: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0, comment: '积分' })
+  score: number;
+
+  @Column({
+    name: 'free_points',
+    type: 'int',
+    unsigned: true,
+    default: 0,
+    comment: '可分配属性点',
+  })
+  freePoints: number;
+
+  // ========== 任务数据 ==========
+
+  @Column({
+    name: 'quest_data',
+    type: 'simple-json',
+    nullable: true,
+    comment: '任务进度数据（JSON）',
+  })
+  questData: PlayerQuestData | null;
 
   // ========== 时间 ==========
 

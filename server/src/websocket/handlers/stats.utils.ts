@@ -6,6 +6,7 @@
 import { MessageFactory } from '@packages/core';
 import type { Character } from '../../character/character.entity';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
+import type { PlayerQuestData } from '../../engine/quest';
 
 /** 等级映射（当前新角色固定） */
 function getLevelText(): string {
@@ -84,8 +85,15 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   player.set('strength', character.strength);
   player.set('vitality', character.vitality);
 
-  // 等级（当前固定 1）
-  player.set('level', 1);
+  // 等级与经验
+  player.set('level', character.level ?? 1);
+  player.set('exp', character.exp ?? 0);
+  player.set('potential', character.potential ?? 0);
+  player.set('score', character.score ?? 0);
+  player.set('free_points', character.freePoints ?? 0);
+
+  // 任务数据
+  player.set('quests', character.questData ?? null);
 
   // HP 上限 = 血气 * 100 + 装备加成
   const equipBonus = player.getEquipmentBonus();
@@ -98,6 +106,28 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
 
   // 银两
   player.set('silver', Math.max(0, Math.floor(character.silver ?? 0)));
+}
+
+/**
+ * 将 PlayerBase 的 dbase 运行时数据保存回 Character 实体
+ * 断线 / 定期存档时调用，确保 exp/level/potential/score/free_points/quests 持久化
+ */
+export function savePlayerData(player: PlayerBase, character: Character): void {
+  // 经验与等级
+  character.exp = player.get<number>('exp') ?? character.exp ?? 0;
+  character.level = player.get<number>('level') ?? character.level ?? 1;
+  character.potential = player.get<number>('potential') ?? character.potential ?? 0;
+  character.score = player.get<number>('score') ?? character.score ?? 0;
+  character.freePoints = player.get<number>('free_points') ?? character.freePoints ?? 0;
+
+  // 任务数据
+  character.questData = player.get<PlayerQuestData>('quests') ?? character.questData ?? null;
+
+  // 银两
+  const silver = player.get<number>('silver');
+  if (silver != null && Number.isFinite(silver)) {
+    character.silver = Math.max(0, Math.floor(silver));
+  }
 }
 
 /** 推送 playerStats 到客户端 */

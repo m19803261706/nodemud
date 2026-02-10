@@ -130,6 +130,15 @@ export class GameGateway
             }
           }
 
+          // 保存玩家运行时数据（exp/level/potential/score/free_points/quests/silver）
+          if (session.characterId) {
+            try {
+              await this.characterService.savePlayerDataToDB(player, session.characterId);
+            } catch (saveError) {
+              this.logger.error('保存玩家数据失败:', saveError);
+            }
+          }
+
           // 房间广播下线
           if (room) {
             room.broadcast(`${player.getName()}下线了。`, player);

@@ -3,11 +3,13 @@
  * 角色 CRUD 业务逻辑
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Character } from './character.entity';
+import type { PlayerBase } from '../engine/game-objects/player-base';
+import { savePlayerData } from '../websocket/handlers/stats.utils';
 
 /** 创建角色数据 */
 export interface CreateCharacterData {
@@ -43,6 +45,8 @@ export interface CreateCharacterData {
 
 @Injectable()
 export class CharacterService {
+  private readonly logger = new Logger(CharacterService.name);
+
   constructor(
     @InjectRepository(Character)
     private readonly characterRepository: Repository<Character>,
@@ -81,5 +85,28 @@ export class CharacterService {
   /** 更新角色银两 */
   async updateSilver(id: string, silver: number): Promise<void> {
     await this.characterRepository.update(id, { silver: Math.max(0, Math.floor(silver)) });
+  }
+
+  /**
+   * 保存玩家运行时数据到数据库
+   * 将 PlayerBase dbase 中的 exp/level/potential/score/free_points/quests/silver 写回 Character
+   */
+  async savePlayerDataToDB(player: PlayerBase, characterId: string): Promise<void> {
+    try {
+      const character = await this.findById(characterId);
+      if (!character) {
+        this.logger.warn(`保存玩家数据失败: 角色 ${characterId} 不存在`);
+        return;
+      }
+
+      // 使用 stats.utils 中的 savePlayerData 将 dbase 数据写入 Character 实体
+      savePlayerData(player, character);
+
+      // 持久化到数据库
+      await this.characterRepository.save(character);
+      this.logger.log(`玩家数据已保存: ${character.name} (${characterId})`);
+    } catch (error) {
+      this.logger.error(`保存玩家数据失败 (${characterId}):`, error);
+    }
   }
 }
