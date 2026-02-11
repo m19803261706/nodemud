@@ -114,18 +114,18 @@ const s = StyleSheet.create({
     marginVertical: 4,
   },
   containerUnlocked: {
-    borderColor: '#8B7A5A35',
-    backgroundColor: '#F7F2E8',
+    borderColor: '#7E6C523D',
+    backgroundColor: '#F7F1E6',
   },
   containerLocked: {
-    borderColor: '#A79C8C55',
-    backgroundColor: '#EEE8DE',
+    borderColor: '#A79C8C66',
+    backgroundColor: '#ECE5DA',
   },
   sideBar: {
     width: 3,
   },
   sideBarUnlocked: {
-    backgroundColor: '#6A8A62',
+    backgroundColor: '#7A5C34',
   },
   sideBarLocked: {
     backgroundColor: '#B4A796',
@@ -152,9 +152,9 @@ const s = StyleSheet.create({
     paddingRight: 8,
   },
   name: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#3A3530',
+    color: '#2F261A',
     fontFamily: 'Noto Serif SC',
   },
   nameLocked: {
@@ -162,7 +162,7 @@ const s = StyleSheet.create({
   },
   subTitle: {
     fontSize: 10,
-    color: '#8B7A5A',
+    color: '#7A6B56',
     fontFamily: 'Noto Serif SC',
   },
   subTitleLocked: {
@@ -170,7 +170,7 @@ const s = StyleSheet.create({
   },
   lvlReq: {
     fontSize: 10,
-    color: '#8B7A5A',
+    color: '#6E5B43',
     fontFamily: 'Noto Sans SC',
   },
   lvlReqLocked: {
@@ -186,10 +186,10 @@ const s = StyleSheet.create({
     overflow: 'hidden',
   },
   stateBadgeUnlocked: {
-    color: '#3F6A4D',
-    backgroundColor: '#3F6A4D20',
+    color: '#6E4D25',
+    backgroundColor: '#8A6A4122',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#3F6A4D66',
+    borderColor: '#8A6A4170',
   },
   stateBadgeLocked: {
     color: '#8B7A5A',
@@ -199,7 +199,7 @@ const s = StyleSheet.create({
   },
   desc: {
     fontSize: 11,
-    color: '#6B5D4D',
+    color: '#5A4A36',
     fontFamily: 'Noto Serif SC',
     lineHeight: 17,
   },
@@ -220,8 +220,8 @@ const s = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8B7A5A55',
-    backgroundColor: '#FCF8F0',
+    borderColor: '#7E6C525C',
+    backgroundColor: '#FBF6EE',
   },
   costChip: {
     flexDirection: 'row',
@@ -231,8 +231,8 @@ const s = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#A9785155',
-    backgroundColor: '#F5E6D8',
+    borderColor: '#8F644265',
+    backgroundColor: '#F3E2D2',
   },
   modLabel: {
     fontSize: 9,

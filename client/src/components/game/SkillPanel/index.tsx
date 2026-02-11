@@ -236,6 +236,7 @@ export const SkillPanel = ({
         showEquipToggle={!readOnlyCatalog}
         actionLabel={detailActionLabel}
         onActionPress={onDetailActionPress}
+        embedded
       />
     </Modal>
   );
