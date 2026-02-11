@@ -182,6 +182,7 @@ describe('LookCommand', () => {
         skillName: '嵩阳入门刀',
         skillType: 'blade',
         category: 'martial',
+        level: 0,
       },
     ]);
   });

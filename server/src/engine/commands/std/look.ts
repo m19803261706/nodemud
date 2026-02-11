@@ -353,17 +353,25 @@ export class LookCommand implements ICommand {
     skillName: string;
     skillType: string;
     category: string;
+    level: number;
   }> {
     const teachSkillIds = npc.get<string[]>('teach_skills') ?? [];
     if (teachSkillIds.length === 0) return [];
+    const teachSkillLevels = npc.get<Record<string, number>>('teach_skill_levels') ?? {};
 
     return teachSkillIds.map((skillId) => {
       const skillDef = ServiceLocator.skillRegistry?.get(skillId);
+      const rawLevel = teachSkillLevels[skillId];
+      const level =
+        typeof rawLevel === 'number' && Number.isFinite(rawLevel)
+          ? Math.max(0, Math.floor(rawLevel))
+          : 0;
       return {
         skillId,
         skillName: skillDef?.skillName ?? skillId,
         skillType: skillDef?.skillType ?? 'cognize',
         category: skillDef?.category ?? 'martial',
+        level,
       };
     });
   }

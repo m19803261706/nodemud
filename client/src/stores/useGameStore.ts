@@ -122,6 +122,7 @@ export interface NpcTeachSkillInfo {
   skillName: string;
   skillType: SkillSlotType;
   category: SkillCategory;
+  level?: number;
 }
 
 /** 物品详情数据（弹窗用，从 commandResult.data 获取） */

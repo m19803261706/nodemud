@@ -36,6 +36,13 @@ export default class SongyangMasterLi extends NpcBase {
       SONGYANG_SKILL_IDS.ULTIMATE_FORCE,
       SONGYANG_SKILL_IDS.CANON_ESSENCE,
     ]);
+    this.set('teach_skill_levels', {
+      [SONGYANG_SKILL_IDS.ULTIMATE_BLADE]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_DODGE]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_PARRY]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_FORCE]: 180,
+      [SONGYANG_SKILL_IDS.CANON_ESSENCE]: 220,
+    });
 
     this.set('chat_chance', 8);
     this.set('chat_msg', [

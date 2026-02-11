@@ -35,6 +35,12 @@ export default class SongyangElderXu extends NpcBase {
       SONGYANG_SKILL_IDS.ADVANCED_PARRY,
       SONGYANG_SKILL_IDS.ADVANCED_FORCE,
     ]);
+    this.set('teach_skill_levels', {
+      [SONGYANG_SKILL_IDS.ADVANCED_BLADE]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_DODGE]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_PARRY]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_FORCE]: 120,
+    });
 
     this.set('chat_chance', 9);
     this.set('chat_msg', [

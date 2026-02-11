@@ -91,6 +91,7 @@ export interface TeachSkillInfo {
   skillName: string; // 技能名称
   skillType: SkillSlotType; // 技能槽位类型
   category: SkillCategory; // 技能分类
+  level: number; // 授艺者当前演示等级
 }
 
 /** 师父传艺目录（技能页快捷学艺入口） */

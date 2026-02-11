@@ -45,21 +45,31 @@ function mapTeachSkillsToReadonlyItems(
     skillName: string;
     skillType: SkillSlotType;
     category: SkillCategory;
+    level?: number;
   }>,
 ): PlayerSkillInfo[] {
-  const learnedMap = new Map(playerSkills.map((skill) => [skill.skillId, skill]));
-  return teachSkills.map((skill) => {
+  const learnedMap = new Map(playerSkills.map(skill => [skill.skillId, skill]));
+  return teachSkills.map(skill => {
+    const teachLevel =
+      typeof skill.level === 'number' && Number.isFinite(skill.level)
+        ? Math.max(0, Math.floor(skill.level))
+        : 0;
     const learned = learnedMap.get(skill.skillId);
-    if (learned) return { ...learned };
+    if (learned) {
+      return {
+        ...learned,
+        level: teachLevel > 0 ? teachLevel : learned.level,
+      };
+    }
 
     return {
       skillId: skill.skillId,
       skillName: skill.skillName,
       skillType: skill.skillType,
       category: skill.category,
-      level: 0,
+      level: teachLevel,
       learned: 0,
-      learnedMax: 1,
+      learnedMax: Math.max(1, Math.pow(teachLevel + 1, 2)),
       isMapped: false,
       mappedSlot: null,
       isActiveForce: false,
@@ -314,7 +324,9 @@ export const SkillPage = () => {
           <TextInput
             value={keyword}
             onChangeText={setKeyword}
-            placeholder={mode === 'master' ? '搜索师父可授武学' : '搜索技能名称'}
+            placeholder={
+              mode === 'master' ? '搜索师父可授武学' : '搜索技能名称'
+            }
             placeholderTextColor="#A79C8C"
             style={s.searchInput}
             returnKeyType="search"
@@ -372,7 +384,9 @@ export const SkillPage = () => {
         skillId={detailSkillId}
         showEquipToggle={mode === 'self'}
         actionLabel={mode === 'master' && masterTeach ? '请教此功' : undefined}
-        onActionPress={mode === 'master' && masterTeach ? handleMasterLearn : undefined}
+        onActionPress={
+          mode === 'master' && masterTeach ? handleMasterLearn : undefined
+        }
       />
     </View>
   );

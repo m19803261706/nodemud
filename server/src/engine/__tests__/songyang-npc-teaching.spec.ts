@@ -15,6 +15,12 @@ describe('Songyang NPC teaching config', () => {
       SONGYANG_SKILL_IDS.ENTRY_PARRY,
       SONGYANG_SKILL_IDS.ENTRY_FORCE,
     ]);
+    expect(npc.get<Record<string, number>>('teach_skill_levels')).toEqual({
+      [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_DODGE]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_PARRY]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_FORCE]: 60,
+    });
   });
 
   it('许长老应教授 4 门进阶技能', () => {
@@ -28,6 +34,12 @@ describe('Songyang NPC teaching config', () => {
       SONGYANG_SKILL_IDS.ADVANCED_PARRY,
       SONGYANG_SKILL_IDS.ADVANCED_FORCE,
     ]);
+    expect(npc.get<Record<string, number>>('teach_skill_levels')).toEqual({
+      [SONGYANG_SKILL_IDS.ADVANCED_BLADE]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_DODGE]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_PARRY]: 120,
+      [SONGYANG_SKILL_IDS.ADVANCED_FORCE]: 120,
+    });
   });
 
   it('李掌门应教授最终 4 门与总纲', () => {
@@ -42,5 +54,12 @@ describe('Songyang NPC teaching config', () => {
       SONGYANG_SKILL_IDS.ULTIMATE_FORCE,
       SONGYANG_SKILL_IDS.CANON_ESSENCE,
     ]);
+    expect(npc.get<Record<string, number>>('teach_skill_levels')).toEqual({
+      [SONGYANG_SKILL_IDS.ULTIMATE_BLADE]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_DODGE]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_PARRY]: 180,
+      [SONGYANG_SKILL_IDS.ULTIMATE_FORCE]: 180,
+      [SONGYANG_SKILL_IDS.CANON_ESSENCE]: 220,
+    });
   });
 });

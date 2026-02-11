@@ -24,20 +24,29 @@ function mapNpcTeachSkillsToReadonlyItems(
   detail: NpcDetailData,
   playerSkills: PlayerSkillInfo[],
 ): PlayerSkillInfo[] {
-  const learnedMap = new Map(playerSkills.map((skill) => [skill.skillId, skill]));
+  const learnedMap = new Map(playerSkills.map(skill => [skill.skillId, skill]));
   const teachSkills = detail.teachSkills ?? [];
-  return teachSkills.map((skill) => {
+  return teachSkills.map(skill => {
+    const teachLevel =
+      typeof skill.level === 'number' && Number.isFinite(skill.level)
+        ? Math.max(0, Math.floor(skill.level))
+        : 0;
     const learned = learnedMap.get(skill.skillId);
-    if (learned) return { ...learned };
+    if (learned) {
+      return {
+        ...learned,
+        level: teachLevel > 0 ? teachLevel : learned.level,
+      };
+    }
 
     return {
       skillId: skill.skillId,
       skillName: skill.skillName,
       skillType: skill.skillType as SkillSlotType,
       category: skill.category as SkillCategory,
-      level: 0,
+      level: teachLevel,
       learned: 0,
-      learnedMax: 1,
+      learnedMax: Math.max(1, Math.pow(teachLevel + 1, 2)),
       isMapped: false,
       mappedSlot: null,
       isActiveForce: false,
@@ -66,7 +75,8 @@ export const NpcList = () => {
     [npcSkillPanelDetail, playerSkills],
   );
   const canLearnFromNpcInPanel =
-    !!npcSkillPanelDetail && new Set(npcSkillPanelDetail.actions ?? []).has('learnSkill');
+    !!npcSkillPanelDetail &&
+    new Set(npcSkillPanelDetail.actions ?? []).has('learnSkill');
 
   return (
     <View style={s.container}>

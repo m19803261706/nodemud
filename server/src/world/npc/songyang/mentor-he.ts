@@ -35,6 +35,12 @@ export default class SongyangMentorHe extends NpcBase {
       SONGYANG_SKILL_IDS.ENTRY_PARRY,
       SONGYANG_SKILL_IDS.ENTRY_FORCE,
     ]);
+    this.set('teach_skill_levels', {
+      [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_DODGE]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_PARRY]: 60,
+      [SONGYANG_SKILL_IDS.ENTRY_FORCE]: 60,
+    });
 
     this.set('chat_chance', 12);
     this.set('chat_msg', [
