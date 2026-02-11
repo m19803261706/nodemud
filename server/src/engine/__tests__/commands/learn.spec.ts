@@ -86,4 +86,15 @@ describe('LearnCommand', () => {
     expect((result.data as any)?.timesCompleted).toBe(1);
     expect(player.get<number>('learned_points')).toBe(1);
   });
+
+  it('批量学习中途资源不足时返回部分成功与中断原因', () => {
+    npc.set('teach_skill_levels', { [skillId]: 100 });
+    player.set('energy', 6);
+
+    const result = command.execute(player, [skillName, 'from', '李掌门', '3']);
+    expect(result.success).toBe(true);
+    expect((result.data as any)?.timesCompleted).toBe(1);
+    expect((result.data as any)?.reason).toBe('insufficient_energy');
+    expect(player.get<number>('learned_points')).toBe(1);
+  });
 });

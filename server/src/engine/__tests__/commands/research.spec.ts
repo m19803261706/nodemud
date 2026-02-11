@@ -73,4 +73,14 @@ describe('ResearchCommand', () => {
     expect(player.get<number>('energy')).toBeLessThan(beforeEnergy);
     expect(player.get<number>('learned_points')).toBe(beforeLearnedPoints + 1);
   });
+
+  it('批量研究中途精力不足时应返回部分成功', () => {
+    player.set('energy', 70);
+
+    const result = command.execute(player, ['测试内功', '3']);
+    expect(result.success).toBe(true);
+    expect((result.data as any)?.timesCompleted).toBe(2);
+    expect((result.data as any)?.reason).toBe('insufficient_energy');
+    expect(player.get<number>('learned_points')).toBe(2);
+  });
 });
