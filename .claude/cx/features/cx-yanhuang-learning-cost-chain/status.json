@@ -1,14 +1,171 @@
 {
   "feature": "炎黄学习消耗链路复刻",
   "slug": "cx-yanhuang-learning-cost-chain",
+  "status": "planning",
   "scope_status": "completed",
   "prd_status": "completed",
+  "plan_status": "completed",
   "created_at": "2026-02-11T00:00:00+08:00",
-  "last_updated": "2026-02-11T23:59:00+08:00",
+  "last_updated": "2026-02-12T00:04:36+08:00",
   "mode": "feature",
+  "phases": [
+    {
+      "number": 1,
+      "name": "契约与数据层基础",
+      "parallel_group": "p1",
+      "status": "pending",
+      "tasks": [1, 2]
+    },
+    {
+      "number": 2,
+      "name": "服务端学习链路",
+      "parallel_group": "p2",
+      "status": "blocked",
+      "tasks": [3, 4, 5],
+      "depends_on": [1, 2]
+    },
+    {
+      "number": 3,
+      "name": "前端联动与验收",
+      "parallel_group": "p3",
+      "status": "blocked",
+      "tasks": [6, 7],
+      "depends_on": [3, 4, 5]
+    }
+  ],
+  "tasks": [
+    {
+      "number": 1,
+      "title": "学习链路契约收口（reason/可用潜能语义）",
+      "phase": 1,
+      "parallel": true,
+      "depends_on": [],
+      "parallel_group": "p1",
+      "related_apis": [1, 2, 3, 4],
+      "related_enums": ["SkillLearnFailureReason"],
+      "related_fields": [1, 2, 3, 4, 5],
+      "status": "pending"
+    },
+    {
+      "number": 2,
+      "title": "learnedPoints 持久化与登录初始化全链路",
+      "phase": 1,
+      "parallel": true,
+      "depends_on": [],
+      "parallel_group": "p1",
+      "related_apis": [4],
+      "related_enums": [],
+      "related_fields": [6, 7, 8],
+      "status": "pending"
+    },
+    {
+      "number": 3,
+      "title": "learn 双入口统一（命令 + WebSocket）",
+      "phase": 2,
+      "parallel": false,
+      "depends_on": [1, 2],
+      "parallel_group": "p2",
+      "related_apis": [1, 3, 5],
+      "related_enums": ["SkillLearnFailureReason"],
+      "related_fields": [1, 2, 3, 4, 5, 8],
+      "status": "pending"
+    },
+    {
+      "number": 4,
+      "title": "research 命令补齐与资源结算",
+      "phase": 2,
+      "parallel": true,
+      "depends_on": [1, 2],
+      "parallel_group": "p2",
+      "related_apis": [2, 3],
+      "related_enums": ["SkillLearnFailureReason"],
+      "related_fields": [2, 3, 4, 8],
+      "status": "pending"
+    },
+    {
+      "number": 5,
+      "title": "study/practice 消耗语义对齐炎黄",
+      "phase": 2,
+      "parallel": true,
+      "depends_on": [1],
+      "parallel_group": "p2",
+      "related_apis": [3],
+      "related_enums": [],
+      "related_fields": [2, 4],
+      "status": "pending"
+    },
+    {
+      "number": 6,
+      "title": "前端提示与顶部潜能展示语义切换",
+      "phase": 3,
+      "parallel": true,
+      "depends_on": [3, 4, 5],
+      "parallel_group": "p3",
+      "related_apis": [3, 4, 5],
+      "related_enums": ["SkillLearnFailureReason"],
+      "related_fields": [1, 3, 4],
+      "status": "pending"
+    },
+    {
+      "number": 7,
+      "title": "测试矩阵与验收证据固化",
+      "phase": 3,
+      "parallel": true,
+      "depends_on": [3, 4, 5, 6],
+      "parallel_group": "p3",
+      "related_apis": [1, 2, 3, 4, 5],
+      "related_enums": ["SkillLearnFailureReason"],
+      "related_fields": [1, 2, 3, 4, 5, 6, 7, 8],
+      "status": "pending"
+    }
+  ],
+  "execution_order": [1, 2, 3, 4, 5, 6, 7],
+  "docs": {
+    "scope": "scope.md",
+    "prd": "prd.md",
+    "design": null
+  },
   "github": {
     "scope_issue": 239,
-    "prd_issue": null
+    "prd_issue": null,
+    "plan_issue": null
+  },
+  "contracts": {
+    "apis": {
+      "1": "learn <skill> from <npc> [times]",
+      "2": "research <skill> [times]",
+      "3": "skillLearnResult(reason/timesCompleted/levelUp)",
+      "4": "playerStats.potential => availablePotential",
+      "5": "skillLearnRequest/command learn reason 一致化"
+    },
+    "fields": {
+      "1": "SkillLearnResultData.reason",
+      "2": "energy cost（映射 jing 消耗）",
+      "3": "availablePotential = potential - learned_points",
+      "4": "teacher cap = teach_skill_levels[skillId]",
+      "5": "timesCompleted / timesRequested",
+      "6": "Character.learnedPoints",
+      "7": "player.learned_points",
+      "8": "save/load learned_points <-> learnedPoints"
+    }
+  },
+  "references": {
+    "yanhuang": [
+      "参考mud代码/mud/cmds/skill/learn.c",
+      "参考mud代码/mud/cmds/skill/study.c",
+      "参考mud代码/mud/cmds/skill/practice.c",
+      "参考mud代码/mud/cmds/skill/research.c",
+      "参考mud代码/mud/feature/skill.c"
+    ],
+    "project": [
+      "server/src/engine/commands/std/learn.ts",
+      "server/src/engine/commands/std/study.ts",
+      "server/src/engine/commands/std/practice.ts",
+      "server/src/websocket/handlers/skill.handler.ts",
+      "server/src/websocket/handlers/stats.utils.ts",
+      "client/src/utils/skillLearnReason.ts",
+      "client/src/stores/useGameStore.ts"
+    ]
   },
   "decisions": {
     "range": "A",
