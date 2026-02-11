@@ -38,6 +38,7 @@ function makeCharacter(partial?: Partial<Character>): Character {
     exp: 200,
     level: 3,
     potential: 40,
+    learnedPoints: 0,
     score: 12,
     freePoints: 2,
     questData: null,
@@ -103,6 +104,20 @@ describe('stats.utils derivePlayerStats', () => {
     expect(stats.silver).toBe(123);
   });
 
+  it('playerStats.potential 输出可用潜能（potential - learned_points）', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ potential: 40, learnedPoints: 12 });
+
+    player.set('potential', 30);
+    player.set('learned_points', 11);
+    let stats = derivePlayerStats(character, player);
+    expect(stats.potential).toBe(19);
+
+    player.set('learned_points', 999);
+    stats = derivePlayerStats(character, player);
+    expect(stats.potential).toBe(0);
+  });
+
   it('登录加载会补齐关键运行时字段并规范化资源', () => {
     const player = new PlayerBase('player/test');
     const character = makeCharacter({
@@ -113,6 +128,7 @@ describe('stats.utils derivePlayerStats', () => {
       wisdom: 3,
       perception: 3,
       exp: 456,
+      learnedPoints: 9,
       silver: 188.8,
       questData: { active: {}, completed: [] },
     });
@@ -127,6 +143,7 @@ describe('stats.utils derivePlayerStats', () => {
     expect(player.get<string>('characterId')).toBe('char-99');
     expect(player.get<number>('exp')).toBe(456);
     expect(player.get<number>('combat_exp')).toBe(456);
+    expect(player.get<number>('learned_points')).toBe(9);
     expect(player.get<number>('hp')).toBe(500);
     expect(player.get<number>('mp')).toBe(0);
     expect(player.get<number>('energy')).toBe(300);
@@ -179,6 +196,19 @@ describe('stats.utils derivePlayerStats', () => {
     savePlayerData(player, character);
 
     expect(character.exp).toBe(888);
+  });
+
+  it('保存玩家数据时 learned_points 会写回 learnedPoints', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({ learnedPoints: 3 });
+
+    player.set('learned_points', 17.9);
+    savePlayerData(player, character);
+    expect(character.learnedPoints).toBe(17);
+
+    player.set('learned_points', -2);
+    savePlayerData(player, character);
+    expect(character.learnedPoints).toBe(0);
   });
 
   it('登录加载应归一化并挂载 sect 数据', () => {

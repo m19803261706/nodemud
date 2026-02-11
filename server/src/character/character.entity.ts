@@ -225,6 +225,15 @@ export class Character {
   @Column({ type: 'int', unsigned: true, default: 0, comment: '潜能点' })
   potential: number;
 
+  @Column({
+    name: 'learned_points',
+    type: 'int',
+    unsigned: true,
+    default: 0,
+    comment: '已消耗潜能点（学习预算）',
+  })
+  learnedPoints: number;
+
   @Column({ type: 'int', unsigned: true, default: 0, comment: '积分' })
   score: number;
 

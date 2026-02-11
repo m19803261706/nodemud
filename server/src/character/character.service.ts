@@ -89,7 +89,7 @@ export class CharacterService {
 
   /**
    * 保存玩家运行时数据到数据库
-   * 将 PlayerBase dbase 中的 exp/level/potential/score/free_points/quests/silver 写回 Character
+   * 将 PlayerBase dbase 中的 exp/level/potential/learned_points/score/free_points/quests/silver 写回 Character
    */
   async savePlayerDataToDB(player: PlayerBase, characterId: string): Promise<void> {
     try {

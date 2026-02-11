@@ -51,6 +51,7 @@ const CHARACTER_TO_DBASE_ALIASES: Record<string, string[]> = {
   id: ['characterId'],
   lastRoom: ['last_room'],
   freePoints: ['free_points'],
+  learnedPoints: ['learned_points'],
   questData: ['quests'],
   sectData: ['sect'],
 };
@@ -118,6 +119,8 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const level = player.get<number>('level') ?? character.level ?? 1;
   const exp = player.get<number>('exp') ?? character.exp ?? 0;
   const potential = player.get<number>('potential') ?? character.potential ?? 0;
+  const learnedPoints = player.get<number>('learned_points') ?? character.learnedPoints ?? 0;
+  const availablePotential = Math.max(0, potential - learnedPoints);
   const score = player.get<number>('score') ?? character.score ?? 0;
   const freePoints = player.get<number>('free_points') ?? character.freePoints ?? 0;
 
@@ -151,7 +154,7 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
     },
     exp,
     expToNextLevel,
-    potential,
+    potential: availablePotential,
     score,
     freePoints,
   };
@@ -177,6 +180,7 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   // 兼容传统武学门槛字段，统一与 exp 同步
   player.set('combat_exp', exp);
   player.set('potential', toSafeInt(character.potential, 0));
+  player.set('learned_points', toSafeInt(character.learnedPoints, 0));
   player.set('score', toSafeInt(character.score, 0));
   player.set('free_points', toSafeInt(character.freePoints, 0));
 
@@ -214,7 +218,7 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
 
 /**
  * 将 PlayerBase 的 dbase 运行时数据保存回 Character 实体
- * 断线 / 定期存档时调用，确保 exp/level/potential/score/free_points/quests/silver 持久化
+ * 断线 / 定期存档时调用，确保 exp/level/potential/learned_points/score/free_points/quests/silver 持久化
  */
 export function savePlayerData(player: PlayerBase, character: Character): void {
   // 经验与等级
@@ -224,6 +228,10 @@ export function savePlayerData(player: PlayerBase, character: Character): void {
   );
   character.level = Math.max(1, toSafeInt(player.get<number>('level') ?? character.level ?? 1, 1));
   character.potential = toSafeInt(player.get<number>('potential') ?? character.potential ?? 0, 0);
+  character.learnedPoints = toSafeInt(
+    player.get<number>('learned_points') ?? character.learnedPoints ?? 0,
+    0,
+  );
   character.score = toSafeInt(player.get<number>('score') ?? character.score ?? 0, 0);
   character.freePoints = toSafeInt(
     player.get<number>('free_points') ?? character.freePoints ?? 0,
