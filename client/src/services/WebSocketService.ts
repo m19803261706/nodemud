@@ -10,10 +10,12 @@ class WebSocketService {
   private ws: WebSocket | null = null;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private connectPromise: Promise<void> | null = null;
   private listeners = new Map<string, Set<(data: any) => void>>();
   private serverUrl: string = '';
   private shouldReconnect: boolean = false;
   private reconnectDelay: number = 3000;
+  private socketVersion: number = 0;
 
   /**
    * 连接到服务器
@@ -25,33 +27,71 @@ class WebSocketService {
     this.shouldReconnect = true;
     this.clearReconnectTimer();
 
-    return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(url);
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return Promise.resolve();
+    }
 
-      this.ws.onopen = () => {
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+      return this.connectPromise ?? Promise.resolve();
+    }
+
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+
+    const socketVersion = ++this.socketVersion;
+    const socket = new WebSocket(url);
+    this.ws = socket;
+
+    this.connectPromise = new Promise((resolve, reject) => {
+      let settled = false;
+      const settleResolve = () => {
+        if (!settled) {
+          settled = true;
+          this.connectPromise = null;
+          resolve();
+        }
+      };
+      const settleReject = (error: any) => {
+        if (!settled) {
+          settled = true;
+          this.connectPromise = null;
+          reject(error);
+        }
+      };
+
+      socket.onopen = () => {
+        if (this.ws !== socket || socketVersion !== this.socketVersion) return;
         console.log('WebSocket 连接成功');
         this.reconnectDelay = 3000; // 重置重连延迟
         this.startPing();
         this.emit('connectionChanged', { connected: true });
-        resolve();
+        settleResolve();
       };
 
-      this.ws.onerror = error => {
+      socket.onerror = error => {
+        if (this.ws !== socket || socketVersion !== this.socketVersion) return;
         console.error('WebSocket 错误:', error);
-        reject(error);
+        settleReject(error);
       };
 
-      this.ws.onmessage = event => {
+      socket.onmessage = event => {
+        if (this.ws !== socket || socketVersion !== this.socketVersion) return;
         this.handleMessage(event.data);
       };
 
-      this.ws.onclose = () => {
+      socket.onclose = () => {
+        if (this.ws !== socket || socketVersion !== this.socketVersion) return;
         console.log('WebSocket 连接关闭');
         this.stopPing();
         this.emit('connectionChanged', { connected: false });
+        this.ws = null;
+        this.connectPromise = null;
         this.scheduleReconnect();
       };
     });
+
+    return this.connectPromise;
   }
 
   /**
@@ -71,9 +111,18 @@ class WebSocketService {
     if (!this.shouldReconnect || !this.serverUrl) {
       return;
     }
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return;
+    }
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+      return;
+    }
     this.clearReconnectTimer();
     console.log(`将在 ${this.reconnectDelay / 1000}s 后尝试重连...`);
     this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) return;
+      if (this.ws && this.ws.readyState === WebSocket.CONNECTING) return;
       console.log('正在重连...');
       this.connect(this.serverUrl).catch(() => {
         // 递增延迟，上限 30 秒
@@ -168,6 +217,7 @@ class WebSocketService {
    * 启动心跳
    */
   private startPing() {
+    this.stopPing();
     this.pingInterval = setInterval(() => {
       this.send(MessageFactory.create('ping'));
     }, 30000); // 30 秒一次
@@ -190,9 +240,13 @@ class WebSocketService {
     this.shouldReconnect = false;
     this.clearReconnectTimer();
     this.stopPing();
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    this.connectPromise = null;
+    this.socketVersion++;
+
+    const socket = this.ws;
+    this.ws = null;
+    if (socket) {
+      socket.close();
     }
   }
 }
