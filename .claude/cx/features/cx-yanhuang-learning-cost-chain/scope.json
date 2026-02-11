@@ -2,8 +2,8 @@
   "mode": "feature",
   "title": "炎黄学习消耗链路复刻",
   "sync": {
-    "enabled": false,
-    "issue_number": null,
-    "issue_url": null
+    "enabled": true,
+    "issue_number": 239,
+    "issue_url": "https://github.com/m19803261706/nodemud/issues/239"
   }
 }
