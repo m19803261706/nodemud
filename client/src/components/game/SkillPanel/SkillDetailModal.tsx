@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
-  FlatList,
+  ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
 import LinearGradient from '../../LinearGradient';
@@ -104,14 +104,6 @@ export const SkillDetailModal = ({
     }
   }, [visible, skillId, clearLearnResult]);
 
-  /** 渲染招式列表项 */
-  const renderAction = ({ item }: { item: ActionDetailInfo }) => (
-    <ActionListItem action={item} />
-  );
-
-  const keyExtractor = (_: ActionDetailInfo, index: number) =>
-    `${_.skillName}-${index}`;
-
   return (
     <Modal
       visible={visible}
@@ -120,20 +112,27 @@ export const SkillDetailModal = ({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={s.overlay}>
-          <TouchableWithoutFeedback onPress={() => {}}>
-            <View style={s.card}>
-              {/* 渐变背景 */}
-              <LinearGradient
-                colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
-                style={StyleSheet.absoluteFill}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-              />
-              <View style={s.borderOverlay} pointerEvents="none" />
+      <View style={s.overlay}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={s.dismissLayer} />
+        </TouchableWithoutFeedback>
+        <View style={s.card}>
+          {/* 渐变背景 */}
+          <LinearGradient
+            colors={['#F5F0E8', '#EBE5DA', '#E0D9CC', '#D5CEC0']}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+          />
+          <View style={s.borderOverlay} pointerEvents="none" />
 
-              <View style={s.content}>
+          <ScrollView
+            style={s.contentScroll}
+            contentContainerStyle={s.content}
+            showsVerticalScrollIndicator={false}
+            bounces
+            nestedScrollEnabled
+          >
                 {/* 头部 */}
                 <View style={s.headerRow}>
                   <Text style={s.headerText} numberOfLines={1}>
@@ -254,24 +253,23 @@ export const SkillDetailModal = ({
 
                 {skillDetail?.actions && skillDetail.actions.length > 0 ? (
                   <View style={s.actionListWrap}>
-                    <FlatList
-                      data={skillDetail.actions}
-                      renderItem={renderAction}
-                      keyExtractor={keyExtractor}
-                      style={s.actionList}
-                      showsVerticalScrollIndicator={false}
-                    />
+                    <View style={s.actionList}>
+                      {skillDetail.actions.map((action: ActionDetailInfo, index: number) => (
+                        <ActionListItem
+                          key={`${action.skillName}-${index}`}
+                          action={action}
+                        />
+                      ))}
+                    </View>
                   </View>
                 ) : (
                   <Text style={s.emptyText}>
                     {skillDetail ? '暂无招式' : '加载中...'}
                   </Text>
                 )}
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
+          </ScrollView>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 };
@@ -282,6 +280,9 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  dismissLayer: {
+    ...StyleSheet.absoluteFillObject,
   },
   card: {
     width: '90%',
@@ -294,6 +295,10 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#8B7A5A55',
     borderRadius: 10,
+  },
+  contentScroll: {
+    flex: 1,
+    width: '100%',
   },
   content: {
     paddingTop: 16,
@@ -417,7 +422,6 @@ const s = StyleSheet.create({
     marginBottom: 6,
   },
   actionListWrap: {
-    maxHeight: 300,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#8B7A5A55',
     borderRadius: 6,
@@ -426,7 +430,7 @@ const s = StyleSheet.create({
     paddingVertical: 6,
   },
   actionList: {
-    maxHeight: 286,
+    width: '100%',
   },
   equipRow: {
     marginBottom: 2,
