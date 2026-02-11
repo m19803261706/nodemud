@@ -66,11 +66,15 @@ export const SkillDetailModal = ({
 }: SkillDetailModalProps) => {
   const skillDetail = useSkillStore(state => state.skillDetail);
   const skills = useSkillStore(state => state.skills);
+  const lastLearnResult = useSkillStore(state => state.lastLearnResult);
+  const clearLearnResult = useSkillStore(state => state.clearLearnResult);
   const sendCommand = useGameStore(state => state.sendCommand);
 
   /** 当前技能的映射状态 */
   const currentSkill = skillId ? skills.find(s => s.skillId === skillId) : null;
   const isMapped = currentSkill?.isMapped ?? false;
+  const canShowLearnFeedback =
+    !!lastLearnResult && !!skillId && lastLearnResult.skillId === skillId;
   const descSections = skillDetail?.description
     ? splitDescriptionSections(skillDetail.description)
     : [];
@@ -96,8 +100,9 @@ export const SkillDetailModal = ({
     // 关闭时清空详情
     if (!visible) {
       useSkillStore.getState().setSkillDetail(null);
+      clearLearnResult();
     }
-  }, [visible, skillId]);
+  }, [visible, skillId, clearLearnResult]);
 
   /** 渲染招式列表项 */
   const renderAction = ({ item }: { item: ActionDetailInfo }) => (
@@ -142,6 +147,11 @@ export const SkillDetailModal = ({
                     <Text style={s.closeBtnText}>&#10005;</Text>
                   </TouchableOpacity>
                 </View>
+                <Text style={s.headerMeta}>
+                  {currentSkill
+                    ? `当前境界 Lv.${currentSkill.level} · 进度 ${currentSkill.learned}/${currentSkill.learnedMax}`
+                    : '可观摩此法门招式与修行要旨'}
+                </Text>
 
                 <View style={s.dividerWrap}>
                   <GradientDivider />
@@ -154,7 +164,9 @@ export const SkillDetailModal = ({
                       <View style={s.descSectionWrap}>
                         {descSections.map(section => (
                           <View key={section.title} style={s.descSection}>
-                            <Text style={s.descSectionTitle}>{section.title}</Text>
+                            <Text style={s.descSectionTitle}>
+                              {section.title.replace(/[【】]/g, '')}
+                            </Text>
                             <Text style={s.desc}>{section.body}</Text>
                           </View>
                         ))}
@@ -165,6 +177,22 @@ export const SkillDetailModal = ({
                     <View style={s.dividerWrap}>
                       <GradientDivider />
                     </View>
+                  </View>
+                ) : null}
+
+                {canShowLearnFeedback ? (
+                  <View
+                    style={[
+                      s.learnFeedback,
+                      lastLearnResult?.success
+                        ? s.learnFeedbackSuccess
+                        : s.learnFeedbackFail,
+                    ]}
+                  >
+                    <Text style={s.learnFeedbackTitle}>
+                      {lastLearnResult?.success ? '学艺有得' : '学艺受阻'}
+                    </Text>
+                    <Text style={s.learnFeedbackText}>{lastLearnResult?.message}</Text>
                   </View>
                 ) : null}
 
@@ -225,13 +253,15 @@ export const SkillDetailModal = ({
                 </Text>
 
                 {skillDetail?.actions && skillDetail.actions.length > 0 ? (
-                  <FlatList
-                    data={skillDetail.actions}
-                    renderItem={renderAction}
-                    keyExtractor={keyExtractor}
-                    style={s.actionList}
-                    showsVerticalScrollIndicator={false}
-                  />
+                  <View style={s.actionListWrap}>
+                    <FlatList
+                      data={skillDetail.actions}
+                      renderItem={renderAction}
+                      keyExtractor={keyExtractor}
+                      style={s.actionList}
+                      showsVerticalScrollIndicator={false}
+                    />
+                  </View>
                 ) : (
                   <Text style={s.emptyText}>
                     {skillDetail ? '暂无招式' : '加载中...'}
@@ -254,21 +284,21 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   card: {
-    width: '85%',
-    maxHeight: '70%',
-    borderRadius: 4,
+    width: '90%',
+    maxHeight: '78%',
+    borderRadius: 10,
     overflow: 'hidden',
   },
   borderOverlay: {
     ...StyleSheet.absoluteFillObject,
     borderWidth: 1,
-    borderColor: '#8B7A5A40',
-    borderRadius: 4,
+    borderColor: '#8B7A5A55',
+    borderRadius: 10,
   },
   content: {
-    paddingTop: 14,
-    paddingBottom: 14,
-    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingHorizontal: 18,
   },
   headerRow: {
     flexDirection: 'row',
@@ -277,9 +307,16 @@ const s = StyleSheet.create({
   },
   headerText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    letterSpacing: 1,
+  },
+  headerMeta: {
+    marginTop: 2,
+    fontSize: 11,
+    color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
   },
   closeBtn: {
@@ -297,22 +334,58 @@ const s = StyleSheet.create({
     marginVertical: 8,
   },
   desc: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#5A5550',
     fontFamily: 'Noto Serif SC',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   descSectionWrap: {
-    gap: 6,
+    gap: 8,
   },
   descSection: {
-    gap: 2,
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A35',
+    backgroundColor: '#FFFFFF40',
   },
   descSectionTitle: {
-    fontSize: 12,
-    color: '#3A3530',
+    fontSize: 11,
+    color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
     fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  learnFeedback: {
+    marginBottom: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 2,
+  },
+  learnFeedbackSuccess: {
+    borderColor: '#3F6A4D66',
+    backgroundColor: '#3F6A4D14',
+  },
+  learnFeedbackFail: {
+    borderColor: '#8B3A3A66',
+    backgroundColor: '#8B3A3A14',
+  },
+  learnFeedbackTitle: {
+    fontSize: 11,
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+    color: '#5A472D',
+  },
+  learnFeedbackText: {
+    fontSize: 11,
+    fontFamily: 'Noto Serif SC',
+    color: '#5A5550',
+    lineHeight: 17,
   },
   lockNote: {
     marginBottom: 8,
@@ -337,14 +410,23 @@ const s = StyleSheet.create({
     lineHeight: 17,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
-    marginBottom: 4,
+    marginBottom: 6,
+  },
+  actionListWrap: {
+    maxHeight: 300,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A35',
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF50',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
   actionList: {
-    maxHeight: 280,
+    maxHeight: 292,
   },
   equipRow: {
     marginBottom: 2,

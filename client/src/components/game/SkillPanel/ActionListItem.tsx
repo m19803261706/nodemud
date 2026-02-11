@@ -34,16 +34,26 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
         <Text style={[s.name, locked ? s.textLocked : undefined]}>
           {action.skillName}
         </Text>
-        <Text style={[s.lvlReq, locked ? s.textLocked : undefined]}>
-          Lv.{action.lvl}
-        </Text>
+        <View style={s.headerRight}>
+          <Text style={[s.lvlReq, locked ? s.textLocked : undefined]}>
+            Lv.{action.lvl}
+          </Text>
+          <Text
+            style={[
+              s.stateBadge,
+              locked ? s.stateBadgeLocked : s.stateBadgeUnlocked,
+            ]}
+          >
+            {locked ? '未悟' : '已悟'}
+          </Text>
+        </View>
       </View>
 
       {/* 描述 */}
       {action.description ? (
         <Text
           style={[s.desc, locked ? s.textLocked : undefined]}
-          numberOfLines={2}
+          numberOfLines={3}
         >
           {action.description}
         </Text>
@@ -59,7 +69,7 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
                 : (action.modifiers[item.key] as number);
             if (val === 0) return null;
             return (
-              <View key={item.key} style={s.modItem}>
+              <View key={item.key} style={s.modChip}>
                 <Text style={s.modLabel}>{item.label}</Text>
                 <Text style={s.modValue}>
                   {val > 0 ? '+' : ''}
@@ -70,7 +80,7 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
           })}
           {/* 资源消耗 */}
           {action.costs.map(cost => (
-            <View key={cost.resource} style={s.modItem}>
+            <View key={cost.resource} style={s.costChip}>
               <Text style={s.costLabel}>{cost.resource}</Text>
               <Text style={s.costValue}>-{cost.amount}</Text>
             </View>
@@ -85,11 +95,12 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
 
 const s = StyleSheet.create({
   container: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#D4C9B8',
-    gap: 4,
+    gap: 5,
   },
   containerLocked: {
     opacity: 0.4,
@@ -99,19 +110,46 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   name: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
+    flex: 1,
   },
   textLocked: {
     color: '#A09888',
   },
   lvlReq: {
-    fontSize: 11,
+    fontSize: 10,
     color: '#8B7A5A',
     fontFamily: 'Noto Sans SC',
+  },
+  stateBadge: {
+    fontSize: 9,
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '600',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  stateBadgeUnlocked: {
+    color: '#3F6A4D',
+    backgroundColor: '#3F6A4D20',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#3F6A4D66',
+  },
+  stateBadgeLocked: {
+    color: '#8B7A5A',
+    backgroundColor: '#8B7A5A16',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A55',
   },
   desc: {
     fontSize: 11,
@@ -122,32 +160,49 @@ const s = StyleSheet.create({
   modRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
     marginTop: 2,
   },
-  modItem: {
+  modChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A40',
+    backgroundColor: '#F5F0E870',
+  },
+  costChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#B08A6A55',
+    backgroundColor: '#B08A6A14',
   },
   modLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
   },
   modValue: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
     color: '#6B5D4D',
     fontFamily: 'Noto Sans SC',
   },
   costLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#A09888',
     fontFamily: 'Noto Serif SC',
   },
   costValue: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
     color: '#B08A6A',
     fontFamily: 'Noto Sans SC',

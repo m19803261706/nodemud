@@ -49,6 +49,15 @@ export interface SkillLearnFailureState {
   hint?: string;
 }
 
+/** 最近一次学艺结果（用于 NPC 武学弹窗内即时反馈） */
+export interface SkillLearnResultState {
+  skillId: string;
+  skillName: string;
+  success: boolean;
+  message: string;
+  updatedAt: number;
+}
+
 /* ─── Store 接口 ─── */
 
 export interface SkillState {
@@ -66,6 +75,8 @@ export interface SkillState {
   skillDetail: SkillDetailInfo | null;
   /** 最近一次学艺失败 */
   lastLearnFailure: SkillLearnFailureState | null;
+  /** 最近一次学艺结果 */
+  lastLearnResult: SkillLearnResultState | null;
 
   // ─── Actions ───
 
@@ -89,6 +100,8 @@ export interface SkillState {
   setSkillDetail: (detail: SkillDetailInfo | null) => void;
   /** 清空学艺失败提示 */
   clearLearnFailure: () => void;
+  /** 清空学艺结果提示 */
+  clearLearnResult: () => void;
 }
 
 /* ─── 修炼初始状态 ─── */
@@ -105,7 +118,7 @@ const INITIAL_PRACTICE: PracticeState = {
 
 /* ─── Store ─── */
 
-export const useSkillStore = create<SkillState>((set, get) => ({
+export const useSkillStore = create<SkillState>((set) => ({
   skills: [],
   skillMap: {},
   activeForce: null,
@@ -113,6 +126,7 @@ export const useSkillStore = create<SkillState>((set, get) => ({
   practiceState: INITIAL_PRACTICE,
   skillDetail: null,
   lastLearnFailure: null,
+  lastLearnResult: null,
 
   // 全量设置技能列表
   setSkillList: (data: SkillListData) =>
@@ -247,6 +261,13 @@ export const useSkillStore = create<SkillState>((set, get) => ({
             message: data.message,
             hint,
           },
+          lastLearnResult: {
+            skillId: data.skillId,
+            skillName: data.skillName,
+            success: false,
+            message: data.message,
+            updatedAt: Date.now(),
+          },
         };
       }
 
@@ -261,7 +282,17 @@ export const useSkillStore = create<SkillState>((set, get) => ({
             }
           : s,
       );
-      return { skills, lastLearnFailure: null };
+      return {
+        skills,
+        lastLearnFailure: null,
+        lastLearnResult: {
+          skillId: data.skillId,
+          skillName: data.skillName,
+          success: true,
+          message: data.message,
+          updatedAt: Date.now(),
+        },
+      };
     }),
 
   // 设置技能详情
@@ -269,4 +300,5 @@ export const useSkillStore = create<SkillState>((set, get) => ({
     set({ skillDetail: detail }),
 
   clearLearnFailure: () => set({ lastLearnFailure: null }),
+  clearLearnResult: () => set({ lastLearnResult: null }),
 }));
