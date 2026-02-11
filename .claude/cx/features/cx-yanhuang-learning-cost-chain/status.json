@@ -1,0 +1,17 @@
+{
+  "feature": "炎黄学习消耗链路复刻",
+  "slug": "cx-yanhuang-learning-cost-chain",
+  "scope_status": "completed",
+  "created_at": "2026-02-11T00:00:00+08:00",
+  "last_updated": "2026-02-11T00:00:00+08:00",
+  "mode": "feature",
+  "github_issue": null,
+  "decisions": {
+    "range": "A",
+    "jing_mapping": "A",
+    "silver_rule": "C",
+    "teacher_cap": "A",
+    "potential_display": "A",
+    "scope_name": "A"
+  }
+}
