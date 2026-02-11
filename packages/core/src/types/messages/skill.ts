@@ -213,6 +213,21 @@ export interface PracticeUpdateMessage extends ServerMessage {
 }
 
 /** skillLearnResult 消息数据 — NPC 学艺结果 */
+export type SkillLearnFailureReason =
+  | 'unlock_rank_required'
+  | 'unlock_attr_required'
+  | 'unlock_preq_skill_required'
+  | 'unlock_puzzle_canju_required'
+  | 'unlock_puzzle_duanju_required'
+  | 'unlock_puzzle_shiyan_required'
+  | 'unlock_challenge_required'
+  | 'canon_crippled'
+  | 'insufficient_silver'
+  | 'insufficient_energy'
+  | 'insufficient_potential'
+  | 'teacher_cap_reached'
+  | 'cannot_improve';
+
 export interface SkillLearnResultData {
   success: boolean; // 是否成功
   skillId: string; // 技能 ID
@@ -224,7 +239,7 @@ export interface SkillLearnResultData {
   learnedMax: number; // 升级所需经验
   levelUp: boolean; // 是否刚升级
   message: string; // 提示信息
-  reason?: string; // 失败原因（可选）
+  reason?: SkillLearnFailureReason; // 失败原因（可选）
 }
 
 /** skillLearnResult 消息 */
