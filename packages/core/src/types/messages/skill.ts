@@ -85,6 +85,23 @@ export interface ActionDetailInfo {
   };
 }
 
+/** 可传授技能摘要（用于师父/授艺面板） */
+export interface TeachSkillInfo {
+  skillId: string; // 技能 ID
+  skillName: string; // 技能名称
+  skillType: SkillSlotType; // 技能槽位类型
+  category: SkillCategory; // 技能分类
+}
+
+/** 师父传艺目录（技能页快捷学艺入口） */
+export interface MasterTeachData {
+  npcId: string; // 师父 NPC 蓝图 ID（如 npc/songyang/master-li）
+  npcName: string; // 师父姓名
+  sectId: string; // 门派 ID
+  sectName: string; // 门派名
+  skills: TeachSkillInfo[]; // 可传授技能
+}
+
 // ========== 服务端 → 客户端消息 ==========
 
 /** skillList 消息数据 — 技能列表全量推送 */
@@ -165,6 +182,7 @@ export interface SkillPanelDataResponse {
   activeForce: string | null; // 当前激活内功 ID
   bonusSummary: SkillBonusSummary; // 技能加成汇总
   detail?: SkillDetailInfo; // 技能详情（可选）
+  masterTeach?: MasterTeachData | null; // 当前师父可传授目录（可选）
 }
 
 /** skillPanelData 消息 */

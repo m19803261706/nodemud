@@ -7,6 +7,7 @@ import { SkillRegistry } from '../../../engine/skills/skill-registry';
 import { PuzzleStepState, normalizePlayerSectData } from '../../../engine/sect/types';
 import type { Session } from '../../types/session';
 import { SkillHandler } from '../skill.handler';
+import { ServiceLocator } from '../../../engine/service-locator';
 
 function createSession(): Session {
   return {
@@ -83,7 +84,7 @@ function parseLastSentMessage(player: PlayerBase): any {
 
 describe('SkillHandler contract regression', () => {
   let skillRegistry: SkillRegistry;
-  let objectManager: { findById: jest.Mock };
+  let objectManager: { findById: jest.Mock; findAll: jest.Mock };
   let combatManager: { executeSkillAction: jest.Mock };
   let practiceManager: { startPractice: jest.Mock; stopPractice: jest.Mock };
   let handler: SkillHandler;
@@ -92,9 +93,13 @@ describe('SkillHandler contract regression', () => {
     skillRegistry = new SkillRegistry();
     registerSongyangSkills(skillRegistry);
 
-    objectManager = { findById: jest.fn() };
+    objectManager = { findById: jest.fn(), findAll: jest.fn(() => []) };
     combatManager = { executeSkillAction: jest.fn() };
     practiceManager = { startPractice: jest.fn(), stopPractice: jest.fn() };
+
+    (ServiceLocator as any).sectManager = {
+      getPlayerSectData: jest.fn((player: PlayerBase) => player.get('sect')),
+    };
 
     handler = new SkillHandler(
       objectManager as any,
@@ -103,6 +108,10 @@ describe('SkillHandler contract regression', () => {
       combatManager as any,
       practiceManager as any,
     );
+  });
+
+  afterEach(() => {
+    delete (ServiceLocator as any).sectManager;
   });
 
   it('skillPanelData 应返回契约字段并包含四段详情文案', async () => {
@@ -208,6 +217,54 @@ describe('SkillHandler contract regression', () => {
     );
   });
 
+  it('skillPanelData 应附带当前师父可传授目录（用于技能页快捷学艺）', async () => {
+    const player = createPlayer();
+    const masterNpc = new NpcBase('npc/songyang/master-li#2');
+    masterNpc.set('name', '李掌门');
+    masterNpc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+
+    const skillManager = {
+      buildSkillListData: jest.fn(() => ({
+        skills: [],
+        skillMap: {},
+        activeForce: null,
+      })),
+      getSkillBonusSummary: jest.fn(() => ({
+        attack: 0,
+        defense: 0,
+        dodge: 0,
+        parry: 0,
+        maxHp: 0,
+        maxMp: 0,
+        critRate: 0,
+        hitRate: 0,
+      })),
+      getAllSkills: jest.fn(() => []),
+    };
+    (player as any).skillManager = skillManager;
+    objectManager.findById.mockReturnValue(player);
+    objectManager.findAll.mockImplementation((predicate: (entity: unknown) => boolean) =>
+      [masterNpc].filter(predicate),
+    );
+
+    await handler.handleSkillPanelRequest(createSession(), {});
+
+    const payload = parseLastSentMessage(player);
+    expect(payload.type).toBe('skillPanelData');
+    expect(payload.data.masterTeach).toMatchObject({
+      npcId: 'npc/songyang/master-li',
+      npcName: '李掌门',
+      sectId: 'songyang',
+      sectName: '嵩阳宗',
+    });
+    expect(payload.data.masterTeach.skills).toEqual([
+      expect.objectContaining({
+        skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+        skillName: '嵩阳入门刀法',
+      }),
+    ]);
+  });
+
   it('skillMapResult 应返回 slotType/skillId/updatedMap 契约字段', async () => {
     const player = createPlayer();
     const skillManager = {
@@ -301,5 +358,84 @@ describe('SkillHandler contract regression', () => {
       'canon_crippled',
     ]);
     expect(allowedReasons.has(payload.data.reason)).toBe(true);
+  });
+
+  it('当前师父不在同房间时，仍可通过蓝图 ID 远程学艺', async () => {
+    const player = createPlayer();
+    player.set('silver', 999);
+    player.set('energy', 80);
+
+    const masterNpc = new NpcBase('npc/songyang/master-li#1');
+    masterNpc.set('name', '李掌门');
+    masterNpc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+    masterNpc.set('teach_cost', 10);
+
+    const room = {
+      getInventory: () => [],
+    };
+    (player as any).getEnvironment = jest.fn(() => room);
+
+    let currentLevel = 0;
+    let learned = 0;
+    const skillManager = {
+      getAllSkills: jest.fn(() => [
+        {
+          skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+          level: currentLevel,
+          learned,
+        },
+      ]),
+      improveSkill: jest.fn(() => {
+        learned += 1;
+        return false;
+      }),
+      learnSkill: jest.fn(),
+    };
+    (player as any).skillManager = skillManager;
+    objectManager.findById.mockReturnValue(player);
+    objectManager.findAll.mockImplementation((predicate: (entity: unknown) => boolean) =>
+      [masterNpc].filter(predicate),
+    );
+
+    await handler.handleSkillLearnRequest(createSession(), {
+      npcId: 'npc/songyang/master-li',
+      skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+      times: 1,
+    });
+
+    const payload = parseLastSentMessage(player);
+    expect(payload.type).toBe('skillLearnResult');
+    expect(payload.data.success).toBe(true);
+    expect(payload.data.skillId).toBe(SONGYANG_SKILL_IDS.ENTRY_BLADE);
+  });
+
+  it('非当前师父即便在线，也不能跨房间远程学艺', async () => {
+    const player = createPlayer();
+    const npc = new NpcBase('npc/songyang/mentor-he#1');
+    npc.set('name', '何教习');
+    npc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+
+    const room = {
+      getInventory: () => [],
+    };
+    (player as any).getEnvironment = jest.fn(() => room);
+    (player as any).skillManager = {
+      getAllSkills: jest.fn(() => []),
+      learnSkill: jest.fn(),
+      improveSkill: jest.fn(),
+    };
+    objectManager.findById.mockReturnValue(player);
+    objectManager.findAll.mockImplementation((predicate: (entity: unknown) => boolean) =>
+      [npc].filter(predicate),
+    );
+
+    await handler.handleSkillLearnRequest(createSession(), {
+      npcId: 'npc/songyang/mentor-he',
+      skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+      times: 1,
+    });
+
+    expect((player as any).receiveMessage).toHaveBeenCalledWith('附近找不到这个人。');
+    expect((player as any).sendToClient).not.toHaveBeenCalled();
   });
 });

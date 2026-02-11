@@ -4,7 +4,7 @@
  * 打开时发送 skillPanelRequest 带 detailSkillId 获取详情数据
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -72,6 +72,8 @@ export const SkillDetailModal = ({
   const lastLearnResult = useSkillStore(state => state.lastLearnResult);
   const clearLearnResult = useSkillStore(state => state.clearLearnResult);
   const sendCommand = useGameStore(state => state.sendCommand);
+  const dismissGuardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [canDismissByBackdrop, setCanDismissByBackdrop] = useState(false);
 
   /** 当前技能的映射状态 */
   const currentSkill = skillId ? skills.find(s => s.skillId === skillId) : null;
@@ -107,16 +109,39 @@ export const SkillDetailModal = ({
         }),
       );
     }
+
+    // 防止“列表点击抬起事件”被遮罩层立刻吞掉导致详情瞬间关闭
+    if (visible) {
+      setCanDismissByBackdrop(false);
+      if (dismissGuardTimer.current) clearTimeout(dismissGuardTimer.current);
+      dismissGuardTimer.current = setTimeout(() => {
+        setCanDismissByBackdrop(true);
+      }, 180);
+    } else {
+      setCanDismissByBackdrop(false);
+    }
+
     // 关闭时清空详情
     if (!visible) {
       useSkillStore.getState().setSkillDetail(null);
       clearLearnResult();
     }
+    return () => {
+      if (dismissGuardTimer.current) {
+        clearTimeout(dismissGuardTimer.current);
+        dismissGuardTimer.current = null;
+      }
+    };
   }, [visible, skillId, clearLearnResult]);
+
+  const handleBackdropPress = () => {
+    if (!canDismissByBackdrop) return;
+    onClose();
+  };
 
   const content = (
     <View style={[s.overlay, embedded ? s.overlayEmbedded : undefined]}>
-      <TouchableWithoutFeedback onPress={onClose}>
+      <TouchableWithoutFeedback onPress={handleBackdropPress}>
         <View style={s.dismissLayer} />
       </TouchableWithoutFeedback>
       <View style={s.card}>

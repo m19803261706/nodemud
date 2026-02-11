@@ -19,6 +19,8 @@ import {
   type SkillDetailInfo,
   type ActionDetailInfo,
   type SkillSlotType,
+  type MasterTeachData,
+  type TeachSkillInfo,
 } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import { SkillService } from '../../skill/skill.service';
@@ -31,6 +33,7 @@ import { NpcBase } from '../../engine/game-objects/npc-base';
 import type { Session } from '../types/session';
 import type { SkillAction } from '../../engine/skills/types';
 import type { SkillManager } from '../../engine/skills/skill-manager';
+import { ServiceLocator } from '../../engine/service-locator';
 import {
   UnlockState,
   evaluateSongyangSkillUnlockById,
@@ -150,6 +153,7 @@ export class SkillHandler {
         skillMap: listData.skillMap,
         activeForce: listData.activeForce,
         bonusSummary,
+        masterTeach: this.buildMasterTeachData(player),
       };
 
       // 如果请求了技能详情
@@ -189,8 +193,8 @@ export class SkillHandler {
         return;
       }
 
-      // 校验 NPC 是否在当前房间
-      const npc = this.findNpcInRoom(player, data.npcId);
+      // 先查同房间 NPC，不存在时允许“当前师父”跨房间授艺
+      const npc = this.resolveLearningNpc(player, data.npcId);
       if (!npc) {
         player.receiveMessage('附近找不到这个人。');
         return;
@@ -447,6 +451,43 @@ export class SkillHandler {
       | undefined;
   }
 
+  /** 学艺对象解析：优先同房间，其次允许玩家当前师父跨房间授艺 */
+  private resolveLearningNpc(player: PlayerBase, npcId: string): NpcBase | undefined {
+    const inRoomNpc = this.findNpcInRoom(player, npcId);
+    if (inRoomNpc) return inRoomNpc;
+
+    const blueprintId = this.getNpcBlueprintId(npcId);
+    if (!this.canLearnRemoteFromMaster(player, blueprintId)) {
+      return undefined;
+    }
+
+    return this.findNpcByBlueprintId(blueprintId);
+  }
+
+  /** 是否允许对“当前师父”跨房间学艺 */
+  private canLearnRemoteFromMaster(player: PlayerBase, npcBlueprintId: string): boolean {
+    const sectManager = ServiceLocator.sectManager;
+    if (!sectManager) return false;
+
+    const sectData = sectManager.getPlayerSectData(player);
+    if (!sectData.current) return false;
+
+    return sectData.current.masterNpcId === npcBlueprintId;
+  }
+
+  /** 通过蓝图 ID 查找任意在线 NPC 实例 */
+  private findNpcByBlueprintId(npcBlueprintId: string): NpcBase | undefined {
+    const candidates = this.objectManager.findAll(
+      (entity) => entity instanceof NpcBase && this.getNpcBlueprintId(entity.id) === npcBlueprintId,
+    ) as NpcBase[];
+    return candidates[0];
+  }
+
+  /** 实例 ID -> 蓝图 ID（xxx#1 -> xxx） */
+  private getNpcBlueprintId(npcId: string): string {
+    return npcId.split('#')[0];
+  }
+
   /** 推送 skillLearnResult 消息到客户端 */
   private sendSkillLearnResult(player: PlayerBase, data: SkillLearnResultData): void {
     const msg = MessageFactory.create('skillLearnResult', data);
@@ -514,5 +555,44 @@ export class SkillHandler {
       description,
       actions,
     };
+  }
+
+  /** 构建“当前师父可传授技能目录”供技能页快捷学习使用 */
+  private buildMasterTeachData(player: PlayerBase): MasterTeachData | null {
+    const sectManager = ServiceLocator.sectManager;
+    if (!sectManager) return null;
+
+    const sectData = sectManager.getPlayerSectData(player);
+    if (!sectData.current?.masterNpcId) return null;
+
+    const masterNpc = this.findNpcByBlueprintId(sectData.current.masterNpcId);
+    if (!masterNpc) return null;
+
+    const skills = this.getNpcTeachSkills(masterNpc);
+    if (skills.length === 0) return null;
+
+    return {
+      npcId: sectData.current.masterNpcId,
+      npcName: masterNpc.getName(),
+      sectId: sectData.current.sectId,
+      sectName: sectData.current.sectName,
+      skills,
+    };
+  }
+
+  /** 提取 NPC teach_skills 并映射为前端可读摘要 */
+  private getNpcTeachSkills(npc: NpcBase): TeachSkillInfo[] {
+    const teachSkillIds = npc.get<string[]>('teach_skills') ?? [];
+    if (teachSkillIds.length === 0) return [];
+
+    return teachSkillIds.map((skillId) => {
+      const skillDef = this.skillRegistry.get(skillId);
+      return {
+        skillId,
+        skillName: skillDef?.skillName ?? skillId,
+        skillType: (skillDef?.skillType ?? 'cognize') as SkillSlotType,
+        category: (skillDef?.category ?? 'martial') as TeachSkillInfo['category'],
+      };
+    });
   }
 }

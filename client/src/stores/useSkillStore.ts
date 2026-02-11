@@ -17,6 +17,7 @@ import type {
   PracticeUpdateData,
   SkillLearnResultData,
   SkillDetailInfo,
+  MasterTeachData,
 } from '@packages/core';
 import { getSkillLearnFailureHint } from '../utils/skillLearnReason';
 
@@ -73,6 +74,8 @@ export interface SkillState {
   practiceState: PracticeState;
   /** 技能详情（面板展开时使用） */
   skillDetail: SkillDetailInfo | null;
+  /** 当前师父可传授目录（技能页快捷学艺） */
+  masterTeach: MasterTeachData | null;
   /** 最近一次学艺失败 */
   lastLearnFailure: SkillLearnFailureState | null;
   /** 最近一次学艺结果 */
@@ -125,6 +128,7 @@ export const useSkillStore = create<SkillState>((set) => ({
   bonusSummary: null,
   practiceState: INITIAL_PRACTICE,
   skillDetail: null,
+  masterTeach: null,
   lastLearnFailure: null,
   lastLearnResult: null,
 
@@ -219,6 +223,7 @@ export const useSkillStore = create<SkillState>((set) => ({
       activeForce: data.activeForce,
       bonusSummary: data.bonusSummary,
       skillDetail: data.detail ?? null,
+      masterTeach: data.masterTeach ?? null,
     }),
 
   // 更新修炼进度
