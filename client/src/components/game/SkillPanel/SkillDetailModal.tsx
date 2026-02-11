@@ -21,6 +21,7 @@ import type { ActionDetailInfo } from '@packages/core';
 import { wsService } from '../../../services/WebSocketService';
 import { useSkillStore } from '../../../stores/useSkillStore';
 import { useGameStore } from '../../../stores/useGameStore';
+import { getSkillLearnFailureHint } from '../../../utils/skillLearnReason';
 import { ActionListItem } from './ActionListItem';
 
 interface SkillDetailModalProps {
@@ -34,7 +35,12 @@ interface SkillDetailModalProps {
   embedded?: boolean;
 }
 
-const DESCRIPTION_TITLES = ['【背景】', '【学习条件】', '【战斗公式】', '【扩展】'];
+const DESCRIPTION_TITLES = [
+  '【背景】',
+  '【学习条件】',
+  '【战斗公式】',
+  '【扩展】',
+];
 
 function splitDescriptionSections(
   description: string,
@@ -47,7 +53,9 @@ function splitDescriptionSections(
       .map(next => description.indexOf(next))
       .filter(pos => pos !== -1);
     const end =
-      endCandidates.length > 0 ? Math.min(...endCandidates) : description.length;
+      endCandidates.length > 0
+        ? Math.min(...endCandidates)
+        : description.length;
 
     const body = description
       .slice(start + title.length, end)
@@ -85,11 +93,17 @@ export const SkillDetailModal = ({
     if (a.lvl !== b.lvl) return a.lvl - b.lvl;
     return a.skillName.localeCompare(b.skillName, 'zh-Hans-CN');
   });
-  const unlockedActions = orderedActions.filter((action) => action.unlocked);
-  const lockedActions = orderedActions.filter((action) => !action.unlocked);
+  const unlockedActions = orderedActions.filter(action => action.unlocked);
+  const lockedActions = orderedActions.filter(action => !action.unlocked);
   const descSections = skillDetail?.description
     ? splitDescriptionSections(skillDetail.description)
     : [];
+  const learnFeedbackReasonText =
+    canShowLearnFeedback && lastLearnResult?.reason
+      ? lastLearnResult.hint ??
+        getSkillLearnFailureHint(lastLearnResult.reason) ??
+        lastLearnResult.reason
+      : null;
 
   /** 装配/卸下操作 */
   const handleEquipToggle = () => {
@@ -161,161 +175,176 @@ export const SkillDetailModal = ({
           bounces
           nestedScrollEnabled
         >
-              {/* 头部 */}
-              <View style={s.headerRow}>
-                <Text style={s.headerText} numberOfLines={1}>
-                  {skillDetail?.skillName || '---'}
-                </Text>
-                <TouchableOpacity
-                  onPress={onClose}
-                  style={s.closeBtn}
-                  activeOpacity={0.7}
-                >
-                  <Text style={s.closeBtnText}>&#10005;</Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={s.headerMeta}>
-                {currentSkill
-                  ? `当前境界 Lv.${currentSkill.level} · 进度 ${currentSkill.learned}/${currentSkill.learnedMax}`
-                  : '可观摩此法门招式与修行要旨'}
-              </Text>
+          {/* 头部 */}
+          <View style={s.headerRow}>
+            <Text style={s.headerText} numberOfLines={1}>
+              {skillDetail?.skillName || '---'}
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              style={s.closeBtn}
+              activeOpacity={0.7}
+            >
+              <Text style={s.closeBtnText}>&#10005;</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={s.headerMeta}>
+            {currentSkill
+              ? `当前境界 Lv.${currentSkill.level} · 进度 ${currentSkill.learned}/${currentSkill.learnedMax}`
+              : '可观摩此法门招式与修行要旨'}
+          </Text>
 
+          <View style={s.dividerWrap}>
+            <GradientDivider />
+          </View>
+
+          {/* 技能描述 */}
+          {skillDetail?.description ? (
+            <View>
+              {descSections.length > 0 ? (
+                <View style={s.descSectionWrap}>
+                  {descSections.map(section => (
+                    <View key={section.title} style={s.descSection}>
+                      <Text style={s.descSectionTitle}>
+                        {section.title.replace(/[【】]/g, '')}
+                      </Text>
+                      <Text style={s.desc}>{section.body}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={s.desc}>{skillDetail.description}</Text>
+              )}
               <View style={s.dividerWrap}>
                 <GradientDivider />
               </View>
+            </View>
+          ) : null}
 
-              {/* 技能描述 */}
-              {skillDetail?.description ? (
-                <View>
-                  {descSections.length > 0 ? (
-                    <View style={s.descSectionWrap}>
-                      {descSections.map(section => (
-                        <View key={section.title} style={s.descSection}>
-                          <Text style={s.descSectionTitle}>
-                            {section.title.replace(/[【】]/g, '')}
-                          </Text>
-                          <Text style={s.desc}>{section.body}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={s.desc}>{skillDetail.description}</Text>
-                  )}
-                  <View style={s.dividerWrap}>
-                    <GradientDivider />
-                  </View>
-                </View>
+          {canShowLearnFeedback ? (
+            <View
+              style={[
+                s.learnFeedback,
+                lastLearnResult?.success
+                  ? s.learnFeedbackSuccess
+                  : s.learnFeedbackFail,
+              ]}
+            >
+              <Text style={s.learnFeedbackTitle}>
+                {lastLearnResult?.success ? '学艺有得' : '学艺受阻'}
+              </Text>
+              <Text style={s.learnFeedbackText}>
+                {lastLearnResult?.message}
+              </Text>
+              {lastLearnResult?.timesRequested &&
+              lastLearnResult.timesRequested > 1 ? (
+                <Text style={s.learnFeedbackMeta}>
+                  完成次数：{lastLearnResult.timesCompleted}/
+                  {lastLearnResult.timesRequested}
+                </Text>
               ) : null}
+              {learnFeedbackReasonText ? (
+                <Text style={s.learnFeedbackMeta}>
+                  中断缘由：{learnFeedbackReasonText}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
 
-              {canShowLearnFeedback ? (
-                <View
+          {currentSkill?.isLocked ? (
+            <View style={s.lockNote}>
+              <Text style={s.lockNoteTitle}>断裂传承</Text>
+              <Text style={s.lockNoteText}>
+                此技能处于锁定状态，无法装配与精进，仅保留残篇心得。
+              </Text>
+            </View>
+          ) : null}
+
+          {/* 装配/卸下按钮 */}
+          {showEquipToggle && currentSkill && !currentSkill.isLocked ? (
+            <View style={s.equipRow}>
+              <TouchableOpacity
+                style={[s.equipBtn, isMapped ? s.equipBtnUnmap : undefined]}
+                onPress={handleEquipToggle}
+                activeOpacity={0.7}
+              >
+                <Text
                   style={[
-                    s.learnFeedback,
-                    lastLearnResult?.success
-                      ? s.learnFeedbackSuccess
-                      : s.learnFeedbackFail,
+                    s.equipBtnText,
+                    isMapped ? s.equipBtnTextUnmap : undefined,
                   ]}
                 >
-                  <Text style={s.learnFeedbackTitle}>
-                    {lastLearnResult?.success ? '学艺有得' : '学艺受阻'}
-                  </Text>
-                  <Text style={s.learnFeedbackText}>{lastLearnResult?.message}</Text>
-                </View>
-              ) : null}
-
-              {currentSkill?.isLocked ? (
-                <View style={s.lockNote}>
-                  <Text style={s.lockNoteTitle}>断裂传承</Text>
-                  <Text style={s.lockNoteText}>
-                    此技能处于锁定状态，无法装配与精进，仅保留残篇心得。
-                  </Text>
-                </View>
-              ) : null}
-
-              {/* 装配/卸下按钮 */}
-              {showEquipToggle && currentSkill && !currentSkill.isLocked ? (
-                <View style={s.equipRow}>
-                  <TouchableOpacity
-                    style={[
-                      s.equipBtn,
-                      isMapped ? s.equipBtnUnmap : undefined,
-                    ]}
-                    onPress={handleEquipToggle}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        s.equipBtnText,
-                        isMapped ? s.equipBtnTextUnmap : undefined,
-                      ]}
-                    >
-                      {isMapped ? '卸下技能' : '装配技能'}
-                    </Text>
-                  </TouchableOpacity>
-                  <View style={s.dividerWrap}>
-                    <GradientDivider />
-                  </View>
-                </View>
-              ) : null}
-
-              {/* 外部动作按钮（如：向师父学习） */}
-              {actionLabel && skillId && onActionPress ? (
-                <View style={s.equipRow}>
-                  <TouchableOpacity
-                    style={[s.equipBtn, s.learnBtn]}
-                    onPress={() => onActionPress(skillId)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[s.equipBtnText, s.learnBtnText]}>{actionLabel}</Text>
-                  </TouchableOpacity>
-                  <View style={s.dividerWrap}>
-                    <GradientDivider />
-                  </View>
-                </View>
-              ) : null}
-
-              {/* 招式列表 */}
-              <Text style={s.sectionTitle}>
-                招式 ({orderedActions.length})
-              </Text>
-
-              {orderedActions.length > 0 ? (
-                <View style={s.actionListWrap}>
-                  <View style={s.actionList}>
-                    {unlockedActions.length > 0 ? (
-                      <View style={s.actionGroupHeader}>
-                        <Text style={s.actionGroupTitle}>
-                          已悟招式 · {unlockedActions.length}
-                        </Text>
-                      </View>
-                    ) : null}
-                    {unlockedActions.map((action: ActionDetailInfo, index: number) => (
-                      <ActionListItem
-                        key={`unlocked-${action.skillName}-${index}`}
-                        action={action}
-                      />
-                    ))}
-
-                    {lockedActions.length > 0 ? (
-                      <View style={s.actionGroupHeader}>
-                        <Text style={s.actionGroupTitleMuted}>
-                          待悟招式 · {lockedActions.length}
-                        </Text>
-                      </View>
-                    ) : null}
-                    {lockedActions.map((action: ActionDetailInfo, index: number) => (
-                      <ActionListItem
-                        key={`locked-${action.skillName}-${index}`}
-                        action={action}
-                      />
-                    ))}
-                  </View>
-                </View>
-              ) : (
-                <Text style={s.emptyText}>
-                  {skillDetail ? '暂无招式' : '加载中...'}
+                  {isMapped ? '卸下技能' : '装配技能'}
                 </Text>
-              )}
+              </TouchableOpacity>
+              <View style={s.dividerWrap}>
+                <GradientDivider />
+              </View>
+            </View>
+          ) : null}
+
+          {/* 外部动作按钮（如：向师父学习） */}
+          {actionLabel && skillId && onActionPress ? (
+            <View style={s.equipRow}>
+              <TouchableOpacity
+                style={[s.equipBtn, s.learnBtn]}
+                onPress={() => onActionPress(skillId)}
+                activeOpacity={0.7}
+              >
+                <Text style={[s.equipBtnText, s.learnBtnText]}>
+                  {actionLabel}
+                </Text>
+              </TouchableOpacity>
+              <View style={s.dividerWrap}>
+                <GradientDivider />
+              </View>
+            </View>
+          ) : null}
+
+          {/* 招式列表 */}
+          <Text style={s.sectionTitle}>招式 ({orderedActions.length})</Text>
+
+          {orderedActions.length > 0 ? (
+            <View style={s.actionListWrap}>
+              <View style={s.actionList}>
+                {unlockedActions.length > 0 ? (
+                  <View style={s.actionGroupHeader}>
+                    <Text style={s.actionGroupTitle}>
+                      已悟招式 · {unlockedActions.length}
+                    </Text>
+                  </View>
+                ) : null}
+                {unlockedActions.map(
+                  (action: ActionDetailInfo, index: number) => (
+                    <ActionListItem
+                      key={`unlocked-${action.skillName}-${index}`}
+                      action={action}
+                    />
+                  ),
+                )}
+
+                {lockedActions.length > 0 ? (
+                  <View style={s.actionGroupHeader}>
+                    <Text style={s.actionGroupTitleMuted}>
+                      待悟招式 · {lockedActions.length}
+                    </Text>
+                  </View>
+                ) : null}
+                {lockedActions.map(
+                  (action: ActionDetailInfo, index: number) => (
+                    <ActionListItem
+                      key={`locked-${action.skillName}-${index}`}
+                      action={action}
+                    />
+                  ),
+                )}
+              </View>
+            </View>
+          ) : (
+            <Text style={s.emptyText}>
+              {skillDetail ? '暂无招式' : '加载中...'}
+            </Text>
+          )}
         </ScrollView>
       </View>
     </View>
@@ -470,6 +499,13 @@ const s = StyleSheet.create({
     fontFamily: 'Noto Serif SC',
     color: '#5A5550',
     lineHeight: 17,
+  },
+  learnFeedbackMeta: {
+    fontSize: 10,
+    fontFamily: 'Noto Serif SC',
+    color: '#8B7A5A',
+    lineHeight: 15,
+    marginTop: 2,
   },
   lockNote: {
     marginBottom: 8,

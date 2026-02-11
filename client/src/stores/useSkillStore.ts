@@ -16,6 +16,7 @@ import type {
   SkillPanelDataResponse,
   PracticeUpdateData,
   SkillLearnResultData,
+  SkillLearnFailureReason,
   SkillDetailInfo,
   MasterTeachData,
 } from '@packages/core';
@@ -56,6 +57,10 @@ export interface SkillLearnResultState {
   skillName: string;
   success: boolean;
   message: string;
+  reason?: SkillLearnFailureReason;
+  hint?: string;
+  timesCompleted: number;
+  timesRequested: number;
   updatedAt: number;
 }
 
@@ -121,7 +126,7 @@ const INITIAL_PRACTICE: PracticeState = {
 
 /* ─── Store ─── */
 
-export const useSkillStore = create<SkillState>((set) => ({
+export const useSkillStore = create<SkillState>(set => ({
   skills: [],
   skillMap: {},
   activeForce: null,
@@ -256,8 +261,16 @@ export const useSkillStore = create<SkillState>((set) => ({
   // 更新学艺结果
   applyLearnResult: (data: SkillLearnResultData) =>
     set(state => {
+      const hint =
+        getSkillLearnFailureHint(data.reason ?? undefined) ?? undefined;
+      const timesCompleted = Number.isFinite(data.timesCompleted)
+        ? Math.max(0, Math.floor(data.timesCompleted))
+        : 0;
+      const timesRequested = Number.isFinite(data.timesRequested)
+        ? Math.max(1, Math.floor(data.timesRequested))
+        : 1;
+
       if (!data.success) {
-        const hint = getSkillLearnFailureHint(data.reason ?? undefined) ?? undefined;
         return {
           lastLearnFailure: {
             skillId: data.skillId,
@@ -271,6 +284,10 @@ export const useSkillStore = create<SkillState>((set) => ({
             skillName: data.skillName,
             success: false,
             message: data.message,
+            reason: data.reason ?? undefined,
+            hint,
+            timesCompleted,
+            timesRequested,
             updatedAt: Date.now(),
           },
         };
@@ -295,6 +312,10 @@ export const useSkillStore = create<SkillState>((set) => ({
           skillName: data.skillName,
           success: true,
           message: data.message,
+          reason: data.reason ?? undefined,
+          hint,
+          timesCompleted,
+          timesRequested,
           updatedAt: Date.now(),
         },
       };

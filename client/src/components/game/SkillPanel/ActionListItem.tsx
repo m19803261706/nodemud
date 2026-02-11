@@ -24,18 +24,33 @@ const MODIFIER_ITEMS: {
   { key: 'parry', label: '招架' },
 ];
 
+const DEFAULT_MODIFIERS: ActionDetailInfo['modifiers'] = {
+  attack: 0,
+  damage: 0,
+  dodge: 0,
+  parry: 0,
+  damageType: '',
+};
+
 export const ActionListItem = ({ action }: ActionListItemProps) => {
   const locked = !action.unlocked;
+  const modifiers = action.modifiers ?? DEFAULT_MODIFIERS;
+  const costs = Array.isArray(action.costs) ? action.costs : [];
 
   return (
-    <View style={[s.container, locked ? s.containerLocked : s.containerUnlocked]}>
+    <View
+      style={[s.container, locked ? s.containerLocked : s.containerUnlocked]}
+    >
       <View style={[s.sideBar, locked ? s.sideBarLocked : s.sideBarUnlocked]} />
 
       <View style={s.content}>
         {/* 头部: 招式名 + 等级要求 */}
         <View style={s.headerRow}>
           <View style={s.titleWrap}>
-            <Text style={[s.name, locked ? s.nameLocked : undefined]} numberOfLines={1}>
+            <Text
+              style={[s.name, locked ? s.nameLocked : undefined]}
+              numberOfLines={1}
+            >
               {action.skillName}
             </Text>
             <Text style={[s.subTitle, locked ? s.subTitleLocked : undefined]}>
@@ -75,7 +90,7 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
               const val =
                 item.key === 'damageType'
                   ? 0
-                  : (action.modifiers[item.key] as number);
+                  : (modifiers[item.key] as number);
               if (val === 0) return null;
               return (
                 <View key={item.key} style={s.modChip}>
@@ -88,7 +103,7 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
               );
             })}
             {/* 资源消耗 */}
-            {action.costs.map(cost => (
+            {costs.map(cost => (
               <View key={cost.resource} style={s.costChip}>
                 <Text style={s.costLabel}>{cost.resource}</Text>
                 <Text style={s.costValue}>-{cost.amount}</Text>
@@ -97,7 +112,9 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
           </View>
         ) : (
           <View style={s.lockInfo}>
-            <Text style={s.lockedHint}>你当前境界不足，继续修习可解锁此式。</Text>
+            <Text style={s.lockedHint}>
+              你当前境界不足，继续修习可解锁此式。
+            </Text>
           </View>
         )}
       </View>
