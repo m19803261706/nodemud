@@ -95,12 +95,12 @@ export class BookBase extends ItemBase implements IUsableItem {
 
   /**
    * 计算研读精力消耗
-   * 公式: max(5, floor((jing_cost * 20 + difficulty - wisdom) / 20))
+   * 公式: max(10, floor((jing_cost * 20 + difficulty - perception) / 20))
    */
-  calculateEnergyCost(wisdom: number): number {
+  calculateEnergyCost(perception: number): number {
     const baseCost = this.getBaseJingCost();
     const difficulty = this.getDifficulty();
-    return Math.max(5, Math.floor((baseCost * 20 + difficulty - wisdom) / 20));
+    return Math.max(10, Math.floor((baseCost * 20 + difficulty - perception) / 20));
   }
 
   // ========== IUsableItem 协议 ==========

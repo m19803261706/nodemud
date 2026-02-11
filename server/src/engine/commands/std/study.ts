@@ -153,8 +153,9 @@ export class StudyCommand implements ICommand {
     }
 
     // 循环研读
-    const wisdom = executor.get<number>('wisdom') ?? 10;
-    const energyCost = book.calculateEnergyCost(wisdom);
+    // 悟性映射 perception，对齐 learn/research 判定口径
+    const perception = executor.get<number>('perception') ?? 10;
+    const energyCost = book.calculateEnergyCost(perception);
     let timesCompleted = 0;
     let didLevelUp = false;
 

@@ -86,20 +86,20 @@ describe('BookBase 书籍基类', () => {
   });
 
   describe('calculateEnergyCost 精力消耗计算', () => {
-    it('基本公式: max(5, floor((jing_cost*20 + difficulty - wisdom) / 20))', () => {
+    it('基本公式: max(10, floor((jing_cost*20 + difficulty - perception) / 20))', () => {
       const book = createBook('test/book');
       book.set('skill/jing_cost', 5);
       book.set('skill/difficulty', 10);
       // (5*20 + 10 - 10) / 20 = 100/20 = 5
-      expect(book.calculateEnergyCost(10)).toBe(5);
+      expect(book.calculateEnergyCost(10)).toBe(10);
     });
 
     it('高慧根降低消耗', () => {
       const book = createBook('test/book');
       book.set('skill/jing_cost', 5);
       book.set('skill/difficulty', 10);
-      // (5*20 + 10 - 50) / 20 = 60/20 = 3 → max(5, 3) = 5
-      expect(book.calculateEnergyCost(50)).toBe(5);
+      // (5*20 + 10 - 50) / 20 = 60/20 = 3 → max(10, 3) = 10
+      expect(book.calculateEnergyCost(50)).toBe(10);
     });
 
     it('高难度增加消耗', () => {
@@ -110,12 +110,12 @@ describe('BookBase 书籍基类', () => {
       expect(book.calculateEnergyCost(10)).toBe(12);
     });
 
-    it('最低消耗不低于 5', () => {
+    it('最低消耗不低于 10', () => {
       const book = createBook('test/book');
       book.set('skill/jing_cost', 1);
       book.set('skill/difficulty', 1);
-      // (1*20 + 1 - 100) / 20 = -79/20 = -3 → max(5, -3) = 5
-      expect(book.calculateEnergyCost(100)).toBe(5);
+      // (1*20 + 1 - 100) / 20 = -79/20 = -3 → max(10, -3) = 10
+      expect(book.calculateEnergyCost(100)).toBe(10);
     });
   });
 
