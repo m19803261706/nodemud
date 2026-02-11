@@ -28,82 +28,113 @@ export const ActionListItem = ({ action }: ActionListItemProps) => {
   const locked = !action.unlocked;
 
   return (
-    <View style={[s.container, locked ? s.containerLocked : undefined]}>
-      {/* 头部: 招式名 + 等级要求 */}
-      <View style={s.headerRow}>
-        <Text style={[s.name, locked ? s.textLocked : undefined]}>
-          {action.skillName}
-        </Text>
-        <View style={s.headerRight}>
-          <Text style={[s.lvlReq, locked ? s.textLocked : undefined]}>
-            Lv.{action.lvl}
-          </Text>
+    <View style={[s.container, locked ? s.containerLocked : s.containerUnlocked]}>
+      <View style={[s.sideBar, locked ? s.sideBarLocked : s.sideBarUnlocked]} />
+
+      <View style={s.content}>
+        {/* 头部: 招式名 + 等级要求 */}
+        <View style={s.headerRow}>
+          <View style={s.titleWrap}>
+            <Text style={[s.name, locked ? s.nameLocked : undefined]} numberOfLines={1}>
+              {action.skillName}
+            </Text>
+            <Text style={[s.subTitle, locked ? s.subTitleLocked : undefined]}>
+              {locked ? `需境界 Lv.${action.lvl} 方可领会` : '已可运使'}
+            </Text>
+          </View>
+
+          <View style={s.headerRight}>
+            <Text style={[s.lvlReq, locked ? s.lvlReqLocked : undefined]}>
+              Lv.{action.lvl}
+            </Text>
+            <Text
+              style={[
+                s.stateBadge,
+                locked ? s.stateBadgeLocked : s.stateBadgeUnlocked,
+              ]}
+            >
+              {locked ? '未悟' : '已悟'}
+            </Text>
+          </View>
+        </View>
+
+        {/* 描述 */}
+        {action.description ? (
           <Text
-            style={[
-              s.stateBadge,
-              locked ? s.stateBadgeLocked : s.stateBadgeUnlocked,
-            ]}
+            style={[s.desc, locked ? s.descLocked : undefined]}
+            numberOfLines={2}
           >
-            {locked ? '未悟' : '已悟'}
+            {action.description}
           </Text>
-        </View>
-      </View>
+        ) : null}
 
-      {/* 描述 */}
-      {action.description ? (
-        <Text
-          style={[s.desc, locked ? s.textLocked : undefined]}
-          numberOfLines={3}
-        >
-          {action.description}
-        </Text>
-      ) : null}
-
-      {/* 已解锁: 显示修正值 */}
-      {!locked ? (
-        <View style={s.modRow}>
-          {MODIFIER_ITEMS.map(item => {
-            const val =
-              item.key === 'damageType'
-                ? 0
-                : (action.modifiers[item.key] as number);
-            if (val === 0) return null;
-            return (
-              <View key={item.key} style={s.modChip}>
-                <Text style={s.modLabel}>{item.label}</Text>
-                <Text style={s.modValue}>
-                  {val > 0 ? '+' : ''}
-                  {val}
-                </Text>
+        {/* 已解锁: 显示修正值 */}
+        {!locked ? (
+          <View style={s.modRow}>
+            {MODIFIER_ITEMS.map(item => {
+              const val =
+                item.key === 'damageType'
+                  ? 0
+                  : (action.modifiers[item.key] as number);
+              if (val === 0) return null;
+              return (
+                <View key={item.key} style={s.modChip}>
+                  <Text style={s.modLabel}>{item.label}</Text>
+                  <Text style={s.modValue}>
+                    {val > 0 ? '+' : ''}
+                    {val}
+                  </Text>
+                </View>
+              );
+            })}
+            {/* 资源消耗 */}
+            {action.costs.map(cost => (
+              <View key={cost.resource} style={s.costChip}>
+                <Text style={s.costLabel}>{cost.resource}</Text>
+                <Text style={s.costValue}>-{cost.amount}</Text>
               </View>
-            );
-          })}
-          {/* 资源消耗 */}
-          {action.costs.map(cost => (
-            <View key={cost.resource} style={s.costChip}>
-              <Text style={s.costLabel}>{cost.resource}</Text>
-              <Text style={s.costValue}>-{cost.amount}</Text>
-            </View>
-          ))}
-        </View>
-      ) : (
-        <Text style={s.lockedHint}>等级不足</Text>
-      )}
+            ))}
+          </View>
+        ) : (
+          <View style={s.lockInfo}>
+            <Text style={s.lockedHint}>你当前境界不足，继续修习可解锁此式。</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
 
 const s = StyleSheet.create({
   container: {
-    paddingVertical: 9,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#D4C9B8',
-    gap: 5,
+    flexDirection: 'row',
+    borderRadius: 6,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    marginVertical: 4,
+  },
+  containerUnlocked: {
+    borderColor: '#8B7A5A35',
+    backgroundColor: '#F7F2E8',
   },
   containerLocked: {
-    opacity: 0.4,
+    borderColor: '#A79C8C55',
+    backgroundColor: '#EEE8DE',
+  },
+  sideBar: {
+    width: 3,
+  },
+  sideBarUnlocked: {
+    backgroundColor: '#6A8A62',
+  },
+  sideBarLocked: {
+    backgroundColor: '#B4A796',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    gap: 5,
   },
   headerRow: {
     flexDirection: 'row',
@@ -115,27 +146,42 @@ const s = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
+  titleWrap: {
+    flex: 1,
+    gap: 1,
+    paddingRight: 8,
+  },
   name: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
     color: '#3A3530',
     fontFamily: 'Noto Serif SC',
-    flex: 1,
   },
-  textLocked: {
-    color: '#A09888',
+  nameLocked: {
+    color: '#706556',
+  },
+  subTitle: {
+    fontSize: 10,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  subTitleLocked: {
+    color: '#9A8D7A',
   },
   lvlReq: {
     fontSize: 10,
     color: '#8B7A5A',
     fontFamily: 'Noto Sans SC',
   },
+  lvlReqLocked: {
+    color: '#9A8D7A',
+  },
   stateBadge: {
     fontSize: 9,
     fontFamily: 'Noto Serif SC',
     fontWeight: '600',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -157,6 +203,9 @@ const s = StyleSheet.create({
     fontFamily: 'Noto Serif SC',
     lineHeight: 17,
   },
+  descLocked: {
+    color: '#857866',
+  },
   modRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -167,12 +216,12 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8B7A5A40',
-    backgroundColor: '#F5F0E870',
+    borderColor: '#8B7A5A55',
+    backgroundColor: '#FCF8F0',
   },
   costChip: {
     flexDirection: 'row',
@@ -182,8 +231,8 @@ const s = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#B08A6A55',
-    backgroundColor: '#B08A6A14',
+    borderColor: '#A9785155',
+    backgroundColor: '#F5E6D8',
   },
   modLabel: {
     fontSize: 9,
@@ -204,13 +253,22 @@ const s = StyleSheet.create({
   costValue: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#B08A6A',
+    color: '#8F6442',
     fontFamily: 'Noto Sans SC',
+  },
+  lockInfo: {
+    marginTop: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#A79C8C55',
+    backgroundColor: '#F1E9DE',
   },
   lockedHint: {
     fontSize: 10,
-    color: '#A09888',
+    color: '#857866',
     fontFamily: 'Noto Serif SC',
-    fontStyle: 'italic',
+    lineHeight: 15,
   },
 });

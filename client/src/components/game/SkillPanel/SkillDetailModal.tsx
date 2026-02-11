@@ -412,21 +412,21 @@ const s = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#6B5D4D',
+    color: '#5E513F',
     fontFamily: 'Noto Serif SC',
     marginBottom: 6,
   },
   actionListWrap: {
     maxHeight: 300,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8B7A5A35',
-    borderRadius: 4,
-    backgroundColor: '#FFFFFF50',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderColor: '#8B7A5A55',
+    borderRadius: 6,
+    backgroundColor: '#ECE4D8',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   actionList: {
-    maxHeight: 292,
+    maxHeight: 286,
   },
   equipRow: {
     marginBottom: 2,
