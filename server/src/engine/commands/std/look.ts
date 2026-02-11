@@ -239,6 +239,7 @@ export class LookCommand implements ICommand {
       ? ((npc as MerchantBase).getRecycleConfig().enabled ?? true)
       : false;
     const teachSkills = this.getNpcTeachSkills(npc);
+    const canLearnFromMaster = this.canLearnFromMaster(npc, executor, teachSkills.length > 0);
 
     const actions: string[] = [];
     if (canChat) actions.push('chat');
@@ -247,6 +248,7 @@ export class LookCommand implements ICommand {
     if (canGive) actions.push('give');
     if (canAttack) actions.push('attack');
     if (teachSkills.length > 0) actions.push('viewSkills');
+    if (canLearnFromMaster) actions.push('learnSkill');
 
     // 门派交互按钮（简单 if/if 颗粒度控制）
     const sectActions = this.getNpcSectActions(npc, executor);
@@ -364,5 +366,25 @@ export class LookCommand implements ICommand {
         category: skillDef?.category ?? 'martial',
       };
     });
+  }
+
+  /**
+   * 仅当目标 NPC 为玩家当前师父时，开放“学习技能”动作。
+   * 对标传统 MUD 中 master_id 判定逻辑，避免陌生授艺 NPC 直接触发学艺按钮。
+   */
+  private canLearnFromMaster(npc: NpcBase, executor?: LivingBase, hasTeachSkills = false): boolean {
+    if (!hasTeachSkills) return false;
+    if (!executor || !(executor instanceof PlayerBase)) return false;
+
+    const sectManager = ServiceLocator.sectManager;
+    if (!sectManager) return false;
+
+    const sectData = sectManager.getPlayerSectData(executor);
+    if (!sectData.current) return false;
+
+    const npcBlueprintId = npc.id.split('#')[0];
+    if (sectData.current.masterNpcId !== npcBlueprintId) return false;
+
+    return sectManager.isSameSectWithNpc(executor, npc);
   }
 }

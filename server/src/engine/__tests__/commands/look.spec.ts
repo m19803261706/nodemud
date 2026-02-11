@@ -186,6 +186,46 @@ describe('LookCommand', () => {
     ]);
   });
 
+  it('look 玩家查看自己的师父时返回 learnSkill 动作', async () => {
+    const room = new RoomBase('songyang/yard');
+    room.set('short', '弟子院');
+
+    const player = new PlayerBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/songyang/mentor-he#1');
+    npc.set('name', '何教习');
+    npc.set('short', '何教习');
+    npc.set('sect_id', 'songyang');
+    npc.set('teach_skills', ['songyang.entry.blade']);
+    await npc.moveTo(room, { quiet: true });
+
+    (ServiceLocator as any).skillRegistry = {
+      get: jest.fn().mockReturnValue({
+        skillId: 'songyang.entry.blade',
+        skillName: '嵩阳入门刀',
+        skillType: 'blade',
+        category: 'martial',
+      }),
+    };
+    (ServiceLocator as any).sectManager = {
+      getPlayerSectData: jest.fn().mockReturnValue({
+        current: {
+          sectId: 'songyang',
+          masterNpcId: 'npc/songyang/mentor-he',
+        },
+      }),
+      isSameSectWithNpc: jest.fn().mockReturnValue(true),
+      getNpcAvailableActions: jest.fn().mockReturnValue([]),
+    };
+
+    const result = cmd.execute(player, ['何教习']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.actions).toEqual(['attack', 'viewSkills', 'learnSkill', 'close']);
+  });
+
   it('look 门派 NPC 返回门派动作位', async () => {
     const room = new RoomBase('songyang/hall');
     room.set('short', '议事堂');

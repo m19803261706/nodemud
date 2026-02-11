@@ -8,9 +8,11 @@ import {
   MessageFactory,
   SkillCategory,
   SkillSlotType,
+  type SkillLearnRequestData,
   type PlayerSkillInfo,
 } from '@packages/core';
 import { useGameStore, type NpcDetailData } from '../../../stores/useGameStore';
+import { useSkillStore } from '../../../stores/useSkillStore';
 import { wsService } from '../../../services/WebSocketService';
 import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
@@ -18,21 +20,30 @@ import { ItemCard } from './ItemCard';
 import { ShopListModal } from './ShopListModal';
 import { SkillPanel } from '../SkillPanel';
 
-function mapNpcTeachSkillsToReadonlyItems(detail: NpcDetailData): PlayerSkillInfo[] {
+function mapNpcTeachSkillsToReadonlyItems(
+  detail: NpcDetailData,
+  playerSkills: PlayerSkillInfo[],
+): PlayerSkillInfo[] {
+  const learnedMap = new Map(playerSkills.map((skill) => [skill.skillId, skill]));
   const teachSkills = detail.teachSkills ?? [];
-  return teachSkills.map((skill) => ({
-    skillId: skill.skillId,
-    skillName: skill.skillName,
-    skillType: skill.skillType as SkillSlotType,
-    category: skill.category as SkillCategory,
-    level: 0,
-    learned: 0,
-    learnedMax: 1,
-    isMapped: false,
-    mappedSlot: null,
-    isActiveForce: false,
-    isLocked: false,
-  }));
+  return teachSkills.map((skill) => {
+    const learned = learnedMap.get(skill.skillId);
+    if (learned) return { ...learned };
+
+    return {
+      skillId: skill.skillId,
+      skillName: skill.skillName,
+      skillType: skill.skillType as SkillSlotType,
+      category: skill.category as SkillCategory,
+      level: 0,
+      learned: 0,
+      learnedMax: 1,
+      isMapped: false,
+      mappedSlot: null,
+      isActiveForce: false,
+      isLocked: false,
+    };
+  });
 }
 
 export const NpcList = () => {
@@ -40,6 +51,7 @@ export const NpcList = () => {
   const npcDetail = useGameStore(state => state.npcDetail);
   const shopListDetail = useGameStore(state => state.shopListDetail);
   const inventory = useGameStore(state => state.inventory);
+  const playerSkills = useSkillStore(state => state.skills);
   const setNpcDetail = useGameStore(state => state.setNpcDetail);
   const setShopListDetail = useGameStore(state => state.setShopListDetail);
   const groundItems = useGameStore(state => state.groundItems);
@@ -49,10 +61,12 @@ export const NpcList = () => {
   const npcSkillItems = useMemo(
     () =>
       npcSkillPanelDetail
-        ? mapNpcTeachSkillsToReadonlyItems(npcSkillPanelDetail)
+        ? mapNpcTeachSkillsToReadonlyItems(npcSkillPanelDetail, playerSkills)
         : [],
-    [npcSkillPanelDetail],
+    [npcSkillPanelDetail, playerSkills],
   );
+  const canLearnFromNpcInPanel =
+    !!npcSkillPanelDetail && new Set(npcSkillPanelDetail.actions ?? []).has('learnSkill');
 
   return (
     <View style={s.container}>
@@ -148,6 +162,16 @@ export const NpcList = () => {
         skillsOverride={npcSkillItems}
         bonusSummaryOverride={null}
         readOnlyCatalog
+        detailActionLabel={canLearnFromNpcInPanel ? '学习技能' : undefined}
+        onDetailActionPress={skillId => {
+          if (!npcSkillPanelDetail || !canLearnFromNpcInPanel) return;
+          const req: SkillLearnRequestData = {
+            npcId: npcSkillPanelDetail.npcId,
+            skillId,
+            times: 1,
+          };
+          wsService.send(MessageFactory.create('skillLearnRequest', req));
+        }}
       />
     </View>
   );

@@ -482,10 +482,10 @@ export class SkillHandler {
     if (!skillManager) return null;
 
     const skillData = skillManager.getAllSkills().find((s) => s.skillId === skillId);
-    if (!skillData) return null;
+    const currentLevel = skillData?.level ?? 0;
 
     // 获取技能描述
-    const description = skillDef.getDescription(skillData.level);
+    const description = skillDef.getDescription(currentLevel);
 
     // 获取招式列表（武学和内功都有 actions 属性）
     const rawActions: SkillAction[] = (skillDef as any).actions ?? [];
@@ -493,7 +493,7 @@ export class SkillHandler {
       skillName: action.name,
       description: action.description,
       lvl: action.lvl,
-      unlocked: skillData.level >= action.lvl,
+      unlocked: currentLevel >= action.lvl,
       costs: action.costs.map((cost) => ({
         resource: cost.resource,
         amount: cost.amount,

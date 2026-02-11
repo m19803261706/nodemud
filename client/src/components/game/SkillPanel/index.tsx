@@ -35,8 +35,11 @@ interface SkillPanelProps {
   title?: string;
   skillsOverride?: PlayerSkillInfo[] | null;
   bonusSummaryOverride?: SkillBonusSummary | null;
-  /** 只读目录模式：禁用技能详情请求与装配交互 */
+  /** 只读目录模式：保留目录浏览，仅禁用详情中的装配交互 */
   readOnlyCatalog?: boolean;
+  /** 详情弹窗外部动作（如“学习技能”） */
+  detailActionLabel?: string;
+  onDetailActionPress?: (skillId: string) => void;
 }
 
 /** 武学子分组配置 */
@@ -53,6 +56,8 @@ export const SkillPanel = ({
   skillsOverride = null,
   bonusSummaryOverride = null,
   readOnlyCatalog = false,
+  detailActionLabel,
+  onDetailActionPress,
 }: SkillPanelProps) => {
   const playerSkills = useSkillStore(state => state.skills);
   const playerBonusSummary = useSkillStore(state => state.bonusSummary);
@@ -105,10 +110,9 @@ export const SkillPanel = ({
 
   /** 点击技能 - 打开详情弹窗 */
   const handleSkillPress = useCallback((skillId: string) => {
-    if (readOnlyCatalog) return;
     setDetailSkillId(skillId);
     setDetailVisible(true);
-  }, [readOnlyCatalog]);
+  }, []);
 
   /** 关闭详情弹窗 */
   const handleDetailClose = useCallback(() => {
@@ -225,13 +229,14 @@ export const SkillPanel = ({
       </View>
 
       {/* 嵌套: 技能详情弹窗 */}
-      {!readOnlyCatalog ? (
-        <SkillDetailModal
-          visible={detailVisible}
-          onClose={handleDetailClose}
-          skillId={detailSkillId}
-        />
-      ) : null}
+      <SkillDetailModal
+        visible={detailVisible}
+        onClose={handleDetailClose}
+        skillId={detailSkillId}
+        showEquipToggle={!readOnlyCatalog}
+        actionLabel={detailActionLabel}
+        onActionPress={onDetailActionPress}
+      />
     </Modal>
   );
 };

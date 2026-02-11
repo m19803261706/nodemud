@@ -171,6 +171,43 @@ describe('SkillHandler contract regression', () => {
     expect(payload.data.detail.description).toContain('【扩展】');
   });
 
+  it('skillPanelData 未学会技能也应可返回详情（用于 NPC 武学面板）', async () => {
+    const player = createPlayer();
+    const skillManager = {
+      buildSkillListData: jest.fn(() => ({
+        skills: [],
+        skillMap: {},
+        activeForce: null,
+      })),
+      getSkillBonusSummary: jest.fn(() => ({
+        attack: 0,
+        defense: 0,
+        dodge: 0,
+        parry: 0,
+        maxHp: 0,
+        maxMp: 0,
+        critRate: 0,
+        hitRate: 0,
+      })),
+      getAllSkills: jest.fn(() => []),
+    };
+    (player as any).skillManager = skillManager;
+    objectManager.findById.mockReturnValue(player);
+
+    await handler.handleSkillPanelRequest(createSession(), {
+      detailSkillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+    });
+
+    const payload = parseLastSentMessage(player);
+    expect(payload.type).toBe('skillPanelData');
+    expect(payload.data.detail).toBeDefined();
+    expect(payload.data.detail.skillId).toBe(SONGYANG_SKILL_IDS.ENTRY_BLADE);
+    expect(payload.data.detail.actions.length).toBeGreaterThan(0);
+    expect(payload.data.detail.actions.every((action: { unlocked: boolean }) => action.unlocked === false)).toBe(
+      true,
+    );
+  });
+
   it('skillMapResult 应返回 slotType/skillId/updatedMap 契约字段', async () => {
     const player = createPlayer();
     const skillManager = {

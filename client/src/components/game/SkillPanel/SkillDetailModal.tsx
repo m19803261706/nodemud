@@ -27,6 +27,9 @@ interface SkillDetailModalProps {
   visible: boolean;
   onClose: () => void;
   skillId: string | null;
+  showEquipToggle?: boolean;
+  actionLabel?: string;
+  onActionPress?: (skillId: string) => void;
 }
 
 const DESCRIPTION_TITLES = ['【背景】', '【学习条件】', '【战斗公式】', '【扩展】'];
@@ -57,6 +60,9 @@ export const SkillDetailModal = ({
   visible,
   onClose,
   skillId,
+  showEquipToggle = true,
+  actionLabel,
+  onActionPress,
 }: SkillDetailModalProps) => {
   const skillDetail = useSkillStore(state => state.skillDetail);
   const skills = useSkillStore(state => state.skills);
@@ -172,7 +178,7 @@ export const SkillDetailModal = ({
                 ) : null}
 
                 {/* 装配/卸下按钮 */}
-                {currentSkill && !currentSkill.isLocked ? (
+                {showEquipToggle && currentSkill && !currentSkill.isLocked ? (
                   <View style={s.equipRow}>
                     <TouchableOpacity
                       style={[
@@ -190,6 +196,22 @@ export const SkillDetailModal = ({
                       >
                         {isMapped ? '卸下技能' : '装配技能'}
                       </Text>
+                    </TouchableOpacity>
+                    <View style={s.dividerWrap}>
+                      <GradientDivider />
+                    </View>
+                  </View>
+                ) : null}
+
+                {/* 外部动作按钮（如：向师父学习） */}
+                {actionLabel && skillId && onActionPress ? (
+                  <View style={s.equipRow}>
+                    <TouchableOpacity
+                      style={[s.equipBtn, s.learnBtn]}
+                      onPress={() => onActionPress(skillId)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.equipBtnText, s.learnBtnText]}>{actionLabel}</Text>
                     </TouchableOpacity>
                     <View style={s.dividerWrap}>
                       <GradientDivider />
@@ -349,6 +371,13 @@ const s = StyleSheet.create({
   },
   equipBtnTextUnmap: {
     color: '#D46040',
+  },
+  learnBtn: {
+    borderColor: '#7C633E88',
+    backgroundColor: '#7C633E18',
+  },
+  learnBtnText: {
+    color: '#5A472D',
   },
   emptyText: {
     textAlign: 'center',
