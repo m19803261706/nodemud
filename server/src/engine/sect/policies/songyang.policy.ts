@@ -34,7 +34,7 @@ export class SongyangPolicy implements SectPolicy {
 
   canApprentice(player: PlayerBase, _master: NpcBase, _data: PlayerSectData): true | string {
     const level = player.get<number>('level') ?? 1;
-    if (level < 3) {
+    if (level < 2) {
       return '你火候未足，先在江湖历练几番，再来叩门。';
     }
     return true;

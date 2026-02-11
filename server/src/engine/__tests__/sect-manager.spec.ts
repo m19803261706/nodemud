@@ -50,6 +50,27 @@ describe('SectManager', () => {
     expect(data.current?.contribution).toBe(0);
   });
 
+  it('等级不足 2 级时不可拜师', () => {
+    const player = createPlayer();
+    player.set('level', 1);
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
+
+    const result = manager.apprentice(player, mentor);
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('火候未足');
+  });
+
+  it('达到 2 级可拜师', () => {
+    const player = createPlayer();
+    player.set('level', 2);
+    const mentor = createSongyangNpc('npc/songyang/mentor-he', '何教习', 'mentor');
+
+    const result = manager.apprentice(player, mentor);
+
+    expect(result.success).toBe(true);
+  });
+
   it('掌门不直接收徒，应先经何教习入门', () => {
     const player = createPlayer();
     const master = createSongyangNpc('npc/songyang/master-li', '李掌门', 'master');
