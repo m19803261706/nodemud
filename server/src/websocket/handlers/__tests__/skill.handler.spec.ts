@@ -40,6 +40,8 @@ function createPlayer(overrides?: {
   player.set('spirit', 30);
   player.set('wisdom', 30);
   player.set('meridian', 30);
+  player.set('potential', 100);
+  player.set('learned_points', 0);
   player.set(
     'sect',
     normalizePlayerSectData({
@@ -212,9 +214,11 @@ describe('SkillHandler contract regression', () => {
     expect(payload.data.detail).toBeDefined();
     expect(payload.data.detail.skillId).toBe(SONGYANG_SKILL_IDS.ENTRY_BLADE);
     expect(payload.data.detail.actions.length).toBeGreaterThan(0);
-    expect(payload.data.detail.actions.every((action: { unlocked: boolean }) => action.unlocked === false)).toBe(
-      true,
-    );
+    expect(
+      payload.data.detail.actions.every(
+        (action: { unlocked: boolean }) => action.unlocked === false,
+      ),
+    ).toBe(true);
   });
 
   it('skillPanelData 应附带当前师父可传授目录（用于技能页快捷学艺）', async () => {
@@ -368,6 +372,7 @@ describe('SkillHandler contract regression', () => {
     const masterNpc = new NpcBase('npc/songyang/master-li#1');
     masterNpc.set('name', '李掌门');
     masterNpc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+    masterNpc.set('teach_skill_levels', { [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 120 });
     masterNpc.set('teach_cost', 10);
 
     const room = {
@@ -407,6 +412,86 @@ describe('SkillHandler contract regression', () => {
     expect(payload.type).toBe('skillLearnResult');
     expect(payload.data.success).toBe(true);
     expect(payload.data.skillId).toBe(SONGYANG_SKILL_IDS.ENTRY_BLADE);
+  });
+
+  it('skillLearnResult 在潜能不足时应返回 insufficient_potential', async () => {
+    const player = createPlayer();
+    player.set('silver', 999);
+    player.set('energy', 999);
+    player.set('potential', 10);
+    player.set('learned_points', 10);
+
+    const npc = new NpcBase('npc/songyang/master-li#9');
+    npc.set('name', '李掌门');
+    npc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+    npc.set('teach_skill_levels', { [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 120 });
+    npc.set('teach_cost', 10);
+
+    const room = {
+      getInventory: () => [npc],
+    };
+    (player as any).getEnvironment = jest.fn(() => room);
+
+    let level = 0;
+    let learned = 0;
+    (player as any).skillManager = {
+      getAllSkills: jest.fn(() => [{ skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE, level, learned }]),
+      improveSkill: jest.fn(() => {
+        learned += 1;
+        return false;
+      }),
+      learnSkill: jest.fn(),
+    };
+    objectManager.findById.mockReturnValue(player);
+
+    await handler.handleSkillLearnRequest(createSession(), {
+      npcId: npc.id,
+      skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+      times: 1,
+    });
+
+    const payload = parseLastSentMessage(player);
+    expect(payload.type).toBe('skillLearnResult');
+    expect(payload.data.success).toBe(false);
+    expect(payload.data.reason).toBe('insufficient_potential');
+  });
+
+  it('skillLearnResult 在达到师父上限时应返回 teacher_cap_reached', async () => {
+    const player = createPlayer();
+    player.set('silver', 999);
+    player.set('energy', 999);
+
+    const npc = new NpcBase('npc/songyang/master-li#8');
+    npc.set('name', '李掌门');
+    npc.set('teach_skills', [SONGYANG_SKILL_IDS.ENTRY_BLADE]);
+    npc.set('teach_skill_levels', { [SONGYANG_SKILL_IDS.ENTRY_BLADE]: 5 });
+    npc.set('teach_cost', 10);
+
+    const room = {
+      getInventory: () => [npc],
+    };
+    (player as any).getEnvironment = jest.fn(() => room);
+
+    const skillManager = {
+      getAllSkills: jest.fn(() => [
+        { skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE, level: 5, learned: 0 },
+      ]),
+      improveSkill: jest.fn(),
+      learnSkill: jest.fn(),
+    };
+    (player as any).skillManager = skillManager;
+    objectManager.findById.mockReturnValue(player);
+
+    await handler.handleSkillLearnRequest(createSession(), {
+      npcId: npc.id,
+      skillId: SONGYANG_SKILL_IDS.ENTRY_BLADE,
+      times: 1,
+    });
+
+    const payload = parseLastSentMessage(player);
+    expect(payload.type).toBe('skillLearnResult');
+    expect(payload.data.success).toBe(false);
+    expect(payload.data.reason).toBe('teacher_cap_reached');
   });
 
   it('非当前师父即便在线，也不能跨房间远程学艺', async () => {

@@ -32,12 +32,12 @@ import type { RoomBase } from '../../engine/game-objects/room-base';
 import { NpcBase } from '../../engine/game-objects/npc-base';
 import type { Session } from '../types/session';
 import type { SkillAction } from '../../engine/skills/types';
-import type { SkillManager } from '../../engine/skills/skill-manager';
 import { ServiceLocator } from '../../engine/service-locator';
 import {
   UnlockState,
   evaluateSongyangSkillUnlockById,
 } from '../../engine/skills/songyang/songyang-unlock-evaluator';
+import { executeNpcTeachLearning } from '../../engine/skills/learning/npc-learn';
 
 @Injectable()
 export class SkillHandler {
@@ -268,123 +268,15 @@ export class SkillHandler {
         }
       }
 
-      // 循环 times 次提升技能
-      let timesCompleted = 0;
-      let didLevelUp = false;
-
-      for (let i = 0; i < times; i++) {
-        // 检查资源（潜能、精力、金钱等 -- 由 NPC 的学艺消耗定义决定）
-        const learnCost = npc.get<number>('teach_cost') ?? 10;
-        const currentSilver = player.getSilver();
-        if (currentSilver < learnCost) {
-          if (timesCompleted === 0) {
-            const progress = this.getSkillProgress(skillManager, data.skillId);
-            this.sendSkillLearnResult(player, {
-              success: false,
-              skillId: data.skillId,
-              skillName: skillDef.skillName,
-              timesCompleted: 0,
-              timesRequested: times,
-              currentLevel: progress.currentLevel,
-              learned: progress.learned,
-              learnedMax: progress.learnedMax,
-              levelUp: false,
-              message: '银两不足，无法继续学习。',
-              reason: 'insufficient_silver',
-            });
-            return;
-          }
-          break;
-        }
-
-        // 检查精力
-        const currentEnergy = player.get<number>('energy') ?? 0;
-        if (currentEnergy < 5) {
-          if (timesCompleted === 0) {
-            const progress = this.getSkillProgress(skillManager, data.skillId);
-            this.sendSkillLearnResult(player, {
-              success: false,
-              skillId: data.skillId,
-              skillName: skillDef.skillName,
-              timesCompleted: 0,
-              timesRequested: times,
-              currentLevel: progress.currentLevel,
-              learned: progress.learned,
-              learnedMax: progress.learnedMax,
-              levelUp: false,
-              message: '精力不足，无法继续学习。',
-              reason: 'insufficient_energy',
-            });
-            return;
-          }
-          break;
-        }
-
-        const before = this.getSkillProgress(skillManager, data.skillId);
-
-        // 扣除资源
-        player.spendSilver(learnCost);
-        player.set('energy', currentEnergy - 5);
-
-        // 提升技能
-        const improved = skillManager.improveSkill(data.skillId, 1);
-        const after = this.getSkillProgress(skillManager, data.skillId);
-        const progressed =
-          after.currentLevel !== before.currentLevel || after.learned !== before.learned;
-
-        // 未发生任何成长（如达到上限/门槛不足）时，回滚本次消耗并结束循环
-        if (!progressed) {
-          player.addSilver(learnCost);
-          player.set('energy', currentEnergy);
-          if (timesCompleted === 0) {
-            this.sendSkillLearnResult(player, {
-              success: false,
-              skillId: data.skillId,
-              skillName: skillDef.skillName,
-              timesCompleted: 0,
-              timesRequested: times,
-              currentLevel: after.currentLevel,
-              learned: after.learned,
-              learnedMax: after.learnedMax,
-              levelUp: false,
-              message: '你当前境界无法继续从此法门精进。',
-              reason: 'cannot_improve',
-            });
-            return;
-          }
-          break;
-        }
-
-        if (improved) {
-          didLevelUp = true;
-        }
-
-        timesCompleted++;
-      }
-
-      // 获取最终技能数据
-      const finalSkillData = skillManager.getAllSkills().find((s) => s.skillId === data.skillId);
-      const currentLevel = finalSkillData?.level ?? 0;
-      const learned = finalSkillData?.learned ?? 0;
-      const learnedMax = Math.pow(currentLevel + 1, 2);
-
-      // 推送学艺结果
-      const message = didLevelUp
-        ? `你向${npc.getName()}学习了${timesCompleted}次「${skillDef.skillName}」，技能提升到了 ${currentLevel} 级！`
-        : `你向${npc.getName()}学习了${timesCompleted}次「${skillDef.skillName}」，经验增加了一些。`;
-
-      this.sendSkillLearnResult(player, {
-        success: true,
+      const learnResult = executeNpcTeachLearning({
+        player,
+        npc,
+        skillManager,
         skillId: data.skillId,
         skillName: skillDef.skillName,
-        timesCompleted,
-        timesRequested: times,
-        currentLevel,
-        learned,
-        learnedMax,
-        levelUp: didLevelUp,
-        message,
+        times,
       });
+      this.sendSkillLearnResult(player, learnResult.data);
     } catch (error) {
       this.logger.error('handleSkillLearnRequest 失败:', error);
     }
@@ -494,21 +386,6 @@ export class SkillHandler {
     if (msg) {
       player.sendToClient(MessageFactory.serialize(msg));
     }
-  }
-
-  /** 读取技能当前进度（统一返回，避免失败分支误填 0） */
-  private getSkillProgress(
-    skillManager: SkillManager,
-    skillId: string,
-  ): { currentLevel: number; learned: number; learnedMax: number } {
-    const data = skillManager.getAllSkills().find((s) => s.skillId === skillId);
-    const currentLevel = data?.level ?? 0;
-    const learned = data?.learned ?? 0;
-    return {
-      currentLevel,
-      learned,
-      learnedMax: Math.pow(currentLevel + 1, 2),
-    };
   }
 
   /**

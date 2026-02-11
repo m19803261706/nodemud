@@ -16,8 +16,12 @@ import { PlayerBase } from '../../game-objects/player-base';
 import { NpcBase } from '../../game-objects/npc-base';
 import { RoomBase } from '../../game-objects/room-base';
 import { ServiceLocator } from '../../service-locator';
-import { SkillLearnSource, MessageFactory, type SkillLearnResultData } from '@packages/core';
-import { evaluateSongyangSkillUnlockById, UnlockState } from '../../skills/songyang/songyang-unlock-evaluator';
+import { SkillLearnSource, MessageFactory } from '@packages/core';
+import {
+  evaluateSongyangSkillUnlockById,
+  UnlockState,
+} from '../../skills/songyang/songyang-unlock-evaluator';
+import { executeNpcTeachLearning } from '../../skills/learning/npc-learn';
 
 @Command({ name: 'learn', aliases: ['学艺', 'xue', '学习'], description: '向 NPC 学习技能' })
 export class LearnCommand implements ICommand {
@@ -138,100 +142,43 @@ export class LearnCommand implements ICommand {
       }
     }
 
-    // 循环学习
-    let timesCompleted = 0;
-    let didLevelUp = false;
-    const learnCost = npc.get<number>('teach_cost') ?? 10;
-
-    for (let i = 0; i < times; i++) {
-      // 检查银两
-      if (executor.getSilver() < learnCost) {
-        if (timesCompleted === 0) {
-          return { success: false, message: '银两不足，无法学习。' };
-        }
-        break;
-      }
-
-      // 检查精力
-      const energy = executor.get<number>('energy') ?? 0;
-      if (energy < 5) {
-        if (timesCompleted === 0) {
-          return { success: false, message: '精力不足，无法学习。' };
-        }
-        break;
-      }
-
-      // 记录学习前的进度
-      const before = skillManager.getAllSkills().find((s) => s.skillId === skillDef.skillId);
-      const beforeLevel = before?.level ?? 0;
-      const beforeLearned = before?.learned ?? 0;
-
-      // 扣除资源
-      executor.spendSilver(learnCost);
-      executor.set('energy', energy - 5);
-
-      // 提升技能
-      skillManager.improveSkill(skillDef.skillId, 1);
-
-      // 检查是否有进步
-      const after = skillManager.getAllSkills().find((s) => s.skillId === skillDef.skillId);
-      const afterLevel = after?.level ?? 0;
-      const afterLearned = after?.learned ?? 0;
-      const progressed = afterLevel !== beforeLevel || afterLearned !== beforeLearned;
-
-      if (!progressed) {
-        // 无进步，回滚本次消耗
-        executor.addSilver(learnCost);
-        executor.set('energy', energy);
-        if (timesCompleted === 0) {
-          return { success: false, message: '你当前境界无法继续从此法门精进。' };
-        }
-        break;
-      }
-
-      if (afterLevel > beforeLevel) {
-        didLevelUp = true;
-      }
-      timesCompleted++;
-    }
-
-    // 获取最终技能数据
-    const finalData = skillManager.getAllSkills().find((s) => s.skillId === skillDef.skillId);
-    const currentLevel = finalData?.level ?? 0;
-    const learned = finalData?.learned ?? 0;
-    const learnedMax = Math.pow(currentLevel + 1, 2);
-
-    // 构建结果消息
-    const message = didLevelUp
-      ? `你向${npc.getName()}学习了${timesCompleted}次「${skillDef.skillName}」，技能提升到了 ${currentLevel} 级！`
-      : `你向${npc.getName()}学习了${timesCompleted}次「${skillDef.skillName}」，经验增加了一些。`;
-
-    // 推送 skillLearnResult 消息给前端同步
-    const resultData: SkillLearnResultData = {
-      success: true,
+    const { data: resultData } = executeNpcTeachLearning({
+      player: executor,
+      npc,
+      skillManager,
       skillId: skillDef.skillId,
       skillName: skillDef.skillName,
-      timesCompleted,
-      timesRequested: times,
-      currentLevel,
-      learned,
-      learnedMax,
-      levelUp: didLevelUp,
-      message,
-    };
+      times,
+    });
+
+    // 推送 skillLearnResult 消息给前端同步
     const msg = MessageFactory.create('skillLearnResult', resultData);
     if (msg) {
       executor.sendToClient(MessageFactory.serialize(msg));
     }
 
+    if (!resultData.success) {
+      return {
+        success: false,
+        message: resultData.message,
+        data: {
+          action: 'learn',
+          skillId: skillDef.skillId,
+          npcId: npc.id,
+          reason: resultData.reason,
+        },
+      };
+    }
+
     return {
       success: true,
-      message,
+      message: resultData.message,
       data: {
         action: 'learn',
         skillId: skillDef.skillId,
         npcId: npc.id,
-        timesCompleted,
+        timesCompleted: resultData.timesCompleted,
+        reason: resultData.reason,
       },
     };
   }
