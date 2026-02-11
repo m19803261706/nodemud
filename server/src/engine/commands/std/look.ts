@@ -238,6 +238,7 @@ export class LookCommand implements ICommand {
     const canShopSell = isMerchant
       ? ((npc as MerchantBase).getRecycleConfig().enabled ?? true)
       : false;
+    const teachSkills = this.getNpcTeachSkills(npc);
 
     const actions: string[] = [];
     if (canChat) actions.push('chat');
@@ -245,6 +246,7 @@ export class LookCommand implements ICommand {
     if (canShopSell) actions.push('shopSell');
     if (canGive) actions.push('give');
     if (canAttack) actions.push('attack');
+    if (teachSkills.length > 0) actions.push('viewSkills');
 
     // 门派交互按钮（简单 if/if 颗粒度控制）
     const sectActions = this.getNpcSectActions(npc, executor);
@@ -307,6 +309,7 @@ export class LookCommand implements ICommand {
         short: npc.getShort(),
         long,
         equipment: eqData,
+        teachSkills,
         actions,
         capabilities: {
           chat: canChat,
@@ -340,5 +343,26 @@ export class LookCommand implements ICommand {
     if (!executor || !(executor instanceof PlayerBase)) return [];
     if (!ServiceLocator.sectManager) return [];
     return ServiceLocator.sectManager.getNpcAvailableActions(executor, npc);
+  }
+
+  /** 获取 NPC 可传授技能列表（用于前端只读技能面板） */
+  private getNpcTeachSkills(npc: NpcBase): Array<{
+    skillId: string;
+    skillName: string;
+    skillType: string;
+    category: string;
+  }> {
+    const teachSkillIds = npc.get<string[]>('teach_skills') ?? [];
+    if (teachSkillIds.length === 0) return [];
+
+    return teachSkillIds.map((skillId) => {
+      const skillDef = ServiceLocator.skillRegistry?.get(skillId);
+      return {
+        skillId,
+        skillName: skillDef?.skillName ?? skillId,
+        skillType: skillDef?.skillType ?? 'cognize',
+        category: skillDef?.category ?? 'martial',
+      };
+    });
   }
 }

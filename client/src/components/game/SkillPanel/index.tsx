@@ -20,9 +20,8 @@ import {
   MessageFactory,
   SkillCategory,
   SKILL_SLOT_GROUPS,
-  SKILL_SLOT_NAMES,
 } from '@packages/core';
-import type { PlayerSkillInfo, SkillSlotType } from '@packages/core';
+import type { PlayerSkillInfo, SkillSlotType, SkillBonusSummary } from '@packages/core';
 import { wsService } from '../../../services/WebSocketService';
 import { useSkillStore } from '../../../stores/useSkillStore';
 import { BonusSummaryBar } from './BonusSummaryBar';
@@ -33,6 +32,11 @@ import { SkillDetailModal } from './SkillDetailModal';
 interface SkillPanelProps {
   visible: boolean;
   onClose: () => void;
+  title?: string;
+  skillsOverride?: PlayerSkillInfo[] | null;
+  bonusSummaryOverride?: SkillBonusSummary | null;
+  /** 只读目录模式：禁用技能详情请求与装配交互 */
+  readOnlyCatalog?: boolean;
 }
 
 /** 武学子分组配置 */
@@ -42,9 +46,19 @@ const MARTIAL_SUBGROUPS: { key: string; label: string }[] = [
   { key: 'movement', label: '身法' },
 ];
 
-export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
-  const skills = useSkillStore(state => state.skills);
-  const bonusSummary = useSkillStore(state => state.bonusSummary);
+export const SkillPanel = ({
+  visible,
+  onClose,
+  title = '技能',
+  skillsOverride = null,
+  bonusSummaryOverride = null,
+  readOnlyCatalog = false,
+}: SkillPanelProps) => {
+  const playerSkills = useSkillStore(state => state.skills);
+  const playerBonusSummary = useSkillStore(state => state.bonusSummary);
+  const usingOverride = Array.isArray(skillsOverride);
+  const skills = usingOverride ? skillsOverride : playerSkills;
+  const bonusSummary = usingOverride ? bonusSummaryOverride : playerBonusSummary;
 
   /** 当前激活的分类 Tab */
   const [activeTab, setActiveTab] = useState<SkillCategory>(
@@ -57,10 +71,10 @@ export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
 
   /** 打开时请求最新面板数据 */
   useEffect(() => {
-    if (visible) {
+    if (visible && !usingOverride) {
       wsService.send(MessageFactory.create('skillPanelRequest', {}));
     }
-  }, [visible]);
+  }, [visible, usingOverride]);
 
   /** 按当前 Tab 过滤技能列表 */
   const filteredSkills = skills.filter(s => s.category === activeTab);
@@ -91,9 +105,10 @@ export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
 
   /** 点击技能 - 打开详情弹窗 */
   const handleSkillPress = useCallback((skillId: string) => {
+    if (readOnlyCatalog) return;
     setDetailSkillId(skillId);
     setDetailVisible(true);
-  }, []);
+  }, [readOnlyCatalog]);
 
   /** 关闭详情弹窗 */
   const handleDetailClose = useCallback(() => {
@@ -171,7 +186,7 @@ export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
 
           {/* 头部标题栏 */}
           <View style={s.header}>
-            <Text style={s.headerTitle}>技能</Text>
+            <Text style={s.headerTitle}>{title}</Text>
             <TouchableOpacity
               onPress={onClose}
               style={s.closeBtn}
@@ -186,9 +201,11 @@ export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
           </View>
 
           {/* 加成汇总栏 */}
-          <View style={s.bonusWrap}>
-            <BonusSummaryBar summary={bonusSummary} />
-          </View>
+          {bonusSummary ? (
+            <View style={s.bonusWrap}>
+              <BonusSummaryBar summary={bonusSummary} />
+            </View>
+          ) : null}
 
           {/* 分类 Tab */}
           <View style={s.tabsWrap}>
@@ -208,11 +225,13 @@ export const SkillPanel = ({ visible, onClose }: SkillPanelProps) => {
       </View>
 
       {/* 嵌套: 技能详情弹窗 */}
-      <SkillDetailModal
-        visible={detailVisible}
-        onClose={handleDetailClose}
-        skillId={detailSkillId}
-      />
+      {!readOnlyCatalog ? (
+        <SkillDetailModal
+          visible={detailVisible}
+          onClose={handleDetailClose}
+          skillId={detailSkillId}
+        />
+      ) : null}
     </Modal>
   );
 };

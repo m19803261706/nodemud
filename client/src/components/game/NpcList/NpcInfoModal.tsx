@@ -68,6 +68,7 @@ interface NpcInfoModalProps {
   detail: NpcDetailData | null;
   inventory: InventoryItem[];
   onClose: () => void;
+  onViewSkills: (detail: NpcDetailData) => void;
   onChat: (npcName: string) => void;
   onShop: (npcName: string) => void;
   onApprentice: (npcName: string) => void;
@@ -136,6 +137,7 @@ export const NpcInfoModal = ({
   detail,
   inventory,
   onClose,
+  onViewSkills,
   onChat,
   onShop,
   onApprentice,
@@ -190,6 +192,9 @@ export const NpcInfoModal = ({
     ? actionSet.has('give')
     : (detail.capabilities?.give ?? true);
   const canApprentice = hasActions ? actionSet.has('apprentice') : false;
+  const canViewSkills = hasActions
+    ? actionSet.has('viewSkills')
+    : (detail.teachSkills?.length ?? 0) > 0;
   const canDonate = hasActions ? actionSet.has('donate') : false;
   const canSpar = hasActions ? actionSet.has('spar') : false;
   const canBetray = hasActions ? actionSet.has('betray') : false;
@@ -240,6 +245,17 @@ export const NpcInfoModal = ({
       label: '拜师',
       onPress: () => {
         onApprentice(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  if (canViewSkills) {
+    actionButtons.push({
+      key: 'view-skills',
+      label: '武学',
+      onPress: () => {
+        onViewSkills(detail);
         handleClose();
       },
     });

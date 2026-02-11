@@ -17,6 +17,8 @@ import type {
   QuestObjectiveProgress,
   CombatActionOption,
   CombatAwaitActionData,
+  SkillSlotType,
+  SkillCategory,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -114,6 +116,14 @@ export interface NpcEquipmentItem {
   quality: number;
 }
 
+/** NPC 可传授技能摘要（用于只读技能面板） */
+export interface NpcTeachSkillInfo {
+  skillId: string;
+  skillName: string;
+  skillType: SkillSlotType;
+  category: SkillCategory;
+}
+
 /** 物品详情数据（弹窗用，从 commandResult.data 获取） */
 export interface ItemDetailData {
   containerId?: string;
@@ -168,6 +178,7 @@ export interface NpcDetailData {
   short: string;
   long: string;
   equipment?: NpcEquipmentItem[];
+  teachSkills?: NpcTeachSkillInfo[];
   actions?: string[];
   capabilities?: {
     chat?: boolean;

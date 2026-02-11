@@ -2,15 +2,38 @@
  * NPC 列表 — 右侧角色列表面板（含 NPC 卡片 + 地面物品卡片）
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
-import { MessageFactory } from '@packages/core';
-import { useGameStore } from '../../../stores/useGameStore';
+import {
+  MessageFactory,
+  SkillCategory,
+  SkillSlotType,
+  type PlayerSkillInfo,
+} from '@packages/core';
+import { useGameStore, type NpcDetailData } from '../../../stores/useGameStore';
 import { wsService } from '../../../services/WebSocketService';
 import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
 import { ItemCard } from './ItemCard';
 import { ShopListModal } from './ShopListModal';
+import { SkillPanel } from '../SkillPanel';
+
+function mapNpcTeachSkillsToReadonlyItems(detail: NpcDetailData): PlayerSkillInfo[] {
+  const teachSkills = detail.teachSkills ?? [];
+  return teachSkills.map((skill) => ({
+    skillId: skill.skillId,
+    skillName: skill.skillName,
+    skillType: skill.skillType as SkillSlotType,
+    category: skill.category as SkillCategory,
+    level: 0,
+    learned: 0,
+    learnedMax: 1,
+    isMapped: false,
+    mappedSlot: null,
+    isActiveForce: false,
+    isLocked: false,
+  }));
+}
 
 export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
@@ -21,6 +44,15 @@ export const NpcList = () => {
   const setShopListDetail = useGameStore(state => state.setShopListDetail);
   const groundItems = useGameStore(state => state.groundItems);
   const sendCommand = useGameStore(state => state.sendCommand);
+  const [npcSkillPanelDetail, setNpcSkillPanelDetail] =
+    useState<NpcDetailData | null>(null);
+  const npcSkillItems = useMemo(
+    () =>
+      npcSkillPanelDetail
+        ? mapNpcTeachSkillsToReadonlyItems(npcSkillPanelDetail)
+        : [],
+    [npcSkillPanelDetail],
+  );
 
   return (
     <View style={s.container}>
@@ -49,6 +81,9 @@ export const NpcList = () => {
         detail={npcDetail}
         inventory={inventory}
         onClose={() => setNpcDetail(null)}
+        onViewSkills={detail => {
+          setNpcSkillPanelDetail(detail);
+        }}
         onChat={name => {
           sendCommand(`ask ${name} default`);
           setNpcDetail(null);
@@ -101,6 +136,18 @@ export const NpcList = () => {
           sendCommand(`buy ${selector} from ${merchantName}`);
           setShopListDetail(null);
         }}
+      />
+      <SkillPanel
+        visible={!!npcSkillPanelDetail}
+        onClose={() => setNpcSkillPanelDetail(null)}
+        title={
+          npcSkillPanelDetail
+            ? `${npcSkillPanelDetail.name} · 可传授武学`
+            : '可传授武学'
+        }
+        skillsOverride={npcSkillItems}
+        bonusSummaryOverride={null}
+        readOnlyCatalog
       />
     </View>
   );
