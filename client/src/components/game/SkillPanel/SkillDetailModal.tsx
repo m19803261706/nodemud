@@ -338,7 +338,9 @@ const s = StyleSheet.create({
   },
   card: {
     width: '90%',
+    height: '78%',
     maxHeight: '78%',
+    minHeight: 360,
     borderRadius: 10,
     overflow: 'hidden',
   },
@@ -349,8 +351,8 @@ const s = StyleSheet.create({
     borderRadius: 10,
   },
   contentScroll: {
-    flex: 1,
     width: '100%',
+    height: '100%',
   },
   content: {
     paddingTop: 16,

@@ -226,18 +226,18 @@ export const SkillPanel = ({
               : renderSimpleList()}
           </View>
         </View>
-      </View>
 
-      {/* 嵌套: 技能详情弹窗 */}
-      <SkillDetailModal
-        visible={detailVisible}
-        onClose={handleDetailClose}
-        skillId={detailSkillId}
-        showEquipToggle={!readOnlyCatalog}
-        actionLabel={detailActionLabel}
-        onActionPress={onDetailActionPress}
-        embedded
-      />
+        {/* 嵌套详情层：放在同一 overlay 容器内，避免 iOS Modal 子层级异常 */}
+        <SkillDetailModal
+          visible={detailVisible}
+          onClose={handleDetailClose}
+          skillId={detailSkillId}
+          showEquipToggle={!readOnlyCatalog}
+          actionLabel={detailActionLabel}
+          onActionPress={onDetailActionPress}
+          embedded
+        />
+      </View>
     </Modal>
   );
 };
