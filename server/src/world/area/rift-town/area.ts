@@ -18,6 +18,7 @@ export default class RiftTownArea extends Area {
       'area/rift-town/south-street',
       'area/rift-town/tavern',
       'area/rift-town/inn',
+      'area/rift-town/inn-upstairs',
       'area/rift-town/herb-shop',
       'area/rift-town/smithy',
       'area/rift-town/martial-hall',
@@ -55,6 +56,12 @@ export default class RiftTownArea extends Area {
       },
       {
         blueprintId: 'npc/rift-town/innkeeper',
+        roomId: 'area/rift-town/inn',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/rift-town/waiter',
         roomId: 'area/rift-town/inn',
         count: 1,
         interval: 300000,

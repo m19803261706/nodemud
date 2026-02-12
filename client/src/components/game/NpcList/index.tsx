@@ -126,6 +126,10 @@ export const NpcList = () => {
         onDonate={(itemName, npcName) => {
           sendCommand(`donate ${itemName} to ${npcName}`);
         }}
+        onRent={npcName => {
+          sendCommand(`rent ${npcName}`);
+          setNpcDetail(null);
+        }}
         onWork={npcId => {
           sendCommand(`work list ${npcId}`);
           setNpcDetail(null);

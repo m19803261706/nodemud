@@ -261,6 +261,9 @@ export class LookCommand implements ICommand {
     if (workActions.includes('work')) actions.push('work');
     if (workActions.includes('workStop')) actions.push('workStop');
 
+    const innActions = this.getNpcInnActions(npc);
+    if (innActions.includes('rent')) actions.push('rent');
+
     actions.push('close');
 
     const header = title ? `${title}·${name}` : name;
@@ -356,6 +359,12 @@ export class LookCommand implements ICommand {
     if (!executor || !(executor instanceof PlayerBase)) return [];
     if (!ServiceLocator.workManager) return [];
     return ServiceLocator.workManager.getNpcAvailableActions(executor, npc);
+  }
+
+  /** 客栈住店交互动作（简单 if/if） */
+  private getNpcInnActions(npc: NpcBase): string[] {
+    if (npc.get<boolean>('can_rent_room') === true) return ['rent'];
+    return [];
   }
 
   /** 获取 NPC 可传授技能列表（用于前端只读技能面板） */

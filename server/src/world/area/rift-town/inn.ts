@@ -3,6 +3,15 @@
  * 坐标: (1, 0, 0)
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
+import { PlayerBase } from '../../../engine/game-objects/player-base';
+import {
+  GameEvents,
+  type CancellableEvent,
+  type MoveEventData,
+} from '../../../engine/types/events';
+
+const INN_UPSTAIRS_ROOM_ID = 'area/rift-town/inn-upstairs';
+const INN_RENT_PASS_TEMP_KEY = 'inn/rift_town_rent_pass_until';
 
 export default class RiftTownInn extends RoomBase {
   static virtual = true;
@@ -16,6 +25,29 @@ export default class RiftTownInn extends RoomBase {
     this.set('coordinates', { x: 1, y: 0, z: 0 });
     this.set('exits', {
       west: 'area/rift-town/square',
+      up: INN_UPSTAIRS_ROOM_ID,
     });
+
+    // 上楼门禁：需先向店小二付房钱，拿到短时通行凭证。
+    this.on(GameEvents.PRE_LEAVE, (event: CancellableEvent & MoveEventData) => {
+      this.checkInnUpstairsAccess(event);
+    });
+  }
+
+  private checkInnUpstairsAccess(event: CancellableEvent & MoveEventData): void {
+    const mover = event.who;
+    const dest = event.dest;
+    if (!(mover instanceof PlayerBase)) return;
+    if (!(dest instanceof RoomBase) || dest.id !== INN_UPSTAIRS_ROOM_ID) return;
+
+    const passUntil = mover.getTemp<number>(INN_RENT_PASS_TEMP_KEY) ?? 0;
+    if (passUntil > Date.now()) {
+      // 一次性凭证：放行时立即消耗。
+      mover.setTemp(INN_RENT_PASS_TEMP_KEY, 0);
+      return;
+    }
+
+    mover.receiveMessage('楼梯口被店小二伸手拦住：「客官，先付房钱再上楼歇息。」');
+    event.cancel();
   }
 }

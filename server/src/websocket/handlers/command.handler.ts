@@ -228,6 +228,20 @@ export class CommandHandler {
       }
     }
 
+    // rent 命令成功后：
+    // - 持久化银两并推送 playerStats（住店扣费 + 二楼恢复精力）
+    if (result.success && result.data?.action === 'rent_room') {
+      if (session.characterId) {
+        try {
+          await this.characterService.updateSilver(session.characterId, player.getSilver());
+          const character = await this.characterService.findById(session.characterId);
+          if (character) sendPlayerStats(player, character);
+        } catch {
+          // 查询失败不阻塞主流程
+        }
+      }
+    }
+
     // give 命令成功且 NPC 接受后：任务系统检查 deliver 类进度
     if (result.success && result.data?.action === 'give' && result.data?.accepted) {
       sendInventoryUpdate(player);

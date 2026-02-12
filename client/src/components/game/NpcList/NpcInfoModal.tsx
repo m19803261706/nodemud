@@ -73,6 +73,7 @@ interface NpcInfoModalProps {
   onShop: (npcName: string) => void;
   onApprentice: (npcName: string) => void;
   onDonate: (itemName: string, npcName: string) => void;
+  onRent: (npcName: string) => void;
   onWork: (npcId: string) => void;
   onWorkStop: (npcId: string) => void;
   onSpar: (npcName: string) => void;
@@ -144,6 +145,7 @@ export const NpcInfoModal = ({
   onShop,
   onApprentice,
   onDonate,
+  onRent,
   onWork,
   onWorkStop,
   onSpar,
@@ -200,6 +202,7 @@ export const NpcInfoModal = ({
     ? actionSet.has('viewSkills')
     : (detail.teachSkills?.length ?? 0) > 0;
   const canDonate = hasActions ? actionSet.has('donate') : false;
+  const canRent = hasActions ? actionSet.has('rent') : false;
   const canWork = hasActions ? actionSet.has('work') : false;
   const canWorkStop = hasActions ? actionSet.has('workStop') : false;
   const canSpar = hasActions ? actionSet.has('spar') : false;
@@ -272,6 +275,17 @@ export const NpcInfoModal = ({
       key: 'donate',
       label: '捐献',
       onPress: () => setActionListMode('donate'),
+    });
+  }
+
+  if (canRent) {
+    actionButtons.push({
+      key: 'rent',
+      label: '住店',
+      onPress: () => {
+        onRent(detail.name);
+        handleClose();
+      },
     });
   }
 

@@ -2,7 +2,7 @@
  * 裂隙镇地图集成测试
  *
  * 验证:
- * - 蓝图加载（1 Area + 18 Room）
+ * - 蓝图加载（1 Area + 19 Room）
  * - 出口连接双向一致性
  * - 坐标与方向偏移一致性
  * - 房间属性完整性
@@ -45,6 +45,7 @@ const ROOM_IDS = [
   'area/rift-town/south-street',
   'area/rift-town/tavern',
   'area/rift-town/inn',
+  'area/rift-town/inn-upstairs',
   'area/rift-town/herb-shop',
   'area/rift-town/smithy',
   'area/rift-town/martial-hall',
@@ -87,18 +88,18 @@ describe('裂隙镇地图', () => {
   });
 
   it('应加载蓝图（Area + Room + NPC + Item）', () => {
-    // 1 Area + 18 Room + NPC 蓝图 + 装备蓝图
+    // 1 Area + 19 Room + NPC 蓝图 + 装备蓝图
     expect(registry.getCount()).toBeGreaterThanOrEqual(19);
   });
 
-  it('Area 应包含全部 18 个房间 ID', () => {
+  it('Area 应包含全部 19 个房间 ID', () => {
     const area = objectManager.findById('area/rift-town/area');
     expect(area).toBeDefined();
     expect(area).toBeInstanceOf(Area);
 
     const areaInstance = area as Area;
     const roomIds = areaInstance.getRoomIds();
-    expect(roomIds).toHaveLength(18);
+    expect(roomIds).toHaveLength(19);
 
     for (const roomId of ROOM_IDS) {
       expect(roomIds).toContain(roomId);
@@ -181,9 +182,13 @@ describe('裂隙镇地图', () => {
 
   it('武馆与书院公共教习应配置在刷新规则中', () => {
     const area = objectManager.findById('area/rift-town/area') as Area;
-    const spawnRuleMap = new Map(area.getSpawnRules().map((rule) => [rule.blueprintId, rule.roomId]));
+    const spawnRuleMap = new Map(
+      area.getSpawnRules().map((rule) => [rule.blueprintId, rule.roomId]),
+    );
 
-    expect(spawnRuleMap.get('npc/rift-town/martial-instructor')).toBe('area/rift-town/martial-hall');
+    expect(spawnRuleMap.get('npc/rift-town/martial-instructor')).toBe(
+      'area/rift-town/martial-hall',
+    );
     expect(spawnRuleMap.get('npc/rift-town/academy-lecturer')).toBe('area/rift-town/academy');
 
     expect(registry.has('npc/rift-town/martial-instructor')).toBe(true);

@@ -13,6 +13,8 @@ import { RoomNode, NODE_SIZE } from './RoomNode';
 const GRID_SIZE = 80;
 /** 画布内边距 */
 const CANVAS_PADDING = 60;
+/** z 轴层偏移（把上下层错开显示，避免节点重叠） */
+const Z_LAYER_OFFSET = 0.45;
 
 interface MapCanvasProps {
   rooms: MapRoom[];
@@ -47,59 +49,64 @@ export const MapCanvas = ({
 }: MapCanvasProps) => {
   const scrollRef = useRef<ScrollView>(null);
 
-  // 仅展示已探索的房间
-  const exploredRooms = useMemo(
-    () => rooms.filter(r => r.isExplored),
-    [rooms],
-  );
-
-  // 计算坐标范围和像素映射
+  // 计算坐标范围和像素映射（所有房间参与布局）
   const layout = useMemo(() => {
-    if (exploredRooms.length === 0) {
-      return { positions: new Map<string, { px: number; py: number }>(), canvasWidth: 0, canvasHeight: 0 };
+    if (rooms.length === 0) {
+      return {
+        positions: new Map<string, { px: number; py: number }>(),
+        canvasWidth: 0,
+        canvasHeight: 0,
+      };
     }
 
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-    for (const r of exploredRooms) {
-      const { x, y } = r.coordinates;
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
+    let minProjectedX = Infinity,
+      maxProjectedX = -Infinity,
+      minProjectedY = Infinity,
+      maxProjectedY = -Infinity;
+
+    const projected = new Map<string, { x: number; y: number }>();
+    for (const r of rooms) {
+      const { x, y, z = 0 } = r.coordinates;
+      // 同层保持正交布局，上下楼层做轻微错位，避免节点完全重叠。
+      const projectedX = x + z * Z_LAYER_OFFSET;
+      const projectedY = y - z * Z_LAYER_OFFSET;
+      projected.set(r.roomId, { x: projectedX, y: projectedY });
+
+      if (projectedX < minProjectedX) minProjectedX = projectedX;
+      if (projectedX > maxProjectedX) maxProjectedX = projectedX;
+      if (projectedY < minProjectedY) minProjectedY = projectedY;
+      if (projectedY > maxProjectedY) maxProjectedY = projectedY;
     }
 
     const positions = new Map<string, { px: number; py: number }>();
-    for (const r of exploredRooms) {
-      const { x, y } = r.coordinates;
-      // y 轴按世界坐标：y 越小越靠北（屏幕上方）
+    for (const r of rooms) {
+      const point = projected.get(r.roomId);
+      if (!point) continue;
       positions.set(r.roomId, {
-        px: (x - minX) * GRID_SIZE + CANVAS_PADDING,
-        py: (y - minY) * GRID_SIZE + CANVAS_PADDING,
+        px: (point.x - minProjectedX) * GRID_SIZE + CANVAS_PADDING,
+        py: (point.y - minProjectedY) * GRID_SIZE + CANVAS_PADDING,
       });
     }
 
-    const canvasWidth = (maxX - minX) * GRID_SIZE + CANVAS_PADDING * 2;
-    const canvasHeight = (maxY - minY) * GRID_SIZE + CANVAS_PADDING * 2;
+    const canvasWidth = (maxProjectedX - minProjectedX) * GRID_SIZE + CANVAS_PADDING * 2;
+    const canvasHeight = (maxProjectedY - minProjectedY) * GRID_SIZE + CANVAS_PADDING * 2;
 
     return { positions, canvasWidth, canvasHeight };
-  }, [exploredRooms]);
+  }, [rooms]);
 
-  // 计算连线（去重）
+  // 计算连线（去重，所有房间之间的连线都显示）
   const edges = useMemo(() => {
     const edgeSet = new Set<string>();
     const result: { x1: number; y1: number; x2: number; y2: number }[] = [];
-    const exploredIds = new Set(exploredRooms.map(r => r.roomId));
+    const roomIds = new Set(rooms.map(r => r.roomId));
 
-    for (const room of exploredRooms) {
+    for (const room of rooms) {
       const from = layout.positions.get(room.roomId);
       if (!from) continue;
 
       for (const dir of room.exits) {
         const targetId = room.exitTargets[dir];
-        if (!targetId || !exploredIds.has(targetId)) continue;
+        if (!targetId || !roomIds.has(targetId)) continue;
 
         const to = layout.positions.get(targetId);
         if (!to) continue;
@@ -116,7 +123,7 @@ export const MapCanvas = ({
       }
     }
     return result;
-  }, [exploredRooms, layout]);
+  }, [rooms, layout]);
 
   // 初始滚动到当前位置居中
   const screenWidth = Dimensions.get('window').width;
@@ -136,7 +143,7 @@ export const MapCanvas = ({
     });
   }, [currentRoomId, layout, screenWidth, screenHeight]);
 
-  if (exploredRooms.length === 0) return null;
+  if (rooms.length === 0) return null;
 
   return (
     <ScrollView
@@ -157,7 +164,7 @@ export const MapCanvas = ({
       ))}
 
       {/* 房间节点层 */}
-      {exploredRooms.map(room => {
+      {rooms.map(room => {
         const pos = layout.positions.get(room.roomId);
         if (!pos) return null;
         return (

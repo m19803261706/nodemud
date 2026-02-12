@@ -286,6 +286,26 @@ describe('LookCommand', () => {
     expect(result.data.actions).toEqual(['chat', 'attack', 'apprentice', 'betray', 'close']);
   });
 
+  it('look 住店 NPC 返回住店动作位', async () => {
+    const room = new RoomBase('rift-town/inn');
+    room.set('short', '安歇客栈');
+
+    const player = new PlayerBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/rift-town/waiter#1');
+    npc.set('name', '店小二');
+    npc.set('short', '店小二');
+    npc.set('can_rent_room', true);
+    await npc.moveTo(room, { quiet: true });
+
+    const result = cmd.execute(player, ['店小二']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.actions).toEqual(['attack', 'rent', 'close']);
+  });
+
   it('look 打工 NPC 返回打工动作位', async () => {
     const room = new RoomBase('rift-town/academy');
     room.set('short', '书院讲堂');
