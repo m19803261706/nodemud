@@ -179,6 +179,47 @@ export interface ShopListDetail {
   goods: ShopGoodView[];
 }
 
+export interface WorkPlanOption {
+  key: 'once' | 'short' | 'medium' | 'auto';
+  label: string;
+  rounds: number | null;
+}
+
+export interface WorkOfferView {
+  jobId: string;
+  title: string;
+  summary: string;
+  tags: string[];
+  recommendedAttr: string;
+  newbieHint: string;
+  estimateCost: { hp: number; energy: number };
+  estimateReward: { exp: number; potential: number; silver: number };
+  dailyCap: { exp: number; potential: number };
+  eligible: boolean;
+  reason?: string;
+  planOptions: WorkPlanOption[];
+}
+
+export interface WorkListDetail {
+  npcId: string;
+  npcName: string;
+  jobs: WorkOfferView[];
+  dailyProgress: {
+    expEarned: number;
+    potentialEarned: number;
+    silverEarned: number;
+    expRemaining: number;
+    potentialRemaining: number;
+  };
+  active?: {
+    jobId: string;
+    title: string;
+    plan: string;
+    roundsPlanned: number | null;
+    roundsCompleted: number;
+  };
+}
+
 /** NPC 详情数据（弹窗用，从 commandResult.data 获取） */
 export interface NpcDetailData {
   npcId: string;
@@ -277,6 +318,10 @@ export interface GameState {
     blueprintId?: string;
     stockLeft?: number;
   }) => void;
+
+  // 打工工单弹窗
+  workListDetail: WorkListDetail | null;
+  setWorkListDetail: (detail: WorkListDetail | null) => void;
 
   // 背包
   inventory: InventoryItem[];
@@ -533,6 +578,10 @@ export const useGameStore = create<GameState>(set => ({
       if (!updated) return state;
       return { shopListDetail: { ...current, goods } };
     }),
+
+  // 打工工单弹窗
+  workListDetail: null,
+  setWorkListDetail: detail => set({ workListDetail: detail }),
 
   // 背包
   inventory: [],

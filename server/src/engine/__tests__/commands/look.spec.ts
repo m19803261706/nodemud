@@ -286,6 +286,29 @@ describe('LookCommand', () => {
     expect(result.data.actions).toEqual(['chat', 'attack', 'apprentice', 'betray', 'close']);
   });
 
+  it('look 打工 NPC 返回打工动作位', async () => {
+    const room = new RoomBase('rift-town/academy');
+    room.set('short', '书院讲堂');
+
+    const player = new PlayerBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/rift-town/academy-lecturer#1');
+    npc.set('name', '温夫子');
+    npc.set('short', '温夫子');
+    await npc.moveTo(room, { quiet: true });
+
+    (ServiceLocator as any).workManager = {
+      getNpcAvailableActions: jest.fn().mockReturnValue(['work', 'workStop']),
+    };
+
+    const result = cmd.execute(player, ['温夫子']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.actions).toEqual(['attack', 'work', 'workStop', 'close']);
+  });
+
   it('不在环境中返回错误', () => {
     const player = new LivingBase('player#1');
     player.set('name', '张三');

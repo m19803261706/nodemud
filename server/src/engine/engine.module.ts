@@ -26,6 +26,7 @@ import { SkillService } from '../skill/skill.service';
 import { SectRegistry } from './sect/sect-registry';
 import { SectManager } from './sect/sect-manager';
 import { SongyangPolicy } from './sect/policies/songyang.policy';
+import { WorkManager } from './work/work-manager';
 
 @Module({
   imports: [SkillModule],
@@ -46,6 +47,7 @@ import { SongyangPolicy } from './sect/policies/songyang.policy';
     SectRegistry,
     SectManager,
     SongyangPolicy,
+    WorkManager,
   ],
   exports: [
     HeartbeatManager,
@@ -63,6 +65,7 @@ import { SongyangPolicy } from './sect/policies/songyang.policy';
     PracticeManager,
     SectRegistry,
     SectManager,
+    WorkManager,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -86,6 +89,7 @@ export class EngineModule implements OnModuleInit {
     private readonly sectRegistry: SectRegistry,
     private readonly sectManager: SectManager,
     private readonly songyangPolicy: SongyangPolicy,
+    private readonly workManager: WorkManager,
   ) {}
 
   async onModuleInit() {
@@ -114,6 +118,7 @@ export class EngineModule implements OnModuleInit {
       skillRegistry: this.skillRegistry,
       practiceManager: this.practiceManager,
       sectManager: this.sectManager,
+      workManager: this.workManager,
     });
     // 设置 PracticeManager 的技能注册表引用
     this.practiceManager.setSkillRegistry(this.skillRegistry);

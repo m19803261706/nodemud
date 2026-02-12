@@ -18,6 +18,7 @@ import { NpcCard } from './NpcCard';
 import { NpcInfoModal } from './NpcInfoModal';
 import { ItemCard } from './ItemCard';
 import { ShopListModal } from './ShopListModal';
+import { WorkListModal } from './WorkListModal';
 import { SkillPanel } from '../SkillPanel';
 
 function mapNpcTeachSkillsToReadonlyItems(
@@ -59,10 +60,12 @@ export const NpcList = () => {
   const nearbyNpcs = useGameStore(state => state.nearbyNpcs);
   const npcDetail = useGameStore(state => state.npcDetail);
   const shopListDetail = useGameStore(state => state.shopListDetail);
+  const workListDetail = useGameStore(state => state.workListDetail);
   const inventory = useGameStore(state => state.inventory);
   const playerSkills = useSkillStore(state => state.skills);
   const setNpcDetail = useGameStore(state => state.setNpcDetail);
   const setShopListDetail = useGameStore(state => state.setShopListDetail);
+  const setWorkListDetail = useGameStore(state => state.setWorkListDetail);
   const groundItems = useGameStore(state => state.groundItems);
   const sendCommand = useGameStore(state => state.sendCommand);
   const [npcSkillPanelDetail, setNpcSkillPanelDetail] =
@@ -123,6 +126,14 @@ export const NpcList = () => {
         onDonate={(itemName, npcName) => {
           sendCommand(`donate ${itemName} to ${npcName}`);
         }}
+        onWork={npcId => {
+          sendCommand(`work list ${npcId}`);
+          setNpcDetail(null);
+        }}
+        onWorkStop={_npcId => {
+          sendCommand('work stop');
+          setNpcDetail(null);
+        }}
         onSpar={name => {
           sendCommand(`spar ${name}`);
           setNpcDetail(null);
@@ -159,6 +170,14 @@ export const NpcList = () => {
         onBuy={(selector, merchantName) => {
           sendCommand(`buy ${selector} from ${merchantName}`);
           setShopListDetail(null);
+        }}
+      />
+      <WorkListModal
+        detail={workListDetail}
+        onClose={() => setWorkListDetail(null)}
+        onStart={(jobId, plan, npcId) => {
+          sendCommand(`work start ${jobId} ${plan} ${npcId}`);
+          setWorkListDetail(null);
         }}
       />
       <SkillPanel

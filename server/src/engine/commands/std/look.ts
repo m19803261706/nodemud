@@ -257,6 +257,10 @@ export class LookCommand implements ICommand {
     if (sectActions.includes('spar')) actions.push('spar');
     if (sectActions.includes('betray')) actions.push('betray');
 
+    const workActions = this.getNpcWorkActions(npc, executor);
+    if (workActions.includes('work')) actions.push('work');
+    if (workActions.includes('workStop')) actions.push('workStop');
+
     actions.push('close');
 
     const header = title ? `${title}·${name}` : name;
@@ -345,6 +349,13 @@ export class LookCommand implements ICommand {
     if (!executor || !(executor instanceof PlayerBase)) return [];
     if (!ServiceLocator.sectManager) return [];
     return ServiceLocator.sectManager.getNpcAvailableActions(executor, npc);
+  }
+
+  /** 获取 NPC 的打工交互动作列表 */
+  private getNpcWorkActions(npc: NpcBase, executor?: LivingBase): string[] {
+    if (!executor || !(executor instanceof PlayerBase)) return [];
+    if (!ServiceLocator.workManager) return [];
+    return ServiceLocator.workManager.getNpcAvailableActions(executor, npc);
   }
 
   /** 获取 NPC 可传授技能列表（用于前端只读技能面板） */

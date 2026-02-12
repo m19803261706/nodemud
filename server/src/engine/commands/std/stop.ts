@@ -1,8 +1,9 @@
 /**
  * stop 指令 -- 停止当前活动
  *
- * 当前支持停止：修炼（打坐/静坐）
- * 后续可扩展停止其他持续活动（如钓鱼、挖矿等）
+ * 当前支持停止：
+ * - 修炼（打坐/静坐）
+ * - 打工（新手杂役）
  *
  * 对标: LPC halt / 炎黄 stop_cmd
  */
@@ -24,6 +25,7 @@ export class StopCommand implements ICommand {
     }
 
     const practiceManager = ServiceLocator.practiceManager;
+    const workManager = ServiceLocator.workManager;
 
     // 检查是否在修炼中
     if (practiceManager?.isInPractice(executor)) {
@@ -32,6 +34,15 @@ export class StopCommand implements ICommand {
       return {
         success: true,
         data: { action: 'stop', activity: 'practice' },
+      };
+    }
+
+    // 检查是否在打工中
+    if (workManager?.isInWork(executor)) {
+      workManager.stopWork(executor, 'manual');
+      return {
+        success: true,
+        data: { action: 'stop', activity: 'work' },
       };
     }
 

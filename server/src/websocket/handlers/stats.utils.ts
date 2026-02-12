@@ -9,6 +9,8 @@ import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { PlayerQuestData } from '../../engine/quest';
 import type { PlayerSectData } from '../../engine/sect/types';
 import { normalizePlayerSectData } from '../../engine/sect/types';
+import type { PlayerWorkData } from '../../engine/work/types';
+import { normalizePlayerWorkData } from '../../engine/work/types';
 import { ServiceLocator } from '../../engine/service-locator';
 
 /** 等级映射（通过 ExpManager 获取等级称号） */
@@ -54,6 +56,7 @@ const CHARACTER_TO_DBASE_ALIASES: Record<string, string[]> = {
   learnedPoints: ['learned_points'],
   questData: ['quests'],
   sectData: ['sect'],
+  workData: ['work'],
 };
 
 /** dbase 赋值克隆，避免 Character 实体对象引用被运行时逻辑污染 */
@@ -203,6 +206,8 @@ export function loadCharacterToPlayer(player: PlayerBase, character: Character):
   player.set('quests', cloneForDbase(character.questData ?? null));
   // 门派数据（保持统一结构，避免登录后缺字段）
   player.set('sect', normalizePlayerSectData(character.sectData ?? null));
+  // 打工数据（保持统一结构，避免登录后缺字段）
+  player.set('work', normalizePlayerWorkData(character.workData ?? null));
 
   // HP 上限 = 血气 * 100 + 装备加成
   const equipBonus = player.getEquipmentBonus();
@@ -258,6 +263,11 @@ export function savePlayerData(player: PlayerBase, character: Character): void {
   // 门派数据
   character.sectData = normalizePlayerSectData(
     player.get<PlayerSectData>('sect') ?? character.sectData ?? null,
+  );
+
+  // 打工数据
+  character.workData = normalizePlayerWorkData(
+    player.get<PlayerWorkData>('work') ?? character.workData ?? null,
   );
 
   // 银两

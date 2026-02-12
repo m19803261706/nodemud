@@ -18,6 +18,7 @@ import type { SkillService } from '../skill/skill.service';
 import type { SkillRegistry } from './skills/skill-registry';
 import type { PracticeManager } from './skills/practice-manager';
 import type { SectManager } from './sect/sect-manager';
+import type { WorkManager } from './work/work-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -51,6 +52,9 @@ export class ServiceLocator {
   // Layer 8 门派服务
   static sectManager: SectManager;
 
+  // Layer 9 打工服务
+  static workManager: WorkManager;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -70,6 +74,7 @@ export class ServiceLocator {
     skillRegistry?: SkillRegistry;
     practiceManager?: PracticeManager;
     sectManager?: SectManager;
+    workManager?: WorkManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -86,6 +91,7 @@ export class ServiceLocator {
     if (providers.skillRegistry) this.skillRegistry = providers.skillRegistry;
     if (providers.practiceManager) this.practiceManager = providers.practiceManager;
     if (providers.sectManager) this.sectManager = providers.sectManager;
+    if (providers.workManager) this.workManager = providers.workManager;
     this._initialized = true;
   }
 
@@ -112,5 +118,6 @@ export class ServiceLocator {
     this.skillRegistry = undefined as any;
     this.practiceManager = undefined as any;
     this.sectManager = undefined as any;
+    this.workManager = undefined as any;
   }
 }

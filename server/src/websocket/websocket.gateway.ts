@@ -121,6 +121,15 @@ export class GameGateway
             }
           }
 
+          // 断线时停止打工：清除 WorkManager 定时器
+          if (ServiceLocator.workManager) {
+            try {
+              ServiceLocator.workManager.onPlayerDisconnect(player);
+            } catch (workError) {
+              this.logger.error('断线打工清理失败:', workError);
+            }
+          }
+
           // 断线时清理战斗：如果玩家正在战斗中，以逃跑方式结束
           if (ServiceLocator.combatManager) {
             const combatId = ServiceLocator.combatManager.getCombatId(player as any);

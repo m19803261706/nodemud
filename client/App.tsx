@@ -92,6 +92,7 @@ function App(): React.JSX.Element {
         setGroundItems,
         location,
         removeLogQuickAction,
+        setWorkListDetail,
       } = useGameStore.getState();
       // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
       const shortName = data.short?.includes('·')
@@ -106,6 +107,7 @@ function App(): React.JSX.Element {
       setNpcs(data.npcs ?? []);
       setGroundItems(data.items ?? []);
       useGameStore.getState().setShopListDetail(null);
+      setWorkListDetail(null);
 
       if (shortName !== '嵩阳山道') {
         removeLogQuickAction(SONGYANG_GATE_INTENT_ACTION_ID);
@@ -150,6 +152,26 @@ function App(): React.JSX.Element {
           });
         }
         // 货单已由弹窗展示，不再写入日志
+        return;
+      }
+      // 打工工单结果 → 工单弹窗
+      if (data.success && data.data?.action === 'work_list') {
+        const payload = data.data;
+        if (
+          payload.npcId &&
+          payload.npcName &&
+          Array.isArray(payload.jobs) &&
+          payload.dailyProgress
+        ) {
+          useGameStore.getState().setWorkListDetail({
+            npcId: payload.npcId,
+            npcName: payload.npcName,
+            jobs: payload.jobs,
+            dailyProgress: payload.dailyProgress,
+            active: payload.active,
+          });
+        }
+        // 工单由弹窗承载，不写日志
         return;
       }
       // buy 成功结果 → 同步更新当前货单库存

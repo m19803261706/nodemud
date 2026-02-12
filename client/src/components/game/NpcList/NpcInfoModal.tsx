@@ -73,6 +73,8 @@ interface NpcInfoModalProps {
   onShop: (npcName: string) => void;
   onApprentice: (npcName: string) => void;
   onDonate: (itemName: string, npcName: string) => void;
+  onWork: (npcId: string) => void;
+  onWorkStop: (npcId: string) => void;
   onSpar: (npcName: string) => void;
   onBetray: (npcName: string) => void;
   onSell: (itemName: string, npcName: string) => void;
@@ -142,6 +144,8 @@ export const NpcInfoModal = ({
   onShop,
   onApprentice,
   onDonate,
+  onWork,
+  onWorkStop,
   onSpar,
   onBetray,
   onSell,
@@ -196,6 +200,8 @@ export const NpcInfoModal = ({
     ? actionSet.has('viewSkills')
     : (detail.teachSkills?.length ?? 0) > 0;
   const canDonate = hasActions ? actionSet.has('donate') : false;
+  const canWork = hasActions ? actionSet.has('work') : false;
+  const canWorkStop = hasActions ? actionSet.has('workStop') : false;
   const canSpar = hasActions ? actionSet.has('spar') : false;
   const canBetray = hasActions ? actionSet.has('betray') : false;
   const canAttack = hasActions
@@ -266,6 +272,28 @@ export const NpcInfoModal = ({
       key: 'donate',
       label: '捐献',
       onPress: () => setActionListMode('donate'),
+    });
+  }
+
+  if (canWork) {
+    actionButtons.push({
+      key: 'work',
+      label: '打工',
+      onPress: () => {
+        onWork(detail.npcId);
+        handleClose();
+      },
+    });
+  }
+
+  if (canWorkStop) {
+    actionButtons.push({
+      key: 'work-stop',
+      label: '停工',
+      onPress: () => {
+        onWorkStop(detail.npcId);
+        handleClose();
+      },
     });
   }
 

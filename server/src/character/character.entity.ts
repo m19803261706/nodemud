@@ -6,6 +6,7 @@
 import { Entity, Column, PrimaryColumn, CreateDateColumn, Index } from 'typeorm';
 import type { PlayerQuestData } from '../engine/quest';
 import type { PlayerSectData } from '../engine/sect/types';
+import type { PlayerWorkData } from '../engine/work/types';
 
 /** 出身枚举 */
 export type CharacterOriginType =
@@ -265,6 +266,16 @@ export class Character {
     comment: '门派状态数据（JSON）',
   })
   sectData: PlayerSectData | null;
+
+  // ========== 打工数据 ==========
+
+  @Column({
+    name: 'work_data',
+    type: 'simple-json',
+    nullable: true,
+    comment: '打工状态数据（JSON）',
+  })
+  workData: PlayerWorkData | null;
 
   // ========== 时间 ==========
 
