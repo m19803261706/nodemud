@@ -386,8 +386,9 @@ export class GameGateway
         player.receiveMessage(result.message);
       }
 
-      // 持久化角色属性数据
+      // 成功后立即推送最新属性，避免前端等待下一轮同步
       if (result.success) {
+        sendPlayerStats(player, character);
         await this.characterService.savePlayerDataToDB(player, session.characterId);
       }
     } catch {

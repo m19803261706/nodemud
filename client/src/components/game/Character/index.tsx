@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { MessageFactory } from '@packages/core';
+import { wsService } from '../../../services/WebSocketService';
 import { useGameStore, type ResourceValue } from '../../../stores/useGameStore';
 import { GradientDivider, StatBar } from '../shared';
 
@@ -36,6 +38,8 @@ const EQUIPMENT_SLOTS = [
   { key: 'wrist', label: '护腕' },
 ] as const;
 
+type AttrKey = (typeof ATTR_CONFIG)[number]['key'];
+
 function resourcePct(res: ResourceValue): number {
   if (res.max <= 0) return 0;
   return Math.max(0, Math.min(100, Math.round((res.current / res.max) * 100)));
@@ -50,6 +54,15 @@ export const CharacterPage = () => {
   const player = useGameStore(state => state.player);
   const equipment = useGameStore(state => state.equipment);
   const setActiveTab = useGameStore(state => state.setActiveTab);
+
+  const handleAllocatePoint = (key: AttrKey) => {
+    if (player.freePoints <= 0) return;
+    wsService.send(
+      MessageFactory.create('allocatePoints', {
+        allocations: { [key]: 1 },
+      }),
+    );
+  };
 
   return (
     <View style={s.container}>
@@ -129,6 +142,11 @@ export const CharacterPage = () => {
 
         <View style={s.panel}>
           <Text style={s.sectionTitle}>六维属性</Text>
+          {player.freePoints > 0 ? (
+            <Text style={s.allocateHint}>
+              点击属性右侧“+”可分配 1 点（剩余 {player.freePoints} 点）
+            </Text>
+          ) : null}
           <View style={s.attrGrid}>
             {ATTR_CONFIG.map(attr => {
               const base = player.attrs[attr.key];
@@ -138,12 +156,21 @@ export const CharacterPage = () => {
                 )?.[attr.key] ?? 0;
               return (
                 <View key={attr.key} style={s.attrCell}>
-                  <Text style={s.attrLabel}>{attr.label}</Text>
+                  <View style={s.attrTopRow}>
+                    <Text style={s.attrLabel}>{attr.label}</Text>
+                    {player.freePoints > 0 ? (
+                      <TouchableOpacity
+                        style={s.attrAllocateBtn}
+                        activeOpacity={0.7}
+                        onPress={() => handleAllocatePoint(attr.key)}
+                      >
+                        <Text style={s.attrAllocateBtnText}>+</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
                   <View style={s.attrValueRow}>
                     <Text style={s.attrValue}>{base}</Text>
-                    {bonus > 0 ? (
-                      <Text style={s.attrBonus}>+{bonus}</Text>
-                    ) : null}
+                    {bonus > 0 ? <Text style={s.attrBonus}>+{bonus}</Text> : null}
                   </View>
                 </View>
               );
@@ -297,10 +324,38 @@ const s = StyleSheet.create({
     borderColor: '#8B7A5A20',
     backgroundColor: '#F5F0E870',
   },
+  attrTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 6,
+  },
   attrLabel: {
     fontSize: 10,
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
+  },
+  allocateHint: {
+    fontSize: 10,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    marginTop: -2,
+  },
+  attrAllocateBtn: {
+    width: 18,
+    height: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A70',
+    backgroundColor: '#F5F0E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attrAllocateBtnText: {
+    fontSize: 13,
+    lineHeight: 13,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Sans SC',
+    fontWeight: '700',
   },
   attrValueRow: {
     marginTop: 2,
