@@ -269,35 +269,46 @@ export class MapHandler {
   }
 
   /**
-   * 根据房间 ID 查找所属区域
-   * 遍历所有 Area 蓝图的 getRoomIds()
+   * 根据房间 ID 查找所属区域。
+   * area 实例 ID 可能是 "area/x" 或 "area/x/area"，
+   * 对外统一返回规范化 areaId（"area/x"），避免探索记录键不一致。
    */
   findAreaByRoom(roomId: string): { area: Area; areaId: string } | null {
-    // 尝试从房间 ID 推导区域 ID（如 area/rift-town/square → area/rift-town）
-    const parts = roomId.split('/');
-    if (parts.length >= 3) {
-      const guessedAreaId = `${parts[0]}/${parts[1]}`;
-      const areaObj = this.objectManager.findById(guessedAreaId);
-      if (areaObj instanceof Area) {
-        const roomIds = areaObj.getRoomIds();
-        if (roomIds.includes(roomId)) {
-          return { area: areaObj, areaId: guessedAreaId };
+    const normalizedAreaId = this.roomIdToAreaId(roomId);
+
+    if (normalizedAreaId) {
+      const candidateIds = [normalizedAreaId, `${normalizedAreaId}/area`];
+      for (const candidateId of candidateIds) {
+        const areaObj = this.objectManager.findById(candidateId);
+        if (!(areaObj instanceof Area)) continue;
+        if (areaObj.getRoomIds().includes(roomId)) {
+          return { area: areaObj, areaId: normalizedAreaId };
         }
       }
     }
 
     // 回退：遍历所有 Area 对象
-    const allEntities = this.objectManager.findAll(
-      (e) => e instanceof Area && !e.destroyed,
-    );
+    const allEntities = this.objectManager.findAll((e) => e instanceof Area && !e.destroyed);
     for (const entity of allEntities) {
       const area = entity as Area;
       if (area.getRoomIds().includes(roomId)) {
-        return { area, areaId: area.id };
+        return { area, areaId: this.normalizeAreaId(area.id) };
       }
     }
 
     return null;
+  }
+
+  /** 从房间 ID 推导规范化区域 ID（area/x/y -> area/x） */
+  private roomIdToAreaId(roomId: string): string | null {
+    const parts = roomId.split('/');
+    if (parts.length < 3) return null;
+    return `${parts[0]}/${parts[1]}`;
+  }
+
+  /** 归一化区域 ID（去掉尾部 /area） */
+  private normalizeAreaId(areaId: string): string {
+    return areaId.endsWith('/area') ? areaId.slice(0, -5) : areaId;
   }
 
   /** 发送导航响应消息 */
