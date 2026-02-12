@@ -74,10 +74,10 @@ export const MapCanvas = ({
     const positions = new Map<string, { px: number; py: number }>();
     for (const r of exploredRooms) {
       const { x, y } = r.coordinates;
-      // y 轴翻转：coordinates 中 y 增大为南，屏幕上方应为北
+      // y 轴按世界坐标：y 越小越靠北（屏幕上方）
       positions.set(r.roomId, {
         px: (x - minX) * GRID_SIZE + CANVAS_PADDING,
-        py: (maxY - y) * GRID_SIZE + CANVAS_PADDING,
+        py: (y - minY) * GRID_SIZE + CANVAS_PADDING,
       });
     }
 
