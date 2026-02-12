@@ -30,16 +30,6 @@ const MP_PER_LEVEL = 30;
 /** 六维属性名称列表 */
 const ATTR_KEYS = ['wisdom', 'perception', 'spirit', 'meridian', 'strength', 'vitality'] as const;
 
-/** 六维属性对应的上限字段名（Character 实体中的字段） */
-const ATTR_CAP_MAP: Record<string, string> = {
-  wisdom: 'wisdomCap',
-  perception: 'perceptionCap',
-  spirit: 'spiritCap',
-  meridian: 'meridianCap',
-  strength: 'strengthCap',
-  vitality: 'vitalityCap',
-};
-
 /** 等级称号表 */
 const LEVEL_TITLES: { min: number; max: number; title: string }[] = [
   { min: 1, max: 4, title: '初入江湖' },
@@ -318,7 +308,7 @@ export class ExpManager {
 
   /**
    * 分配属性点
-   * 校验: 1) 总点数不超过可用 free_points 2) 每项属性不超过上限
+   * 校验: 1) 总点数不超过可用 free_points
    * @returns { success: boolean; message: string }
    */
   allocatePoints(
@@ -351,31 +341,6 @@ export class ExpManager {
         success: false,
         message: `属性点不足。可用: ${freePoints}，需要: ${totalPoints}。`,
       };
-    }
-
-    // 检查各属性是否超过上限
-    for (const key of ATTR_KEYS) {
-      const val = allocations[key];
-      if (val == null || val === 0) continue;
-
-      const currentVal = (character as any)[key] as number;
-      const capField = ATTR_CAP_MAP[key];
-      const cap = (character as any)[capField] as number;
-
-      if (currentVal + val > cap) {
-        const attrNames: Record<string, string> = {
-          wisdom: '慧根',
-          perception: '心眼',
-          spirit: '气海',
-          meridian: '脉络',
-          strength: '筋骨',
-          vitality: '血气',
-        };
-        return {
-          success: false,
-          message: `${attrNames[key]}超过上限。当前: ${currentVal}，上限: ${cap}，尝试增加: ${val}。`,
-        };
-      }
     }
 
     // 执行分配
