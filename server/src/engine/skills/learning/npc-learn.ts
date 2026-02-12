@@ -91,6 +91,53 @@ function buildFailureResult(
   };
 }
 
+function buildImmersiveLearnMessage(params: {
+  npcName: string;
+  skillName: string;
+  timesCompleted: number;
+  finalLevel: number;
+  finalLearned: number;
+  finalLearnedMax: number;
+  silverSpent: number;
+  energySpent: number;
+  potentialSpent: number;
+  didLevelUp: boolean;
+  stopReason?: SkillLearnFailureReason;
+}): string {
+  const {
+    npcName,
+    skillName,
+    timesCompleted,
+    finalLevel,
+    finalLearned,
+    finalLearnedMax,
+    silverSpent,
+    energySpent,
+    potentialSpent,
+    didLevelUp,
+    stopReason,
+  } = params;
+
+  const lines: string[] = [];
+  lines.push(`你向${npcName}抱拳请益「${skillName}」，${npcName}凝神为你拆招点诀。`);
+  lines.push(`你前后请教 ${timesCompleted} 次，反复揣摩其间关窍。`);
+  lines.push(`此番共耗：银两 ${silverSpent} 两，精力 ${energySpent}，潜能 ${potentialSpent}。`);
+
+  if (didLevelUp) {
+    lines.push(`灵台一清，你对「${skillName}」的领悟突破至 Lv.${finalLevel}。`);
+  } else {
+    lines.push(`招意渐明，你对「${skillName}」又多了几分心得。`);
+  }
+
+  lines.push(`当前进境：Lv.${finalLevel}（${finalLearned}/${finalLearnedMax}）。`);
+
+  if (stopReason) {
+    lines.push(`行至半途：${getReasonMessage(stopReason).replace(/。$/, '')}。`);
+  }
+
+  return lines.join('\n');
+}
+
 export function executeNpcTeachLearning(params: NpcLearnExecutionParams): NpcLearnExecutionResult {
   const { player, npc, skillManager, skillId, skillName, times } = params;
   const teachCost = Math.max(0, Math.floor(npc.get<number>('teach_cost') ?? 10));
@@ -102,6 +149,9 @@ export function executeNpcTeachLearning(params: NpcLearnExecutionParams): NpcLea
   let timesCompleted = 0;
   let didLevelUp = false;
   let stopReason: SkillLearnFailureReason | undefined;
+  let silverSpent = 0;
+  let energySpent = 0;
+  let potentialSpent = 0;
 
   for (let i = 0; i < times; i++) {
     const before = getSkillProgress(skillManager, skillId);
@@ -150,6 +200,9 @@ export function executeNpcTeachLearning(params: NpcLearnExecutionParams): NpcLea
     player.spendSilver(teachCost);
     player.set('energy', energy - energyCost);
     player.set('learned_points', learnedPointsBefore + 1);
+    silverSpent += teachCost;
+    energySpent += energyCost;
+    potentialSpent += 1;
 
     const improved = skillManager.improveSkill(skillId, 1);
     const after = getSkillProgress(skillManager, skillId);
@@ -161,6 +214,9 @@ export function executeNpcTeachLearning(params: NpcLearnExecutionParams): NpcLea
       player.addSilver(teachCost);
       player.set('energy', energy);
       player.set('learned_points', learnedPointsBefore);
+      silverSpent -= teachCost;
+      energySpent -= energyCost;
+      potentialSpent -= 1;
       if (timesCompleted === 0) {
         return buildFailureResult(skillManager, skillId, skillName, times, 'cannot_improve');
       }
@@ -175,12 +231,19 @@ export function executeNpcTeachLearning(params: NpcLearnExecutionParams): NpcLea
   }
 
   const finalProgress = getSkillProgress(skillManager, skillId);
-  const baseMessage = didLevelUp
-    ? `你向${npc.getName()}学习了${timesCompleted}次「${skillName}」，技能提升到了 ${finalProgress.currentLevel} 级！`
-    : `你向${npc.getName()}学习了${timesCompleted}次「${skillName}」，经验增加了一些。`;
-  const message = stopReason
-    ? `${baseMessage}（因${getReasonMessage(stopReason).replace(/。$/, '')}中断）`
-    : baseMessage;
+  const message = buildImmersiveLearnMessage({
+    npcName: npc.getName(),
+    skillName,
+    timesCompleted,
+    finalLevel: finalProgress.currentLevel,
+    finalLearned: finalProgress.learned,
+    finalLearnedMax: finalProgress.learnedMax,
+    silverSpent,
+    energySpent,
+    potentialSpent,
+    didLevelUp,
+    stopReason,
+  });
 
   return {
     data: {
