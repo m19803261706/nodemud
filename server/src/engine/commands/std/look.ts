@@ -377,12 +377,17 @@ export class LookCommand implements ICommand {
   }
 
   /**
-   * 仅当目标 NPC 为玩家当前师父时，开放“学习技能”动作。
-   * 对标传统 MUD 中 master_id 判定逻辑，避免陌生授艺 NPC 直接触发学艺按钮。
+   * 学习技能按钮显示规则：
+   * 1) 公共教习（can_public_teach=true）始终可学；
+   * 2) 非公共教习时，仍沿用“仅当前师父可学”的门派判定。
    */
   private canLearnFromMaster(npc: NpcBase, executor?: LivingBase, hasTeachSkills = false): boolean {
     if (!hasTeachSkills) return false;
     if (!executor || !(executor instanceof PlayerBase)) return false;
+
+    if (npc.get<boolean>('can_public_teach') === true) {
+      return true;
+    }
 
     const sectManager = ServiceLocator.sectManager;
     if (!sectManager) return false;

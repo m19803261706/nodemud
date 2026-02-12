@@ -20,6 +20,7 @@ import { QuestManager } from './quest/quest-manager';
 import { SkillRegistry } from './skills/skill-registry';
 import { PracticeManager } from './skills/practice-manager';
 import { registerSongyangSkills } from './skills/songyang/register-songyang-skills';
+import { registerNoviceSkills } from './skills/novice/register-novice-skills';
 import { SkillModule } from '../skill/skill.module';
 import { SkillService } from '../skill/skill.service';
 import { SectRegistry } from './sect/sect-registry';
@@ -88,6 +89,9 @@ export class EngineModule implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    const registeredNoviceSkillCount = registerNoviceSkills(this.skillRegistry);
+    this.logger.log(`新手公共武学注册完成: ${registeredNoviceSkillCount} 项`);
+
     const registeredSongyangSkillCount = registerSongyangSkills(this.skillRegistry);
     this.logger.log(`嵩阳技能注册完成: ${registeredSongyangSkillCount} 项`);
 

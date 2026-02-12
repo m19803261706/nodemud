@@ -2,7 +2,7 @@
  * 裂隙镇地图集成测试
  *
  * 验证:
- * - 蓝图加载（1 Area + 14 Room = 15 个）
+ * - 蓝图加载（1 Area + 18 Room）
  * - 出口连接双向一致性
  * - 坐标与方向偏移一致性
  * - 房间属性完整性
@@ -47,7 +47,11 @@ const ROOM_IDS = [
   'area/rift-town/inn',
   'area/rift-town/herb-shop',
   'area/rift-town/smithy',
+  'area/rift-town/martial-hall',
+  'area/rift-town/training-yard',
   'area/rift-town/notice-board',
+  'area/rift-town/academy',
+  'area/rift-town/academy-library',
   'area/rift-town/general-store',
   'area/rift-town/north-road',
   'area/rift-town/south-road',
@@ -76,25 +80,25 @@ describe('裂隙镇地图', () => {
   afterAll(() => {
     objectManager.onModuleDestroy();
     for (const key of Object.keys(require.cache)) {
-      if (key.includes('world/area/rift-town')) {
+      if (key.includes('world/area/rift-town') || key.includes('world/npc/rift-town')) {
         delete require.cache[key];
       }
     }
   });
 
   it('应加载蓝图（Area + Room + NPC + Item）', () => {
-    // 1 Area + 14 Room + NPC 蓝图 + 装备蓝图
-    expect(registry.getCount()).toBeGreaterThanOrEqual(15);
+    // 1 Area + 18 Room + NPC 蓝图 + 装备蓝图
+    expect(registry.getCount()).toBeGreaterThanOrEqual(19);
   });
 
-  it('Area 应包含全部 14 个房间 ID', () => {
+  it('Area 应包含全部 18 个房间 ID', () => {
     const area = objectManager.findById('area/rift-town/area');
     expect(area).toBeDefined();
     expect(area).toBeInstanceOf(Area);
 
     const areaInstance = area as Area;
     const roomIds = areaInstance.getRoomIds();
-    expect(roomIds).toHaveLength(14);
+    expect(roomIds).toHaveLength(18);
 
     for (const roomId of ROOM_IDS) {
       expect(roomIds).toContain(roomId);
@@ -173,6 +177,17 @@ describe('裂隙镇地图', () => {
     expect(dirs).toContain('east');
     expect(dirs).toContain('west');
     expect(dirs).toContain('down');
+  });
+
+  it('武馆与书院公共教习应配置在刷新规则中', () => {
+    const area = objectManager.findById('area/rift-town/area') as Area;
+    const spawnRuleMap = new Map(area.getSpawnRules().map((rule) => [rule.blueprintId, rule.roomId]));
+
+    expect(spawnRuleMap.get('npc/rift-town/martial-instructor')).toBe('area/rift-town/martial-hall');
+    expect(spawnRuleMap.get('npc/rift-town/academy-lecturer')).toBe('area/rift-town/academy');
+
+    expect(registry.has('npc/rift-town/martial-instructor')).toBe(true);
+    expect(registry.has('npc/rift-town/academy-lecturer')).toBe(true);
   });
 
   it('北门应连通山道，南门保持单出口', () => {

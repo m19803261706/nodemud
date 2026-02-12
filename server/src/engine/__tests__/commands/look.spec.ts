@@ -227,6 +227,39 @@ describe('LookCommand', () => {
     expect(result.data.actions).toEqual(['attack', 'viewSkills', 'learnSkill', 'close']);
   });
 
+  it('look 公共教习 NPC 返回 learnSkill 动作', async () => {
+    const room = new RoomBase('rift-town/martial-hall');
+    room.set('short', '武馆前堂');
+
+    const player = new PlayerBase('player#1');
+    player.set('name', '张三');
+    await player.moveTo(room, { quiet: true });
+
+    const npc = new NpcBase('npc/rift-town/martial-instructor#1');
+    npc.set('name', '陈教头');
+    npc.set('short', '陈教头');
+    npc.set('can_public_teach', true);
+    npc.set('teach_skills', ['novice.basic-blade']);
+    await npc.moveTo(room, { quiet: true });
+
+    (ServiceLocator as any).skillRegistry = {
+      get: jest.fn().mockReturnValue({
+        skillId: 'novice.basic-blade',
+        skillName: '江湖基础刀法',
+        skillType: 'blade',
+        category: 'martial',
+      }),
+    };
+    (ServiceLocator as any).sectManager = {
+      getNpcAvailableActions: jest.fn().mockReturnValue([]),
+    };
+
+    const result = cmd.execute(player, ['陈教头']);
+
+    expect(result.success).toBe(true);
+    expect(result.data.actions).toEqual(['attack', 'viewSkills', 'learnSkill', 'close']);
+  });
+
   it('look 门派 NPC 返回门派动作位', async () => {
     const room = new RoomBase('songyang/hall');
     room.set('short', '议事堂');
