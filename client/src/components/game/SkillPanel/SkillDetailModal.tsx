@@ -4,7 +4,7 @@
  * 打开时发送 skillPanelRequest 带 detailSkillId 获取详情数据
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import LinearGradient from '../../LinearGradient';
 import { GradientDivider } from '../shared';
-import { MessageFactory } from '@packages/core';
+import { MessageFactory, SKILL_CONSTANTS, SkillCategory } from '@packages/core';
 import type { ActionDetailInfo } from '@packages/core';
 import { wsService } from '../../../services/WebSocketService';
 import { useSkillStore } from '../../../stores/useSkillStore';
@@ -24,13 +24,22 @@ import { useGameStore } from '../../../stores/useGameStore';
 import { getSkillLearnFailureHint } from '../../../utils/skillLearnReason';
 import { ActionListItem } from './ActionListItem';
 
+export interface SkillLearnActionMeta {
+  teacherName?: string;
+  teacherLevelCap?: number;
+  teachCostPerLearn?: number;
+  skillCategory?: SkillCategory;
+}
+
 interface SkillDetailModalProps {
   visible: boolean;
   onClose: () => void;
   skillId: string | null;
   showEquipToggle?: boolean;
   actionLabel?: string;
-  onActionPress?: (skillId: string) => void;
+  onActionPress?: (skillId: string, times: number) => void;
+  actionMeta?: SkillLearnActionMeta | null;
+  actionQuickTimes?: number[];
   /** 嵌入父层展示（用于避免 Modal 套 Modal 导致的 iOS 展示异常） */
   embedded?: boolean;
 }
@@ -66,6 +75,155 @@ function splitDescriptionSections(
   return sections;
 }
 
+const DEFAULT_ACTION_QUICK_TIMES = [1, 3, 5, 10, 20];
+
+interface LearnEstimateResult {
+  requestedTimes: number;
+  executableTimes: number;
+  silverCost: number;
+  energyCost: number;
+  potentialCost: number;
+  projectedLevel: number;
+  projectedLearned: number;
+  projectedLearnedMax: number;
+  stopReason?: string;
+}
+
+function normalizeQuickTimes(source?: number[]): number[] {
+  const raw = Array.isArray(source) && source.length > 0 ? source : DEFAULT_ACTION_QUICK_TIMES;
+  const normalized = Array.from(
+    new Set(
+      raw
+        .map(value => Math.max(1, Math.floor(Number(value) || 0)))
+        .filter(value => Number.isFinite(value)),
+    ),
+  )
+    .filter(value => value > 0)
+    .sort((a, b) => a - b);
+  return normalized.length > 0 ? normalized : DEFAULT_ACTION_QUICK_TIMES;
+}
+
+function resolveRelevantAttrValue(
+  category: SkillCategory,
+  attrs: { strength: number; spirit: number; wisdom: number; perception: number },
+): number {
+  if (category === SkillCategory.INTERNAL) return attrs.spirit;
+  if (category === SkillCategory.SUPPORT) return attrs.wisdom;
+  if (category === SkillCategory.COGNIZE) return attrs.perception;
+  return attrs.strength;
+}
+
+function calcLearnEnergyCost(currentLevel: number, perception: number): number {
+  const safePerception = Math.max(1, Math.floor(perception || 1));
+  let cost = Math.floor((100 + Math.max(0, currentLevel) * 2) / safePerception);
+  if (currentLevel <= 0) {
+    cost *= 2;
+  }
+  return Math.max(5, cost);
+}
+
+function calcLearnGain(
+  currentLevel: number,
+  cognizeLevel: number,
+  relevantAttr: number,
+): number {
+  const effectiveAmount = 1 * (1 + Math.max(0, cognizeLevel) / SKILL_CONSTANTS.COGNIZE_FACTOR);
+  const attrBonus =
+    1 +
+    (Math.max(0, relevantAttr) * 100) /
+      (Math.max(0, currentLevel) + SKILL_CONSTANTS.ATTR_FACTOR);
+  return effectiveAmount * attrBonus;
+}
+
+function estimateLearnCost(params: {
+  requestedTimes: number;
+  teachCostPerLearn: number;
+  availableSilver: number;
+  availableEnergy: number;
+  availablePotential: number;
+  perception: number;
+  currentLevel: number;
+  currentLearned: number;
+  category: SkillCategory;
+  cognizeLevel: number;
+  relevantAttrValue: number;
+  teacherLevelCap?: number;
+}): LearnEstimateResult {
+  const requestedTimes = Math.max(1, Math.floor(params.requestedTimes));
+  const teachCostPerLearn = Math.max(0, Math.floor(params.teachCostPerLearn));
+  const teacherLevelCap =
+    typeof params.teacherLevelCap === 'number' && Number.isFinite(params.teacherLevelCap)
+      ? Math.max(0, Math.floor(params.teacherLevelCap))
+      : undefined;
+
+  let silverLeft = Math.max(0, Math.floor(params.availableSilver));
+  let energyLeft = Math.max(0, Math.floor(params.availableEnergy));
+  let potentialLeft = Math.max(0, Math.floor(params.availablePotential));
+  let level = Math.max(0, Math.floor(params.currentLevel));
+  let learned = Math.max(0, params.currentLearned);
+
+  let silverCost = 0;
+  let energyCost = 0;
+  let potentialCost = 0;
+  let executableTimes = 0;
+  let stopReason: string | undefined;
+
+  for (let i = 0; i < requestedTimes; i++) {
+    if (teacherLevelCap !== undefined && level >= teacherLevelCap) {
+      stopReason = '师父所授已尽';
+      break;
+    }
+
+    const singleEnergyCost = calcLearnEnergyCost(level, params.perception);
+    if (silverLeft < teachCostPerLearn) {
+      stopReason = '银两不足';
+      break;
+    }
+    if (energyLeft < singleEnergyCost) {
+      stopReason = '精力不足';
+      break;
+    }
+    if (potentialLeft < 1) {
+      stopReason = '潜能不足';
+      break;
+    }
+
+    silverLeft -= teachCostPerLearn;
+    energyLeft -= singleEnergyCost;
+    potentialLeft -= 1;
+    silverCost += teachCostPerLearn;
+    energyCost += singleEnergyCost;
+    potentialCost += 1;
+    executableTimes += 1;
+
+    learned += calcLearnGain(level, params.cognizeLevel, params.relevantAttrValue);
+
+    while (true) {
+      const learnedMax = Math.pow(level + 1, 2);
+      if (learned < learnedMax) break;
+      learned = 0;
+      level += 1;
+      if (teacherLevelCap !== undefined && level >= teacherLevelCap) {
+        break;
+      }
+    }
+  }
+
+  const projectedLearnedMax = Math.pow(level + 1, 2);
+
+  return {
+    requestedTimes,
+    executableTimes,
+    silverCost,
+    energyCost,
+    potentialCost,
+    projectedLevel: level,
+    projectedLearned: Math.max(0, Math.floor(learned)),
+    projectedLearnedMax,
+    stopReason,
+  };
+}
+
 export const SkillDetailModal = ({
   visible,
   onClose,
@@ -73,6 +231,8 @@ export const SkillDetailModal = ({
   showEquipToggle = true,
   actionLabel,
   onActionPress,
+  actionMeta = null,
+  actionQuickTimes,
   embedded = false,
 }: SkillDetailModalProps) => {
   const skillDetail = useSkillStore(state => state.skillDetail);
@@ -80,8 +240,14 @@ export const SkillDetailModal = ({
   const lastLearnResult = useSkillStore(state => state.lastLearnResult);
   const clearLearnResult = useSkillStore(state => state.clearLearnResult);
   const sendCommand = useGameStore(state => state.sendCommand);
+  const player = useGameStore(state => state.player);
   const dismissGuardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [canDismissByBackdrop, setCanDismissByBackdrop] = useState(false);
+  const normalizedQuickTimes = useMemo(
+    () => normalizeQuickTimes(actionQuickTimes),
+    [actionQuickTimes],
+  );
+  const [selectedTimes, setSelectedTimes] = useState(() => normalizedQuickTimes[0] ?? 1);
 
   /** 当前技能的映射状态 */
   const currentSkill = skillId ? skills.find(s => s.skillId === skillId) : null;
@@ -100,10 +266,61 @@ export const SkillDetailModal = ({
     : [];
   const learnFeedbackReasonText =
     canShowLearnFeedback && lastLearnResult?.reason
-      ? lastLearnResult.hint ??
+      ? (lastLearnResult.hint ??
         getSkillLearnFailureHint(lastLearnResult.reason) ??
-        lastLearnResult.reason
+        lastLearnResult.reason)
       : null;
+
+  const cognitionLevel =
+    skills.find(skill => skill.skillType === 'cognize')?.level ?? 0;
+  const teachCostPerLearnRaw = actionMeta?.teachCostPerLearn;
+  const teachCostPerLearn =
+    typeof teachCostPerLearnRaw === 'number' && Number.isFinite(teachCostPerLearnRaw)
+      ? Math.max(0, Math.floor(teachCostPerLearnRaw))
+      : 10;
+  const usingDefaultTeachCost =
+    !(typeof teachCostPerLearnRaw === 'number' && Number.isFinite(teachCostPerLearnRaw));
+  const skillCategory =
+    currentSkill?.category ?? actionMeta?.skillCategory ?? SkillCategory.MARTIAL;
+  const attrs = {
+    strength: Math.max(0, Math.floor(player.attrs.strength ?? 0)),
+    spirit: Math.max(0, Math.floor(player.attrs.spirit ?? 0)),
+    wisdom: Math.max(0, Math.floor(player.attrs.wisdom ?? 0)),
+    perception: Math.max(1, Math.floor(player.attrs.perception ?? 1)),
+  };
+  const estimatedLearnCost = useMemo(() => {
+    if (!actionLabel || !skillId || !onActionPress) return null;
+
+    return estimateLearnCost({
+      requestedTimes: selectedTimes,
+      teachCostPerLearn,
+      availableSilver: player.silver,
+      availableEnergy: player.energy.current,
+      availablePotential: player.potential,
+      perception: attrs.perception,
+      currentLevel: currentSkill?.level ?? 0,
+      currentLearned: currentSkill?.learned ?? 0,
+      category: skillCategory,
+      cognizeLevel: cognitionLevel,
+      relevantAttrValue: resolveRelevantAttrValue(skillCategory, attrs),
+      teacherLevelCap: actionMeta?.teacherLevelCap,
+    });
+  }, [
+    actionLabel,
+    actionMeta?.teacherLevelCap,
+    attrs,
+    cognitionLevel,
+    currentSkill?.learned,
+    currentSkill?.level,
+    onActionPress,
+    player.energy.current,
+    player.potential,
+    player.silver,
+    selectedTimes,
+    skillCategory,
+    skillId,
+    teachCostPerLearn,
+  ]);
 
   /** 装配/卸下操作 */
   const handleEquipToggle = () => {
@@ -148,9 +365,19 @@ export const SkillDetailModal = ({
     };
   }, [visible, skillId, clearLearnResult]);
 
+  useEffect(() => {
+    const nextDefault = normalizedQuickTimes[0] ?? 1;
+    setSelectedTimes(nextDefault);
+  }, [normalizedQuickTimes, skillId, visible]);
+
   const handleBackdropPress = () => {
     if (!canDismissByBackdrop) return;
     onClose();
+  };
+
+  const handleLearnActionPress = () => {
+    if (!actionLabel || !skillId || !onActionPress) return;
+    onActionPress(skillId, selectedTimes);
   };
 
   const content = (
@@ -286,15 +513,79 @@ export const SkillDetailModal = ({
           {/* 外部动作按钮（如：向师父学习） */}
           {actionLabel && skillId && onActionPress ? (
             <View style={s.equipRow}>
-              <TouchableOpacity
-                style={[s.equipBtn, s.learnBtn]}
-                onPress={() => onActionPress(skillId)}
-                activeOpacity={0.7}
-              >
-                <Text style={[s.equipBtnText, s.learnBtnText]}>
-                  {actionLabel}
-                </Text>
-              </TouchableOpacity>
+              <View style={s.learnPlanWrap}>
+                <View style={s.learnQuickTimesRow}>
+                  {normalizedQuickTimes.map(times => (
+                    <TouchableOpacity
+                      key={`learn-times-${times}`}
+                      style={[
+                        s.learnQuickTimesBtn,
+                        selectedTimes === times
+                          ? s.learnQuickTimesBtnActive
+                          : undefined,
+                      ]}
+                      onPress={() => setSelectedTimes(times)}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[
+                          s.learnQuickTimesText,
+                          selectedTimes === times
+                            ? s.learnQuickTimesTextActive
+                            : undefined,
+                        ]}
+                      >
+                        {times}次
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {estimatedLearnCost ? (
+                  <View style={s.learnEstimateBox}>
+                    <Text style={s.learnEstimateMain}>
+                      预计消耗：银两 {estimatedLearnCost.silverCost} · 精力{' '}
+                      {estimatedLearnCost.energyCost} · 潜能{' '}
+                      {estimatedLearnCost.potentialCost}
+                    </Text>
+                    <Text style={s.learnEstimateMeta}>
+                      本次预计可完成 {estimatedLearnCost.executableTimes}/
+                      {estimatedLearnCost.requestedTimes} 次
+                      {estimatedLearnCost.stopReason
+                        ? `（受限：${estimatedLearnCost.stopReason}）`
+                        : ''}
+                    </Text>
+                    <Text style={s.learnEstimateMeta}>
+                      预计境界：Lv.{estimatedLearnCost.projectedLevel} · 进度{' '}
+                      {estimatedLearnCost.projectedLearned}/
+                      {estimatedLearnCost.projectedLearnedMax}
+                    </Text>
+                    {usingDefaultTeachCost ? (
+                      <Text style={s.learnEstimateHint}>
+                        银两按默认每次 10 两估算，实际以 NPC 当次收取为准。
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                <TouchableOpacity
+                  style={[
+                    s.equipBtn,
+                    s.learnBtn,
+                    estimatedLearnCost?.executableTimes === 0
+                      ? s.learnBtnDisabled
+                      : undefined,
+                  ]}
+                  onPress={handleLearnActionPress}
+                  activeOpacity={0.7}
+                  disabled={estimatedLearnCost?.executableTimes === 0}
+                >
+                  <Text style={[s.equipBtnText, s.learnBtnText]}>
+                    {actionLabel}（{selectedTimes}次）
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
               <View style={s.dividerWrap}>
                 <GradientDivider />
               </View>
@@ -597,6 +888,71 @@ const s = StyleSheet.create({
   },
   learnBtnText: {
     color: '#5A472D',
+  },
+  learnBtnDisabled: {
+    opacity: 0.45,
+  },
+  learnPlanWrap: {
+    width: '100%',
+    gap: 8,
+    marginBottom: 8,
+  },
+  learnQuickTimesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  learnQuickTimesBtn: {
+    height: 26,
+    minWidth: 44,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A60',
+    backgroundColor: '#FFFFFF66',
+  },
+  learnQuickTimesBtnActive: {
+    borderColor: '#7C633E99',
+    backgroundColor: '#7C633E20',
+  },
+  learnQuickTimesText: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '600',
+  },
+  learnQuickTimesTextActive: {
+    color: '#5A472D',
+  },
+  learnEstimateBox: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A55',
+    backgroundColor: '#FFFFFF3D',
+    gap: 2,
+  },
+  learnEstimateMain: {
+    fontSize: 11,
+    color: '#5A4B39',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 17,
+  },
+  learnEstimateMeta: {
+    fontSize: 10,
+    color: '#7A6A58',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 15,
+  },
+  learnEstimateHint: {
+    marginTop: 2,
+    fontSize: 10,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+    lineHeight: 15,
   },
   emptyText: {
     textAlign: 'center',

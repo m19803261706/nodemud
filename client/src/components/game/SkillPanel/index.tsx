@@ -21,13 +21,17 @@ import {
   SkillCategory,
   SKILL_SLOT_GROUPS,
 } from '@packages/core';
-import type { PlayerSkillInfo, SkillSlotType, SkillBonusSummary } from '@packages/core';
+import type {
+  PlayerSkillInfo,
+  SkillSlotType,
+  SkillBonusSummary,
+} from '@packages/core';
 import { wsService } from '../../../services/WebSocketService';
 import { useSkillStore } from '../../../stores/useSkillStore';
 import { BonusSummaryBar } from './BonusSummaryBar';
 import { SkillCategoryTabs } from './SkillCategoryTabs';
 import { SkillListItem } from './SkillListItem';
-import { SkillDetailModal } from './SkillDetailModal';
+import { SkillDetailModal, type SkillLearnActionMeta } from './SkillDetailModal';
 
 interface SkillPanelProps {
   visible: boolean;
@@ -39,7 +43,8 @@ interface SkillPanelProps {
   readOnlyCatalog?: boolean;
   /** 详情弹窗外部动作（如“学习技能”） */
   detailActionLabel?: string;
-  onDetailActionPress?: (skillId: string) => void;
+  onDetailActionPress?: (skillId: string, times: number) => void;
+  resolveDetailActionMeta?: (skillId: string) => SkillLearnActionMeta | null;
 }
 
 /** 武学子分组配置 */
@@ -58,12 +63,15 @@ export const SkillPanel = ({
   readOnlyCatalog = false,
   detailActionLabel,
   onDetailActionPress,
+  resolveDetailActionMeta,
 }: SkillPanelProps) => {
   const playerSkills = useSkillStore(state => state.skills);
   const playerBonusSummary = useSkillStore(state => state.bonusSummary);
   const usingOverride = Array.isArray(skillsOverride);
   const skills = usingOverride ? skillsOverride : playerSkills;
-  const bonusSummary = usingOverride ? bonusSummaryOverride : playerBonusSummary;
+  const bonusSummary = usingOverride
+    ? bonusSummaryOverride
+    : playerBonusSummary;
 
   /** 当前激活的分类 Tab */
   const [activeTab, setActiveTab] = useState<SkillCategory>(
@@ -73,6 +81,10 @@ export const SkillPanel = ({
   /** 技能详情弹窗 */
   const [detailSkillId, setDetailSkillId] = useState<string | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
+  const detailActionMeta =
+    detailSkillId && resolveDetailActionMeta
+      ? resolveDetailActionMeta(detailSkillId)
+      : null;
 
   /** 打开时请求最新面板数据 */
   useEffect(() => {
@@ -235,6 +247,7 @@ export const SkillPanel = ({
           showEquipToggle={!readOnlyCatalog}
           actionLabel={detailActionLabel}
           onActionPress={onDetailActionPress}
+          actionMeta={detailActionMeta}
           embedded
         />
       </View>

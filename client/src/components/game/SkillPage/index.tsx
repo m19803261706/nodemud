@@ -46,6 +46,7 @@ function mapTeachSkillsToReadonlyItems(
     skillType: SkillSlotType;
     category: SkillCategory;
     level?: number;
+    teachCost?: number;
   }>,
 ): PlayerSkillInfo[] {
   const learnedMap = new Map(playerSkills.map(skill => [skill.skillId, skill]));
@@ -121,6 +122,10 @@ export const SkillPage = () => {
     [masterTeach, skills],
   );
   const sourceSkills = mode === 'master' ? masterSkills : skills;
+  const currentMasterTeachSkill = useMemo(() => {
+    if (!masterTeach || !detailSkillId || mode !== 'master') return null;
+    return masterTeach.skills.find(skill => skill.skillId === detailSkillId) ?? null;
+  }, [masterTeach, detailSkillId, mode]);
 
   /** 按当前 Tab + 关键词过滤技能列表 */
   const filteredSkills = useMemo(() => {
@@ -183,12 +188,12 @@ export const SkillPage = () => {
 
   /** 在技能页直接向当前师父学艺（允许跨房间） */
   const handleMasterLearn = useCallback(
-    (skillId: string) => {
+    (skillId: string, times: number) => {
       if (!masterTeach) return;
       const req: SkillLearnRequestData = {
         npcId: masterTeach.npcId,
         skillId,
-        times: 1,
+        times,
       };
       wsService.send(MessageFactory.create('skillLearnRequest', req));
     },
@@ -386,6 +391,15 @@ export const SkillPage = () => {
         actionLabel={mode === 'master' && masterTeach ? '请教此功' : undefined}
         onActionPress={
           mode === 'master' && masterTeach ? handleMasterLearn : undefined
+        }
+        actionMeta={
+          mode === 'master' && masterTeach && currentMasterTeachSkill
+            ? {
+                teacherName: masterTeach.npcName,
+                teacherLevelCap: currentMasterTeachSkill.level,
+                skillCategory: currentMasterTeachSkill.category,
+              }
+            : null
         }
       />
     </View>

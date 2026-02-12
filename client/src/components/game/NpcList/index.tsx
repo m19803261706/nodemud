@@ -173,14 +173,27 @@ export const NpcList = () => {
         bonusSummaryOverride={null}
         readOnlyCatalog
         detailActionLabel={canLearnFromNpcInPanel ? '学习技能' : undefined}
-        onDetailActionPress={skillId => {
+        onDetailActionPress={(skillId, times) => {
           if (!npcSkillPanelDetail || !canLearnFromNpcInPanel) return;
           const req: SkillLearnRequestData = {
             npcId: npcSkillPanelDetail.npcId,
             skillId,
-            times: 1,
+            times,
           };
           wsService.send(MessageFactory.create('skillLearnRequest', req));
+        }}
+        resolveDetailActionMeta={skillId => {
+          if (!npcSkillPanelDetail) return null;
+          const teachSkill = (npcSkillPanelDetail.teachSkills ?? []).find(
+            skill => skill.skillId === skillId,
+          );
+          if (!teachSkill) return null;
+          return {
+            teacherName: npcSkillPanelDetail.name,
+            teacherLevelCap: teachSkill.level,
+            teachCostPerLearn: (teachSkill as any).teachCost,
+            skillCategory: teachSkill.category,
+          };
         }}
       />
     </View>

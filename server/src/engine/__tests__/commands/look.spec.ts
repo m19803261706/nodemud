@@ -183,6 +183,7 @@ describe('LookCommand', () => {
         skillType: 'blade',
         category: 'martial',
         level: 0,
+        teachCost: 10,
       },
     ]);
   });
