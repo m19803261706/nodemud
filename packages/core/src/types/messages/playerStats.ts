@@ -22,13 +22,25 @@ export interface CharacterAttrs {
   vitality: number; // 血气
 }
 
+/** 人物门派摘要 */
+export interface PlayerSectSummary {
+  sectId: string; // 门派 ID
+  sectName: string; // 门派名
+  rank: string; // 职位/辈分
+  masterName: string; // 师父
+  contribution: number; // 贡献
+}
+
 /** playerStats 消息（服务端 → 客户端） */
 export interface PlayerStatsMessage extends ServerMessage {
   type: 'playerStats';
   data: {
     name: string; // 角色名
+    gender: 'male' | 'female'; // 性别
+    origin: string; // 出身
     level: number; // 数字等级
     levelTitle: string; // 中文等级称号（如 "初入江湖"）
+    sect: PlayerSectSummary | null; // 门派信息（未入门为 null）
     silver: number; // 银两
     hp: ResourceValue; // 气血
     mp: ResourceValue; // 内力

@@ -1,6 +1,6 @@
 /**
  * CharacterPage -- 人物信息页
- * 展示当前角色的成长、属性与装备摘要
+ * 展示人物身份、成长与六维属性
  */
 
 import React from 'react';
@@ -25,20 +25,34 @@ const ATTR_CONFIG = [
   { key: 'vitality', label: '血气' },
 ] as const;
 
-const EQUIPMENT_SLOTS = [
-  { key: 'head', label: '头部' },
-  { key: 'neck', label: '颈部' },
-  { key: 'body', label: '躯干' },
-  { key: 'hands', label: '手部' },
-  { key: 'waist', label: '腰部' },
-  { key: 'feet', label: '足部' },
-  { key: 'weapon', label: '武器' },
-  { key: 'offhand', label: '副手' },
-  { key: 'finger', label: '戒指' },
-  { key: 'wrist', label: '护腕' },
-] as const;
+const GENDER_LABEL_MAP: Record<'male' | 'female', string> = {
+  male: '男',
+  female: '女',
+};
+
+const ORIGIN_LABEL_MAP: Record<string, string> = {
+  noble: '世家子弟',
+  wanderer: '江湖浪子',
+  scholar: '书院学子',
+  soldier: '边塞军卒',
+  herbalist: '山野药童',
+  beggar: '乞丐流民',
+};
 
 type AttrKey = (typeof ATTR_CONFIG)[number]['key'];
+
+type CharacterProfileExt = {
+  gender?: 'male' | 'female';
+  origin?: string;
+  sect?: {
+    sectId?: string;
+    sectName?: string;
+    rank?: string;
+    masterName?: string;
+    contribution?: number;
+  } | null;
+};
+
 
 function resourcePct(res: ResourceValue): number {
   if (res.max <= 0) return 0;
@@ -50,9 +64,13 @@ function resourceText(res: ResourceValue): string {
   return `${res.current}/${res.max}`;
 }
 
+function toOriginLabel(origin: string): string {
+  if (!origin) return '未知';
+  return ORIGIN_LABEL_MAP[origin] ?? origin;
+}
+
 export const CharacterPage = () => {
   const player = useGameStore(state => state.player);
-  const equipment = useGameStore(state => state.equipment);
   const setActiveTab = useGameStore(state => state.setActiveTab);
 
   const handleAllocatePoint = (key: AttrKey) => {
@@ -63,6 +81,15 @@ export const CharacterPage = () => {
       }),
     );
   };
+
+  const profile = player as typeof player & CharacterProfileExt;
+  const genderKey = profile.gender === 'female' ? 'female' : 'male';
+  const genderLabel = GENDER_LABEL_MAP[genderKey];
+  const originLabel = toOriginLabel(profile.origin ?? '');
+  const sectName = profile.sect?.sectName ?? '无门无派';
+  const rankName = profile.sect?.rank ?? '江湖散人';
+  const masterName = profile.sect?.masterName ?? '暂无师承';
+  const sectContribution = profile.sect?.contribution ?? 0;
 
   return (
     <View style={s.container}>
@@ -105,6 +132,36 @@ export const CharacterPage = () => {
               pct={resourcePct(player.energy)}
               color="#8B7355"
             />
+          </View>
+        </View>
+
+        <View style={s.panel}>
+          <Text style={s.sectionTitle}>人物信息</Text>
+          <View style={s.infoGrid}>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>性别</Text>
+              <Text style={s.infoValue}>{genderLabel}</Text>
+            </View>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>出身</Text>
+              <Text style={s.infoValue}>{originLabel}</Text>
+            </View>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>门派</Text>
+              <Text style={s.infoValue}>{sectName}</Text>
+            </View>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>职位</Text>
+              <Text style={s.infoValue}>{rankName}</Text>
+            </View>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>师承</Text>
+              <Text style={s.infoValue}>{masterName}</Text>
+            </View>
+            <View style={s.infoCell}>
+              <Text style={s.infoLabel}>门贡</Text>
+              <Text style={s.infoValue}>{sectContribution}</Text>
+            </View>
           </View>
         </View>
 
@@ -170,30 +227,10 @@ export const CharacterPage = () => {
                   </View>
                   <View style={s.attrValueRow}>
                     <Text style={s.attrValue}>{base}</Text>
-                    {bonus > 0 ? <Text style={s.attrBonus}>+{bonus}</Text> : null}
+                    {bonus > 0 ? (
+                      <Text style={s.attrBonus}>+{bonus}</Text>
+                    ) : null}
                   </View>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={s.panel}>
-          <Text style={s.sectionTitle}>装备摘要</Text>
-          <View style={s.equipmentList}>
-            {EQUIPMENT_SLOTS.map(slot => {
-              const equipped = equipment[slot.key];
-              return (
-                <View key={slot.key} style={s.equipmentRow}>
-                  <Text style={s.equipmentLabel}>{slot.label}</Text>
-                  <Text
-                    style={[
-                      s.equipmentValue,
-                      equipped ? s.equipmentValueOn : null,
-                    ]}
-                  >
-                    {equipped ? equipped.name : '--'}
-                  </Text>
                 </View>
               );
             })}
@@ -281,6 +318,33 @@ const s = StyleSheet.create({
     color: '#6B5D4D',
     fontFamily: 'Noto Serif SC',
     fontWeight: '700',
+  },
+  infoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: 8,
+    columnGap: 8,
+  },
+  infoCell: {
+    width: '31%',
+    minWidth: 88,
+    borderWidth: 1,
+    borderColor: '#8B7A5A25',
+    backgroundColor: '#F5F0E880',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  infoLabel: {
+    fontSize: 10,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  infoValue: {
+    fontSize: 12,
+    color: '#3A3530',
+    fontFamily: 'Noto Sans SC',
+    fontWeight: '700',
+    marginTop: 2,
   },
   statGrid: {
     flexDirection: 'row',
@@ -373,31 +437,6 @@ const s = StyleSheet.create({
     fontSize: 10,
     color: '#2F7A3F',
     fontFamily: 'Noto Sans SC',
-    fontWeight: '600',
-  },
-  equipmentList: {
-    gap: 4,
-  },
-  equipmentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#8B7A5A25',
-  },
-  equipmentLabel: {
-    fontSize: 11,
-    color: '#8B7A5A',
-    fontFamily: 'Noto Serif SC',
-  },
-  equipmentValue: {
-    fontSize: 12,
-    color: '#8B7A5A',
-    fontFamily: 'Noto Serif SC',
-  },
-  equipmentValueOn: {
-    color: '#3A3530',
     fontWeight: '600',
   },
   actionRow: {

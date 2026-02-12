@@ -6,6 +6,18 @@
 import { MessageHandler, type IMessageHandler } from '../MessageFactory';
 import type { PlayerStatsMessage } from '../../types/messages/playerStats';
 
+function isValidSectSummary(sect: any): boolean {
+  if (sect == null) return true;
+  return (
+    typeof sect === 'object' &&
+    typeof sect.sectId === 'string' &&
+    typeof sect.sectName === 'string' &&
+    typeof sect.rank === 'string' &&
+    typeof sect.masterName === 'string' &&
+    typeof sect.contribution === 'number'
+  );
+}
+
 @MessageHandler('playerStats')
 export class PlayerStatsHandler implements IMessageHandler {
   create(data: PlayerStatsMessage['data']): PlayerStatsMessage {
@@ -19,8 +31,11 @@ export class PlayerStatsHandler implements IMessageHandler {
   validate(data: any): boolean {
     return (
       typeof data.name === 'string' &&
+      (data.gender === 'male' || data.gender === 'female') &&
+      typeof data.origin === 'string' &&
       typeof data.level === 'number' &&
       typeof data.levelTitle === 'string' &&
+      isValidSectSummary(data.sect) &&
       typeof data.silver === 'number' &&
       !!data.hp &&
       typeof data.hp.current === 'number' &&

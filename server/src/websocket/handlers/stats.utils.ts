@@ -123,6 +123,10 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
   const availablePotential = Math.max(0, potential - learnedPoints);
   const score = player.get<number>('score') ?? character.score ?? 0;
   const freePoints = player.get<number>('free_points') ?? character.freePoints ?? 0;
+  const sectState = normalizePlayerSectData(
+    player.get<PlayerSectData>('sect') ?? character.sectData ?? null,
+  );
+  const sectCurrent = sectState.current;
 
   // 下一级所需经验（通过 ExpManager 计算）
   let expToNextLevel = 0;
@@ -133,8 +137,19 @@ export function derivePlayerStats(character: Character, player: PlayerBase) {
 
   return {
     name: character.name,
+    gender: character.gender === 'female' ? 'female' : 'male',
+    origin: character.origin,
     level,
     levelTitle: getLevelText(level),
+    sect: sectCurrent
+      ? {
+          sectId: sectCurrent.sectId,
+          sectName: sectCurrent.sectName,
+          rank: sectCurrent.rank,
+          masterName: sectCurrent.masterName,
+          contribution: sectCurrent.contribution,
+        }
+      : null,
     silver,
     hp: { current: hpCurrent, max: hpMax },
     mp: { current: mpCurrent, max: mpMax },

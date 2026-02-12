@@ -118,6 +118,39 @@ describe('stats.utils derivePlayerStats', () => {
     expect(stats.potential).toBe(0);
   });
 
+  it('playerStats 应包含性别/出身/门派师承摘要', () => {
+    const player = new PlayerBase('player/test');
+    const character = makeCharacter({
+      gender: 'female',
+      origin: 'scholar',
+      sectData: {
+        current: {
+          sectId: 'songyang',
+          sectName: '嵩阳宗',
+          masterNpcId: 'npc/songyang/master-li',
+          masterName: '李掌门',
+          rank: '内门弟子',
+          contribution: 456,
+          joinedAt: 1700000000000,
+        },
+        restrictions: { bannedSectIds: [], cooldownUntil: null },
+        daily: { dateKey: '2026-02-10', sparCount: 0 },
+      },
+    });
+
+    const stats = derivePlayerStats(character, player);
+
+    expect(stats.gender).toBe('female');
+    expect(stats.origin).toBe('scholar');
+    expect(stats.sect).toMatchObject({
+      sectId: 'songyang',
+      sectName: '嵩阳宗',
+      rank: '内门弟子',
+      masterName: '李掌门',
+      contribution: 456,
+    });
+  });
+
   it('登录加载会补齐关键运行时字段并规范化资源', () => {
     const player = new PlayerBase('player/test');
     const character = makeCharacter({
