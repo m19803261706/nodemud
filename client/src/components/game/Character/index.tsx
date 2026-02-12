@@ -3,12 +3,14 @@
  * 展示人物身份、成长与六维属性
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Modal,
   StyleSheet,
 } from 'react-native';
 import { MessageFactory } from '@packages/core';
@@ -17,12 +19,42 @@ import { useGameStore, type ResourceValue } from '../../../stores/useGameStore';
 import { GradientDivider, StatBar } from '../shared';
 
 const ATTR_CONFIG = [
-  { key: 'wisdom', label: '慧根' },
-  { key: 'perception', label: '心眼' },
-  { key: 'spirit', label: '气海' },
-  { key: 'meridian', label: '脉络' },
-  { key: 'strength', label: '筋骨' },
-  { key: 'vitality', label: '血气' },
+  {
+    key: 'wisdom',
+    label: '慧根',
+    brief: '悟道之资',
+    detail: '影响修炼速度、秘籍领悟与心法理解。慧根越高，悟性越快。',
+  },
+  {
+    key: 'perception',
+    label: '心眼',
+    brief: '洞察之明',
+    detail: '影响命中、闪避与对招式的预判。心眼越高，临阵越稳。',
+  },
+  {
+    key: 'spirit',
+    label: '气海',
+    brief: '内力之源',
+    detail: '影响内力上限与内功威力。气海越深，真气越雄。',
+  },
+  {
+    key: 'meridian',
+    label: '脉络',
+    brief: '经脉之通',
+    detail: '影响内力运转与回复效率。脉络越畅，行功越顺。',
+  },
+  {
+    key: 'strength',
+    label: '筋骨',
+    brief: '外功之基',
+    detail: '影响外功伤害与负重能力。筋骨越强，拳脚越重。',
+  },
+  {
+    key: 'vitality',
+    label: '血气',
+    brief: '生机之本',
+    detail: '影响生命上限与抗击打能力。血气越盛，越能硬扛。',
+  },
 ] as const;
 
 const GENDER_LABEL_MAP: Record<'male' | 'female', string> = {
@@ -40,6 +72,8 @@ const ORIGIN_LABEL_MAP: Record<string, string> = {
 };
 
 type AttrKey = (typeof ATTR_CONFIG)[number]['key'];
+
+type AttrInfoItem = (typeof ATTR_CONFIG)[number];
 
 type CharacterProfileExt = {
   gender?: 'male' | 'female';
@@ -72,6 +106,9 @@ function toOriginLabel(origin: string): string {
 export const CharacterPage = () => {
   const player = useGameStore(state => state.player);
   const setActiveTab = useGameStore(state => state.setActiveTab);
+  const [activeAttrInfo, setActiveAttrInfo] = useState<AttrInfoItem | null>(
+    null,
+  );
 
   const handleAllocatePoint = (key: AttrKey) => {
     if (player.freePoints <= 0) return;
@@ -204,6 +241,7 @@ export const CharacterPage = () => {
               点击属性右侧“+”可分配 1 点（剩余 {player.freePoints} 点）
             </Text>
           ) : null}
+          <Text style={s.attrGuide}>点右上角「?」查看属性用途</Text>
           <View style={s.attrGrid}>
             {ATTR_CONFIG.map(attr => {
               const base = player.attrs[attr.key];
@@ -213,6 +251,14 @@ export const CharacterPage = () => {
                 )?.[attr.key] ?? 0;
               return (
                 <View key={attr.key} style={s.attrCell}>
+                  <TouchableOpacity
+                    style={s.attrInfoCorner}
+                    activeOpacity={0.7}
+                    onPress={() => setActiveAttrInfo(attr)}
+                    hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+                  >
+                    <Text style={s.attrInfoCornerText}>?</Text>
+                  </TouchableOpacity>
                   <View style={s.attrTopRow}>
                     <Text style={s.attrLabel}>{attr.label}</Text>
                     {player.freePoints > 0 ? (
@@ -255,6 +301,34 @@ export const CharacterPage = () => {
         </View>
       </ScrollView>
       <GradientDivider opacity={0.3} />
+
+      <Modal
+        visible={!!activeAttrInfo}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setActiveAttrInfo(null)}
+      >
+        <TouchableWithoutFeedback onPress={() => setActiveAttrInfo(null)}>
+          <View style={s.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={s.modalCard}>
+                <View style={s.modalHeaderRow}>
+                  <Text style={s.modalTitle}>{activeAttrInfo?.label}</Text>
+                  <TouchableOpacity
+                    style={s.modalCloseBtn}
+                    onPress={() => setActiveAttrInfo(null)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={s.modalCloseBtnText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={s.modalBrief}>{activeAttrInfo?.brief}</Text>
+                <Text style={s.modalDetail}>{activeAttrInfo?.detail}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -382,11 +456,13 @@ const s = StyleSheet.create({
   attrCell: {
     width: '31%',
     minWidth: 88,
-    paddingVertical: 6,
+    paddingTop: 8,
+    paddingBottom: 6,
     paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: '#8B7A5A20',
     backgroundColor: '#F5F0E870',
+    position: 'relative',
   },
   attrTopRow: {
     flexDirection: 'row',
@@ -404,6 +480,33 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
     marginTop: -2,
+  },
+  attrGuide: {
+    fontSize: 10,
+    color: '#7A6A56',
+    fontFamily: 'Noto Serif SC',
+    marginTop: -4,
+    marginBottom: 2,
+  },
+  attrInfoCorner: {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#8B7A5A90',
+    backgroundColor: '#F5F0E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attrInfoCornerText: {
+    fontSize: 10,
+    lineHeight: 10,
+    color: '#6B5D4D',
+    fontFamily: 'Noto Sans SC',
+    fontWeight: '700',
   },
   attrAllocateBtn: {
     width: 18,
@@ -438,6 +541,55 @@ const s = StyleSheet.create({
     color: '#2F7A3F',
     fontFamily: 'Noto Sans SC',
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#8B7A5A55',
+    backgroundColor: '#F5F0E8',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 15,
+    color: '#3A3530',
+    fontFamily: 'Noto Serif SC',
+    fontWeight: '700',
+  },
+  modalCloseBtn: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseBtnText: {
+    fontSize: 18,
+    color: '#8B7A5A',
+    lineHeight: 18,
+  },
+  modalBrief: {
+    fontSize: 11,
+    color: '#8B7A5A',
+    fontFamily: 'Noto Serif SC',
+  },
+  modalDetail: {
+    fontSize: 12,
+    color: '#5A5048',
+    lineHeight: 18,
+    fontFamily: 'Noto Serif SC',
   },
   actionRow: {
     flexDirection: 'row',
