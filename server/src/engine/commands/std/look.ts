@@ -241,6 +241,12 @@ export class LookCommand implements ICommand {
     const teachSkills = this.getNpcTeachSkills(npc);
     const canLearnFromMaster = this.canLearnFromMaster(npc, executor, teachSkills.length > 0);
 
+    const rentPriceRaw = npc.get<number>('rent_price');
+    const rentPrice =
+      typeof rentPriceRaw === 'number' && Number.isFinite(rentPriceRaw)
+        ? Math.max(1, Math.floor(rentPriceRaw))
+        : undefined;
+
     const actions: string[] = [];
     if (canChat) actions.push('chat');
     if (canShopList) actions.push('shopList');
@@ -319,6 +325,7 @@ export class LookCommand implements ICommand {
         long,
         equipment: eqData,
         teachSkills,
+        ...(typeof rentPrice === 'number' ? { rentPrice } : {}),
         actions,
         capabilities: {
           chat: canChat,

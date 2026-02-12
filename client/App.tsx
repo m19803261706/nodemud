@@ -40,6 +40,14 @@ function stripRichTags(text: string): string {
   return text.replace(/\[[^\]]+\]/g, '');
 }
 
+function buildLocationActions(exits: string[] | undefined): string[] {
+  const actions = ['回城', '飞行', '地图', '邮件'];
+  const exitSet = new Set(exits ?? []);
+  if (exitSet.has('up')) actions.push('上楼');
+  if (exitSet.has('down')) actions.push('下楼');
+  return actions;
+}
+
 /** 应用根组件 */
 function App(): React.JSX.Element {
   // App 启动时建立 WebSocket 连接（类似 MUD 的 telnet 连接大厅）
@@ -90,7 +98,6 @@ function App(): React.JSX.Element {
         setDirections,
         setNpcs,
         setGroundItems,
-        location,
         removeLogQuickAction,
         setWorkListDetail,
       } = useGameStore.getState();
@@ -100,7 +107,7 @@ function App(): React.JSX.Element {
         : data.short;
       setLocation({
         name: shortName,
-        actions: location.actions,
+        actions: buildLocationActions(data.exits),
         description: data.long,
       });
       setDirections(exitsToDirections(data.exits, shortName, data.exitNames));

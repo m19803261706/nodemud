@@ -234,6 +234,7 @@ export interface NpcDetailData {
   long: string;
   equipment?: NpcEquipmentItem[];
   teachSkills?: NpcTeachSkillInfo[];
+  rentPrice?: number;
   actions?: string[];
   capabilities?: {
     chat?: boolean;

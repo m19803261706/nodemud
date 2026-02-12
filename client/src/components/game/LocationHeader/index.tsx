@@ -33,6 +33,10 @@ export const LocationHeader = () => {
         data: {},
         timestamp: Date.now(),
       });
+    } else if (label === '上楼') {
+      sendCommand('go up');
+    } else if (label === '下楼') {
+      sendCommand('go down');
     }
   };
 

@@ -203,6 +203,8 @@ export const NpcInfoModal = ({
     : (detail.teachSkills?.length ?? 0) > 0;
   const canDonate = hasActions ? actionSet.has('donate') : false;
   const canRent = hasActions ? actionSet.has('rent') : false;
+  const rentLabel =
+    typeof detail.rentPrice === 'number' ? `住店(${detail.rentPrice}两)` : '住店';
   const canWork = hasActions ? actionSet.has('work') : false;
   const canWorkStop = hasActions ? actionSet.has('workStop') : false;
   const canSpar = hasActions ? actionSet.has('spar') : false;
@@ -281,7 +283,7 @@ export const NpcInfoModal = ({
   if (canRent) {
     actionButtons.push({
       key: 'rent',
-      label: '住店',
+      label: rentLabel,
       onPress: () => {
         onRent(detail.name);
         handleClose();
