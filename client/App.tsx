@@ -204,7 +204,10 @@ function App(): React.JSX.Element {
         potential: data.potential,
         score: data.score,
         freePoints: data.freePoints,
-      });
+        ...(typeof data.gender === 'string' ? { gender: data.gender } : {}),
+        ...(typeof data.origin === 'string' ? { origin: data.origin } : {}),
+        ...(data.sect !== undefined ? { sect: data.sect } : {}),
+      } as any);
     };
 
     const handleEquipmentUpdate = (data: any) => {
