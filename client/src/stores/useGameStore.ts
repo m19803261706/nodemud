@@ -19,6 +19,7 @@ import type {
   CombatAwaitActionData,
   SkillSlotType,
   SkillCategory,
+  MapResponseData,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -46,11 +47,23 @@ export interface CombatData {
   defense: number;
 }
 
+/** 人物门派信息摘要 */
+export interface PlayerSectSummary {
+  sectId: string;
+  sectName: string;
+  rank: string;
+  masterName: string;
+  contribution: number;
+}
+
 /** 玩家数据（来自服务端 playerStats 消息） */
 export interface PlayerData {
   name: string;
+  gender: 'male' | 'female';
+  origin: string;
   level: number;
   levelTitle: string;
+  sect: PlayerSectSummary | null;
   silver: number;
   hp: ResourceValue;
   mp: ResourceValue;
@@ -314,6 +327,12 @@ export interface GameState {
   /** 清除战斗等待行动状态 */
   clearCombatAwaitAction: () => void;
 
+  // 地图弹窗
+  mapVisible: boolean;
+  mapData: MapResponseData | null;
+  setMapVisible: (visible: boolean) => void;
+  setMapData: (data: MapResponseData | null) => void;
+
   // 导航
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -333,8 +352,11 @@ const EMPTY_ATTRS: CharacterAttrs = {
 
 const INITIAL_PLAYER: PlayerData = {
   name: '',
+  gender: 'male',
+  origin: '',
   level: 0,
   levelTitle: '',
+  sect: null,
   silver: 0,
   hp: { current: 0, max: 0 },
   mp: { current: 0, max: 0 },
@@ -645,6 +667,12 @@ export const useGameStore = create<GameState>(set => ({
         actionTimeout: 0,
       },
     })),
+
+  // 地图弹窗
+  mapVisible: false,
+  mapData: null,
+  setMapVisible: visible => set({ mapVisible: visible }),
+  setMapData: data => set({ mapData: data }),
 
   // 导航
   activeTab: '江湖',

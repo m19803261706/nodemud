@@ -5,6 +5,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useGameStore } from '../../../stores/useGameStore';
+import { wsService } from '../../../services/WebSocketService';
 import { GradientDivider } from '../shared';
 import { LocationTitle } from './LocationTitle';
 import { LocationActionButton } from './LocationActionButton';
@@ -25,6 +26,13 @@ export const LocationHeader = () => {
       setQuestModalVisible(true);
       // 每次打开任务面板都主动拉取一次最新任务快照
       sendCommand('quest');
+    } else if (label === '地图') {
+      // 发送 mapRequest 请求当前区域地图数据
+      wsService.send({
+        type: 'mapRequest',
+        data: {},
+        timestamp: Date.now(),
+      });
     }
   };
 

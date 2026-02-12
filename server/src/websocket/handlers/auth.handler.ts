@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import { AccountService } from '../../account/account.service';
 import { CharacterService } from '../../character/character.service';
+import { ExplorationService } from '../../character/exploration.service';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { ObjectManager } from '../../engine/object-manager';
 import type { Session } from '../types/session';
@@ -22,6 +23,7 @@ export class AuthHandler {
   constructor(
     private readonly accountService: AccountService,
     private readonly characterService: CharacterService,
+    private readonly explorationService: ExplorationService,
     private readonly blueprintFactory: BlueprintFactory,
     private readonly objectManager: ObjectManager,
   ) {}
@@ -67,6 +69,7 @@ export class AuthHandler {
               entryBroadcastText: `${character.name}上线了。`,
               useLastRoom: true,
               logger: this.logger,
+              explorationService: this.explorationService,
             });
           }
         } catch (enterError) {

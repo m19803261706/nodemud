@@ -8,6 +8,7 @@ import { MessageFactory, type SkillMapResultData, type SkillSlotType } from '@pa
 import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { CharacterService } from '../../character/character.service';
+import { ExplorationService } from '../../character/exploration.service';
 import { ServiceLocator } from '../../engine/service-locator';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
@@ -31,6 +32,7 @@ export class CommandHandler {
     private readonly objectManager: ObjectManager,
     private readonly blueprintFactory: BlueprintFactory,
     private readonly characterService: CharacterService,
+    private readonly explorationService: ExplorationService,
   ) {}
 
   /**
@@ -108,6 +110,11 @@ export class CommandHandler {
               player,
             );
             sendRoomInfo(player, newRoom, this.blueprintFactory);
+
+            // 探索记录：异步解锁新房间
+            if (session.characterId) {
+              this.unlockRoomExploration(session.characterId, newRoom.id);
+            }
 
             // 任务系统：检查新房间 NPC 可接任务
             if (ServiceLocator.questManager) {
@@ -322,5 +329,20 @@ export class CommandHandler {
         ServiceLocator.questManager.onInventoryChange(player);
       }
     }
+  }
+
+  /**
+   * 异步解锁房间探索记录（不阻塞移动流程）
+   * 从房间 ID 推导区域 ID（area/{area-name}/{room-name} → area/{area-name}）
+   */
+  private unlockRoomExploration(characterId: string, roomId: string): void {
+    const parts = roomId.split('/');
+    if (parts.length < 3) return;
+    const areaId = `${parts[0]}/${parts[1]}`;
+
+    // 异步执行，不阻塞主流程
+    this.explorationService.unlockRoom(characterId, areaId, roomId).catch((err) => {
+      this.logger.error(`解锁房间探索记录失败: ${roomId}`, err);
+    });
   }
 }

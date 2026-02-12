@@ -11,6 +11,7 @@ import type { RoomBase } from '../../engine/game-objects/room-base';
 import { loadCharacterToPlayer, sendPlayerStats } from './stats.utils';
 import { sendRoomInfo } from './room-utils';
 import type { Session } from '../types/session';
+import type { ExplorationService } from '../../character/exploration.service';
 
 interface EnterWorldLogger {
   warn(message: string): void;
@@ -26,6 +27,7 @@ export interface EnterWorldOptions {
   entryBroadcastText: string;
   useLastRoom?: boolean;
   logger?: EnterWorldLogger;
+  explorationService?: ExplorationService;
 }
 
 export async function enterWorldWithCharacter(options: EnterWorldOptions): Promise<PlayerBase> {
@@ -39,6 +41,7 @@ export async function enterWorldWithCharacter(options: EnterWorldOptions): Promi
     entryBroadcastText,
     useLastRoom = false,
     logger,
+    explorationService,
   } = options;
 
   // 1) 创建并注册玩家对象
@@ -76,6 +79,17 @@ export async function enterWorldWithCharacter(options: EnterWorldOptions): Promi
   sendRoomInfo(player, room, blueprintFactory);
   sendPlayerStats(player, character);
   room.broadcast(entryBroadcastText, player);
+
+  // 6) 异步解锁进场房间探索记录
+  if (explorationService) {
+    const parts = room.id.split('/');
+    if (parts.length >= 3) {
+      const areaId = `${parts[0]}/${parts[1]}`;
+      explorationService.unlockRoom(character.id, areaId, room.id).catch(() => {
+        // 静默处理，不阻塞进场
+      });
+    }
+  }
 
   return player;
 }

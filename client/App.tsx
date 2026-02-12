@@ -336,6 +336,22 @@ function App(): React.JSX.Element {
       }
     };
 
+    /** 地图响应 → 写入 store + 显示弹窗 */
+    const handleMapResponse = (data: any) => {
+      const { setMapData, setMapVisible } = useGameStore.getState();
+      setMapData(data);
+      setMapVisible(true);
+    };
+
+    /** 导航响应 → 失败时写入日志提示 */
+    const handleNavigateResponse = (data: any) => {
+      if (!data.success && data.message) {
+        useGameStore
+          .getState()
+          .appendLog({ text: data.message, color: '#8B3A3A' });
+      }
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -355,6 +371,8 @@ function App(): React.JSX.Element {
     wsService.on('practiceUpdate', handlePracticeUpdate);
     wsService.on('skillLearnResult', handleSkillLearnResult);
     wsService.on('exertResult', handleExertResult);
+    wsService.on('mapResponse', handleMapResponse);
+    wsService.on('navigateResponse', handleNavigateResponse);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -376,6 +394,8 @@ function App(): React.JSX.Element {
       wsService.off('practiceUpdate', handlePracticeUpdate);
       wsService.off('skillLearnResult', handleSkillLearnResult);
       wsService.off('exertResult', handleExertResult);
+      wsService.off('mapResponse', handleMapResponse);
+      wsService.off('navigateResponse', handleNavigateResponse);
     };
   }, []);
 

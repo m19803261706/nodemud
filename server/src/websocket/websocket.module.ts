@@ -13,11 +13,12 @@ import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
 import { SkillHandler } from './handlers/skill.handler';
+import { MapHandler } from './handlers/map.handler';
 import { SkillModule } from '../skill/skill.module';
 
 @Module({
   imports: [AccountModule, CharacterModule, FateModule, EngineModule, SkillModule],
-  providers: [GameGateway, AuthHandler, CharacterHandler, CommandHandler, SkillHandler],
+  providers: [GameGateway, AuthHandler, CharacterHandler, CommandHandler, SkillHandler, MapHandler],
   exports: [GameGateway],
 })
 export class WebSocketModule {}

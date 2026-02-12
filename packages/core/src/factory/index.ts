@@ -55,6 +55,11 @@ import './handlers/skillLearnRequest';
 import './handlers/skillLearnResult';
 // 运功系统消息
 import './handlers/exertResult';
+// 地图系统消息
+import './handlers/mapRequest';
+import './handlers/mapResponse';
+import './handlers/navigateRequest';
+import './handlers/navigateResponse';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

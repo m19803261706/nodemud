@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MessageFactory } from '@packages/core';
 import type { CharacterAttributes, CharacterOrigin } from '@packages/core';
 import { CharacterService } from '../../character/character.service';
+import { ExplorationService } from '../../character/exploration.service';
 import { FateService } from '../../fate/fate.service';
 import { ORIGIN_CONFIG } from '../../fate/fate.constants';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
@@ -59,6 +60,7 @@ export class CharacterHandler {
 
   constructor(
     private readonly characterService: CharacterService,
+    private readonly explorationService: ExplorationService,
     private readonly fateService: FateService,
     private readonly blueprintFactory: BlueprintFactory,
     private readonly objectManager: ObjectManager,
@@ -274,6 +276,7 @@ export class CharacterHandler {
           entryBroadcastText: `${character.name}来到此处。`,
           useLastRoom: false,
           logger: this.logger,
+          explorationService: this.explorationService,
         });
       } catch (enterError) {
         this.logger.error('角色进场失败:', enterError);

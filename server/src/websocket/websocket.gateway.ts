@@ -22,6 +22,7 @@ import { AuthHandler } from './handlers/auth.handler';
 import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
 import { SkillHandler } from './handlers/skill.handler';
+import { MapHandler } from './handlers/map.handler';
 import { sendPlayerStats } from './handlers/stats.utils';
 import { sendInventoryUpdate } from './handlers/room-utils';
 import { CharacterService } from '../character/character.service';
@@ -48,6 +49,7 @@ export class GameGateway
     private readonly characterHandler: CharacterHandler,
     private readonly commandHandler: CommandHandler,
     private readonly skillHandler: SkillHandler,
+    private readonly mapHandler: MapHandler,
     private readonly characterService: CharacterService,
     private readonly objectManager: ObjectManager,
   ) {}
@@ -252,6 +254,12 @@ export class GameGateway
         break;
       case 'practiceEnd':
         await this.skillHandler.handlePracticeEnd(session, message.data as any);
+        break;
+      case 'mapRequest':
+        await this.mapHandler.handleMapRequest(session);
+        break;
+      case 'navigateRequest':
+        await this.mapHandler.handleNavigateRequest(client, session, message.data as any);
         break;
       case 'ping':
         // 心跳，无需处理
