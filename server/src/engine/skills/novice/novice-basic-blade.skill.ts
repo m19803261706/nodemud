@@ -1,4 +1,3 @@
-import type { LivingBase } from '../../game-objects/living-base';
 import type { SkillAction } from '../types';
 import { BladeSkillBase } from '../martial/weapon/blade-skill-base';
 import { NOVICE_SKILL_IDS } from './novice-skill-ids';
@@ -43,11 +42,7 @@ export class NoviceBasicBladeSkill extends BladeSkillBase {
     return '江湖基础刀法';
   }
 
-  validLearn(player: LivingBase): true | string {
-    const strength = Math.max(0, Math.floor(player.get<number>('strength') ?? 0));
-    if (strength < 6) {
-      return '你筋骨尚浅，先在武馆扎稳马步，再来习刀。';
-    }
+  validLearn(): true | string {
     return true;
   }
 

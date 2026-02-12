@@ -1,4 +1,3 @@
-import type { LivingBase } from '../../game-objects/living-base';
 import type { CharacterAttrs, SkillAction } from '../types';
 import { QiInternalBase } from '../internal/qi-internal-base';
 import { NOVICE_SKILL_IDS } from './novice-skill-ids';
@@ -43,12 +42,7 @@ export class NoviceBasicForceSkill extends QiInternalBase {
     return '引气诀';
   }
 
-  validLearn(player: LivingBase): true | string {
-    const meridian = Math.max(0, Math.floor(player.get<number>('meridian') ?? 0));
-    const spirit = Math.max(0, Math.floor(player.get<number>('spirit') ?? 0));
-    if (meridian < 6 || spirit < 6) {
-      return '你经脉与灵性火候尚浅，先去书院稳住吐纳节律。';
-    }
+  validLearn(): true | string {
     return true;
   }
 

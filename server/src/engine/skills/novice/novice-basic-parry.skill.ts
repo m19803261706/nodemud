@@ -1,4 +1,3 @@
-import type { LivingBase } from '../../game-objects/living-base';
 import type { SkillAction } from '../types';
 import { ParrySkillBase } from '../martial/parry-skill-base';
 import { NOVICE_SKILL_IDS } from './novice-skill-ids';
@@ -43,11 +42,7 @@ export class NoviceBasicParrySkill extends ParrySkillBase {
     return '守拙架';
   }
 
-  validLearn(player: LivingBase): true | string {
-    const vitality = Math.max(0, Math.floor(player.get<number>('vitality') ?? 0));
-    if (vitality < 6) {
-      return '你气血不足，先把站桩熬满，再学守架。';
-    }
+  validLearn(): true | string {
     return true;
   }
 

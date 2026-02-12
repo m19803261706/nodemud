@@ -1,4 +1,3 @@
-import type { LivingBase } from '../../game-objects/living-base';
 import type { SkillAction } from '../types';
 import { DodgeSkillBase } from '../martial/dodge-skill-base';
 import { NOVICE_SKILL_IDS } from './novice-skill-ids';
@@ -43,11 +42,7 @@ export class NoviceBasicDodgeSkill extends DodgeSkillBase {
     return '行旅身法';
   }
 
-  validLearn(player: LivingBase): true | string {
-    const perception = Math.max(0, Math.floor(player.get<number>('perception') ?? 0));
-    if (perception < 6) {
-      return '你眼力火候未到，先练脚下方位与呼吸节奏。';
-    }
+  validLearn(): true | string {
     return true;
   }
 

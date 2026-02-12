@@ -24,27 +24,16 @@ describe('Novice skill registration', () => {
     }
   });
 
-  it('学习门槛低于门派入门课，适配新手初期属性', () => {
+  it('新手公共武学不设置属性门槛', () => {
     const registry = new SkillRegistry();
     registerNoviceSkills(registry);
 
     const rookie = new LivingBase('rookie#1');
-    rookie.set('strength', 5);
-    rookie.set('vitality', 5);
-    rookie.set('perception', 5);
-    rookie.set('spirit', 5);
-    rookie.set('meridian', 5);
-
-    expect(registry.get(NOVICE_SKILL_IDS.BASIC_BLADE)?.validLearn(rookie)).not.toBe(true);
-    expect(registry.get(NOVICE_SKILL_IDS.BASIC_DODGE)?.validLearn(rookie)).not.toBe(true);
-    expect(registry.get(NOVICE_SKILL_IDS.BASIC_PARRY)?.validLearn(rookie)).not.toBe(true);
-    expect(registry.get(NOVICE_SKILL_IDS.BASIC_FORCE)?.validLearn(rookie)).not.toBe(true);
-
-    rookie.set('strength', 6);
-    rookie.set('vitality', 6);
-    rookie.set('perception', 6);
-    rookie.set('spirit', 6);
-    rookie.set('meridian', 6);
+    rookie.set('strength', 0);
+    rookie.set('vitality', 0);
+    rookie.set('perception', 0);
+    rookie.set('spirit', 0);
+    rookie.set('meridian', 0);
 
     expect(registry.get(NOVICE_SKILL_IDS.BASIC_BLADE)?.validLearn(rookie)).toBe(true);
     expect(registry.get(NOVICE_SKILL_IDS.BASIC_DODGE)?.validLearn(rookie)).toBe(true);
