@@ -107,7 +107,7 @@ export const LoginScreen = ({ navigation }: any) => {
     };
   }, [navigation, rememberMe, username, password]);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!username || !password) {
       showToast({
         type: 'warning',
@@ -116,6 +116,26 @@ export const LoginScreen = ({ navigation }: any) => {
       });
       return;
     }
+
+    // 确保 WebSocket 连接已建立
+    try {
+      await wsService.connect('ws://localhost:4000');
+    } catch (error) {
+      showAlert({
+        type: 'error',
+        title: '连接失败',
+        message: '无法连接到服务器，请检查网络',
+        buttons: [
+          {
+            text: '重试',
+            onPress: handleLogin,
+          },
+        ],
+      });
+      return;
+    }
+
+    // 发送登录消息
     if (!wsService.send(MessageFactory.create('login', username, password))) {
       showAlert({
         type: 'error',
@@ -123,8 +143,8 @@ export const LoginScreen = ({ navigation }: any) => {
         message: '与服务器的连接已断开，请重试',
         buttons: [
           {
-            text: '重新连接',
-            onPress: () => wsService.connect('ws://localhost:4001'),
+            text: '重试',
+            onPress: handleLogin,
           },
         ],
       });

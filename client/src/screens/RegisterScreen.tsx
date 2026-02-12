@@ -55,7 +55,7 @@ export const RegisterScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!username || !phone || !password || !confirmPassword) {
       showToast({ type: 'warning', title: '提示', message: '请填写完整信息' });
       return;
@@ -124,6 +124,25 @@ export const RegisterScreen = ({ navigation }: any) => {
       return;
     }
 
+    // 确保 WebSocket 连接已建立
+    try {
+      await wsService.connect('ws://localhost:4000');
+    } catch (error) {
+      showAlert({
+        type: 'error',
+        title: '连接失败',
+        message: '无法连接到服务器，请检查网络',
+        buttons: [
+          {
+            text: '重试',
+            onPress: handleRegister,
+          },
+        ],
+      });
+      return;
+    }
+
+    // 发送注册消息
     if (
       !wsService.send(
         MessageFactory.create('register', username, password, phone),
@@ -135,8 +154,8 @@ export const RegisterScreen = ({ navigation }: any) => {
         message: '与服务器的连接已断开，请重试',
         buttons: [
           {
-            text: '重新连接',
-            onPress: () => wsService.connect('ws://localhost:4001'),
+            text: '重试',
+            onPress: handleRegister,
           },
         ],
       });
