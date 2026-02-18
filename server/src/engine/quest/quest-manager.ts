@@ -14,6 +14,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   MessageFactory,
   rt,
+  SkillLearnSource,
   type QuestUpdateData,
   type ActiveQuestInfo,
   type CompletedQuestInfo,
@@ -233,6 +234,10 @@ export class QuestManager {
     // 接受后立即检查 collect 类型目标（玩家可能已有物品）
     this.checkCollectObjectives(player, questId);
 
+    // 接受后立即检查 talk 类型目标
+    // 如果 giverNpc 就是 talk 目标 NPC，且玩家正在与该 NPC 对话（接受任务），直接完成
+    this.checkTalkObjectivesOnAccept(player, questId, npcBlueprintId);
+
     // 推送任务更新
     this.sendQuestUpdate(player);
 
@@ -346,6 +351,11 @@ export class QuestManager {
     if (rewards.items && rewards.items.length > 0) {
       this.giveItems(player, rewards.items);
       rewardParts.push('物品');
+    }
+
+    // 技能奖励
+    if (rewards.rewardSkills && rewards.rewardSkills.length > 0) {
+      this.grantSkills(player, rewards.rewardSkills, rewardParts);
     }
 
     // 从 active 移除，加入 completed
@@ -487,6 +497,47 @@ export class QuestManager {
       if (available.length > 0) {
         player.receiveMessage(`你注意到${npc.getName()}似乎有事相求。`);
       }
+    }
+  }
+
+  /**
+   * NPC 对话回调
+   * 更新 talk 类型目标的计数（ask 命令成功后调用）
+   */
+  onNpcTalked(player: PlayerBase, npcBlueprintId: string): void {
+    const questData = this.getPlayerQuestData(player);
+    let changed = false;
+
+    for (const [questId, progress] of Object.entries(questData.active)) {
+      if (progress.status !== QuestStatus.ACTIVE) continue;
+
+      const def = this.definitions.get(questId);
+      if (!def) continue;
+      let questChanged = false;
+
+      for (let i = 0; i < def.objectives.length; i++) {
+        const obj = def.objectives[i];
+        if (obj.type === ObjectiveType.TALK && obj.targetId === npcBlueprintId) {
+          const current = progress.objectives[i] ?? 0;
+          if (current < obj.count) {
+            progress.objectives[i] = current + 1;
+            questChanged = true;
+          }
+        }
+      }
+
+      if (questChanged) {
+        changed = true;
+        const becameReady = this.checkQuestCompletion(def, progress);
+        if (becameReady) {
+          this.notifyQuestReady(player, def);
+        }
+      }
+    }
+
+    if (changed) {
+      this.savePlayerQuestData(player, questData);
+      this.sendQuestUpdate(player);
     }
   }
 
@@ -690,6 +741,44 @@ export class QuestManager {
     }
   }
 
+  /**
+   * 接受任务时检查 talk 目标
+   * 如果发布 NPC 就是 talk 目标 NPC，接受即视为完成对话
+   */
+  private checkTalkObjectivesOnAccept(
+    player: PlayerBase,
+    questId: string,
+    giverNpcBlueprintId: string,
+  ): void {
+    const questData = this.getPlayerQuestData(player);
+    const progress = questData.active[questId];
+    if (!progress) return;
+
+    const def = this.definitions.get(questId);
+    if (!def) return;
+
+    let changed = false;
+    for (let i = 0; i < def.objectives.length; i++) {
+      const obj = def.objectives[i];
+      if (obj.type !== ObjectiveType.TALK) continue;
+      if (obj.targetId !== giverNpcBlueprintId) continue;
+
+      const current = progress.objectives[i] ?? 0;
+      if (current < obj.count) {
+        progress.objectives[i] = current + 1;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      const becameReady = this.checkQuestCompletion(def, progress);
+      if (becameReady) {
+        this.notifyQuestReady(player, def);
+      }
+      this.savePlayerQuestData(player, questData);
+    }
+  }
+
   /** 构建任务接受日志（支持富文本文案） */
   private buildAcceptMessage(def: QuestDefinition): string {
     return [def.flavorText?.onAccept, rt('sys', `你接受了任务：${def.name}`)]
@@ -728,6 +817,22 @@ export class QuestManager {
       }
     }
     return count;
+  }
+
+  /** 发放技能奖励 */
+  private grantSkills(player: PlayerBase, skillIds: string[], rewardParts: string[]): void {
+    const skillManager = player.skillManager;
+    if (!skillManager) return;
+
+    for (const skillId of skillIds) {
+      const result = skillManager.learnSkill(skillId, SkillLearnSource.QUEST);
+      if (result === true) {
+        const skillDef = ServiceLocator.skillRegistry?.get(skillId);
+        const skillName = skillDef?.skillName ?? skillId;
+        rewardParts.push(`武学「${skillName}」`);
+        player.receiveMessage(rt('skill', `你领悟了「${skillName}」！`));
+      }
+    }
   }
 
   /** 给予玩家物品 */

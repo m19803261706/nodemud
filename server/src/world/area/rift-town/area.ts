@@ -91,6 +91,18 @@ export default class RiftTownArea extends Area {
         interval: 300000,
       },
       {
+        blueprintId: 'npc/rift-town/sword-instructor',
+        roomId: 'area/rift-town/training-yard',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/rift-town/fist-instructor',
+        roomId: 'area/rift-town/training-yard',
+        count: 1,
+        interval: 300000,
+      },
+      {
         blueprintId: 'npc/rift-town/merchant',
         roomId: 'area/rift-town/general-store',
         count: 1,

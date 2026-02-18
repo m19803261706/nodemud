@@ -69,6 +69,8 @@ export interface QuestRewards {
   score?: number;
   /** 物品奖励 */
   items?: { blueprintId: string; count: number }[];
+  /** 技能奖励（自动学会指定技能） */
+  rewardSkills?: string[];
 }
 
 /** 任务文案（用于日志沉浸感） */

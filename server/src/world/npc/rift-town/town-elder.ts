@@ -4,6 +4,7 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions, rt } from '@packages/core';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
 import {
   type QuestDefinition,
   QuestType,
@@ -31,19 +32,28 @@ export default class TownElder extends NpcBase {
     this.set('level', 20);
     this.set('max_hp', 800);
     this.set('hp', 800);
+    this.set('personality', 'friendly');
+    this.set('speech_style', 'formal');
     this.set('chat_chance', 10);
     this.set('chat_msg', [
       '老镇长捋了捋花白的胡须，目光远眺裂谷方向。',
       '老镇长轻叹一声，拄着拐杖踱了几步。',
       '老镇长朝路过的镇民和蔼地点了点头。',
+      '老镇长拄着拐杖在广场边慢慢踱步，不时与过路的镇民寒暄几句。',
     ]);
     this.set('inquiry', {
       裂隙镇:
         '老镇长慢悠悠地说：「裂隙镇啊，原本只是个寻常山谷里的小村庄。五十年前那场天裂，大地撕开一道深谷，我们就在裂谷边上重建了这个小镇。如今南来北往的人多了，倒也热闹了不少。」',
       天裂: '老镇长神色凝重：「天裂之变，是五十年前的事了。那一夜天空好像被撕开一道口子，大地震颤不止，整个山谷裂成了深不见底的裂谷。死了不少人啊……至今裂谷深处还时不时传出奇怪的响动。」',
       势力: '老镇长摇了摇头：「承天朝的兵、嵩阳宗的弟子、东海散盟的商人……这些年什么人都来过。裂隙镇是中立之地，我们不站队，谁来了都欢迎，但谁也别想在这儿闹事。」',
-      盗匪: '老镇长叹了口气：「北道上最近来了些不三不四的家伙，劫掠过往行人。我已经让卫兵加强巡逻了，但人手实在不够。你若是有本事，帮忙清理一下最好不过。」',
-      default: '老镇长笑了笑：「老朽年纪大了，记性不好啦。你四处走走问问别人吧。」',
+      盗匪: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `老镇长叹了口气：「北道上最近来了些不三不四的家伙，劫掠过往行人。我已经让卫兵加强巡逻了，但人手实在不够。${title}若是有本事，帮忙清理一下最好不过。」`;
+      },
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `老镇长笑了笑：「${title}啊，老朽年纪大了，记性不好啦。你四处走走问问别人吧。」`;
+      },
     });
 
     // 新手主线终章：裂谷北道清剿
@@ -54,7 +64,7 @@ export default class TownElder extends NpcBase {
         description: '老镇长请你清剿北道盗匪，让来往商旅敢走夜路。',
         type: QuestType.CAPTURE,
         giverNpc: 'npc/rift-town/town-elder',
-        prerequisites: { completedQuests: ['rift-town-novice-003'] },
+        prerequisites: { completedQuests: ['rift-town-novice-006'] },
         objectives: [
           {
             type: ObjectiveType.KILL,

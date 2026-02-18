@@ -6,6 +6,7 @@ import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions, rt } from '@packages/core';
 import type { LivingBase } from '../../../engine/game-objects/living-base';
 import type { ItemBase } from '../../../engine/game-objects/item-base';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
 import {
   type QuestDefinition,
   ObjectiveType,
@@ -32,19 +33,30 @@ export default class Bartender extends NpcBase {
     this.set('level', 15);
     this.set('max_hp', 500);
     this.set('hp', 500);
+    this.set('personality', 'stern');
+    this.set('speech_style', 'crude');
     this.set('chat_chance', 15);
     this.set('chat_msg', [
       '酒保擦了擦柜台上的酒渍。',
       '酒保不紧不慢地擦着杯子。',
       '酒保抬头扫了一眼酒馆里的客人。',
       '酒保从柜台下拿出一坛酒，拍去上面的灰尘。',
+      '酒保把几个空酒坛摞到墙角，动作利落得不像酒馆掌柜。',
     ]);
     this.set('inquiry', {
-      消息: '酒保放下手里的杯子，压低声音说：「最近裂谷深处不太平，有人说看到奇怪的光芒。北门的卫兵加了岗，你要是想往北走，最好小心点。」',
+      消息: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `酒保放下手里的杯子，压低声音说：「${title}，最近裂谷深处不太平，有人说看到奇怪的光芒。北门的卫兵加了岗，你要是想往北走，最好小心点。」`;
+      },
       裂隙镇:
         '酒保说：「裂隙镇虽小，但南来北往的人可不少。这里的人嘛，大多是为了讨口饭吃，不过也有些来历不明的家伙。」',
-      旅人: '酒保朝角落里努了努嘴：「那个人？来了有段日子了，整天闷坐着喝酒，也不跟人说话。我看他身手不凡，你最好别去招惹。」',
-      default: '酒保不置可否地摇了摇头：「这种事我可不清楚，你去问问广场上的老镇长。」',
+      旅人: '酒保朝角落里努了努嘴：「那位客人？住了有些日子了。不太爱说话，但从不赊账。」他顿了顿，压低声音：「别的，我就不方便多说了。」',
+      黑衣人:
+        '酒保朝角落里努了努嘴：「那位客人？住了有些日子了。不太爱说话，但从不赊账。」他顿了顿，压低声音：「别的，我就不方便多说了。」',
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `酒保不置可否地摇了摇头：「${title}，这种事我可不清楚，你去问问广场上的老镇长。」`;
+      },
     });
 
     const questDefs: QuestDefinition[] = [
@@ -77,7 +89,8 @@ export default class Bartender extends NpcBase {
           onReady: `${rt('sys', '干粮已经备齐。去断崖酒馆找酒保交付任务。')}`,
           onComplete:
             `${rt('npc', '酒保')}收起账本，声音仍旧平：「今天你给别人一口饭，` +
-            `明天真落难，也会有人给你留盏灯。」`,
+            `明天真落难，也会有人给你留盏灯。」\n` +
+            `他瞥了你一眼，又补了句：「光跑腿可不算江湖人。去${rt('npc', '书院')}找${rt('npc', '温夫子')}，先学学吐纳，打好根基再说。」`,
         },
       },
     ];

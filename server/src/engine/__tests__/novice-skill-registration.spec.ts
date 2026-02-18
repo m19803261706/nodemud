@@ -4,13 +4,13 @@ import { NOVICE_SKILL_ID_LIST, NOVICE_SKILL_IDS } from '../skills/novice/novice-
 import { SkillRegistry } from '../skills/skill-registry';
 
 describe('Novice skill registration', () => {
-  it('注册入口可一次性注册 4 门新手公共武学', () => {
+  it('注册入口可一次性注册 9 门新手公共武学', () => {
     const registry = new SkillRegistry();
     const count = registerNoviceSkills(registry);
 
-    expect(count).toBe(4);
-    expect(registry.getCount()).toBe(4);
-    expect(NOVICE_SKILL_ID_LIST).toHaveLength(4);
+    expect(count).toBe(9);
+    expect(registry.getCount()).toBe(9);
+    expect(NOVICE_SKILL_ID_LIST).toHaveLength(9);
   });
 
   it('公共武学默认不绑定门派', () => {
@@ -39,5 +39,10 @@ describe('Novice skill registration', () => {
     expect(registry.get(NOVICE_SKILL_IDS.BASIC_DODGE)?.validLearn(rookie)).toBe(true);
     expect(registry.get(NOVICE_SKILL_IDS.BASIC_PARRY)?.validLearn(rookie)).toBe(true);
     expect(registry.get(NOVICE_SKILL_IDS.BASIC_FORCE)?.validLearn(rookie)).toBe(true);
+    expect(registry.get(NOVICE_SKILL_IDS.BASIC_SWORD)?.validLearn(rookie)).toBe(true);
+    expect(registry.get(NOVICE_SKILL_IDS.BASIC_FIST)?.validLearn(rookie)).toBe(true);
+    expect(registry.get(NOVICE_SKILL_IDS.BASIC_PALM)?.validLearn(rookie)).toBe(true);
+    expect(registry.get(NOVICE_SKILL_IDS.BASIC_SPEAR)?.validLearn(rookie)).toBe(true);
+    expect(registry.get(NOVICE_SKILL_IDS.BASIC_STAFF)?.validLearn(rookie)).toBe(true);
   });
 });

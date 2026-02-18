@@ -120,6 +120,13 @@ export class CommandHandler {
             if (ServiceLocator.questManager) {
               ServiceLocator.questManager.onPlayerEnterRoom(player, newRoom);
             }
+
+            // NPC 钩子：通知房间内所有 NPC 有玩家进入
+            for (const entity of newRoom.getInventory()) {
+              if (entity instanceof NpcBase && entity.getCombatState() !== 'dead') {
+                entity.onPlayerEnter(player);
+              }
+            }
           }
         }
       } catch (moveError) {
@@ -315,6 +322,31 @@ export class CommandHandler {
         const msg = MessageFactory.create('skillMapResult', responseData);
         if (msg) {
           player.sendToClient(MessageFactory.serialize(msg));
+        }
+      }
+    }
+
+    // ask 命令成功后：触发 TALK 目标检查
+    if (result.success && result.data?.action === 'ask' && ServiceLocator.questManager) {
+      const npcId = result.data.npcId as string;
+      if (npcId) {
+        const npcBlueprintId = npcId.split('#')[0];
+        ServiceLocator.questManager.onNpcTalked(player, npcBlueprintId);
+
+        // TALK 任务自动完成可能发放技能/经验奖励，需持久化
+        if (session.characterId) {
+          try {
+            const character = await this.characterService.findById(session.characterId);
+            if (character) {
+              if (ServiceLocator.expManager) {
+                ServiceLocator.expManager.checkLevelUp(player, character);
+              }
+              sendPlayerStats(player, character);
+              await this.characterService.savePlayerDataToDB(player, session.characterId);
+            }
+          } catch {
+            // 查询失败不阻塞主流程
+          }
         }
       }
     }
