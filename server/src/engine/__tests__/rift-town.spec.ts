@@ -141,6 +141,7 @@ describe('裂隙镇地图', () => {
         const targetRoom = objectManager.findById(targetId) as RoomBase;
         expect(targetRoom).toBeDefined();
 
+        // 跨区域出口仍校验双向一致性
         const targetExits = targetRoom.getExits();
         expect(targetExits[reverseDir]).toBe(roomId);
       }
@@ -148,12 +149,16 @@ describe('裂隙镇地图', () => {
   });
 
   it('坐标应与方向偏移一致', () => {
+    const roomIdSet = new Set(ROOM_IDS);
     for (const roomId of ROOM_IDS) {
       const room = objectManager.findById(roomId) as RoomBase;
       const coords = room.getCoordinates()!;
       const exits = room.getExits();
 
       for (const [dir, targetId] of Object.entries(exits)) {
+        // 跨区域出口不校验坐标（各区域有独立坐标系）
+        if (!roomIdSet.has(targetId)) continue;
+
         const offset = DIR_OFFSET[dir];
         expect(offset).toBeDefined();
 
@@ -199,7 +204,7 @@ describe('裂隙镇地图', () => {
     const northGate = objectManager.findById('area/rift-town/north-gate') as RoomBase;
     expect(Object.keys(northGate.getExits())).toHaveLength(2);
     expect(northGate.getExit('south')).toBe('area/rift-town/north-road');
-    expect(northGate.getExit('north')).toBe('area/songyang/mountain-path');
+    expect(northGate.getExit('north')).toBe('area/songyang/road-rift');
 
     const southGate = objectManager.findById('area/rift-town/south-gate') as RoomBase;
     expect(Object.keys(southGate.getExits())).toHaveLength(1);

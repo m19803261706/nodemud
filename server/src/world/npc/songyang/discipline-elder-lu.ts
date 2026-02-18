@@ -1,6 +1,7 @@
 /**
- * 陆长老 — 嵩阳宗执法长老
+ * 陆长老 -- 嵩阳宗执法长老
  * 门派职责：纪律与戒律巡查（本期无交互动作）
+ * 性格：严厉 (stern) / 说话风格：正式 (formal)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
@@ -25,6 +26,10 @@ export default class SongyangDisciplineElderLu extends NpcBase {
     this.set('hp', 3100);
     this.set('combat_exp', 5600);
 
+    // 性格标签
+    this.set('personality', 'stern');
+    this.set('speech_style', 'formal');
+
     this.set('sect_id', 'songyang');
 
     this.set('chat_chance', 10);
@@ -32,6 +37,8 @@ export default class SongyangDisciplineElderLu extends NpcBase {
       '陆长老冷声道：「人可有错，门规不可乱。」',
       '陆长老用木尺轻点石阶，示意旁人站位端正。',
       '陆长老看了你一眼，又把视线移回戒律碑。',
+      '陆长老板着脸巡视一圈，弟子们纷纷垂手肃立。',
+      '陆长老低声与身旁执事说了两句，执事连连点头，脚步匆匆离去。',
     ]);
 
     this.set('inquiry', {

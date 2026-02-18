@@ -1,8 +1,4 @@
-import {
-  PuzzleStepState,
-  clonePlayerSectData,
-  normalizePlayerSectData,
-} from '../sect/types';
+import { PuzzleStepState, clonePlayerSectData, normalizePlayerSectData } from '../sect/types';
 
 describe('sect types normalize/clone', () => {
   it('normalizePlayerSectData 会为缺省 songyangSkill 回填默认结构', () => {

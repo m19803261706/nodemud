@@ -6,7 +6,7 @@ import type { ItemBase } from '../../game-objects/item-base';
 import type { LivingBase } from '../../game-objects/living-base';
 import type { NpcBase } from '../../game-objects/npc-base';
 import type { PlayerBase } from '../../game-objects/player-base';
-import type { PlayerSectData } from '../types';
+import type { PlayerSectData, SectAlignment, SectTone, SectTaskTemplate } from '../types';
 
 export interface SectRankThreshold {
   rank: string;
@@ -39,6 +39,12 @@ export interface SectPolicy {
   readonly sectName: string;
   readonly factionRequired: string;
   readonly ranks: SectRankThreshold[];
+  /** 门派阵营 */
+  readonly alignment: SectAlignment;
+  /** 门派风格调性 */
+  readonly tone: SectTone;
+  /** 门派描述 */
+  readonly description: string;
 
   canApprentice(player: PlayerBase, master: NpcBase, data: PlayerSectData): true | string;
 
@@ -53,4 +59,16 @@ export interface SectPolicy {
     witness: NpcBase,
     data: PlayerSectData,
   ): SectBetrayPenalty;
+
+  /** 获取日常任务每日上限 */
+  getDailyTaskLimit(rank: string): number;
+
+  /** 获取周常任务每周上限 */
+  getWeeklyTaskLimit(rank: string): number;
+
+  /** 获取门派特色日常任务池（空数组=纯通用池） */
+  getCustomDailyPool(): SectTaskTemplate[];
+
+  /** 获取门派特色周常任务池 */
+  getCustomWeeklyPool(): SectTaskTemplate[];
 }

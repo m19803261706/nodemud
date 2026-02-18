@@ -278,6 +278,18 @@ export class GameGateway
       case 'sectTeleport':
         await this.sectHandler.handleSectTeleport(client, session, message.data as any);
         break;
+      case 'sectTaskRequest':
+        await this.sectHandler.handleSectTaskRequest(session);
+        break;
+      case 'sectTaskAccept':
+        await this.sectHandler.handleSectTaskAccept(session, message.data as any);
+        break;
+      case 'sectTaskComplete':
+        await this.sectHandler.handleSectTaskComplete(session, message.data as any);
+        break;
+      case 'sectTaskAbandon':
+        await this.sectHandler.handleSectTaskAbandon(session, message.data as any);
+        break;
       case 'ping':
         // 心跳，无需处理
         break;

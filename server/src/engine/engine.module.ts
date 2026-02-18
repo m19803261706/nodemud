@@ -27,6 +27,9 @@ import { SectRegistry } from './sect/sect-registry';
 import { SectManager } from './sect/sect-manager';
 import { SongyangPolicy } from './sect/policies/songyang.policy';
 import { WorkManager } from './work/work-manager';
+import { SectTaskManager } from './sect/sect-task-manager';
+import { SectTaskTracker } from './sect/sect-task-tracker';
+import { COMMON_TASK_TEMPLATES } from './sect/sect-task-templates';
 
 @Module({
   imports: [SkillModule],
@@ -48,6 +51,8 @@ import { WorkManager } from './work/work-manager';
     SectManager,
     SongyangPolicy,
     WorkManager,
+    SectTaskManager,
+    SectTaskTracker,
   ],
   exports: [
     HeartbeatManager,
@@ -66,6 +71,8 @@ import { WorkManager } from './work/work-manager';
     SectRegistry,
     SectManager,
     WorkManager,
+    SectTaskManager,
+    SectTaskTracker,
   ],
 })
 export class EngineModule implements OnModuleInit {
@@ -90,6 +97,8 @@ export class EngineModule implements OnModuleInit {
     private readonly sectManager: SectManager,
     private readonly songyangPolicy: SongyangPolicy,
     private readonly workManager: WorkManager,
+    private readonly sectTaskManager: SectTaskManager,
+    private readonly sectTaskTracker: SectTaskTracker,
   ) {}
 
   async onModuleInit() {
@@ -101,6 +110,12 @@ export class EngineModule implements OnModuleInit {
 
     // 注册门派策略（后续新增门派在这里扩展）
     this.sectRegistry.register(this.songyangPolicy);
+
+    // 注册通用门派任务模板
+    for (const template of COMMON_TASK_TEMPLATES) {
+      this.sectTaskManager.registerCommonTemplate(template);
+    }
+    this.logger.log(`门派任务模板注册完成: ${COMMON_TASK_TEMPLATES.length} 个通用模板`);
 
     ServiceLocator.initialize({
       heartbeatManager: this.heartbeatManager,
@@ -118,6 +133,8 @@ export class EngineModule implements OnModuleInit {
       skillRegistry: this.skillRegistry,
       practiceManager: this.practiceManager,
       sectManager: this.sectManager,
+      sectTaskManager: this.sectTaskManager,
+      sectTaskTracker: this.sectTaskTracker,
       workManager: this.workManager,
     });
     // 设置 PracticeManager 的技能注册表引用

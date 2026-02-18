@@ -28,6 +28,8 @@ export default class Bandit extends NpcBase {
     this.set('max_hp', 200);
     this.set('hp', 200);
     this.set('combat_exp', 50);
+    this.set('personality', 'grumpy');
+    this.set('speech_style', 'crude');
     this.set('chat_chance', 8);
     this.set('chat_msg', [
       '裂谷盗匪警惕地四处张望，手按在刀柄上。',

@@ -121,6 +121,11 @@ export class CommandHandler {
               ServiceLocator.questManager.onPlayerEnterRoom(player, newRoom);
             }
 
+            // 门派任务进度追踪：进入房间
+            if (ServiceLocator.sectTaskTracker) {
+              ServiceLocator.sectTaskTracker.onEnterRoom(player, newRoom.id);
+            }
+
             // NPC 钩子：通知房间内所有 NPC 有玩家进入
             for (const entity of newRoom.getInventory()) {
               if (entity instanceof NpcBase && entity.getCombatState() !== 'dead') {
@@ -143,6 +148,15 @@ export class CommandHandler {
         // 广播给房间其他人
         const itemName = result.data.itemName || '物品';
         room.broadcast(`${player.getName()}捡起了${itemName}。`, player);
+      }
+
+      // 门派任务进度：获取物品
+      if (ServiceLocator.sectTaskTracker && result.data.itemBlueprintId) {
+        ServiceLocator.sectTaskTracker.onObtainItem(
+          player,
+          result.data.itemBlueprintId as string,
+          1,
+        );
       }
     }
 
@@ -327,11 +341,18 @@ export class CommandHandler {
     }
 
     // ask 命令成功后：触发 TALK 目标检查
-    if (result.success && result.data?.action === 'ask' && ServiceLocator.questManager) {
+    if (result.success && result.data?.action === 'ask') {
       const npcId = result.data.npcId as string;
       if (npcId) {
         const npcBlueprintId = npcId.split('#')[0];
-        ServiceLocator.questManager.onNpcTalked(player, npcBlueprintId);
+        if (ServiceLocator.questManager) {
+          ServiceLocator.questManager.onNpcTalked(player, npcBlueprintId);
+        }
+
+        // 门派任务进度：对话 NPC
+        if (ServiceLocator.sectTaskTracker) {
+          ServiceLocator.sectTaskTracker.onTalkToNpc(player, npcBlueprintId);
+        }
 
         // TALK 任务自动完成可能发放技能/经验奖励，需持久化
         if (session.characterId) {

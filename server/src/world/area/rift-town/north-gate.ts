@@ -17,7 +17,7 @@ export default class RiftTownNorthGate extends RoomBase {
     this.set('coordinates', { x: 0, y: -3, z: 0 });
     this.set('exits', {
       south: 'area/rift-town/north-road',
-      north: 'area/songyang/mountain-path',
+      north: 'area/songyang/road-rift',
     });
   }
 }

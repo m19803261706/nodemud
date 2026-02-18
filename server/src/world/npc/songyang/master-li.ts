@@ -1,6 +1,7 @@
 /**
- * 李掌门 — 嵩阳宗掌门
+ * 李掌门 -- 嵩阳宗掌门
  * 门派职责：收徒 / 见证叛门
+ * 性格：严厉 (stern) / 说话风格：正式 (formal)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
@@ -26,6 +27,10 @@ export default class SongyangMasterLi extends NpcBase {
     this.set('hp', 3200);
     this.set('combat_exp', 6000);
 
+    // 性格标签
+    this.set('personality', 'stern');
+    this.set('speech_style', 'formal');
+
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'master');
     this.set('teach_cost', 120);
@@ -49,6 +54,8 @@ export default class SongyangMasterLi extends NpcBase {
       '李掌门缓缓道：「入门易，守心难。」',
       '李掌门目光掠过演武场，低声道：「刀剑先修人，再修招。」',
       '李掌门拂袖而立，似在默背门规。',
+      '李掌门望向山外云海，神色淡远，不知在想什么。',
+      '李掌门合上手中旧卷，叹道：「当年那一辈人，如今剩不下几个了。」',
     ]);
 
     this.set('inquiry', {

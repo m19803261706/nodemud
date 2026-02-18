@@ -4,6 +4,7 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
 
 const INN_ROOM_PRICE = 18;
 
@@ -28,17 +29,26 @@ export default class InnWaiter extends NpcBase {
     this.set('hp', 260);
     this.set('can_rent_room', true);
     this.set('rent_price', INN_ROOM_PRICE);
+    this.set('personality', 'friendly');
+    this.set('speech_style', 'crude');
     this.set('chat_chance', 12);
     this.set('chat_msg', [
       '店小二把茶盏一一摆正，顺手抹去桌沿水痕。',
       '店小二朝楼梯努努嘴：「住店的客官，先到我这儿交个房钱。」',
       `店小二笑道：「二楼包间一晚只要 ${INN_ROOM_PRICE} 两银子，干净安静。」`,
+      '店小二手脚麻利地收拾着桌上的残茶冷盏。',
     ]);
     this.set('inquiry', {
-      住店: `店小二低声道：「二楼包间 ${INN_ROOM_PRICE} 两银子，交了钱我就放你上楼歇息。」`,
+      住店: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `店小二低声道：「${title}，二楼包间 ${INN_ROOM_PRICE} 两银子，交了钱我就放你上楼歇息。」`;
+      },
       休息: `店小二点头道：「交 ${INN_ROOM_PRICE} 两房钱，上楼便可安稳调息。」`,
       房钱: `店小二掂了掂算盘：「本店包间一口价，${INN_ROOM_PRICE} 两银子。」`,
-      default: '店小二挠挠头：「客官若要住店歇脚，我这就能给你安排。」',
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `店小二挠挠头：「${title}若要住店歇脚，我这就能给你安排。」`;
+      },
     });
   }
 }

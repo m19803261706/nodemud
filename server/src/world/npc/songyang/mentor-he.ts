@@ -1,10 +1,13 @@
 /**
- * 何教习 — 嵩阳宗入门教习
+ * 何教习 -- 嵩阳宗入门教习
  * 门派职责：初阶收徒
+ * 性格：严厉 (stern) / 说话风格：正式 (formal)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { SONGYANG_SKILL_IDS } from '../../../engine/skills/songyang/songyang-skill-ids';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
+import { RoomBase } from '../../../engine/game-objects/room-base';
 
 export default class SongyangMentorHe extends NpcBase {
   static virtual = false;
@@ -25,6 +28,10 @@ export default class SongyangMentorHe extends NpcBase {
     this.set('max_hp', 1800);
     this.set('hp', 1800);
     this.set('combat_exp', 2600);
+
+    // 性格标签
+    this.set('personality', 'stern');
+    this.set('speech_style', 'formal');
 
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'mentor');
@@ -47,6 +54,8 @@ export default class SongyangMentorHe extends NpcBase {
       '何教习沉声道：「脚下先稳，拳上才有魂。」',
       '何教习用竹片在地上轻点两下，示意弟子重走步位。',
       '何教习翻看名册，逐个核对新弟子课业。',
+      '何教习背手踱步，忽然喝道：「第三排！站桩膝盖过脚尖了！」',
+      '何教习低头在竹片上记了几笔，嘴角微沉，似乎对今日课业不甚满意。',
     ]);
 
     this.set('inquiry', {
@@ -56,5 +65,25 @@ export default class SongyangMentorHe extends NpcBase {
       来意: '何教习道：「要学本事，先把心摆正。」',
       default: '何教习道：「说重点，江湖不听废话。」',
     });
+  }
+
+  /**
+   * 玩家进入房间：偶尔点评同门弟子（~15%）
+   */
+  onPlayerEnter(player: PlayerBase): void {
+    if (!this.isPlayerSameSect(player)) return;
+    if (Math.random() > 0.15) return;
+
+    const title = this.getPlayerTitle(player);
+    const env = this.getEnvironment();
+    if (!env || !(env instanceof RoomBase)) return;
+
+    const lines = [
+      `何教习扫了${title}一眼，道：「站没站相，去把桩法走三遍再来。」`,
+      `何教习看见${title}，微微点头：「今天练了几趟刀？」`,
+      `何教习竹片一点，沉声道：「${title}，步法有进步，但上盘还散。」`,
+    ];
+    const msg = lines[Math.floor(Math.random() * lines.length)];
+    player.receiveMessage(msg);
   }
 }

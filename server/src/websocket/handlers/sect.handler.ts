@@ -14,11 +14,17 @@ import {
   type SectNpcLocation,
   type SectRankInfo,
   type SectTeleportRole,
+  type SectTaskResponseData,
+  type SectTaskInstanceDTO,
+  type SectTaskObjectiveDTO,
+  type SectTaskRewardsDTO,
+  type SectTaskProgressDTO,
 } from '@packages/core';
 import { ObjectManager } from '../../engine/object-manager';
 import { BlueprintFactory } from '../../engine/blueprint-factory';
 import { SectManager } from '../../engine/sect/sect-manager';
 import { SectRegistry } from '../../engine/sect/sect-registry';
+import { SectTaskManager } from '../../engine/sect/sect-task-manager';
 import { ServiceLocator } from '../../engine/service-locator';
 import { NpcBase } from '../../engine/game-objects/npc-base';
 import type { PlayerBase } from '../../engine/game-objects/player-base';
@@ -52,6 +58,7 @@ export class SectHandler {
     private readonly blueprintFactory: BlueprintFactory,
     private readonly sectManager: SectManager,
     private readonly sectRegistry: SectRegistry,
+    private readonly sectTaskManager: SectTaskManager,
   ) {}
 
   /**
@@ -81,9 +88,7 @@ export class SectHandler {
     const overview = this.buildOverview(sectData.current, policy?.ranks ?? []);
 
     // 组装技能树（当前仅支持嵩阳）
-    const skillTree = sectId === SONGYANG_FACTION_ID
-      ? this.buildSongyangSkillTree(player)
-      : [];
+    const skillTree = sectId === SONGYANG_FACTION_ID ? this.buildSongyangSkillTree(player) : [];
 
     // 组装进度
     const progress = this.buildProgress(sectData);
@@ -170,6 +175,124 @@ export class SectHandler {
 
     // 新房间广播到达消息
     targetRoom.broadcast(`${player.getName()}匆匆赶到。`, player);
+  }
+
+  // ================================================================
+  //  门派任务处理
+  // ================================================================
+
+  /**
+   * 处理门派任务列表请求
+   */
+  async handleSectTaskRequest(session: Session): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const sectData = this.sectManager.getPlayerSectData(player);
+
+    // 先检查超时
+    this.sectTaskManager.checkExpiry(player, sectData);
+
+    const result = this.sectTaskManager.getAvailableTasks(player, sectData);
+
+    const responseData: SectTaskResponseData = {
+      activeDailyTask: result.activeDailyTask
+        ? this.toTaskInstanceDTO(result.activeDailyTask)
+        : null,
+      activeWeeklyTask: result.activeWeeklyTask
+        ? this.toTaskInstanceDTO(result.activeWeeklyTask)
+        : null,
+      progress: {
+        dailyCount: result.dailyCount,
+        dailyMax: result.dailyMax,
+        weeklyCount: result.weeklyCount,
+        weeklyMax: result.weeklyMax,
+        totalCompleted: result.totalCompleted,
+        nextMilestone: result.nextMilestone,
+      },
+      availableDailyTemplates: result.availableDailyTemplates,
+      availableWeeklyTemplates: result.availableWeeklyTemplates,
+    };
+
+    const msg = MessageFactory.create('sectTaskResponse', responseData);
+    if (msg) player.sendToClient(MessageFactory.serialize(msg));
+  }
+
+  /**
+   * 处理接取门派任务
+   */
+  async handleSectTaskAccept(
+    session: Session,
+    data: { templateId: string; category: 'daily' | 'weekly' },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const sectData = this.sectManager.getPlayerSectData(player);
+    const result = this.sectTaskManager.acceptTask(
+      player,
+      sectData,
+      data.templateId,
+      data.category,
+    );
+
+    const msg = MessageFactory.create('sectTaskAcceptResult', {
+      success: result.success,
+      message: result.message,
+      task: result.task ? this.toTaskInstanceDTO(result.task) : undefined,
+    });
+    if (msg) player.sendToClient(MessageFactory.serialize(msg));
+  }
+
+  /**
+   * 处理完成（交付）门派任务
+   */
+  async handleSectTaskComplete(
+    session: Session,
+    data: { category: 'daily' | 'weekly' },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const sectData = this.sectManager.getPlayerSectData(player);
+    const result = this.sectTaskManager.completeTask(player, sectData, data.category);
+
+    const progress = result.success
+      ? this.buildTaskProgress(player)
+      : undefined;
+
+    const msg = MessageFactory.create('sectTaskCompleteResult', {
+      success: result.success,
+      message: result.message,
+      rewards: result.rewards
+        ? this.toRewardsDTO(result.rewards)
+        : undefined,
+      milestoneRewards: result.milestoneRewards
+        ? this.toRewardsDTO(result.milestoneRewards)
+        : undefined,
+      progress,
+    });
+    if (msg) player.sendToClient(MessageFactory.serialize(msg));
+  }
+
+  /**
+   * 处理放弃门派任务
+   */
+  async handleSectTaskAbandon(
+    session: Session,
+    data: { category: 'daily' | 'weekly' },
+  ): Promise<void> {
+    const player = this.getPlayerFromSession(session);
+    if (!player) return;
+
+    const sectData = this.sectManager.getPlayerSectData(player);
+    const result = this.sectTaskManager.abandonTask(player, sectData, data.category);
+
+    const msg = MessageFactory.create('sectTaskAbandonResult', {
+      success: result.success,
+      message: result.message,
+    });
+    if (msg) player.sendToClient(MessageFactory.serialize(msg));
   }
 
   // ================================================================
@@ -308,5 +431,51 @@ export class SectHandler {
   private getPlayerFromSession(session: Session): PlayerBase | undefined {
     if (!session.authenticated || !session.playerId) return undefined;
     return this.objectManager.findById(session.playerId) as PlayerBase | undefined;
+  }
+
+  // ================================================================
+  //  门派任务 DTO 转换
+  // ================================================================
+
+  /** 将服务端 SectTaskInstance 转为客户端 DTO */
+  private toTaskInstanceDTO(task: any): SectTaskInstanceDTO {
+    return {
+      templateId: task.templateId,
+      category: task.category,
+      name: task.name,
+      description: task.description,
+      objectives: task.objectives.map((obj: any): SectTaskObjectiveDTO => ({
+        type: obj.type,
+        description: obj.description,
+        count: obj.count,
+        current: obj.current,
+      })),
+      rewards: this.toRewardsDTO(task.rewards),
+      flavorText: task.flavorText?.onComplete,
+    };
+  }
+
+  /** 将服务端奖励转为 DTO */
+  private toRewardsDTO(rewards: any): SectTaskRewardsDTO {
+    return {
+      contribution: rewards.contribution ?? 0,
+      exp: rewards.exp ?? 0,
+      potential: rewards.potential ?? 0,
+      silver: rewards.silver,
+    };
+  }
+
+  /** 构建任务进度摘要 */
+  private buildTaskProgress(player: PlayerBase): SectTaskProgressDTO {
+    const sectData = this.sectManager.getPlayerSectData(player);
+    const result = this.sectTaskManager.getAvailableTasks(player, sectData);
+    return {
+      dailyCount: result.dailyCount,
+      dailyMax: result.dailyMax,
+      weeklyCount: result.weeklyCount,
+      weeklyMax: result.weeklyMax,
+      totalCompleted: result.totalCompleted,
+      nextMilestone: result.nextMilestone,
+    };
   }
 }

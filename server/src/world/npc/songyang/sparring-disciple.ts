@@ -1,6 +1,7 @@
 /**
- * 陪练弟子 — 嵩阳宗演武场
+ * 陪练弟子 -- 嵩阳宗演武场
  * 门派职责：演武挑战
+ * 性格：友善 (friendly) / 说话风格：粗犷 (crude)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
@@ -25,6 +26,10 @@ export default class SongyangSparringDisciple extends NpcBase {
     this.set('hp', 950);
     this.set('combat_exp', 1200);
 
+    // 性格标签
+    this.set('personality', 'friendly');
+    this.set('speech_style', 'crude');
+
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'sparring');
 
@@ -33,6 +38,8 @@ export default class SongyangSparringDisciple extends NpcBase {
       '陪练弟子抱拳站定，道：「师兄弟切磋，点到为止。」',
       '陪练弟子低喝一声，脚下连踏三步又收势。',
       '陪练弟子擦去额角汗水，继续练起基础桩法。',
+      '陪练弟子揉着手腕嘀咕：「林师兄那一掌，劲道真足……」',
+      '陪练弟子活动着肩膀，嘿嘿笑道：「再来一趟，刚才那招没接住。」',
     ]);
 
     this.set('inquiry', {

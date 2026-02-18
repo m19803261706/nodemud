@@ -19,14 +19,14 @@ export default class SongyangMountainPath extends RoomBase {
   static virtual = true;
 
   create() {
-    this.set('short', '嵩阳山道');
+    this.set('short', '嵩阳山道·上段');
     this.set(
       'long',
-      '石阶沿山脊盘旋而上，松风穿林，钟声隐隐。回首南方，裂隙镇的屋脊已沉在山雾里。',
+      '石阶沿山脊盘旋而上，松风穿林，钟声隐隐。两侧古木参天，枝叶间漏下斑驳日光，山门的轮廓已在目力之内。',
     );
     this.set('coordinates', { x: 0, y: -4, z: 0 });
     this.set('exits', {
-      south: 'area/rift-town/north-gate',
+      south: 'area/songyang/pine-pavilion',
       north: 'area/songyang/gate',
     });
 

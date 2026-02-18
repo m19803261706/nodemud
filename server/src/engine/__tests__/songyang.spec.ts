@@ -18,15 +18,30 @@ import { Area } from '../game-objects/area';
 const WORLD_DIR = path.join(__dirname, '..', '..', 'world');
 
 const ROOM_IDS = [
-  'area/songyang/mountain-path',
+  // 宗门核心区
+  'area/songyang/master-retreat',
+  'area/songyang/practice-cliff',
+  'area/songyang/tianyan-stele',
+  'area/songyang/meditation-room',
+  'area/songyang/scripture-pavilion',
+  'area/songyang/hall',
+  'area/songyang/deacon-court',
+  'area/songyang/discipline-hall',
+  'area/songyang/disciples-yard',
+  'area/songyang/herb-garden',
   'area/songyang/gate',
   'area/songyang/drill-ground',
-  'area/songyang/hall',
-  'area/songyang/disciples-yard',
-  'area/songyang/scripture-pavilion',
-  'area/songyang/deacon-court',
-  'area/songyang/meditation-room',
   'area/songyang/armory',
+  // 嵩阳山道
+  'area/songyang/mountain-path',
+  'area/songyang/pine-pavilion',
+  'area/songyang/mountain-path-middle',
+  'area/songyang/mountain-stream',
+  'area/songyang/rocky-slope',
+  'area/songyang/mountain-path-lower',
+  // 官道
+  'area/songyang/road-songshan',
+  'area/songyang/road-rift',
 ];
 
 describe('嵩阳宗地图', () => {
@@ -66,18 +81,19 @@ describe('嵩阳宗地图', () => {
     }
   });
 
-  it('Area 应包含 9 个房间与 9 条 NPC 刷新规则', () => {
+  it('Area 应包含 21 个房间与 14 条 NPC 刷新规则', () => {
     const area = objectManager.findById('area/songyang/area') as Area;
     const roomIds = area.getRoomIds();
-    expect(roomIds).toHaveLength(9);
+    expect(roomIds).toHaveLength(21);
     for (const roomId of ROOM_IDS) {
       expect(roomIds).toContain(roomId);
     }
 
     const spawnRules = area.getSpawnRules();
-    expect(spawnRules).toHaveLength(9);
+    expect(spawnRules).toHaveLength(14);
     expect(spawnRules.map((x) => x.blueprintId)).toEqual(
       expect.arrayContaining([
+        // 原有 NPC
         'npc/songyang/master-li',
         'npc/songyang/deacon-zhao',
         'npc/songyang/sparring-disciple',
@@ -86,16 +102,27 @@ describe('嵩阳宗地图', () => {
         'npc/songyang/senior-disciple-lin',
         'npc/songyang/mentor-he',
         'npc/songyang/gate-disciple',
+        // 新增 NPC
+        'npc/songyang/herb-disciple',
+        'npc/songyang/patrol-disciple',
+        'npc/songyang/mountain-bandit',
+        'npc/songyang/bandit-leader',
+        'npc/songyang/wild-wolf',
       ]),
     );
   });
 
-  it('嵩阳山道应与裂隙镇北门双向连通', () => {
+  it('嵩阳山道经官道与裂隙镇北门连通', () => {
     const mountainPath = objectManager.findById('area/songyang/mountain-path') as RoomBase;
+    const roadRift = objectManager.findById('area/songyang/road-rift') as RoomBase;
     const northGate = objectManager.findById('area/rift-town/north-gate') as RoomBase;
 
-    expect(mountainPath.getExit('south')).toBe('area/rift-town/north-gate');
-    expect(northGate.getExit('north')).toBe('area/songyang/mountain-path');
+    // 山道·上段 → 古松亭（不再直连北门）
+    expect(mountainPath.getExit('south')).toBe('area/songyang/pine-pavilion');
+    // 官道·裂谷段 → 北门
+    expect(roadRift.getExit('south')).toBe('area/rift-town/north-gate');
+    // 北门 → 官道·裂谷段
+    expect(northGate.getExit('north')).toBe('area/songyang/road-rift');
   });
 
   it('房间坐标应与出口方向一致', () => {

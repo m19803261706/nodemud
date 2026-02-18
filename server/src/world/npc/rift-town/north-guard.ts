@@ -4,6 +4,8 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions } from '@packages/core';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
+import { RoomBase } from '../../../engine/game-objects/room-base';
 
 export default class NorthGuard extends NpcBase {
   static virtual = false;
@@ -25,18 +27,27 @@ export default class NorthGuard extends NpcBase {
     this.set('level', 20);
     this.set('max_hp', 900);
     this.set('hp', 900);
+    this.set('personality', 'stern');
+    this.set('speech_style', 'formal');
     this.set('chat_chance', 8);
     this.set('chat_msg', [
       '北门卫兵警惕地注视着北方的道路。',
       '北门卫兵按了按腰间的刀柄，目光扫过四周。',
       '北门卫兵挺了挺胸，调整了一下站姿。',
+      '北门卫兵目光一凝，盯着北道尽头看了片刻，随后松了口气。',
     ]);
     this.set('inquiry', {
-      北方: '北门卫兵正色道：「北边通往裂谷深处，最近不太平。没事别往北走，要去的话，自己多加小心。」',
+      北方: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `北门卫兵正色道：「${title}，北边通往裂谷深处，最近不太平。没事别往北走，要去的话，自己多加小心。」`;
+      },
       承天朝:
         '北门卫兵挺起胸膛：「我等奉承天朝之命驻守裂隙镇，保一方平安。有什么事，可以找我们。」',
       裂谷: '北门卫兵压低声音：「裂谷里最近有异动，上头让我们加强巡逻。具体什么情况，不方便说。」',
-      default: '北门卫兵摆摆手：「我只负责守门，别的事情不归我管。」',
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `北门卫兵摆摆手：「${title}，我只负责守门，别的事情不归我管。」`;
+      },
     });
     this.set('combat_exp', 100);
     this.set('equipment', [
@@ -47,5 +58,15 @@ export default class NorthGuard extends NpcBase {
       { blueprintId: 'item/rift-town/leather-belt', position: 'waist' },
       { blueprintId: 'item/rift-town/guard-blade', position: 'weapon' },
     ]);
+  }
+
+  /** 玩家进入北门时偶尔审视 */
+  onPlayerEnter(player: PlayerBase): void {
+    if (Math.random() > 0.2) return;
+    const title = this.getPlayerTitle(player);
+    const env = this.getEnvironment();
+    if (env && env instanceof RoomBase) {
+      env.broadcast(`[npc]${this.getName()}[/npc]上下打量了${title}一番，手不自觉地按在刀柄上。`);
+    }
   }
 }

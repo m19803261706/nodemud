@@ -16,6 +16,7 @@ export default class SongyangDeaconCourt extends RoomBase {
     this.set('coordinates', { x: 1, y: -6, z: 0 });
     this.set('exits', {
       west: 'area/songyang/hall',
+      south: 'area/songyang/discipline-hall',
     });
   }
 }

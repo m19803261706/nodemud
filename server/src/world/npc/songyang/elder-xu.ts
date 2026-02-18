@@ -1,6 +1,7 @@
 /**
- * 许长老 — 嵩阳宗传功长老
+ * 许长老 -- 嵩阳宗传功长老
  * 门派职责：收徒 / 见证叛门
+ * 性格：友善 (friendly) / 说话风格：书卷气 (scholarly)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
@@ -26,6 +27,10 @@ export default class SongyangElderXu extends NpcBase {
     this.set('hp', 2900);
     this.set('combat_exp', 5200);
 
+    // 性格标签
+    this.set('personality', 'friendly');
+    this.set('speech_style', 'scholarly');
+
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'master');
     this.set('teach_cost', 60);
@@ -47,6 +52,8 @@ export default class SongyangElderXu extends NpcBase {
       '许长老合掌静立，低声道：「招式可教，心术难扶。」',
       '许长老看着山雾，道：「练武先练耐性，耐性就是命门。」',
       '许长老把一本旧谱放回架上，神色安然。',
+      '许长老翻着一卷泛黄的手札，偶尔提笔在页边批注几个小字。',
+      '许长老负手立于窗前，望着院中弟子练功，微微颔首。',
     ]);
 
     this.set('inquiry', {

@@ -16,3 +16,4 @@ export * from './skill';
 export * from './exert';
 export * from './map';
 export * from './sect';
+export * from './sect-task';

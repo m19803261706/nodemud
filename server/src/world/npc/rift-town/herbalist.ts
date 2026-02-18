@@ -7,6 +7,8 @@ import { Factions, rt } from '@packages/core';
 import { MerchantBase } from '../../../engine/game-objects/merchant-base';
 import type { LivingBase } from '../../../engine/game-objects/living-base';
 import type { ItemBase } from '../../../engine/game-objects/item-base';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
+import { RoomBase } from '../../../engine/game-objects/room-base';
 import {
   type QuestDefinition,
   ObjectiveType,
@@ -35,17 +37,27 @@ export default class Herbalist extends MerchantBase {
     this.set('level', 35);
     this.set('max_hp', 2000);
     this.set('hp', 2000);
+    this.set('personality', 'friendly');
+    this.set('speech_style', 'scholarly');
     this.set('chat_chance', 8);
     this.set('chat_msg', [
       '白发药师低头碾磨着草药，药臼发出有节奏的声响。',
       '白发药师轻嗅了一下手中的草药，微微点头。',
       '白发药师翻开一本泛黄的药典，陷入了沉思。',
+      '白发药师将几味药材分拣归类，动作不紧不慢。',
+      '白发药师自言自语：「这批黄芩的药性比去年的强了些……」',
     ]);
     this.set('inquiry', {
       草药: '白发药师抬起头，淡淡地说：「裂谷里的草药倒是不少。崖壁上的石莲、谷底的灵芝……不过那些地方可不好去，没本事的人还是别冒险了。」',
       百蛮: '白发药师的手顿了顿：「西南百蛮……那是很久以前的事了。老身如今只是个卖药的。」',
-      治伤: '白发药师打量了你一眼：「要治伤？小伤的话，买些止血散就够了。重伤嘛……看你诚意如何。」',
-      default: '白发药师头也不抬：「没有的事，别打扰老身做药。」',
+      治伤: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `白发药师打量了你一眼：「${title}要治伤？小伤的话，买些止血散就够了。重伤嘛……看你诚意如何。」`;
+      },
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `白发药师头也不抬：「${title}，没有的事，别打扰老身做药。」`;
+      },
     });
     this.set('equipment', [
       { blueprintId: 'item/rift-town/herb-shirt', position: 'body' },
@@ -107,6 +119,18 @@ export default class Herbalist extends MerchantBase {
       },
     ];
     this.set('quests', questDefs);
+  }
+
+  /** 玩家进入药铺时偶尔招揽 */
+  onPlayerEnter(player: PlayerBase): void {
+    if (Math.random() > 0.15) return;
+    const title = this.getPlayerTitle(player);
+    const env = this.getEnvironment();
+    if (env && env instanceof RoomBase) {
+      env.broadcast(
+        `[npc]${this.getName()}[/npc]抬头瞥了一眼，淡淡道：「${title}，身上有伤就早些治，拖久了可不好办。」`,
+      );
+    }
   }
 
   /**

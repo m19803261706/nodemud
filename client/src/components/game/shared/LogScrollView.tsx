@@ -46,8 +46,11 @@ export const LogScrollView = ({
   const flatListRef = useRef<FlatList<LogEntry>>(null);
   const isAtBottomRef = useRef(true);
   const lastLogCountRef = useRef(gameLog.length);
-  /** 记录有滚动请求但 FlatList 不可见未能执行 */
-  const pendingScrollRef = useRef(false);
+  /**
+   * 记录有滚动请求但 FlatList 不可见未能执行
+   * 首次挂载默认需要补偿一次滚到底，避免 Tab 切换后停在非底部位置
+   */
+  const pendingScrollRef = useRef(true);
   /** 上一次 onLayout 的高度，用于检测"从不可见变为可见" */
   const lastLayoutHeightRef = useRef(0);
   const [hasNewMessage, setHasNewMessage] = useState(false);
@@ -101,7 +104,7 @@ export const LogScrollView = ({
     lastLogCountRef.current = gameLog.length;
 
     if (!appended) return;
-    if (isAtBottomRef.current) {
+    if (isAtBottomRef.current || pendingScrollRef.current) {
       pendingScrollRef.current = true;
       scheduleScrollToEnd(true);
     } else {
@@ -145,8 +148,8 @@ export const LogScrollView = ({
 
           // 组件变为可见或尺寸变化时，补偿之前未执行的滚动
           if (
-            (wasHidden || becameVisible || pendingScrollRef.current) &&
-            isAtBottomRef.current
+            pendingScrollRef.current ||
+            ((wasHidden || becameVisible) && isAtBottomRef.current)
           ) {
             pendingScrollRef.current = false;
             scheduleScrollToEnd(false);

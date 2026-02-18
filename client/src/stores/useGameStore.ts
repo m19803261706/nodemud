@@ -21,6 +21,11 @@ import type {
   SkillCategory,
   MapResponseData,
   SectInfoResponseData,
+  SectTaskResponseData,
+  SectTaskAcceptResultData,
+  SectTaskCompleteResultData,
+  SectTaskAbandonResultData,
+  SectTaskProgressUpdateData,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -375,6 +380,14 @@ export interface GameState {
   // 门派
   sectInfo: SectInfoResponseData | null;
   setSectInfo: (data: SectInfoResponseData) => void;
+
+  // 门派任务
+  sectTaskData: SectTaskResponseData | null;
+  setSectTaskData: (data: SectTaskResponseData | null) => void;
+  updateSectTaskFromAccept: (data: SectTaskAcceptResultData) => void;
+  updateSectTaskFromComplete: (data: SectTaskCompleteResultData) => void;
+  updateSectTaskFromAbandon: (data: SectTaskAbandonResultData, category: 'daily' | 'weekly') => void;
+  updateSectTaskProgress: (data: SectTaskProgressUpdateData) => void;
 
   // 导航
   activeTab: string;
@@ -741,6 +754,62 @@ export const useGameStore = create<GameState>(set => ({
   // 门派
   sectInfo: null,
   setSectInfo: data => set({ sectInfo: data }),
+
+  // 门派任务
+  sectTaskData: null,
+  setSectTaskData: data => set({ sectTaskData: data }),
+  updateSectTaskFromAccept: data => {
+    if (!data.success || !data.task) return;
+    set(state => {
+      if (!state.sectTaskData) return state;
+      const updated = { ...state.sectTaskData };
+      if (data.task!.category === 'daily') {
+        updated.activeDailyTask = data.task!;
+        updated.availableDailyTemplates = [];
+      } else {
+        updated.activeWeeklyTask = data.task!;
+        updated.availableWeeklyTemplates = [];
+      }
+      return { sectTaskData: updated };
+    });
+  },
+  updateSectTaskFromComplete: data => {
+    if (!data.success) return;
+    set(state => {
+      if (!state.sectTaskData) return state;
+      const updated = { ...state.sectTaskData };
+      if (data.progress) {
+        updated.progress = data.progress;
+      }
+      // 清除已完成的活跃任务（需要重新拉取列表获取新候选）
+      return { sectTaskData: updated };
+    });
+  },
+  updateSectTaskFromAbandon: (data, category) => {
+    if (!data.success) return;
+    set(state => {
+      if (!state.sectTaskData) return state;
+      const updated = { ...state.sectTaskData };
+      if (category === 'daily') {
+        updated.activeDailyTask = null;
+      } else {
+        updated.activeWeeklyTask = null;
+      }
+      return { sectTaskData: updated };
+    });
+  },
+  updateSectTaskProgress: data => {
+    set(state => {
+      if (!state.sectTaskData) return state;
+      const updated = { ...state.sectTaskData };
+      if (data.category === 'daily') {
+        updated.activeDailyTask = data.task;
+      } else {
+        updated.activeWeeklyTask = data.task;
+      }
+      return { sectTaskData: updated };
+    });
+  },
 
   // 导航
   activeTab: '江湖',

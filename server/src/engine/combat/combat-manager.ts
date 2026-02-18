@@ -656,6 +656,14 @@ export class CombatManager implements OnModuleInit {
     if (ServiceLocator.questManager) {
       ServiceLocator.questManager.onNpcDeath(npc, player);
     }
+
+    // 门派任务进度：击杀 NPC
+    if (ServiceLocator.sectTaskTracker) {
+      const blueprintId = npc.get<string>('blueprintId') ?? '';
+      if (blueprintId) {
+        ServiceLocator.sectTaskTracker.onKillNpc(player, blueprintId);
+      }
+    }
   }
 
   // ================================================================

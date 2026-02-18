@@ -66,6 +66,15 @@ import './handlers/navigateResponse';
 import './handlers/sectInfoRequest';
 import './handlers/sectInfoResponse';
 import './handlers/sectTeleport';
+// 门派任务系统消息
+import './handlers/sectTaskRequest';
+import './handlers/sectTaskResponse';
+import './handlers/sectTaskAccept';
+import './handlers/sectTaskAcceptResult';
+import './handlers/sectTaskComplete';
+import './handlers/sectTaskCompleteResult';
+import './handlers/sectTaskAbandon';
+import './handlers/sectTaskProgressUpdate';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

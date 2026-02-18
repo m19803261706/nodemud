@@ -12,6 +12,7 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UIProvider } from './src/components';
+import { MessageFactory } from '@packages/core';
 import { wsService } from './src/services/WebSocketService';
 import { useGameStore, exitsToDirections } from './src/stores/useGameStore';
 import { useSkillStore } from './src/stores/useSkillStore';
@@ -459,6 +460,37 @@ function App(): React.JSX.Element {
       useGameStore.getState().setSectInfo(data);
     };
 
+    /** 门派任务列表响应 */
+    const handleSectTaskResponse = (data: any) => {
+      useGameStore.getState().setSectTaskData(data);
+    };
+
+    /** 门派任务接取结果 */
+    const handleSectTaskAcceptResult = (data: any) => {
+      useGameStore.getState().updateSectTaskFromAccept(data);
+    };
+
+    /** 门派任务完成结果 → 完成后重新拉取任务列表 */
+    const handleSectTaskCompleteResult = (data: any) => {
+      useGameStore.getState().updateSectTaskFromComplete(data);
+      // 完成后重新请求任务列表以获取新候选
+      if (data.success) {
+        wsService.send(MessageFactory.create('sectTaskRequest', {}));
+      }
+    };
+
+    /** 门派任务放弃结果 → 放弃后重新拉取 */
+    const handleSectTaskAbandonResult = (data: any) => {
+      if (data.success) {
+        wsService.send(MessageFactory.create('sectTaskRequest', {}));
+      }
+    };
+
+    /** 门派任务进度推送 */
+    const handleSectTaskProgressUpdate = (data: any) => {
+      useGameStore.getState().updateSectTaskProgress(data);
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -483,6 +515,11 @@ function App(): React.JSX.Element {
     wsService.on('mapResponse', handleMapResponse);
     wsService.on('navigateResponse', handleNavigateResponse);
     wsService.on('sectInfoResponse', handleSectInfoResponse);
+    wsService.on('sectTaskResponse', handleSectTaskResponse);
+    wsService.on('sectTaskAcceptResult', handleSectTaskAcceptResult);
+    wsService.on('sectTaskCompleteResult', handleSectTaskCompleteResult);
+    wsService.on('sectTaskAbandonResult', handleSectTaskAbandonResult);
+    wsService.on('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -509,6 +546,11 @@ function App(): React.JSX.Element {
       wsService.off('mapResponse', handleMapResponse);
       wsService.off('navigateResponse', handleNavigateResponse);
       wsService.off('sectInfoResponse', handleSectInfoResponse);
+      wsService.off('sectTaskResponse', handleSectTaskResponse);
+      wsService.off('sectTaskAcceptResult', handleSectTaskAcceptResult);
+      wsService.off('sectTaskCompleteResult', handleSectTaskCompleteResult);
+      wsService.off('sectTaskAbandonResult', handleSectTaskAbandonResult);
+      wsService.off('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
     };
   }, []);
 

@@ -1,11 +1,13 @@
 /**
- * 守山弟子 — 嵩阳宗山门值守
+ * 守山弟子 -- 嵩阳宗山门值守
  * 门派职责：环境氛围与基础问询（本期无交互动作）
+ * 性格：严厉 (stern) / 说话风格：正式 (formal)
  */
 import { Factions } from '@packages/core';
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { BaseEntity } from '../../../engine/base-entity';
 import { PlayerBase } from '../../../engine/game-objects/player-base';
+import { RoomBase } from '../../../engine/game-objects/room-base';
 
 export default class SongyangGateDisciple extends NpcBase {
   static virtual = false;
@@ -29,6 +31,10 @@ export default class SongyangGateDisciple extends NpcBase {
     this.set('hp', 780);
     this.set('combat_exp', 900);
 
+    // 性格标签
+    this.set('personality', 'stern');
+    this.set('speech_style', 'formal');
+
     this.set('sect_id', 'songyang');
 
     this.set('chat_chance', 14);
@@ -36,6 +42,8 @@ export default class SongyangGateDisciple extends NpcBase {
       '守山弟子目视山道，低声复诵值守口令。',
       '守山弟子向你抱拳，道：「山门重地，请按规行事。」',
       '守山弟子抬手整了整剑穗，继续站定不动。',
+      '守山弟子偷偷打了个哈欠，又赶紧挺直了腰板。',
+      '守山弟子望着山道尽头，嘟囔：「今日怎么一个上山的人都没有……」',
     ]);
 
     this.set('inquiry', {
@@ -48,22 +56,46 @@ export default class SongyangGateDisciple extends NpcBase {
     });
   }
 
+  /**
+   * 对话钩子：处理入山关键词
+   * 同门直接放行，外来者发放临时通行许可
+   */
   onChat(speaker: BaseEntity, message: string): void {
     if (!(speaker instanceof PlayerBase)) return;
 
     const keyword = message.trim();
     if (!SongyangGateDisciple.ENTRY_KEYWORDS.has(keyword)) return;
 
-    const sectData = speaker.get<any>('sect');
-    const sectId = sectData?.current?.sectId;
-    if (sectId === 'songyang') {
-      speaker.receiveMessage('守山弟子抱拳道：「同门请入。」');
+    const title = this.getPlayerTitle(speaker);
+    if (this.isPlayerSameSect(speaker)) {
+      speaker.receiveMessage(`守山弟子抱拳道：「${title}请入，自家人不必多礼。」`);
       return;
     }
 
-    // 给外来者发放短时一次性通行许可，由山道房间 PRE_LEAVE 事件在进山时消耗。
+    // 给外来者发放短时一次性通行许可，由山道房间 PRE_LEAVE 事件在进山时消耗
     const passUntil = Date.now() + 3 * 60 * 1000;
     speaker.setTemp('sect/songyang_gate_pass_until', passUntil);
-    speaker.receiveMessage('守山弟子侧身让出半步：「可入山门一次，办完事速退。」');
+    speaker.receiveMessage(`守山弟子侧身让出半步：「${title}可入山门一次，办完事速退。」`);
+  }
+
+  /**
+   * 玩家进入山门：外来者高概率盘问（~50%）
+   */
+  onPlayerEnter(player: PlayerBase): void {
+    // 同门不盘问
+    if (this.isPlayerSameSect(player)) return;
+    if (Math.random() > 0.5) return;
+
+    const title = this.getPlayerTitle(player);
+    const env = this.getEnvironment();
+    if (!env || !(env instanceof RoomBase)) return;
+
+    const lines = [
+      `守山弟子警觉地拦住去路：「${title}且慢，此乃嵩阳重地，先报来意。」`,
+      `守山弟子上前一步，按住剑柄：「${title}是何人？来此何事？」`,
+      `守山弟子目光审视：「山门不是闲人出入之地，${title}请说明来意。」`,
+    ];
+    const msg = lines[Math.floor(Math.random() * lines.length)];
+    player.receiveMessage(msg);
   }
 }

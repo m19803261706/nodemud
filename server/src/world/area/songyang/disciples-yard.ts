@@ -17,6 +17,7 @@ export default class SongyangDisciplesYard extends RoomBase {
     this.set('exits', {
       east: 'area/songyang/gate',
       north: 'area/songyang/scripture-pavilion',
+      south: 'area/songyang/herb-garden',
     });
   }
 }

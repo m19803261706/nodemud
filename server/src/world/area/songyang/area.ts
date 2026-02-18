@@ -13,18 +13,34 @@ export default class SongyangArea extends Area {
     this.set('region', '中原·嵩山');
     this.set('level_range', { min: 3, max: 15 });
     this.set('rooms', [
-      'area/songyang/mountain-path',
+      // 宗门核心区
+      'area/songyang/master-retreat',
+      'area/songyang/practice-cliff',
+      'area/songyang/tianyan-stele',
+      'area/songyang/meditation-room',
+      'area/songyang/scripture-pavilion',
+      'area/songyang/hall',
+      'area/songyang/deacon-court',
+      'area/songyang/discipline-hall',
+      'area/songyang/disciples-yard',
+      'area/songyang/herb-garden',
       'area/songyang/gate',
       'area/songyang/drill-ground',
-      'area/songyang/hall',
-      'area/songyang/disciples-yard',
-      'area/songyang/scripture-pavilion',
-      'area/songyang/deacon-court',
-      'area/songyang/meditation-room',
       'area/songyang/armory',
+      // 嵩阳山道
+      'area/songyang/mountain-path',
+      'area/songyang/pine-pavilion',
+      'area/songyang/mountain-path-middle',
+      'area/songyang/mountain-stream',
+      'area/songyang/rocky-slope',
+      'area/songyang/mountain-path-lower',
+      // 官道
+      'area/songyang/road-songshan',
+      'area/songyang/road-rift',
     ]);
 
     this.set('spawn_rules', [
+      // 宗门核心 NPC
       {
         blueprintId: 'npc/songyang/master-li',
         roomId: 'area/songyang/hall',
@@ -78,6 +94,38 @@ export default class SongyangArea extends Area {
         roomId: 'area/songyang/gate',
         count: 1,
         interval: 300000,
+      },
+      // 新增 NPC
+      {
+        blueprintId: 'npc/songyang/herb-disciple',
+        roomId: 'area/songyang/herb-garden',
+        count: 1,
+        interval: 300000,
+      },
+      {
+        blueprintId: 'npc/songyang/patrol-disciple',
+        roomId: 'area/songyang/pine-pavilion',
+        count: 1,
+        interval: 300000,
+      },
+      // 野怪
+      {
+        blueprintId: 'npc/songyang/mountain-bandit',
+        roomId: 'area/songyang/rocky-slope',
+        count: 2,
+        interval: 60000,
+      },
+      {
+        blueprintId: 'npc/songyang/bandit-leader',
+        roomId: 'area/songyang/rocky-slope',
+        count: 1,
+        interval: 120000,
+      },
+      {
+        blueprintId: 'npc/songyang/wild-wolf',
+        roomId: 'area/songyang/mountain-stream',
+        count: 2,
+        interval: 60000,
       },
     ]);
 

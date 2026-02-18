@@ -13,6 +13,7 @@ import { SectEmptyState } from './SectEmptyState';
 import { SectOverview } from './SectOverview';
 import { RankProgress } from './RankProgress';
 import { SectProgress } from './SectProgress';
+import { SectTaskPanel } from './SectTaskPanel';
 import { SectActions } from './SectActions';
 import { LogScrollView } from '../shared/LogScrollView';
 
@@ -62,6 +63,9 @@ export const SectPage = () => {
                 contribution={sectInfo.overview.contribution}
                 nextRank={sectInfo.overview.nextRank}
               />
+
+              {/* 门派任务 */}
+              <SectTaskPanel />
 
               {/* 日常/进度 */}
               {sectInfo.progress ? (

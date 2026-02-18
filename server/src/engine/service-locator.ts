@@ -18,6 +18,8 @@ import type { SkillService } from '../skill/skill.service';
 import type { SkillRegistry } from './skills/skill-registry';
 import type { PracticeManager } from './skills/practice-manager';
 import type { SectManager } from './sect/sect-manager';
+import type { SectTaskManager } from './sect/sect-task-manager';
+import type { SectTaskTracker } from './sect/sect-task-tracker';
 import type { WorkManager } from './work/work-manager';
 
 export class ServiceLocator {
@@ -51,6 +53,8 @@ export class ServiceLocator {
 
   // Layer 8 门派服务
   static sectManager: SectManager;
+  static sectTaskManager: SectTaskManager;
+  static sectTaskTracker: SectTaskTracker;
 
   // Layer 9 打工服务
   static workManager: WorkManager;
@@ -74,6 +78,8 @@ export class ServiceLocator {
     skillRegistry?: SkillRegistry;
     practiceManager?: PracticeManager;
     sectManager?: SectManager;
+    sectTaskManager?: SectTaskManager;
+    sectTaskTracker?: SectTaskTracker;
     workManager?: WorkManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
@@ -91,6 +97,8 @@ export class ServiceLocator {
     if (providers.skillRegistry) this.skillRegistry = providers.skillRegistry;
     if (providers.practiceManager) this.practiceManager = providers.practiceManager;
     if (providers.sectManager) this.sectManager = providers.sectManager;
+    if (providers.sectTaskManager) this.sectTaskManager = providers.sectTaskManager;
+    if (providers.sectTaskTracker) this.sectTaskTracker = providers.sectTaskTracker;
     if (providers.workManager) this.workManager = providers.workManager;
     this._initialized = true;
   }
@@ -118,6 +126,8 @@ export class ServiceLocator {
     this.skillRegistry = undefined as any;
     this.practiceManager = undefined as any;
     this.sectManager = undefined as any;
+    this.sectTaskManager = undefined as any;
+    this.sectTaskTracker = undefined as any;
     this.workManager = undefined as any;
   }
 }

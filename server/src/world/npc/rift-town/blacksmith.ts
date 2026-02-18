@@ -4,6 +4,7 @@
  */
 import { NpcBase } from '../../../engine/game-objects/npc-base';
 import { Factions, rt } from '@packages/core';
+import type { PlayerBase } from '../../../engine/game-objects/player-base';
 import {
   type QuestDefinition,
   QuestType,
@@ -32,18 +33,27 @@ export default class Blacksmith extends NpcBase {
     this.set('level', 25);
     this.set('max_hp', 1200);
     this.set('hp', 1200);
+    this.set('personality', 'grumpy');
+    this.set('speech_style', 'crude');
     this.set('chat_chance', 10);
     this.set('chat_msg', [
       '老周铁匠叮叮当当地敲打着铁砧上的红铁。',
       '老周铁匠将一把刚打好的刀放进水桶里，滋——地一声白气升腾。',
       '老周铁匠擦了擦额头上的汗珠，喝了口水。',
+      '老周铁匠嘟囔了一句：「这批铁料杂质太多，又得多淬两遍。」',
     ]);
     this.set('inquiry', {
-      武器: '老周铁匠放下铁锤，爽朗地笑道：「要买兵器？咱这小铺子没什么神兵利器，但打出来的家伙事儿，结实！砍上几百刀都不卷刃。」',
+      武器: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `老周铁匠放下铁锤，爽朗地笑道：「${title}要买兵器？咱这小铺子没什么神兵利器，但打出来的家伙事儿，结实！砍上几百刀都不卷刃。」`;
+      },
       承天朝:
         '老周铁匠摸了摸左臂的旧疤：「承天朝嘛，在那当了十年军匠。后来受了伤，就退下来了。朝廷的事，咱管不了那么多，能踏踏实实打铁就行。」',
       铠甲: '老周铁匠拍了拍胸脯：「铠甲也能打，不过费时费料。你要是真想要，先交定金，我给你量身打一副。」',
-      default: '老周铁匠摆摆手：「这事儿我不懂，你去问别人吧。我就是个打铁的。」',
+      default: (asker) => {
+        const title = this.getPlayerTitle(asker as PlayerBase);
+        return `老周铁匠摆摆手：「${title}，这事儿我不懂，你去问别人吧。我就是个打铁的。」`;
+      },
     });
     this.set('combat_exp', 120);
     this.set('equipment', [

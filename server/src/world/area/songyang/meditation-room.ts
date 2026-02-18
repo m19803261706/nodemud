@@ -16,6 +16,7 @@ export default class SongyangMeditationRoom extends RoomBase {
     this.set('coordinates', { x: 0, y: -7, z: 0 });
     this.set('exits', {
       south: 'area/songyang/hall',
+      north: 'area/songyang/practice-cliff',
     });
   }
 }

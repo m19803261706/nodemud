@@ -6,7 +6,7 @@ import type { ItemBase } from '../../game-objects/item-base';
 import type { LivingBase } from '../../game-objects/living-base';
 import type { NpcBase } from '../../game-objects/npc-base';
 import type { PlayerBase } from '../../game-objects/player-base';
-import type { PlayerSectData } from '../types';
+import type { PlayerSectData, SectAlignment, SectTone, SectTaskTemplate } from '../types';
 import type {
   SectPolicy,
   SectDonationEvaluation,
@@ -20,6 +20,9 @@ export class SongyangPolicy implements SectPolicy {
   readonly sectId = 'songyang';
   readonly sectName = '嵩阳宗';
   readonly factionRequired = 'songyang';
+  readonly alignment: SectAlignment = 'righteous';
+  readonly tone: SectTone = 'orthodox';
+  readonly description = '中古纪残存正统名门，与朝廷关系密切，保守僵化';
 
   readonly ranks: SectRankThreshold[] = [
     { rank: '外门弟子', minContribution: 0 },
@@ -97,5 +100,45 @@ export class SongyangPolicy implements SectPolicy {
       clearRank: true,
       summary: '你已自绝门墙，嵩阳宗自此不再收录。',
     };
+  }
+
+  /** 职位→日常任务上限映射 */
+  private static readonly RANK_DAILY_LIMITS: Record<string, number> = {
+    '外门弟子': 2,
+    '内门弟子': 3,
+    '执礼弟子': 3,
+    '亲传弟子': 4,
+    '嵩阳执事': 5,
+    '嵩阳长老': 5,
+    '首座长老': 5,
+    '副掌门': 5,
+  };
+
+  /** 职位→周常任务上限映射 */
+  private static readonly RANK_WEEKLY_LIMITS: Record<string, number> = {
+    '外门弟子': 1,
+    '内门弟子': 1,
+    '执礼弟子': 2,
+    '亲传弟子': 2,
+    '嵩阳执事': 2,
+    '嵩阳长老': 2,
+    '首座长老': 2,
+    '副掌门': 2,
+  };
+
+  getDailyTaskLimit(rank: string): number {
+    return SongyangPolicy.RANK_DAILY_LIMITS[rank] ?? 2;
+  }
+
+  getWeeklyTaskLimit(rank: string): number {
+    return SongyangPolicy.RANK_WEEKLY_LIMITS[rank] ?? 1;
+  }
+
+  getCustomDailyPool(): SectTaskTemplate[] {
+    return [];
+  }
+
+  getCustomWeeklyPool(): SectTaskTemplate[] {
+    return [];
   }
 }

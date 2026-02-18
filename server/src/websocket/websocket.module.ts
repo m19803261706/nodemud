@@ -19,7 +19,15 @@ import { SkillModule } from '../skill/skill.module';
 
 @Module({
   imports: [AccountModule, CharacterModule, FateModule, EngineModule, SkillModule],
-  providers: [GameGateway, AuthHandler, CharacterHandler, CommandHandler, SkillHandler, MapHandler, SectHandler],
+  providers: [
+    GameGateway,
+    AuthHandler,
+    CharacterHandler,
+    CommandHandler,
+    SkillHandler,
+    MapHandler,
+    SectHandler,
+  ],
   exports: [GameGateway],
 })
 export class WebSocketModule {}
