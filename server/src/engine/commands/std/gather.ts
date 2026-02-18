@@ -2,24 +2,31 @@
  * gather 指令 -- 采集当前房间的资源（药草、矿石等）
  *
  * 检查房间是否有 gatherables 配置，随机采集一种资源。
- * 无冷却、无限采集，对玩家友好。
- * 返回 itemBlueprintId 触发门派任务进度追踪。
+ * 返回 gather_start，由 command.handler 延迟执行物品产出。
+ * 采集期间设置 activity 临时状态，阻止重复采集。
  *
  * 用法: gather / 采集
  */
 import { Command, type ICommand, type CommandResult } from '../../types/command';
 import type { LivingBase } from '../../game-objects/living-base';
+import { PlayerBase } from '../../game-objects/player-base';
+import { ServiceLocator } from '../../service-locator';
 import { rt } from '@packages/core';
 
 /** 可采集资源定义 */
 export interface Gatherable {
   /** 资源 ID，用于任务目标匹配（如 herb-金线草） */
   id: string;
+  /** 物品蓝图 ID，用于创建实际物品（如 item/herb/golden-grass） */
+  blueprintId: string;
   /** 显示名称 */
   name: string;
   /** 采集成功描述（多条随机） */
   messages?: string[];
 }
+
+/** 采集延迟（毫秒） */
+const GATHER_DELAY_MS = 3000;
 
 /** 默认采集描述 */
 const DEFAULT_MESSAGES = [
@@ -36,6 +43,22 @@ export class GatherCommand implements ICommand {
   directory = 'std';
 
   execute(executor: LivingBase, _args: string[]): CommandResult {
+    // 忙碌检查
+    if (executor.isInCombat()) {
+      return { success: false, message: '战斗中无法采集。' };
+    }
+    if (executor.getTemp<string>('activity') === 'gathering') {
+      return { success: false, message: '你正在采集中，稍安勿躁。' };
+    }
+    if (executor instanceof PlayerBase) {
+      if (ServiceLocator.practiceManager?.isInPractice(executor)) {
+        return { success: false, message: '你正在修炼中，无法同时采集。' };
+      }
+      if (ServiceLocator.workManager?.isWorking(executor)) {
+        return { success: false, message: '你正在打工中，无法同时采集。' };
+      }
+    }
+
     const env = executor.getEnvironment();
     if (!env) {
       return { success: false, message: '你不在任何地方。' };
@@ -49,6 +72,9 @@ export class GatherCommand implements ICommand {
     // 随机选一种资源
     const target = gatherables[Math.floor(Math.random() * gatherables.length)];
 
+    // 设置忙碌状态
+    executor.setTemp('activity', 'gathering');
+
     // 随机采集描述
     const messages = target.messages ?? DEFAULT_MESSAGES;
     const template = messages[Math.floor(Math.random() * messages.length)];
@@ -56,11 +82,13 @@ export class GatherCommand implements ICommand {
 
     return {
       success: true,
-      message: msg,
+      message: `${rt('sys', '你开始采集...')}\n${msg}`,
       data: {
-        action: 'gather',
-        itemBlueprintId: target.id,
+        action: 'gather_start',
+        gatherableId: target.id,
+        blueprintId: target.blueprintId,
         itemName: target.name,
+        delay: GATHER_DELAY_MS,
       },
     };
   }

@@ -29,11 +29,7 @@ const WORK_PLANS = {
 
 type WorkPlanKey = keyof typeof WORK_PLANS;
 
-type WorkJobId =
-  | 'rift.copy-script'
-  | 'rift.drill-form'
-  | 'rift.sort-herb'
-  | 'rift.forge-assist';
+type WorkJobId = 'rift.copy-script' | 'rift.drill-form' | 'rift.sort-herb' | 'rift.forge-assist';
 
 interface WorkJobDefinition {
   id: WorkJobId;
@@ -281,6 +277,11 @@ export class WorkManager {
   private readonly logger = new Logger(WorkManager.name);
   private readonly activeSessions = new Map<string, WorkSession>();
 
+  /** 检查玩家是否正在打工 */
+  isWorking(player: PlayerBase): boolean {
+    return this.activeSessions.has(player.id);
+  }
+
   /** look 动作注入：仅在打工 NPC 显示「打工」，进行中显示「停工」 */
   getNpcAvailableActions(player: PlayerBase, npc: NpcBase): string[] {
     const npcBlueprintId = this.getBlueprintId(npc.id);
@@ -439,7 +440,17 @@ export class WorkManager {
     };
   }
 
-  stopWork(player: PlayerBase, reason: 'manual' | 'disconnect' | 'combat' | 'left' | 'resource' | 'cap' | 'finished' = 'manual'): CommandResult {
+  stopWork(
+    player: PlayerBase,
+    reason:
+      | 'manual'
+      | 'disconnect'
+      | 'combat'
+      | 'left'
+      | 'resource'
+      | 'cap'
+      | 'finished' = 'manual',
+  ): CommandResult {
     const session = this.activeSessions.get(player.id);
     if (!session) {
       return { success: false, message: '你当前没有在打工。' };
@@ -561,7 +572,8 @@ export class WorkManager {
     workData.history[session.job.id] = clampToInt(workData.history[session.job.id] ?? 0, 0) + 1;
     this.setWorkData(player, workData);
 
-    const flavor = session.job.roleplayLines[(session.roundsCompleted - 1) % session.job.roleplayLines.length];
+    const flavor =
+      session.job.roleplayLines[(session.roundsCompleted - 1) % session.job.roleplayLines.length];
     const summary = `${rt('sys', `本轮所得：经验 ${gainedExp}，潜能 ${gainedPotential}，银两 ${gainedSilver}。`)}`;
     const remaining = `${rt('sys', `今日剩余：经验 ${Math.max(0, DAILY_EXP_CAP - workData.daily.expEarned)}，潜能 ${Math.max(0, DAILY_POTENTIAL_CAP - workData.daily.potentialEarned)}。`)}`;
     player.receiveMessage(`${rt('npc', session.npcName)}${flavor}\n${summary}\n${remaining}`);
@@ -571,7 +583,10 @@ export class WorkManager {
       return;
     }
 
-    if (workData.daily.expEarned >= DAILY_EXP_CAP && workData.daily.potentialEarned >= DAILY_POTENTIAL_CAP) {
+    if (
+      workData.daily.expEarned >= DAILY_EXP_CAP &&
+      workData.daily.potentialEarned >= DAILY_POTENTIAL_CAP
+    ) {
       this.finishSession(player, session, 'cap');
     }
   }

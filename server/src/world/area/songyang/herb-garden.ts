@@ -23,6 +23,7 @@ export default class SongyangHerbGarden extends RoomBase {
     this.set('gatherables', [
       {
         id: 'herb-金线草',
+        blueprintId: 'item/herb/golden-grass',
         name: '金线草',
         messages: [
           '你蹲在药田旁，拔起一株{name}，根须沾着湿润的泥土。',
@@ -32,6 +33,7 @@ export default class SongyangHerbGarden extends RoomBase {
       },
       {
         id: 'herb-石斛',
+        blueprintId: 'item/herb/dendrobium',
         name: '石斛',
         messages: [
           '你在篱笆边发现几丛{name}，摘下一株。',
@@ -40,6 +42,7 @@ export default class SongyangHerbGarden extends RoomBase {
       },
       {
         id: 'herb-七星莲',
+        blueprintId: 'item/herb/seven-star-lotus',
         name: '七星莲',
         messages: [
           '药田角落长着一小片{name}，你摘下一株。',
@@ -48,6 +51,7 @@ export default class SongyangHerbGarden extends RoomBase {
       },
       {
         id: 'herb-断肠藤',
+        blueprintId: 'item/herb/heartbreak-vine',
         name: '断肠藤',
         messages: [
           '你戴上手套，小心地剪下一段{name}。',
@@ -57,8 +61,6 @@ export default class SongyangHerbGarden extends RoomBase {
     ]);
 
     // 房间动态动作按钮
-    this.set('roomActions', [
-      { id: 'gather', label: '采集', command: 'gather' },
-    ]);
+    this.set('roomActions', [{ id: 'gather', label: '采集', command: 'gather' }]);
   }
 }

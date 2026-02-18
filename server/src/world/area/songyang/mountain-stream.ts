@@ -23,6 +23,7 @@ export default class SongyangMountainStream extends RoomBase {
     this.set('gatherables', [
       {
         id: 'herb-七星莲',
+        blueprintId: 'item/herb/seven-star-lotus',
         name: '七星莲',
         messages: [
           '你在溪边的湿石缝中发现一株{name}，小心摘下。',
@@ -31,6 +32,7 @@ export default class SongyangMountainStream extends RoomBase {
       },
       {
         id: 'herb-断肠藤',
+        blueprintId: 'item/herb/heartbreak-vine',
         name: '断肠藤',
         messages: [
           '崖壁上垂下几条{name}，你攀上去扯下一段。',
@@ -39,14 +41,16 @@ export default class SongyangMountainStream extends RoomBase {
       },
       {
         id: 'herb-金线草',
+        blueprintId: 'item/herb/golden-grass',
         name: '金线草',
-        messages: ['你在溪流转弯处发现几株野生的{name}。', '青苔间夹杂着一株{name}，你弯腰采下。'],
+        messages: [
+          '你在溪流转弯处发现几株野生的{name}。',
+          '青苔间夹杂着一株{name}，你弯腰采下。',
+        ],
       },
     ]);
 
     // 房间动态动作按钮
-    this.set('roomActions', [
-      { id: 'gather', label: '采集', command: 'gather' },
-    ]);
+    this.set('roomActions', [{ id: 'gather', label: '采集', command: 'gather' }]);
   }
 }
