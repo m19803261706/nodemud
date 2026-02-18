@@ -12,7 +12,6 @@ import { useGameStore } from '../../../stores/useGameStore';
 import { SectEmptyState } from './SectEmptyState';
 import { SectOverview } from './SectOverview';
 import { RankProgress } from './RankProgress';
-import { SectSkillGrid } from './SectSkillGrid';
 import { SectProgress } from './SectProgress';
 import { SectActions } from './SectActions';
 import { LogScrollView } from '../shared/LogScrollView';
@@ -63,11 +62,6 @@ export const SectPage = () => {
                 contribution={sectInfo.overview.contribution}
                 nextRank={sectInfo.overview.nextRank}
               />
-
-              {/* 技能网格 */}
-              {sectInfo.skillTree ? (
-                <SectSkillGrid skills={sectInfo.skillTree} />
-              ) : null}
 
               {/* 日常/进度 */}
               {sectInfo.progress ? (
