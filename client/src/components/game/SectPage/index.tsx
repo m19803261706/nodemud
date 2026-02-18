@@ -95,7 +95,7 @@ const s = StyleSheet.create({
     flex: 1,
   },
   scrollView: {
-    flex: 3,
+    flex: 17,
   },
   scrollContent: {
     padding: 4,
@@ -103,7 +103,7 @@ const s = StyleSheet.create({
     paddingBottom: 16,
   },
   logArea: {
-    flex: 1,
+    flex: 3,
     borderWidth: 1,
     borderColor: '#8B7A5A30',
     borderTopWidth: 0,
