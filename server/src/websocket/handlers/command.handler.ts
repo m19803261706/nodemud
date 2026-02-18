@@ -160,56 +160,40 @@ export class CommandHandler {
       }
     }
 
-    // gather 命令成功后：延迟产出物品 + 门派任务进度 + 广播
+    // gather 命令成功后：通过 ActivityManager 管理采集活动
     if (result.success && result.data?.action === 'gather_start') {
-      const delay = (result.data.delay as number) || 3000;
-      const blueprintId = result.data.blueprintId as string;
-      const gatherableId = result.data.gatherableId as string;
-      const itemName = (result.data.itemName as string) || '资源';
-      const playerId = session.playerId!;
+      const activityManager = ServiceLocator.activityManager;
+      if (activityManager) {
+        const blueprintId = result.data.blueprintId as string;
+        const gatherableId = result.data.gatherableId as string;
+        const itemName = (result.data.itemName as string) || '资源';
+        const delay = (result.data.delay as number) || 3000;
 
-      setTimeout(() => {
-        try {
-          const p = this.objectManager.findById(playerId) as PlayerBase | undefined;
-          if (!p || p.getTemp<string>('activity') !== 'gathering') return;
+        activityManager.startActivity(player, {
+          type: 'gathering',
+          label: '采集',
+          stopLabel: '停止采集',
+          delay,
+          onComplete: (p) => {
+            // 创建物品实例并放入背包
+            const item = this.blueprintFactory.clone(blueprintId);
+            item.moveTo(p, { quiet: true });
+            p.receiveMessage(`你采到了${itemName}，放入了背包。`);
+            sendInventoryUpdate(p);
 
-          // 清除忙碌状态
-          p.setTemp('activity', undefined);
+            // 门派任务进度追踪
+            if (ServiceLocator.sectTaskTracker) {
+              ServiceLocator.sectTaskTracker.onObtainItem(p, gatherableId, 1);
+            }
 
-          // 创建物品实例并放入背包
-          const item = this.blueprintFactory.clone(blueprintId);
-          item.moveTo(p, { quiet: true });
-
-          // 通知玩家（发送 commandResult 让前端移除停止按钮）
-          const completeResp = {
-            type: 'commandResult',
-            data: {
-              success: true,
-              message: `你采到了${itemName}，放入了背包。`,
-              data: { action: 'gather_complete' },
-            },
-            timestamp: Date.now(),
-          };
-          p.sendToClient(JSON.stringify(completeResp));
-          sendInventoryUpdate(p);
-
-          // 门派任务进度追踪
-          if (ServiceLocator.sectTaskTracker) {
-            ServiceLocator.sectTaskTracker.onObtainItem(p, gatherableId, 1);
-          }
-
-          // 广播
-          const room = p.getEnvironment() as RoomBase | null;
-          if (room) {
-            room.broadcast(`${p.getName()}采集了一些${itemName}。`, p);
-          }
-        } catch (err) {
-          this.logger.error('采集完成处理失败:', err);
-          // 确保清除忙碌状态
-          const p = this.objectManager.findById(playerId) as PlayerBase | undefined;
-          if (p) p.setTemp('activity', undefined);
-        }
-      }, delay);
+            // 广播
+            const room = p.getEnvironment() as RoomBase | null;
+            if (room) {
+              room.broadcast(`${p.getName()}采集了一些${itemName}。`, p);
+            }
+          },
+        });
+      }
     }
 
     // drop 命令成功后：推送 inventoryUpdate + roomInfo

@@ -47,10 +47,12 @@ export class GatherCommand implements ICommand {
     if (executor.isInCombat()) {
       return { success: false, message: '战斗中无法采集。' };
     }
-    if (executor.getTemp<string>('activity') === 'gathering') {
-      return { success: false, message: '你正在采集中，稍安勿躁。' };
-    }
     if (executor instanceof PlayerBase) {
+      // 通过 ActivityManager 检查通用活动（采集等）
+      if (ServiceLocator.activityManager?.isActive(executor)) {
+        const activity = ServiceLocator.activityManager.getActivity(executor);
+        return { success: false, message: `你正在${activity?.label ?? '忙碌'}中，稍安勿躁。` };
+      }
       if (ServiceLocator.practiceManager?.isInPractice(executor)) {
         return { success: false, message: '你正在修炼中，无法同时采集。' };
       }
@@ -72,8 +74,7 @@ export class GatherCommand implements ICommand {
     // 随机选一种资源
     const target = gatherables[Math.floor(Math.random() * gatherables.length)];
 
-    // 设置忙碌状态
-    executor.setTemp('activity', 'gathering');
+    // 注意：不在此处设置忙碌状态，由 ActivityManager.startActivity() 统一管理
 
     // 随机采集描述
     const messages = target.messages ?? DEFAULT_MESSAGES;

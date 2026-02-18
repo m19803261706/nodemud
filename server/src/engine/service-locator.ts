@@ -21,6 +21,7 @@ import type { SectManager } from './sect/sect-manager';
 import type { SectTaskManager } from './sect/sect-task-manager';
 import type { SectTaskTracker } from './sect/sect-task-tracker';
 import type { WorkManager } from './work/work-manager';
+import type { ActivityManager } from './activity/activity-manager';
 
 export class ServiceLocator {
   // Layer 1 服务
@@ -59,6 +60,9 @@ export class ServiceLocator {
   // Layer 9 打工服务
   static workManager: WorkManager;
 
+  // Layer 10 活动管理器（采集等延迟活动）
+  static activityManager: ActivityManager;
+
   private static _initialized = false;
 
   /** 初始化服务定位器（由 EngineModule 调用） */
@@ -81,6 +85,7 @@ export class ServiceLocator {
     sectTaskManager?: SectTaskManager;
     sectTaskTracker?: SectTaskTracker;
     workManager?: WorkManager;
+    activityManager?: ActivityManager;
   }): void {
     this.heartbeatManager = providers.heartbeatManager;
     this.objectManager = providers.objectManager;
@@ -100,6 +105,7 @@ export class ServiceLocator {
     if (providers.sectTaskManager) this.sectTaskManager = providers.sectTaskManager;
     if (providers.sectTaskTracker) this.sectTaskTracker = providers.sectTaskTracker;
     if (providers.workManager) this.workManager = providers.workManager;
+    if (providers.activityManager) this.activityManager = providers.activityManager;
     this._initialized = true;
   }
 
@@ -129,5 +135,6 @@ export class ServiceLocator {
     this.sectTaskManager = undefined as any;
     this.sectTaskTracker = undefined as any;
     this.workManager = undefined as any;
+    this.activityManager = undefined as any;
   }
 }

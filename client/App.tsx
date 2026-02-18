@@ -262,23 +262,6 @@ function App(): React.JSX.Element {
       if (data.success && data.data?.action === 'buy') {
         useGameStore.getState().applyShopBuyResult(data.data);
       }
-      // 采集开始 → 显示停止按钮
-      if (data.success && data.data?.action === 'gather_start') {
-        useGameStore.getState().upsertLogQuickAction({
-          id: ACTIVITY_STOP_ACTION_ID,
-          label: '停止采集',
-          command: 'stop',
-          consumeOnPress: true,
-        });
-      }
-      // 采集完成/停止 → 移除停止按钮
-      if (
-        data.success &&
-        (data.data?.action === 'gather_complete' ||
-          (data.data?.action === 'stop' && data.data?.activity === 'gathering'))
-      ) {
-        useGameStore.getState().removeLogQuickAction(ACTIVITY_STOP_ACTION_ID);
-      }
       // 有消息 → 写入日志（失败红色，成功默认色）
       if (data.message) {
         const { appendLog } = useGameStore.getState();
@@ -529,6 +512,22 @@ function App(): React.JSX.Element {
       useGameStore.getState().updateSectTaskProgress(data);
     };
 
+    /** 活动状态更新（通用忙碌管理器） → 动态显示/隐藏停止按钮 */
+    const handleActivityUpdate = (data: any) => {
+      const { upsertLogQuickAction, removeLogQuickAction } =
+        useGameStore.getState();
+      if (data.status === 'started' && data.stopLabel) {
+        upsertLogQuickAction({
+          id: ACTIVITY_STOP_ACTION_ID,
+          label: data.stopLabel,
+          command: 'stop',
+          consumeOnPress: true,
+        });
+      } else if (data.status === 'completed' || data.status === 'stopped') {
+        removeLogQuickAction(ACTIVITY_STOP_ACTION_ID);
+      }
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -558,6 +557,7 @@ function App(): React.JSX.Element {
     wsService.on('sectTaskCompleteResult', handleSectTaskCompleteResult);
     wsService.on('sectTaskAbandonResult', handleSectTaskAbandonResult);
     wsService.on('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
+    wsService.on('activityUpdate', handleActivityUpdate);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -589,6 +589,7 @@ function App(): React.JSX.Element {
       wsService.off('sectTaskCompleteResult', handleSectTaskCompleteResult);
       wsService.off('sectTaskAbandonResult', handleSectTaskAbandonResult);
       wsService.off('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
+      wsService.off('activityUpdate', handleActivityUpdate);
     };
   }, []);
 

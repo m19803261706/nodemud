@@ -24,16 +24,19 @@ export class StopCommand implements ICommand {
       return { success: false, message: '只有玩家才能使用此指令。' };
     }
 
+    const activityManager = ServiceLocator.activityManager;
     const practiceManager = ServiceLocator.practiceManager;
     const workManager = ServiceLocator.workManager;
 
-    // 检查是否在采集中
-    if (executor.getTemp<string>('activity') === 'gathering') {
-      executor.setTemp('activity', undefined);
+    // 检查是否有通用活动（采集等），由 ActivityManager 统一管理
+    if (activityManager?.isActive(executor as any)) {
+      const activity = activityManager.getActivity(executor as any);
+      activityManager.stopActivity(executor as any);
+      // ActivityManager 会推送 activityUpdate（stopped），前端自动移除停止按钮
       return {
         success: true,
-        message: '你停下了手中的采集。',
-        data: { action: 'stop', activity: 'gathering' },
+        message: `你停止了${activity?.label ?? '当前活动'}。`,
+        data: { action: 'stop', activity: activity?.type },
       };
     }
 

@@ -75,6 +75,8 @@ import './handlers/sectTaskComplete';
 import './handlers/sectTaskCompleteResult';
 import './handlers/sectTaskAbandon';
 import './handlers/sectTaskProgressUpdate';
+// 活动状态消息
+import './handlers/activityUpdate';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

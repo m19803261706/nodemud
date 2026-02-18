@@ -27,6 +27,7 @@ import { SectRegistry } from './sect/sect-registry';
 import { SectManager } from './sect/sect-manager';
 import { SongyangPolicy } from './sect/policies/songyang.policy';
 import { WorkManager } from './work/work-manager';
+import { ActivityManager } from './activity/activity-manager';
 import { SectTaskManager } from './sect/sect-task-manager';
 import { SectTaskTracker } from './sect/sect-task-tracker';
 import { COMMON_TASK_TEMPLATES } from './sect/sect-task-templates';
@@ -51,6 +52,7 @@ import { COMMON_TASK_TEMPLATES } from './sect/sect-task-templates';
     SectManager,
     SongyangPolicy,
     WorkManager,
+    ActivityManager,
     SectTaskManager,
     SectTaskTracker,
   ],
@@ -71,6 +73,7 @@ import { COMMON_TASK_TEMPLATES } from './sect/sect-task-templates';
     SectRegistry,
     SectManager,
     WorkManager,
+    ActivityManager,
     SectTaskManager,
     SectTaskTracker,
   ],
@@ -97,6 +100,7 @@ export class EngineModule implements OnModuleInit {
     private readonly sectManager: SectManager,
     private readonly songyangPolicy: SongyangPolicy,
     private readonly workManager: WorkManager,
+    private readonly activityManager: ActivityManager,
     private readonly sectTaskManager: SectTaskManager,
     private readonly sectTaskTracker: SectTaskTracker,
   ) {}
@@ -136,6 +140,7 @@ export class EngineModule implements OnModuleInit {
       sectTaskManager: this.sectTaskManager,
       sectTaskTracker: this.sectTaskTracker,
       workManager: this.workManager,
+      activityManager: this.activityManager,
     });
     // 设置 PracticeManager 的技能注册表引用
     this.practiceManager.setSkillRegistry(this.skillRegistry);
