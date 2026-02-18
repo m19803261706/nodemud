@@ -11,7 +11,9 @@ import { Area } from './game-objects/area';
 import { NpcBase } from './game-objects/npc-base';
 import { ItemBase } from './game-objects/item-base';
 import { LivingBase } from './game-objects/living-base';
+import { RoomBase } from './game-objects/room-base';
 import type { SpawnRule } from './game-objects/area';
+import { notifyRoomObjectAdded } from '../websocket/handlers/room-utils';
 
 /** NPC 心跳间隔（毫秒） */
 const NPC_HEARTBEAT_INTERVAL = 2000;
@@ -153,6 +155,11 @@ export class SpawnManager {
 
       npc.moveTo(room, { quiet: true });
       npc.enableHeartbeat(NPC_HEARTBEAT_INTERVAL);
+
+      // 增量通知房间内在场玩家：NPC 重生出现
+      if (room instanceof RoomBase) {
+        notifyRoomObjectAdded(room as RoomBase, npc);
+      }
 
       const name = (npc as NpcBase).getName?.() ?? npc.id;
       this.logger.log(`NPC 重生完成: ${name} → ${roomId}`);

@@ -36,9 +36,10 @@ export class RemainsBase extends ContainerBase {
     }
   }
 
-  /** 腐烂消失：广播消息后销毁 */
+  /** 腐烂消失：广播消息后销毁，增量通知在场玩家 */
   private decay(): void {
     const env = this.getEnvironment();
+    const remainsId = this.id;
     if (env) {
       // 延迟引入避免循环依赖
       const { RoomBase } = require('./room-base');
@@ -47,6 +48,14 @@ export class RemainsBase extends ContainerBase {
       }
     }
     this.destroy();
+    // 销毁后通知房间内玩家移除此物品
+    if (env) {
+      const { RoomBase } = require('./room-base');
+      const { notifyRoomObjectRemoved } = require('../../websocket/handlers/room-utils');
+      if (env instanceof RoomBase) {
+        notifyRoomObjectRemoved(env, remainsId, 'item');
+      }
+    }
   }
 
   /** 覆写：销毁时内容物一并消失，不散落到上层 */

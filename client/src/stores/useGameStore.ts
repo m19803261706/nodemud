@@ -294,6 +294,8 @@ export interface GameState {
   // NPC
   nearbyNpcs: NpcData[];
   setNpcs: (npcs: NpcData[]) => void;
+  addNpc: (npc: NpcData) => void;
+  removeNpc: (npcId: string) => void;
 
   // NPC 详情弹窗
   npcDetail: NpcDetailData | null;
@@ -323,6 +325,8 @@ export interface GameState {
   // 地面物品
   groundItems: ItemBrief[];
   setGroundItems: (items: ItemBrief[]) => void;
+  addGroundItem: (item: ItemBrief) => void;
+  removeGroundItem: (itemId: string) => void;
 
   // 物品详情弹窗（容器/普通物品）
   itemDetail: ItemDetailData | null;
@@ -530,6 +534,16 @@ export const useGameStore = create<GameState>(set => ({
   // NPC
   nearbyNpcs: [],
   setNpcs: npcs => set({ nearbyNpcs: npcs }),
+  addNpc: npc =>
+    set(state => ({
+      nearbyNpcs: state.nearbyNpcs.some(n => n.id === npc.id)
+        ? state.nearbyNpcs
+        : [...state.nearbyNpcs, npc],
+    })),
+  removeNpc: npcId =>
+    set(state => ({
+      nearbyNpcs: state.nearbyNpcs.filter(n => n.id !== npcId),
+    })),
 
   // NPC 详情弹窗
   npcDetail: null,
@@ -591,6 +605,16 @@ export const useGameStore = create<GameState>(set => ({
   // 地面物品
   groundItems: [],
   setGroundItems: items => set({ groundItems: items }),
+  addGroundItem: item =>
+    set(state => ({
+      groundItems: state.groundItems.some(i => i.id === item.id)
+        ? state.groundItems
+        : [...state.groundItems, item],
+    })),
+  removeGroundItem: itemId =>
+    set(state => ({
+      groundItems: state.groundItems.filter(i => i.id !== itemId),
+    })),
   itemDetail: null,
   setItemDetail: detail => set({ itemDetail: detail }),
 
@@ -653,7 +677,8 @@ export const useGameStore = create<GameState>(set => ({
             ? false
             : state.combat.awaitingAction,
           // availableActions 始终由服务端最新推送决定
-          availableActions: data.availableActions ?? state.combat.availableActions,
+          availableActions:
+            data.availableActions ?? state.combat.availableActions,
           actionTimeout: resolvedPlayerAction ? 0 : state.combat.actionTimeout,
         };
       })(),

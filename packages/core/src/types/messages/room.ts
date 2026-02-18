@@ -27,6 +27,25 @@ export interface NpcBrief {
   hasQuestReady?: boolean; // 是否有可交付任务
 }
 
+/** 房间对象新增消息（增量推送，服务端 → 客户端） */
+export interface RoomObjectAddedMessage extends ServerMessage {
+  type: 'roomObjectAdded';
+  data: {
+    objectType: 'npc' | 'item';
+    npc?: NpcBrief;
+    item?: ItemBrief;
+  };
+}
+
+/** 房间对象移除消息（增量推送，服务端 → 客户端） */
+export interface RoomObjectRemovedMessage extends ServerMessage {
+  type: 'roomObjectRemoved';
+  data: {
+    objectType: 'npc' | 'item';
+    objectId: string;
+  };
+}
+
 /** 房间信息消息（服务端 → 客户端） */
 export interface RoomInfoMessage extends ServerMessage {
   type: 'roomInfo';

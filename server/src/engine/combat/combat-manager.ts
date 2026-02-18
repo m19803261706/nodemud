@@ -213,11 +213,7 @@ export class CombatManager implements OnModuleInit {
         }
       } else {
         this.handleVictoryRewards(player, enemy);
-        // NPC 死亡后房间状态已变（NPC 移除 + 残骸生成），刷新客户端房间信息
-        const room = player.getEnvironment() as RoomBase | null;
-        if (room) {
-          sendRoomInfo(player, room, ServiceLocator.blueprintFactory);
-        }
+        // NPC 死亡后 NpcBase.die() 已通过增量消息自动推送 roomObjectAdded/Removed
       }
     }
 

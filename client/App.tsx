@@ -40,12 +40,54 @@ function stripRichTags(text: string): string {
   return text.replace(/\[[^\]]+\]/g, '');
 }
 
-function buildLocationActions(exits: string[] | undefined): string[] {
-  const actions = ['回城', '飞行', '地图', '邮件'];
-  const exitSet = new Set(exits ?? []);
-  if (exitSet.has('up')) actions.push('上楼');
-  if (exitSet.has('down')) actions.push('下楼');
-  return actions;
+/** 八方向集合 — 属于九宫格导航的标准方向 */
+const STANDARD_DIRS = new Set([
+  'north',
+  'south',
+  'east',
+  'west',
+  'northeast',
+  'northwest',
+  'southeast',
+  'southwest',
+]);
+
+/** 特殊出口中文标签映射 */
+const SPECIAL_EXIT_LABEL: Record<string, string> = {
+  up: '上楼',
+  down: '下楼',
+  enter: '进入',
+  out: '出去',
+  climb: '攀爬',
+};
+
+/** 特殊出口 → logQuickAction ID 前缀 */
+const SPECIAL_EXIT_ACTION_PREFIX = 'exit-';
+
+function buildLocationActions(): string[] {
+  return ['回城', '飞行', '地图', '邮件'];
+}
+
+/** 从 exits 中提取非八方向的特殊出口，生成 logQuickAction 列表 */
+function buildSpecialExitActions(
+  exits: string[],
+  exitNames?: Record<string, string>,
+): { id: string; label: string; command: string; consumeOnPress: boolean }[] {
+  return exits
+    .filter(dir => !STANDARD_DIRS.has(dir))
+    .map(dir => {
+      // 优先用目标房间名，其次用固定映射，最后用原始方向
+      const targetName = exitNames?.[dir];
+      const label = targetName
+        ? `${SPECIAL_EXIT_LABEL[dir] || dir}·${targetName}`
+        : SPECIAL_EXIT_LABEL[dir] || dir;
+      return {
+        id: `${SPECIAL_EXIT_ACTION_PREFIX}${dir}`,
+        label,
+        command: `go ${dir}`,
+        consumeOnPress: false,
+      };
+    });
 }
 
 /** 应用根组件 */
@@ -99,6 +141,7 @@ function App(): React.JSX.Element {
         setNpcs,
         setGroundItems,
         removeLogQuickAction,
+        upsertLogQuickAction,
         setWorkListDetail,
       } = useGameStore.getState();
       // 截取地点名（去掉区域前缀，如"裂隙镇·镇中广场" → "镇中广场"）
@@ -107,7 +150,7 @@ function App(): React.JSX.Element {
         : data.short;
       setLocation({
         name: shortName,
-        actions: buildLocationActions(data.exits),
+        actions: buildLocationActions(),
         description: data.long,
       });
       setDirections(exitsToDirections(data.exits, shortName, data.exitNames));
@@ -115,6 +158,18 @@ function App(): React.JSX.Element {
       setGroundItems(data.items ?? []);
       useGameStore.getState().setShopListDetail(null);
       setWorkListDetail(null);
+
+      // 清除上一个房间的特殊出口按钮，添加当前房间的
+      const { logQuickActions } = useGameStore.getState();
+      logQuickActions
+        .filter(a => a.id.startsWith(SPECIAL_EXIT_ACTION_PREFIX))
+        .forEach(a => removeLogQuickAction(a.id));
+
+      const specialExits = buildSpecialExitActions(
+        data.exits ?? [],
+        data.exitNames,
+      );
+      specialExits.forEach(action => upsertLogQuickAction(action));
 
       if (shortName !== '嵩阳山道') {
         removeLogQuickAction(SONGYANG_GATE_INTENT_ACTION_ID);
@@ -368,6 +423,20 @@ function App(): React.JSX.Element {
       }
     };
 
+    /** 房间对象新增 → 增量更新 NPC/地面物品列表 */
+    const handleRoomObjectAdded = (data: any) => {
+      const { addNpc, addGroundItem } = useGameStore.getState();
+      if (data.objectType === 'npc' && data.npc) addNpc(data.npc);
+      else if (data.objectType === 'item' && data.item) addGroundItem(data.item);
+    };
+
+    /** 房间对象移除 → 增量更新 NPC/地面物品列表 */
+    const handleRoomObjectRemoved = (data: any) => {
+      const { removeNpc, removeGroundItem } = useGameStore.getState();
+      if (data.objectType === 'npc') removeNpc(data.objectId);
+      else if (data.objectType === 'item') removeGroundItem(data.objectId);
+    };
+
     /** 地图响应 → 写入 store + 显示弹窗 */
     const handleMapResponse = (data: any) => {
       const { setMapData, setMapVisible } = useGameStore.getState();
@@ -403,6 +472,8 @@ function App(): React.JSX.Element {
     wsService.on('practiceUpdate', handlePracticeUpdate);
     wsService.on('skillLearnResult', handleSkillLearnResult);
     wsService.on('exertResult', handleExertResult);
+    wsService.on('roomObjectAdded', handleRoomObjectAdded);
+    wsService.on('roomObjectRemoved', handleRoomObjectRemoved);
     wsService.on('mapResponse', handleMapResponse);
     wsService.on('navigateResponse', handleNavigateResponse);
 
@@ -426,6 +497,8 @@ function App(): React.JSX.Element {
       wsService.off('practiceUpdate', handlePracticeUpdate);
       wsService.off('skillLearnResult', handleSkillLearnResult);
       wsService.off('exertResult', handleExertResult);
+      wsService.off('roomObjectAdded', handleRoomObjectAdded);
+      wsService.off('roomObjectRemoved', handleRoomObjectRemoved);
       wsService.off('mapResponse', handleMapResponse);
       wsService.off('navigateResponse', handleNavigateResponse);
     };

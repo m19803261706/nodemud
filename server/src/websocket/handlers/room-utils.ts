@@ -5,7 +5,8 @@
 
 import { MessageFactory } from '@packages/core';
 import type { NpcBrief, ItemBrief, InventoryItem } from '@packages/core';
-import type { PlayerBase } from '../../engine/game-objects/player-base';
+import { BaseEntity } from '../../engine/base-entity';
+import { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
 import { NpcBase } from '../../engine/game-objects/npc-base';
 import { ItemBase } from '../../engine/game-objects/item-base';
@@ -66,6 +67,56 @@ function resolveExitNames(
 }
 
 /**
+ * 构建 NPC 简要信息（复用于 sendRoomInfo 和增量通知）
+ * @param npc NPC 实例
+ * @param player 可选，传入时标记任务状态
+ */
+function buildNpcBrief(npc: NpcBase, player?: PlayerBase): NpcBrief {
+  const brief: NpcBrief = {
+    id: npc.id,
+    name: npc.getName(),
+    title: npc.get<string>('title') || '',
+    gender: npc.get<string>('gender') || 'male',
+    faction: npc.get<string>('visible_faction') || '',
+    level: npc.get<number>('level') || 1,
+    hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
+    attitude: npc.get<string>('attitude') || 'neutral',
+  };
+
+  // 任务系统：标记 NPC 是否有可接/可交付任务
+  if (player && ServiceLocator.questManager) {
+    const npcBlueprintId = npc.id.split('#')[0];
+    const questBriefs = ServiceLocator.questManager.getNpcQuestBriefs(player, npcBlueprintId);
+    if (questBriefs.length > 0) {
+      brief.hasQuest = questBriefs.some((q) => q.state === 'available');
+      brief.hasQuestReady = questBriefs.some((q) => q.state === 'ready');
+    }
+  }
+
+  return brief;
+}
+
+/**
+ * 构建物品简要信息（复用于 sendRoomInfo 和增量通知）
+ */
+function buildItemBrief(item: ItemBase): ItemBrief {
+  const brief: ItemBrief = {
+    id: item.id,
+    name: item.getName(),
+    short: item.getShort(),
+    type: item.getType(),
+  };
+  if (item instanceof ContainerBase) {
+    brief.isContainer = true;
+    brief.contentCount = item.getContents().length;
+  }
+  if (item instanceof RemainsBase) {
+    brief.isRemains = true;
+  }
+  return brief;
+}
+
+/**
  * 向玩家发送当前房间信息
  */
 export function sendRoomInfo(
@@ -77,55 +128,15 @@ export function sendRoomInfo(
   const exits = room.getExits();
   const exitNames = resolveExitNames(exits, blueprintFactory);
 
-  // 收集房间内 NPC 列表
   const npcs: NpcBrief[] = room
     .getInventory()
     .filter((e): e is NpcBase => e instanceof NpcBase)
-    .map((npc) => {
-      const brief: NpcBrief = {
-        id: npc.id,
-        name: npc.getName(),
-        title: npc.get<string>('title') || '',
-        gender: npc.get<string>('gender') || 'male',
-        faction: npc.get<string>('visible_faction') || '',
-        level: npc.get<number>('level') || 1,
-        hpPct: Math.round(((npc.get<number>('hp') || 0) / (npc.get<number>('max_hp') || 1)) * 100),
-        attitude: npc.get<string>('attitude') || 'neutral',
-      };
+    .map((npc) => buildNpcBrief(npc, player));
 
-      // 任务系统：标记 NPC 是否有可接/可交付任务
-      if (ServiceLocator.questManager) {
-        const npcBlueprintId = npc.id.split('#')[0];
-        const questBriefs = ServiceLocator.questManager.getNpcQuestBriefs(player, npcBlueprintId);
-        if (questBriefs.length > 0) {
-          brief.hasQuest = questBriefs.some((q) => q.state === 'available');
-          brief.hasQuestReady = questBriefs.some((q) => q.state === 'ready');
-        }
-      }
-
-      return brief;
-    });
-
-  // 收集房间内地面物品列表
   const items: ItemBrief[] = room
     .getInventory()
     .filter((e): e is ItemBase => e instanceof ItemBase)
-    .map((item) => {
-      const brief: ItemBrief = {
-        id: item.id,
-        name: item.getName(),
-        short: item.getShort(),
-        type: item.getType(),
-      };
-      if (item instanceof ContainerBase) {
-        brief.isContainer = true;
-        brief.contentCount = item.getContents().length;
-      }
-      if (item instanceof RemainsBase) {
-        brief.isRemains = true;
-      }
-      return brief;
-    });
+    .map((item) => buildItemBrief(item));
 
   const msg = MessageFactory.create(
     'roomInfo',
@@ -139,6 +150,55 @@ export function sendRoomInfo(
   );
   if (msg) {
     player.sendToClient(MessageFactory.serialize(msg));
+  }
+}
+
+/**
+ * 通知房间内所有玩家：新对象加入
+ * 增量消息的 NpcBrief 不携带任务标记（不同玩家看到的任务状态不同），
+ * 玩家下次进入房间时 sendRoomInfo 会覆盖完整数据。
+ */
+export function notifyRoomObjectAdded(room: RoomBase, entity: BaseEntity): void {
+  let objectType: 'npc' | 'item';
+  let brief: NpcBrief | ItemBrief;
+
+  if (entity instanceof NpcBase) {
+    objectType = 'npc';
+    brief = buildNpcBrief(entity);
+  } else if (entity instanceof ItemBase) {
+    objectType = 'item';
+    brief = buildItemBrief(entity);
+  } else {
+    return;
+  }
+
+  const msg = MessageFactory.create('roomObjectAdded', objectType, brief);
+  if (!msg) return;
+  const serialized = MessageFactory.serialize(msg);
+
+  for (const occupant of room.getInventory()) {
+    if (occupant instanceof PlayerBase) {
+      occupant.sendToClient(serialized);
+    }
+  }
+}
+
+/**
+ * 通知房间内所有玩家：对象移除
+ */
+export function notifyRoomObjectRemoved(
+  room: RoomBase,
+  entityId: string,
+  objectType: 'npc' | 'item',
+): void {
+  const msg = MessageFactory.create('roomObjectRemoved', objectType, entityId);
+  if (!msg) return;
+  const serialized = MessageFactory.serialize(msg);
+
+  for (const occupant of room.getInventory()) {
+    if (occupant instanceof PlayerBase) {
+      occupant.sendToClient(serialized);
+    }
   }
 }
 

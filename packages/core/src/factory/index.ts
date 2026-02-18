@@ -23,6 +23,8 @@ import './handlers/toast';
 import './handlers/alert';
 // 房间信息消息
 import './handlers/roomInfo';
+import './handlers/roomObjectAdded';
+import './handlers/roomObjectRemoved';
 // 玩家属性消息
 import './handlers/playerStats';
 // 物品/背包消息
