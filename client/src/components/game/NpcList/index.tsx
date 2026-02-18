@@ -68,6 +68,7 @@ export const NpcList = () => {
   const setWorkListDetail = useGameStore(state => state.setWorkListDetail);
   const groundItems = useGameStore(state => state.groundItems);
   const sendCommand = useGameStore(state => state.sendCommand);
+  const setActiveTab = useGameStore(state => state.setActiveTab);
   const [npcSkillPanelDetail, setNpcSkillPanelDetail] =
     useState<NpcDetailData | null>(null);
   const npcSkillItems = useMemo(
@@ -154,6 +155,10 @@ export const NpcList = () => {
         }}
         onGive={(itemName, npcName) => {
           sendCommand(`give ${itemName} to ${npcName}`);
+        }}
+        onSectTask={() => {
+          setNpcDetail(null);
+          setActiveTab('门派');
         }}
         onQuestAccept={(questId, npcId) => {
           wsService.send(

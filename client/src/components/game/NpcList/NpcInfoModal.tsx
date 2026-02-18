@@ -83,6 +83,7 @@ interface NpcInfoModalProps {
   onGive: (itemName: string, npcName: string) => void;
   onQuestAccept: (questId: string, npcId: string) => void;
   onQuestComplete: (questId: string, npcId: string) => void;
+  onSectTask: () => void;
 }
 
 interface NpcActionButton {
@@ -155,6 +156,7 @@ export const NpcInfoModal = ({
   onGive,
   onQuestAccept,
   onQuestComplete,
+  onSectTask,
 }: NpcInfoModalProps) => {
   const [actionListMode, setActionListMode] = useState<
     'give' | 'sell' | 'donate' | null
@@ -204,11 +206,14 @@ export const NpcInfoModal = ({
   const canDonate = hasActions ? actionSet.has('donate') : false;
   const canRent = hasActions ? actionSet.has('rent') : false;
   const rentLabel =
-    typeof detail.rentPrice === 'number' ? `住店(${detail.rentPrice}两)` : '住店';
+    typeof detail.rentPrice === 'number'
+      ? `住店(${detail.rentPrice}两)`
+      : '住店';
   const canWork = hasActions ? actionSet.has('work') : false;
   const canWorkStop = hasActions ? actionSet.has('workStop') : false;
   const canSpar = hasActions ? actionSet.has('spar') : false;
   const canBetray = hasActions ? actionSet.has('betray') : false;
+  const canSectTask = hasActions ? actionSet.has('sectTask') : false;
   const canAttack = hasActions
     ? actionSet.has('attack')
     : (detail.capabilities?.attack ?? true);
@@ -319,6 +324,17 @@ export const NpcInfoModal = ({
       label: '演武',
       onPress: () => {
         onSpar(detail.name);
+        handleClose();
+      },
+    });
+  }
+
+  if (canSectTask) {
+    actionButtons.push({
+      key: 'sect-task',
+      label: '门派任务',
+      onPress: () => {
+        onSectTask();
         handleClose();
       },
     });

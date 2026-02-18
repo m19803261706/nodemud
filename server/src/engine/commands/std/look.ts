@@ -262,6 +262,7 @@ export class LookCommand implements ICommand {
     if (sectActions.includes('donate')) actions.push('donate');
     if (sectActions.includes('spar')) actions.push('spar');
     if (sectActions.includes('betray')) actions.push('betray');
+    if (sectActions.includes('sectTask')) actions.push('sectTask');
 
     const workActions = this.getNpcWorkActions(npc, executor);
     if (workActions.includes('work')) actions.push('work');

@@ -80,6 +80,11 @@ export class SectManager {
       actions.push('betray');
     }
 
+    // 门派任务发布 NPC
+    if (npc.get<boolean>('sect_task_publisher') === true) {
+      actions.push('sectTask');
+    }
+
     return actions;
   }
 
