@@ -164,7 +164,7 @@ const WORK_JOB_DEFS: WorkJobDefinition[] = [
     summary: '在武馆按教头口令走桩、拆招，打磨基本架势。',
     tags: ['武事', '筋骨', '步法'],
     npcBlueprintIds: ['npc/rift-town/martial-instructor'],
-    estimateCost: { hp: 6, energy: 4 },
+    estimateCost: { hp: 1, energy: 4 },
     estimateReward: { exp: 30, potential: 14, silver: 20 },
     roleplayLines: [
       '木桩连响，陈教头竹杆一点：脚先到，手后发。',
@@ -179,7 +179,7 @@ const WORK_JOB_DEFS: WorkJobDefinition[] = [
       const vit = attr(player, 'vitality');
       const reduce = Math.floor((str + vit) / 18);
       return {
-        hp: Math.max(4, 7 - reduce),
+        hp: 1,
         energy: Math.max(2, 5 - Math.floor(reduce / 2)),
       };
     },
@@ -236,12 +236,12 @@ const WORK_JOB_DEFS: WorkJobDefinition[] = [
     summary: '在铁匠铺鼓风、翻料、淬火，帮老周赶工。',
     tags: ['工事', '力气', '火候'],
     npcBlueprintIds: ['npc/rift-town/blacksmith'],
-    estimateCost: { hp: 7, energy: 3 },
+    estimateCost: { hp: 1, energy: 3 },
     estimateReward: { exp: 28, potential: 14, silver: 24 },
     roleplayLines: [
       '火门一开，热浪扑面，你咬牙拉动风箱，炉火立刻窜高。',
       '铁坯出炉，你按老周的手势翻面落锤，火星四溅。',
-      '淬火池里“嗤”地一声白雾腾起，你手臂震得发麻。',
+      '淬火池里"嗤"地一声白雾腾起，你手臂震得发麻。',
       '老周掂了掂铁件，粗声道：行，今天这活没白干。',
     ],
     newbieHint: '银两回报最高，但体力消耗也更重。',
@@ -251,7 +251,7 @@ const WORK_JOB_DEFS: WorkJobDefinition[] = [
       const vit = attr(player, 'vitality');
       const reduce = Math.floor((str + vit) / 20);
       return {
-        hp: Math.max(4, 8 - reduce),
+        hp: 1,
         energy: Math.max(2, 4 - Math.floor(reduce / 2)),
       };
     },
