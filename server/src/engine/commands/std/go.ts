@@ -71,6 +71,20 @@ export class GoCommand implements ICommand {
       return { success: false, message: '你正在战斗中，无法移动！' };
     }
 
+    // 忙碌状态禁止移动
+    const activity = executor.getTemp<string>('activity');
+    if (activity) {
+      const labels: Record<string, string> = {
+        gathering: '采集',
+        practicing: '修炼',
+        working: '打工',
+      };
+      return {
+        success: false,
+        message: `你正在${labels[activity] ?? activity}中，无法移动。输入 stop 可停止当前活动。`,
+      };
+    }
+
     // 无方向参数
     if (args.length === 0 || !args[0].trim()) {
       return { success: false, message: '去哪里？请指定方向。' };

@@ -180,8 +180,17 @@ export class CommandHandler {
           const item = this.blueprintFactory.clone(blueprintId);
           item.moveTo(p, { quiet: true });
 
-          // 通知玩家
-          p.receiveMessage(`你采到了${itemName}，放入了背包。`);
+          // 通知玩家（发送 commandResult 让前端移除停止按钮）
+          const completeResp = {
+            type: 'commandResult',
+            data: {
+              success: true,
+              message: `你采到了${itemName}，放入了背包。`,
+              data: { action: 'gather_complete' },
+            },
+            timestamp: Date.now(),
+          };
+          p.sendToClient(JSON.stringify(completeResp));
           sendInventoryUpdate(p);
 
           // 门派任务进度追踪

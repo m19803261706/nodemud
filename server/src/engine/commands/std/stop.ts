@@ -27,6 +27,16 @@ export class StopCommand implements ICommand {
     const practiceManager = ServiceLocator.practiceManager;
     const workManager = ServiceLocator.workManager;
 
+    // 检查是否在采集中
+    if (executor.getTemp<string>('activity') === 'gathering') {
+      executor.setTemp('activity', undefined);
+      return {
+        success: true,
+        message: '你停下了手中的采集。',
+        data: { action: 'stop', activity: 'gathering' },
+      };
+    }
+
     // 检查是否在修炼中
     if (practiceManager?.isInPractice(executor)) {
       practiceManager.stopPractice(executor);

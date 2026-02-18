@@ -68,6 +68,9 @@ const SPECIAL_EXIT_ACTION_PREFIX = 'exit-';
 /** 房间动态动作 → logQuickAction ID 前缀 */
 const ROOM_ACTION_PREFIX = 'room-action-';
 
+/** 忙碌状态停止按钮 ID */
+const ACTIVITY_STOP_ACTION_ID = 'activity-stop';
+
 function buildLocationActions(): string[] {
   return ['回城', '飞行', '地图', '邮件'];
 }
@@ -258,6 +261,23 @@ function App(): React.JSX.Element {
       // buy 成功结果 → 同步更新当前货单库存
       if (data.success && data.data?.action === 'buy') {
         useGameStore.getState().applyShopBuyResult(data.data);
+      }
+      // 采集开始 → 显示停止按钮
+      if (data.success && data.data?.action === 'gather_start') {
+        useGameStore.getState().upsertLogQuickAction({
+          id: ACTIVITY_STOP_ACTION_ID,
+          label: '停止采集',
+          command: 'stop',
+          consumeOnPress: true,
+        });
+      }
+      // 采集完成/停止 → 移除停止按钮
+      if (
+        data.success &&
+        (data.data?.action === 'gather_complete' ||
+          (data.data?.action === 'stop' && data.data?.activity === 'gathering'))
+      ) {
+        useGameStore.getState().removeLogQuickAction(ACTIVITY_STOP_ACTION_ID);
       }
       // 有消息 → 写入日志（失败红色，成功默认色）
       if (data.message) {
