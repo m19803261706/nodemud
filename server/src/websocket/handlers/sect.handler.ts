@@ -195,6 +195,8 @@ export class SectHandler {
 
     const result = this.sectTaskManager.getAvailableTasks(player, sectData);
 
+    const { near, npcName } = this.isNearTaskPublisher(player);
+
     const responseData: SectTaskResponseData = {
       activeDailyTask: result.activeDailyTask
         ? this.toTaskInstanceDTO(result.activeDailyTask)
@@ -212,6 +214,8 @@ export class SectHandler {
       },
       availableDailyTemplates: result.availableDailyTemplates,
       availableWeeklyTemplates: result.availableWeeklyTemplates,
+      nearTaskPublisher: near,
+      taskPublisherName: npcName,
     };
 
     const msg = MessageFactory.create('sectTaskResponse', responseData);
@@ -227,6 +231,17 @@ export class SectHandler {
   ): Promise<void> {
     const player = this.getPlayerFromSession(session);
     if (!player) return;
+
+    // 必须在任务发布 NPC 身边才能接取
+    const { near } = this.isNearTaskPublisher(player);
+    if (!near) {
+      const msg = MessageFactory.create('sectTaskAcceptResult', {
+        success: false,
+        message: '你需要找到门派执事才能领取任务。',
+      });
+      if (msg) player.sendToClient(MessageFactory.serialize(msg));
+      return;
+    }
 
     const sectData = this.sectManager.getPlayerSectData(player);
     const result = this.sectTaskManager.acceptTask(
@@ -254,19 +269,26 @@ export class SectHandler {
     const player = this.getPlayerFromSession(session);
     if (!player) return;
 
+    // 必须在任务发布 NPC 身边才能交付
+    const { near } = this.isNearTaskPublisher(player);
+    if (!near) {
+      const msg = MessageFactory.create('sectTaskCompleteResult', {
+        success: false,
+        message: '你需要回到门派执事处交付任务。',
+      });
+      if (msg) player.sendToClient(MessageFactory.serialize(msg));
+      return;
+    }
+
     const sectData = this.sectManager.getPlayerSectData(player);
     const result = this.sectTaskManager.completeTask(player, sectData, data.category);
 
-    const progress = result.success
-      ? this.buildTaskProgress(player)
-      : undefined;
+    const progress = result.success ? this.buildTaskProgress(player) : undefined;
 
     const msg = MessageFactory.create('sectTaskCompleteResult', {
       success: result.success,
       message: result.message,
-      rewards: result.rewards
-        ? this.toRewardsDTO(result.rewards)
-        : undefined,
+      rewards: result.rewards ? this.toRewardsDTO(result.rewards) : undefined,
       milestoneRewards: result.milestoneRewards
         ? this.toRewardsDTO(result.milestoneRewards)
         : undefined,
@@ -427,6 +449,27 @@ export class SectHandler {
     }
   }
 
+  /** 检查玩家是否在同一房间内有门派任务发布 NPC */
+  private isNearTaskPublisher(player: PlayerBase): { near: boolean; npcName?: string } {
+    const room = player.getEnvironment() as RoomBase | null;
+    if (!room) return { near: false };
+
+    const sectId = player.get<any>('sect')?.current?.sectId;
+    if (!sectId) return { near: false };
+
+    for (const entity of room.getInventory()) {
+      if (
+        entity instanceof NpcBase &&
+        !entity.destroyed &&
+        entity.get<string>('sect_id') === sectId &&
+        entity.get<boolean>('sect_task_publisher') === true
+      ) {
+        return { near: true, npcName: entity.getName() };
+      }
+    }
+    return { near: false };
+  }
+
   /** 从 session 获取玩家对象 */
   private getPlayerFromSession(session: Session): PlayerBase | undefined {
     if (!session.authenticated || !session.playerId) return undefined;
@@ -444,12 +487,14 @@ export class SectHandler {
       category: task.category,
       name: task.name,
       description: task.description,
-      objectives: task.objectives.map((obj: any): SectTaskObjectiveDTO => ({
-        type: obj.type,
-        description: obj.description,
-        count: obj.count,
-        current: obj.current,
-      })),
+      objectives: task.objectives.map(
+        (obj: any): SectTaskObjectiveDTO => ({
+          type: obj.type,
+          description: obj.description,
+          count: obj.count,
+          current: obj.current,
+        }),
+      ),
       rewards: this.toRewardsDTO(task.rewards),
       flavorText: task.flavorText?.onComplete,
     };

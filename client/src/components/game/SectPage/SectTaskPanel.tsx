@@ -4,7 +4,13 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { MessageFactory } from '@packages/core';
 import type {
   SectTaskInstanceDTO,
@@ -33,7 +39,15 @@ export const SectTaskPanel = () => {
     );
   }
 
-  const { activeDailyTask, activeWeeklyTask, progress, availableDailyTemplates, availableWeeklyTemplates } = sectTaskData;
+  const {
+    activeDailyTask,
+    activeWeeklyTask,
+    progress,
+    availableDailyTemplates,
+    availableWeeklyTemplates,
+    nearTaskPublisher,
+    taskPublisherName,
+  } = sectTaskData;
 
   return (
     <View style={s.container}>
@@ -42,15 +56,28 @@ export const SectTaskPanel = () => {
       {/* 进度概览 */}
       <TaskProgressBar progress={progress} />
 
+      {/* 不在 NPC 身边的提示 */}
+      {!nearTaskPublisher ? (
+        <View style={s.card}>
+          <Text style={s.hintNpc}>
+            前往{taskPublisherName ?? '门派执事'}处领取或交付任务
+          </Text>
+        </View>
+      ) : null}
+
       {/* 日常任务区 */}
       <View style={s.card}>
-        <Text style={s.subTitle}>日常任务 ({progress.dailyCount}/{progress.dailyMax})</Text>
+        <Text style={s.subTitle}>
+          日常任务 ({progress.dailyCount}/{progress.dailyMax})
+        </Text>
         {activeDailyTask ? (
-          <ActiveTask task={activeDailyTask} />
+          <ActiveTask task={activeDailyTask} canOperate={nearTaskPublisher} />
         ) : progress.dailyCount >= progress.dailyMax ? (
           <Text style={s.hint}>今日日常次数已用完</Text>
-        ) : availableDailyTemplates.length > 0 ? (
+        ) : nearTaskPublisher && availableDailyTemplates.length > 0 ? (
           <TemplateList templates={availableDailyTemplates} category="daily" />
+        ) : !nearTaskPublisher ? (
+          <Text style={s.hint}>需在执事处领取</Text>
         ) : (
           <Text style={s.hint}>暂无可用任务</Text>
         )}
@@ -58,13 +85,20 @@ export const SectTaskPanel = () => {
 
       {/* 周常任务区 */}
       <View style={s.card}>
-        <Text style={s.subTitle}>周常任务 ({progress.weeklyCount}/{progress.weeklyMax})</Text>
+        <Text style={s.subTitle}>
+          周常任务 ({progress.weeklyCount}/{progress.weeklyMax})
+        </Text>
         {activeWeeklyTask ? (
-          <ActiveTask task={activeWeeklyTask} />
+          <ActiveTask task={activeWeeklyTask} canOperate={nearTaskPublisher} />
         ) : progress.weeklyCount >= progress.weeklyMax ? (
           <Text style={s.hint}>本周周常次数已用完</Text>
-        ) : availableWeeklyTemplates.length > 0 ? (
-          <TemplateList templates={availableWeeklyTemplates} category="weekly" />
+        ) : nearTaskPublisher && availableWeeklyTemplates.length > 0 ? (
+          <TemplateList
+            templates={availableWeeklyTemplates}
+            category="weekly"
+          />
+        ) : !nearTaskPublisher ? (
+          <Text style={s.hint}>需在执事处领取</Text>
         ) : (
           <Text style={s.hint}>暂无可用任务</Text>
         )}
@@ -76,25 +110,25 @@ export const SectTaskPanel = () => {
 /** 进度条 */
 const TaskProgressBar = ({ progress }: { progress: SectTaskProgressDTO }) => (
   <View style={s.progressRow}>
-    <Text style={s.progressText}>
-      累计完成 {progress.totalCompleted} 次
-    </Text>
+    <Text style={s.progressText}>累计完成 {progress.totalCompleted} 次</Text>
     {progress.nextMilestone ? (
-      <Text style={s.progressHint}>
-        下一里程碑: {progress.nextMilestone}
-      </Text>
+      <Text style={s.progressHint}>下一里程碑: {progress.nextMilestone}</Text>
     ) : null}
   </View>
 );
 
 /** 活跃任务卡片 */
-const ActiveTask = ({ task }: { task: SectTaskInstanceDTO }) => {
+const ActiveTask = ({ task, canOperate }: { task: SectTaskInstanceDTO; canOperate: boolean }) => {
   const handleComplete = useCallback(() => {
-    wsService.send(MessageFactory.create('sectTaskComplete', { category: task.category }));
+    wsService.send(
+      MessageFactory.create('sectTaskComplete', { category: task.category }),
+    );
   }, [task.category]);
 
   const handleAbandon = useCallback(() => {
-    wsService.send(MessageFactory.create('sectTaskAbandon', { category: task.category }));
+    wsService.send(
+      MessageFactory.create('sectTaskAbandon', { category: task.category }),
+    );
   }, [task.category]);
 
   const allDone = task.objectives.every(obj => obj.current >= obj.count);
@@ -107,10 +141,20 @@ const ActiveTask = ({ task }: { task: SectTaskInstanceDTO }) => {
       {/* 目标列表 */}
       {task.objectives.map((obj, i) => (
         <View key={i} style={s.objRow}>
-          <Text style={[s.objText, obj.current >= obj.count ? s.objDone : undefined]}>
+          <Text
+            style={[
+              s.objText,
+              obj.current >= obj.count ? s.objDone : undefined,
+            ]}
+          >
             {obj.description}
           </Text>
-          <Text style={[s.objCount, obj.current >= obj.count ? s.objDone : undefined]}>
+          <Text
+            style={[
+              s.objCount,
+              obj.current >= obj.count ? s.objDone : undefined,
+            ]}
+          >
             {obj.current}/{obj.count}
           </Text>
         </View>
@@ -118,10 +162,12 @@ const ActiveTask = ({ task }: { task: SectTaskInstanceDTO }) => {
 
       {/* 操作按钮 */}
       <View style={s.btnRow}>
-        {allDone ? (
+        {allDone && canOperate ? (
           <TouchableOpacity style={s.btnComplete} onPress={handleComplete}>
             <Text style={s.btnCompleteText}>交付任务</Text>
           </TouchableOpacity>
+        ) : allDone && !canOperate ? (
+          <Text style={s.hintReturn}>返回执事处交付</Text>
         ) : null}
         <TouchableOpacity style={s.btnAbandon} onPress={handleAbandon}>
           <Text style={s.btnAbandonText}>放弃</Text>
@@ -195,6 +241,20 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Serif SC',
     fontStyle: 'italic',
+  },
+  hintNpc: {
+    fontSize: 12,
+    color: '#2E6B8A',
+    fontFamily: 'Noto Serif SC',
+    textAlign: 'center',
+  },
+  hintReturn: {
+    fontSize: 11,
+    color: '#2E6B8A',
+    fontFamily: 'Noto Serif SC',
+    fontStyle: 'italic',
+    flex: 1,
+    textAlignVertical: 'center',
   },
   progressRow: {
     flexDirection: 'row',

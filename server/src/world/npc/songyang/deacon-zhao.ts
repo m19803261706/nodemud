@@ -32,6 +32,7 @@ export default class SongyangDeaconZhao extends NpcBase {
 
     this.set('sect_id', 'songyang');
     this.set('sect_role', 'deacon');
+    this.set('sect_task_publisher', true);
 
     this.set('chat_chance', 10);
     this.set('chat_msg', [
@@ -46,6 +47,7 @@ export default class SongyangDeaconZhao extends NpcBase {
       捐献: '赵执事道：「门中器物、药材皆可入账。若要捐献，直言便是。」',
       贡献: '赵执事道：「门中贡献记在账上，积少成多，自见分晓。」',
       叛门: '赵执事道：「一旦叛门，宗门永拒。话出口前先想清楚。」',
+      任务: '赵执事翻过一页册子，道：「门中每日有些杂务要人跑腿。日常小事嘛，勤快些就好；每周还有几桩大差事，办妥了贡献可不少。」',
       default: '赵执事道：「账目在此，诸事凭规矩说话。」',
     });
   }

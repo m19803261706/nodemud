@@ -63,6 +63,10 @@ export interface SectTaskResponseData {
   progress: SectTaskProgressDTO;
   availableDailyTemplates: SectTaskTemplateSummary[];
   availableWeeklyTemplates: SectTaskTemplateSummary[];
+  /** 玩家是否在任务发布 NPC 身边（接取/交付需要） */
+  nearTaskPublisher: boolean;
+  /** 任务发布 NPC 名称（用于提示） */
+  taskPublisherName?: string;
 }
 
 export interface SectTaskResponseMessage extends ServerMessage {
