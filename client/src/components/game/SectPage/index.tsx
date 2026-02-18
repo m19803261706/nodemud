@@ -50,6 +50,12 @@ export const SectPage = () => {
               {/* 门派概览卡片 */}
               <SectOverview overview={sectInfo.overview} />
 
+              {/* 快捷操作（置顶方便玩家操作） */}
+              <SectActions
+                npcLocations={sectInfo.npcLocations}
+                onTeleport={handleTeleport}
+              />
+
               {/* 职位阶梯 */}
               <RankProgress
                 ranks={sectInfo.overview.ranks}
@@ -67,12 +73,6 @@ export const SectPage = () => {
               {sectInfo.progress ? (
                 <SectProgress progress={sectInfo.progress} />
               ) : null}
-
-              {/* 操作按钮区 */}
-              <SectActions
-                npcLocations={sectInfo.npcLocations}
-                onTeleport={handleTeleport}
-              />
             </ScrollView>
           </View>
 

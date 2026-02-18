@@ -16,11 +16,10 @@ interface SectActionsProps {
 const ACTION_BUTTONS: {
   role: SectTeleportRole;
   label: string;
-  icon: string;
 }[] = [
-  { role: 'master', label: '找师父', icon: '🏮' },
-  { role: 'deacon', label: '找执事', icon: '📜' },
-  { role: 'sparring', label: '去演武场', icon: '⚔' },
+  { role: 'master', label: '找师父' },
+  { role: 'deacon', label: '找执事' },
+  { role: 'sparring', label: '去演武场' },
 ];
 
 export const SectActions = ({ npcLocations, onTeleport }: SectActionsProps) => {
@@ -28,7 +27,7 @@ export const SectActions = ({ npcLocations, onTeleport }: SectActionsProps) => {
     <View style={s.container}>
       <Text style={s.sectionTitle}>快捷操作</Text>
       <View style={s.buttonRow}>
-        {ACTION_BUTTONS.map(({ role, label, icon }) => {
+        {ACTION_BUTTONS.map(({ role, label }) => {
           const loc = npcLocations?.[role];
           const available = !!loc;
 
@@ -42,8 +41,12 @@ export const SectActions = ({ npcLocations, onTeleport }: SectActionsProps) => {
               activeOpacity={available ? 0.7 : 1}
               disabled={!available}
             >
-              <Text style={s.btnIcon}>{icon}</Text>
-              <Text style={[s.btnLabel, !available ? s.btnLabelDisabled : undefined]}>
+              <Text
+                style={[
+                  s.btnLabel,
+                  !available ? s.btnLabelDisabled : undefined,
+                ]}
+              >
                 {label}
               </Text>
               {loc ? (
@@ -82,17 +85,14 @@ const s = StyleSheet.create({
     backgroundColor: '#F5F0E8',
     borderWidth: 1,
     borderColor: '#8B7A5A40',
-    borderRadius: 6,
-    paddingVertical: 12,
+    borderRadius: 4,
+    paddingVertical: 8,
     paddingHorizontal: 8,
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
   btnDisabled: {
     opacity: 0.45,
-  },
-  btnIcon: {
-    fontSize: 20,
   },
   btnLabel: {
     fontSize: 12,
