@@ -103,7 +103,7 @@ const s = StyleSheet.create({
     paddingBottom: 16,
   },
   logArea: {
-    flex: 2,
+    flex: 1,
     borderWidth: 1,
     borderColor: '#8B7A5A30',
     borderTopWidth: 0,

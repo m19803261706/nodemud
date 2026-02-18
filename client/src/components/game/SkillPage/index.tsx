@@ -124,7 +124,9 @@ export const SkillPage = () => {
   const sourceSkills = mode === 'master' ? masterSkills : skills;
   const currentMasterTeachSkill = useMemo(() => {
     if (!masterTeach || !detailSkillId || mode !== 'master') return null;
-    return masterTeach.skills.find(skill => skill.skillId === detailSkillId) ?? null;
+    return (
+      masterTeach.skills.find(skill => skill.skillId === detailSkillId) ?? null
+    );
   }, [masterTeach, detailSkillId, mode]);
 
   /** 按当前 Tab + 关键词过滤技能列表 */
@@ -581,7 +583,7 @@ const s = StyleSheet.create({
     paddingVertical: 30,
   },
   logArea: {
-    flex: 2,
+    flex: 1,
     borderWidth: 1,
     borderColor: '#8B7A5A30',
     borderTopWidth: 0,
