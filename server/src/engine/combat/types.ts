@@ -23,6 +23,8 @@ export interface CombatParticipant {
   state: CombatParticipantState;
   /** 选招超时定时器（仅玩家使用） */
   actionTimeout?: ReturnType<typeof setTimeout>;
+  /** 招式冷却追踪 — key: `${skillId}::${actionName}`，value: 剩余冷却回合数 */
+  actionCooldowns: Map<string, number>;
 }
 
 /** 战斗实例 */

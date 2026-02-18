@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 20,
     costs: [{ resource: 'energy', amount: 7 }],
     modifiers: { attack: 9, damage: 7, dodge: 4, parry: 3, damageType: 'blunt' },
+    cooldown: 1,
   },
   {
     name: '拍浪回潮',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 45,
     costs: [{ resource: 'energy', amount: 9 }],
     modifiers: { attack: 12, damage: 11, dodge: 5, parry: 4, damageType: 'blunt' },
+    cooldown: 2,
   },
   {
     name: '碎碑裂石',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 70,
     costs: [{ resource: 'energy', amount: 11 }],
     modifiers: { attack: 16, damage: 15, dodge: 5, parry: 5, damageType: 'blunt' },
+    cooldown: 3,
   },
 ];
 

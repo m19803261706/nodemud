@@ -718,6 +718,7 @@ export class SkillManager {
             costs: this.mapResourceCosts(action.costs),
             canUse: this.checkResourceCosts(action.costs),
             isInternal: false,
+            cooldownRemaining: 0,
           });
         }
       }
@@ -742,6 +743,7 @@ export class SkillManager {
             costs: this.mapResourceCosts(action.costs),
             canUse: this.checkResourceCosts(action.costs),
             isInternal: true,
+            cooldownRemaining: 0,
           });
         }
       }

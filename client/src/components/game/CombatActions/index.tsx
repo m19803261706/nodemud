@@ -1,6 +1,6 @@
 /**
  * CombatActions — 战斗招式快捷栏容器
- * ATB 满时弹出，让玩家选择攻击招式
+ * 战斗全程始终可见，非出手回合灰显不可点
  * 包含倒计时进度条 + 快捷按钮栏 + "更多"展开弹窗
  */
 
@@ -80,7 +80,8 @@ export const CombatActions = () => {
   /* ─── 发送招式选择 ─── */
   const handleActionPress = useCallback(
     (action: CombatActionOption) => {
-      if (!combatId || !action.canUse) return;
+      // 必须在出手回合、可用、且冷却完毕
+      if (!combatId || !awaitingAction || !action.canUse || action.cooldownRemaining > 0) return;
       wsService.send(
         MessageFactory.create('skillUse', {
           combatId,
@@ -89,7 +90,7 @@ export const CombatActions = () => {
       );
       setExpandVisible(false);
     },
-    [combatId],
+    [combatId, awaitingAction],
   );
 
   /** "更多"展开弹窗中选择招式 */
@@ -100,8 +101,8 @@ export const CombatActions = () => {
     [handleActionPress],
   );
 
-  /* ─── 不在等待行动时不渲染 ─── */
-  if (!awaitingAction) return null;
+  /* ─── 无可用招式时不渲染 ─── */
+  if (availableActions.length === 0) return null;
 
   /** 倒计时秒数显示 */
   const remainSec = (remainMs / 1000).toFixed(1);
@@ -121,28 +122,31 @@ export const CombatActions = () => {
   });
 
   return (
-    <View style={s.container}>
-      {/* 倒计时进度条 */}
-      <View style={s.timerRow}>
-        <Text style={s.timerLabel}>行动</Text>
-        <View style={s.timerBarBg}>
-          <Animated.View
-            style={[
-              s.timerBarFill,
-              { width: barWidth, backgroundColor: barColor },
-            ]}
-          />
+    <View style={[s.container, !awaitingAction && s.containerInactive]}>
+      {/* 倒计时进度条 — 仅出手回合显示 */}
+      {awaitingAction ? (
+        <View style={s.timerRow}>
+          <Text style={s.timerLabel}>行动</Text>
+          <View style={s.timerBarBg}>
+            <Animated.View
+              style={[
+                s.timerBarFill,
+                { width: barWidth, backgroundColor: barColor },
+              ]}
+            />
+          </View>
+          <Text style={[s.timerText, isUrgent && s.timerUrgent]}>
+            {remainSec}s
+          </Text>
         </View>
-        <Text style={[s.timerText, isUrgent && s.timerUrgent]}>
-          {remainSec}s
-        </Text>
-      </View>
+      ) : null}
 
       {/* 快捷栏 */}
       <ActionBar
         actions={availableActions}
         onActionPress={handleActionPress}
         onMorePress={() => setExpandVisible(true)}
+        disabled={!awaitingAction}
       />
 
       {/* 展开弹窗 */}
@@ -151,6 +155,7 @@ export const CombatActions = () => {
         actions={availableActions}
         onSelect={handleExpandSelect}
         onClose={() => setExpandVisible(false)}
+        awaitingAction={awaitingAction}
       />
     </View>
   );
@@ -163,6 +168,10 @@ const s = StyleSheet.create({
     borderColor: '#8B7A5A40',
     paddingVertical: 6,
     gap: 6,
+  },
+  /** 非出手回合降低整体透明度 */
+  containerInactive: {
+    opacity: 0.6,
   },
   /* 倒计时行 */
   timerRow: {

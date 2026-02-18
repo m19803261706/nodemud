@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 20,
     costs: [{ resource: 'energy', amount: 7 }],
     modifiers: { attack: 10, damage: 8, dodge: 2, parry: 2, damageType: 'slash' },
+    cooldown: 1,
   },
   {
     name: '回锋压门',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 45,
     costs: [{ resource: 'energy', amount: 9 }],
     modifiers: { attack: 14, damage: 12, dodge: 3, parry: 3, damageType: 'slash' },
+    cooldown: 2,
   },
   {
     name: '碎石落崖',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 70,
     costs: [{ resource: 'energy', amount: 11 }],
     modifiers: { attack: 18, damage: 16, dodge: 4, parry: 4, damageType: 'slash' },
+    cooldown: 3,
   },
 ];
 

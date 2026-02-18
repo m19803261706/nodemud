@@ -14,6 +14,14 @@ interface SongyangSkillContent {
   actions: SkillAction[];
 }
 
+/** 根据招式解锁等级自动推算冷却回合数 */
+function lvlToCooldown(lvl: number): number {
+  if (lvl >= 70) return 3;
+  if (lvl >= 45) return 2;
+  if (lvl >= 20) return 1;
+  return 0;
+}
+
 function action(
   name: string,
   lvl: number,
@@ -21,13 +29,16 @@ function action(
   modifiers: SkillAction['modifiers'],
   description?: string,
 ): SkillAction {
-  return {
+  const cooldown = lvlToCooldown(lvl);
+  const a: SkillAction = {
     name,
     description: description ?? `${name}，借嵩阳门中章法稳步推进。`,
     lvl,
     costs,
     modifiers,
   };
+  if (cooldown > 0) a.cooldown = cooldown;
+  return a;
 }
 
 const SONGYANG_SKILL_CONTENT: Record<SongyangSkillId, SongyangSkillContent> = {
@@ -325,34 +336,66 @@ const SONGYANG_SKILL_CONTENT: Record<SongyangSkillId, SongyangSkillContent> = {
       '沿用 DamageEngine，重点放大 attack/damage 修正并提高资源消耗；在攻强场景下可快速拉开伤害差距，仍受武器匹配限制。',
     extension: '后续可引入掌门试刀节点，解锁特定演武动作。',
     actions: [
-      action('天柱问势', 1, [{ resource: 'energy', amount: 14 }, { resource: 'mp', amount: 10 }], {
-        attack: 30,
-        damage: 28,
-        dodge: 4,
-        parry: 4,
-        damageType: 'slash',
-      }),
-      action('岳门裂空', 70, [{ resource: 'energy', amount: 17 }, { resource: 'mp', amount: 14 }], {
-        attack: 40,
-        damage: 38,
-        dodge: 5,
-        parry: 5,
-        damageType: 'slash',
-      }),
-      action('嵩巅坠刃', 140, [{ resource: 'energy', amount: 20 }, { resource: 'mp', amount: 18 }], {
-        attack: 52,
-        damage: 48,
-        dodge: 6,
-        parry: 6,
-        damageType: 'slash',
-      }),
-      action('问岳无回', 210, [{ resource: 'energy', amount: 24 }, { resource: 'mp', amount: 22 }], {
-        attack: 64,
-        damage: 60,
-        dodge: 7,
-        parry: 7,
-        damageType: 'slash',
-      }),
+      action(
+        '天柱问势',
+        1,
+        [
+          { resource: 'energy', amount: 14 },
+          { resource: 'mp', amount: 10 },
+        ],
+        {
+          attack: 30,
+          damage: 28,
+          dodge: 4,
+          parry: 4,
+          damageType: 'slash',
+        },
+      ),
+      action(
+        '岳门裂空',
+        70,
+        [
+          { resource: 'energy', amount: 17 },
+          { resource: 'mp', amount: 14 },
+        ],
+        {
+          attack: 40,
+          damage: 38,
+          dodge: 5,
+          parry: 5,
+          damageType: 'slash',
+        },
+      ),
+      action(
+        '嵩巅坠刃',
+        140,
+        [
+          { resource: 'energy', amount: 20 },
+          { resource: 'mp', amount: 18 },
+        ],
+        {
+          attack: 52,
+          damage: 48,
+          dodge: 6,
+          parry: 6,
+          damageType: 'slash',
+        },
+      ),
+      action(
+        '问岳无回',
+        210,
+        [
+          { resource: 'energy', amount: 24 },
+          { resource: 'mp', amount: 22 },
+        ],
+        {
+          attack: 64,
+          damage: 60,
+          dodge: 7,
+          parry: 7,
+          damageType: 'slash',
+        },
+      ),
     ],
   },
   [SONGYANG_SKILL_IDS.ULTIMATE_DODGE]: {

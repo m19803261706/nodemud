@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 20,
     costs: [{ resource: 'energy', amount: 7 }],
     modifiers: { attack: 6, damage: 5, dodge: 15, parry: 8, damageType: 'blunt' },
+    cooldown: 1,
   },
   {
     name: '回环抢线',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 45,
     costs: [{ resource: 'energy', amount: 9 }],
     modifiers: { attack: 9, damage: 7, dodge: 20, parry: 10, damageType: 'blunt' },
+    cooldown: 2,
   },
   {
     name: '踏影折返',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 70,
     costs: [{ resource: 'energy', amount: 11 }],
     modifiers: { attack: 12, damage: 10, dodge: 25, parry: 12, damageType: 'blunt' },
+    cooldown: 3,
   },
 ];
 

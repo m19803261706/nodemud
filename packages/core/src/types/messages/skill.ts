@@ -40,6 +40,7 @@ export interface CombatActionOption {
   costs: ResourceCostInfo[]; // 资源消耗
   canUse: boolean; // 是否可用
   isInternal: boolean; // 是否为内功招式
+  cooldownRemaining: number; // 剩余冷却回合数（0 = 可用）
 }
 
 /** 资源消耗信息 */

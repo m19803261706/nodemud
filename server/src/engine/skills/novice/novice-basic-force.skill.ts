@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 25,
     costs: [{ resource: 'mp', amount: 10 }],
     modifiers: { attack: 8, damage: 8, dodge: 5, parry: 5, damageType: 'internal' },
+    cooldown: 1,
   },
   {
     name: '收束丹田',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 55,
     costs: [{ resource: 'mp', amount: 13 }],
     modifiers: { attack: 11, damage: 12, dodge: 6, parry: 6, damageType: 'internal' },
+    cooldown: 2,
   },
   {
     name: '通络凝神',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 85,
     costs: [{ resource: 'mp', amount: 16 }],
     modifiers: { attack: 14, damage: 16, dodge: 8, parry: 8, damageType: 'internal' },
+    cooldown: 3,
   },
 ];
 

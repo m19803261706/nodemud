@@ -1,7 +1,7 @@
 /**
  * ActionExpandModal — 全部招式展开弹窗
  * 当招式超过快捷栏容量时，点击"更多"弹出完整列表
- * 每个招式显示详细描述和资源消耗
+ * 每个招式显示详细描述、资源消耗和冷却状态
  */
 
 import React from 'react';
@@ -29,6 +29,7 @@ interface ActionExpandModalProps {
   actions: CombatActionOption[];
   onSelect: (action: CombatActionOption) => void;
   onClose: () => void;
+  awaitingAction?: boolean;
 }
 
 /** 资源消耗标签 */
@@ -40,60 +41,78 @@ const CostTag = ({ cost }: { cost: ResourceCostInfo }) => (
   </View>
 );
 
+/** 冷却标签 */
+const CooldownTag = ({ remaining }: { remaining: number }) => (
+  <View style={s.cooldownTag}>
+    <Text style={s.cooldownTagText}>冷却 {remaining} 回合</Text>
+  </View>
+);
+
 /** 单个招式行 */
 const ActionRow = ({
   action,
   onPress,
+  disabled,
 }: {
   action: CombatActionOption;
   onPress: () => void;
-}) => (
-  <TouchableOpacity
-    style={[s.row, !action.canUse && s.rowDisabled]}
-    onPress={onPress}
-    activeOpacity={0.7}
-    disabled={!action.canUse}
-  >
-    <View style={s.rowHeader}>
-      <View style={s.rowTitleWrap}>
-        <Text
-          style={[s.rowName, action.isInternal && s.internalText]}
-          numberOfLines={1}
-        >
-          {action.actionName}
-        </Text>
-        <Text style={s.rowSkill} numberOfLines={1}>
-          {action.skillName} Lv.{action.lvl}
-        </Text>
-      </View>
-      {action.isInternal ? (
-        <View style={s.internalBadge}>
-          <Text style={s.internalBadgeText}>内功</Text>
+  disabled?: boolean;
+}) => {
+  const isCooling = action.cooldownRemaining > 0;
+  const isDisabled = disabled || !action.canUse || isCooling;
+
+  return (
+    <TouchableOpacity
+      style={[s.row, isDisabled && s.rowDisabled]}
+      onPress={onPress}
+      activeOpacity={0.7}
+      disabled={isDisabled}
+    >
+      <View style={s.rowHeader}>
+        <View style={s.rowTitleWrap}>
+          <Text
+            style={[s.rowName, action.isInternal && s.internalText]}
+            numberOfLines={1}
+          >
+            {action.actionName}
+          </Text>
+          <Text style={s.rowSkill} numberOfLines={1}>
+            {action.skillName} Lv.{action.lvl}
+          </Text>
         </View>
-      ) : null}
-    </View>
-
-    {action.actionDesc ? (
-      <Text style={s.rowDesc} numberOfLines={2}>
-        {action.actionDesc}
-      </Text>
-    ) : null}
-
-    {action.costs.length > 0 ? (
-      <View style={s.costRow}>
-        {action.costs.map((c, i) => (
-          <CostTag key={`${c.resource}-${i}`} cost={c} />
-        ))}
+        {action.isInternal ? (
+          <View style={s.internalBadge}>
+            <Text style={s.internalBadgeText}>内功</Text>
+          </View>
+        ) : null}
       </View>
-    ) : null}
-  </TouchableOpacity>
-);
+
+      {action.actionDesc ? (
+        <Text style={s.rowDesc} numberOfLines={2}>
+          {action.actionDesc}
+        </Text>
+      ) : null}
+
+      <View style={s.tagRow}>
+        {action.costs.length > 0 ? (
+          <View style={s.costRow}>
+            {action.costs.map((c, i) => (
+              <CostTag key={`${c.resource}-${i}`} cost={c} />
+            ))}
+          </View>
+        ) : null}
+        {isCooling ? <CooldownTag remaining={action.cooldownRemaining} /> : null}
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 export const ActionExpandModal = ({
   visible,
   actions,
   onSelect,
   onClose,
+  awaitingAction,
 }: ActionExpandModalProps) => {
   if (!visible) return null;
 
@@ -135,6 +154,7 @@ export const ActionExpandModal = ({
                       key={action.index}
                       action={action}
                       onPress={() => onSelect(action)}
+                      disabled={!awaitingAction}
                     />
                   ))}
                 </ScrollView>
@@ -256,10 +276,15 @@ const s = StyleSheet.create({
     lineHeight: 18,
     marginTop: 3,
   },
+  tagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
   costRow: {
     flexDirection: 'row',
     gap: 4,
-    marginTop: 4,
   },
   costTag: {
     backgroundColor: '#8B7A5A15',
@@ -272,6 +297,20 @@ const s = StyleSheet.create({
   costTagText: {
     fontSize: 9,
     color: '#8B7A5A',
+    fontFamily: 'Noto Sans SC',
+  },
+  cooldownTag: {
+    backgroundColor: '#A0303015',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: '#A0303040',
+  },
+  cooldownTagText: {
+    fontSize: 9,
+    color: '#A03030',
+    fontWeight: '600',
     fontFamily: 'Noto Sans SC',
   },
   closeBtn: {

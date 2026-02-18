@@ -29,6 +29,8 @@ export interface SkillAction {
     /** 伤害类型 */
     damageType: string;
   };
+  /** 使用后冷却回合数（默认 0 = 无冷却） */
+  cooldown?: number;
 }
 
 /**

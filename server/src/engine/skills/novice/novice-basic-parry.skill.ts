@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 20,
     costs: [{ resource: 'energy', amount: 7 }],
     modifiers: { attack: 8, damage: 6, dodge: 7, parry: 17, damageType: 'blunt' },
+    cooldown: 1,
   },
   {
     name: '并掌截门',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 45,
     costs: [{ resource: 'energy', amount: 9 }],
     modifiers: { attack: 11, damage: 9, dodge: 9, parry: 22, damageType: 'blunt' },
+    cooldown: 2,
   },
   {
     name: '守拙反震',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 70,
     costs: [{ resource: 'energy', amount: 11 }],
     modifiers: { attack: 14, damage: 12, dodge: 11, parry: 28, damageType: 'blunt' },
+    cooldown: 3,
   },
 ];
 

@@ -1,6 +1,7 @@
 /**
  * ActionButton — 单个战斗招式按钮
  * 显示招式名 + 资源消耗，不可用时灰显
+ * 冷却中显示剩余回合数覆盖层
  * 内功招式使用特殊配色
  */
 
@@ -26,7 +27,8 @@ export const ActionButton = ({
   onPress,
   disabled,
 }: ActionButtonProps) => {
-  const isDisabled = disabled || !action.canUse;
+  const isCooling = action.cooldownRemaining > 0;
+  const isDisabled = disabled || !action.canUse || isCooling;
 
   /** 生成资源消耗摘要文本，如 "内30 气10" */
   const costText = action.costs
@@ -54,6 +56,13 @@ export const ActionButton = ({
         <Text style={s.cost} numberOfLines={1}>
           {costText}
         </Text>
+      ) : null}
+
+      {/* 冷却覆盖层 */}
+      {isCooling ? (
+        <View style={s.cooldownOverlay}>
+          <Text style={s.cooldownText}>{action.cooldownRemaining}</Text>
+        </View>
       ) : null}
     </TouchableOpacity>
   );
@@ -88,6 +97,8 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
+    position: 'relative',
+    overflow: 'hidden',
   },
   /** 内功招式边框特殊配色 */
   internalBorder: {
@@ -113,6 +124,19 @@ const s = StyleSheet.create({
     color: '#8B7A5A',
     fontFamily: 'Noto Sans SC',
     textAlign: 'center',
+  },
+  /** 冷却覆盖层 */
+  cooldownOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(58, 53, 48, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cooldownText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#F5F0E8',
+    fontFamily: 'Noto Sans SC',
   },
   moreBtn: {
     backgroundColor: 'rgba(235, 228, 218, 0.8)',

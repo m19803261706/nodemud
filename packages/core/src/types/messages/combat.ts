@@ -3,6 +3,8 @@
  * 客户端与服务端共享的战斗系统消息接口
  */
 
+import type { CombatActionOption } from './skill';
+
 /** 战斗参与者信息 */
 export interface CombatFighter {
   name: string;
@@ -35,6 +37,7 @@ export interface CombatStartData {
   combatId: string;
   player: CombatFighter;
   enemy: CombatFighter;
+  availableActions?: CombatActionOption[]; // 战斗开始时的可用招式列表
 }
 
 /** combatUpdate 消息数据 */
@@ -43,6 +46,7 @@ export interface CombatUpdateData {
   actions: CombatAction[];
   player: Pick<CombatFighter, 'hp' | 'maxHp' | 'atbPct'>;
   enemy: Pick<CombatFighter, 'hp' | 'maxHp' | 'atbPct'>;
+  availableActions?: CombatActionOption[]; // 最新招式列表（含冷却状态）
 }
 
 /** combatEnd 消息数据 */

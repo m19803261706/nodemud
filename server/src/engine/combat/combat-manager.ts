@@ -92,6 +92,7 @@ export class CombatManager implements OnModuleInit {
       gauge: 0,
       target: enemy,
       state: CombatParticipantState.CHARGING,
+      actionCooldowns: new Map(),
     };
     const enemyParticipant: CombatParticipant = {
       entity: enemy,
@@ -99,6 +100,7 @@ export class CombatManager implements OnModuleInit {
       gauge: 0,
       target: player,
       state: CombatParticipantState.CHARGING,
+      actionCooldowns: new Map(),
     };
 
     const participants = new Map<string, CombatParticipant>();
@@ -124,12 +126,18 @@ export class CombatManager implements OnModuleInit {
     enemy.setTemp('combat/state', 'fighting');
     enemy.setTemp('combat/id', combatId);
 
-    // 推送 combatStart
+    // 推送 combatStart（携带初始招式列表）
     const startData: CombatStartData = {
       combatId,
       player: this.buildFighterInfo(player, playerParticipant),
       enemy: this.buildFighterInfo(enemy, enemyParticipant),
     };
+    if (player instanceof PlayerBase) {
+      const skillMgr = this.getSkillManager(player);
+      if (skillMgr) {
+        startData.availableActions = this.getActionsWithCooldown(player, playerParticipant, skillMgr);
+      }
+    }
     this.sendToPlayer(player, 'combatStart', startData);
 
     this.logger.log(`战斗开始[${mode}]: ${player.getName()} vs ${enemy.getName()} (${combatId})`);
@@ -447,7 +455,14 @@ export class CombatManager implements OnModuleInit {
       return false;
     }
 
-    // 4. 校验可用性（资源是否足够）
+    // 4. 校验可用性（资源是否足够 + 冷却是否完毕）
+    const cooldownKey = `${actionOption.skillId}::${actionOption.actionName}`;
+    const cooldownLeft = participant.actionCooldowns.get(cooldownKey) ?? 0;
+    if (cooldownLeft > 0) {
+      this.sendToPlayer(player, 'toast', { content: '招式冷却中，无法使用。' });
+      this.executeAutoAttack(combat, participant, player);
+      return false;
+    }
     if (!actionOption.canUse) {
       this.sendToPlayer(player, 'toast', { content: '资源不足，无法使用该招式。' });
       this.executeAutoAttack(combat, participant, player);
@@ -498,6 +513,13 @@ export class CombatManager implements OnModuleInit {
     participant.state = CombatParticipantState.CHARGING;
     participant.gauge = 0;
 
+    // 11.5 冷却处理：先递减所有现存冷却（本次出手算 1 回合），再设置本招冷却
+    this.tickCooldowns(participant);
+    const actionCooldown = skillAction.cooldown ?? 0;
+    if (actionCooldown > 0) {
+      participant.actionCooldowns.set(cooldownKey, actionCooldown);
+    }
+
     // 12. 检查目标死亡
     if (damageResult.defeated) {
       const reason: CombatEndReason = participant.side === 'player' ? 'victory' : 'defeat';
@@ -547,7 +569,7 @@ export class CombatManager implements OnModuleInit {
   //  消息推送
   // ================================================================
 
-  /** 推送 combatUpdate 消息 */
+  /** 推送 combatUpdate 消息（自动附带最新招式列表） */
   private sendCombatUpdate(combat: CombatInstance, actions: CombatAction[]): void {
     const playerParticipant = combat.participants.get(combat.player.id);
     const enemyParticipant = combat.participants.get(combat.enemy.id);
@@ -567,6 +589,18 @@ export class CombatManager implements OnModuleInit {
         atbPct: Math.floor((enemyParticipant.gauge / COMBAT_CONSTANTS.MAX_GAUGE) * 100),
       },
     };
+
+    // 附带最新招式列表（含冷却状态）
+    if (combat.player instanceof PlayerBase) {
+      const skillMgr = this.getSkillManager(combat.player);
+      if (skillMgr) {
+        updateData.availableActions = this.getActionsWithCooldown(
+          combat.player,
+          playerParticipant,
+          skillMgr,
+        );
+      }
+    }
 
     this.sendToPlayer(combat.player, 'combatUpdate', updateData);
   }
@@ -635,6 +669,9 @@ export class CombatManager implements OnModuleInit {
     // 重置状态
     participant.state = CombatParticipantState.CHARGING;
     participant.gauge = 0;
+
+    // 普攻也算 1 回合，递减冷却
+    this.tickCooldowns(participant);
 
     // 执行普通攻击
     const result = DamageEngine.calculate(participant.entity, participant.target);
@@ -780,6 +817,46 @@ export class CombatManager implements OnModuleInit {
     target.receiveDamage(finalDamage);
     const aliveHp = target.get<number>('hp') ?? 0;
     return { appliedDamage: finalDamage, defeated: aliveHp <= 0 };
+  }
+
+  // ================================================================
+  //  冷却系统
+  // ================================================================
+
+  /**
+   * 获取招式列表（含冷却状态）
+   * 在 getAvailableCombatActions 基础上叠加冷却信息
+   */
+  private getActionsWithCooldown(
+    player: PlayerBase,
+    participant: CombatParticipant,
+    skillMgr: SkillManager,
+  ): import('@packages/core').CombatActionOption[] {
+    const actions = skillMgr.getAvailableCombatActions();
+    return actions.map((action) => {
+      const key = `${action.skillId}::${action.actionName}`;
+      const cooldownRemaining = participant.actionCooldowns.get(key) ?? 0;
+      return {
+        ...action,
+        cooldownRemaining,
+        // 冷却中不可用
+        canUse: cooldownRemaining > 0 ? false : action.canUse,
+      };
+    });
+  }
+
+  /**
+   * 递减参与者所有冷却值（每次出手算 1 回合）
+   * 冷却降为 0 时自动移除
+   */
+  private tickCooldowns(participant: CombatParticipant): void {
+    for (const [key, remaining] of participant.actionCooldowns) {
+      if (remaining <= 1) {
+        participant.actionCooldowns.delete(key);
+      } else {
+        participant.actionCooldowns.set(key, remaining - 1);
+      }
+    }
   }
 
   // ================================================================

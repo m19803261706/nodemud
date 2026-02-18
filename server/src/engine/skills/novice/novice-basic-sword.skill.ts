@@ -16,6 +16,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 20,
     costs: [{ resource: 'energy', amount: 7 }],
     modifiers: { attack: 11, damage: 7, dodge: 3, parry: 3, damageType: 'slash' },
+    cooldown: 1,
   },
   {
     name: '提剑封门',
@@ -23,6 +24,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 45,
     costs: [{ resource: 'energy', amount: 9 }],
     modifiers: { attack: 14, damage: 11, dodge: 4, parry: 5, damageType: 'pierce' },
+    cooldown: 2,
   },
   {
     name: '坠星一击',
@@ -30,6 +32,7 @@ const ACTIONS: SkillAction[] = [
     lvl: 70,
     costs: [{ resource: 'energy', amount: 11 }],
     modifiers: { attack: 18, damage: 15, dodge: 4, parry: 4, damageType: 'pierce' },
+    cooldown: 3,
   },
 ];
 

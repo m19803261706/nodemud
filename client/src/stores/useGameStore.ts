@@ -47,23 +47,11 @@ export interface CombatData {
   defense: number;
 }
 
-/** 人物门派信息摘要 */
-export interface PlayerSectSummary {
-  sectId: string;
-  sectName: string;
-  rank: string;
-  masterName: string;
-  contribution: number;
-}
-
 /** 玩家数据（来自服务端 playerStats 消息） */
 export interface PlayerData {
   name: string;
-  gender: 'male' | 'female';
-  origin: string;
   level: number;
   levelTitle: string;
-  sect: PlayerSectSummary | null;
   silver: number;
   hp: ResourceValue;
   mp: ResourceValue;
@@ -398,11 +386,8 @@ const EMPTY_ATTRS: CharacterAttrs = {
 
 const INITIAL_PLAYER: PlayerData = {
   name: '',
-  gender: 'male',
-  origin: '',
   level: 0,
   levelTitle: '',
-  sect: null,
   silver: 0,
   hp: { current: 0, max: 0 },
   mp: { current: 0, max: 0 },
@@ -643,7 +628,7 @@ export const useGameStore = create<GameState>(set => ({
         log: [],
         result: null,
         awaitingAction: false,
-        availableActions: [],
+        availableActions: data.availableActions ?? [],
         actionTimeout: 0,
       },
     }),
@@ -667,9 +652,8 @@ export const useGameStore = create<GameState>(set => ({
           awaitingAction: resolvedPlayerAction
             ? false
             : state.combat.awaitingAction,
-          availableActions: resolvedPlayerAction
-            ? []
-            : state.combat.availableActions,
+          // availableActions 始终由服务端最新推送决定
+          availableActions: data.availableActions ?? state.combat.availableActions,
           actionTimeout: resolvedPlayerAction ? 0 : state.combat.actionTimeout,
         };
       })(),
