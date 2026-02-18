@@ -18,5 +18,33 @@ export default class SongyangMountainStream extends RoomBase {
     this.set('exits', {
       east: 'area/songyang/mountain-path-middle',
     });
+
+    // 可采集资源（山溪野生草药，品种少但有稀有的）
+    this.set('gatherables', [
+      {
+        id: 'herb-七星莲',
+        name: '七星莲',
+        messages: [
+          '你在溪边的湿石缝中发现一株{name}，小心摘下。',
+          '潭水旁长着几株{name}，叶片沾满水雾，你采下一株。',
+        ],
+      },
+      {
+        id: 'herb-断肠藤',
+        name: '断肠藤',
+        messages: [
+          '崖壁上垂下几条{name}，你攀上去扯下一段。',
+          '溪畔岩缝里蔓延着{name}，你小心地截取一截。',
+        ],
+      },
+      {
+        id: 'herb-金线草',
+        name: '金线草',
+        messages: [
+          '你在溪流转弯处发现几株野生的{name}。',
+          '青苔间夹杂着一株{name}，你弯腰采下。',
+        ],
+      },
+    ]);
   }
 }

@@ -18,5 +18,42 @@ export default class SongyangHerbGarden extends RoomBase {
     this.set('exits', {
       north: 'area/songyang/disciples-yard',
     });
+
+    // 可采集资源（药圃品种齐全，概率均匀）
+    this.set('gatherables', [
+      {
+        id: 'herb-金线草',
+        name: '金线草',
+        messages: [
+          '你蹲在药田旁，拔起一株{name}，根须沾着湿润的泥土。',
+          '你顺着竹牌标记找到{name}，小心连根拔起。',
+          '药田里的{name}长势正好，你摘下一株放入怀中。',
+        ],
+      },
+      {
+        id: 'herb-石斛',
+        name: '石斛',
+        messages: [
+          '你在篱笆边发现几丛{name}，摘下一株。',
+          '一株{name}攀附在竹架上，你轻轻将它取下。',
+        ],
+      },
+      {
+        id: 'herb-七星莲',
+        name: '七星莲',
+        messages: [
+          '药田角落长着一小片{name}，你摘下一株。',
+          '你认出药牌上写着{name}，蹲下采了一株。',
+        ],
+      },
+      {
+        id: 'herb-断肠藤',
+        name: '断肠藤',
+        messages: [
+          '你戴上手套，小心地剪下一段{name}。',
+          '一根{name}缠在篱笆上，你谨慎地取下一截。',
+        ],
+      },
+    ]);
   }
 }

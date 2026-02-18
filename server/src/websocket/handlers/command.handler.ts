@@ -160,6 +160,22 @@ export class CommandHandler {
       }
     }
 
+    // gather 命令成功后：门派任务进度（采集）+ 广播
+    if (result.success && result.data?.action === 'gather') {
+      if (ServiceLocator.sectTaskTracker && result.data.itemBlueprintId) {
+        ServiceLocator.sectTaskTracker.onObtainItem(
+          player,
+          result.data.itemBlueprintId as string,
+          1,
+        );
+      }
+      const room = player.getEnvironment() as RoomBase | null;
+      if (room) {
+        const herbName = result.data.itemName || '资源';
+        room.broadcast(`${player.getName()}采集了一些${herbName}。`, player);
+      }
+    }
+
     // drop 命令成功后：推送 inventoryUpdate + roomInfo
     if (result.success && result.data?.action === 'drop') {
       const room = player.getEnvironment() as RoomBase | null;
