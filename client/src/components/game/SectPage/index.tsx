@@ -41,38 +41,40 @@ export const SectPage = () => {
         </View>
       ) : (
         <View style={s.contentWrap}>
-          <ScrollView
-            style={s.scrollView}
-            contentContainerStyle={s.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* 门派概览卡片 */}
-            <SectOverview overview={sectInfo.overview} />
+          {/* 上半部分：门派内容 */}
+          <View style={s.scrollWrap}>
+            <ScrollView
+              contentContainerStyle={s.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* 门派概览卡片 */}
+              <SectOverview overview={sectInfo.overview} />
 
-            {/* 职位阶梯 */}
-            <RankProgress
-              ranks={sectInfo.overview.ranks}
-              currentRank={sectInfo.overview.rank}
-              contribution={sectInfo.overview.contribution}
-              nextRank={sectInfo.overview.nextRank}
-            />
+              {/* 职位阶梯 */}
+              <RankProgress
+                ranks={sectInfo.overview.ranks}
+                currentRank={sectInfo.overview.rank}
+                contribution={sectInfo.overview.contribution}
+                nextRank={sectInfo.overview.nextRank}
+              />
 
-            {/* 技能网格 */}
-            {sectInfo.skillTree ? (
-              <SectSkillGrid skills={sectInfo.skillTree} />
-            ) : null}
+              {/* 技能网格 */}
+              {sectInfo.skillTree ? (
+                <SectSkillGrid skills={sectInfo.skillTree} />
+              ) : null}
 
-            {/* 日常/进度 */}
-            {sectInfo.progress ? (
-              <SectProgress progress={sectInfo.progress} />
-            ) : null}
+              {/* 日常/进度 */}
+              {sectInfo.progress ? (
+                <SectProgress progress={sectInfo.progress} />
+              ) : null}
 
-            {/* 操作按钮区 */}
-            <SectActions
-              npcLocations={sectInfo.npcLocations}
-              onTeleport={handleTeleport}
-            />
-          </ScrollView>
+              {/* 操作按钮区 */}
+              <SectActions
+                npcLocations={sectInfo.npcLocations}
+                onTeleport={handleTeleport}
+              />
+            </ScrollView>
+          </View>
 
           {/* 下半部分：日志 */}
           <View style={s.logArea}>
@@ -94,7 +96,7 @@ const s = StyleSheet.create({
   contentWrap: {
     flex: 1,
   },
-  scrollView: {
+  scrollWrap: {
     flex: 17,
   },
   scrollContent: {
