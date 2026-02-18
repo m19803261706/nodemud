@@ -20,6 +20,7 @@ import type {
   SkillSlotType,
   SkillCategory,
   MapResponseData,
+  SectInfoResponseData,
 } from '@packages/core';
 import { wsService } from '../services/WebSocketService';
 
@@ -370,6 +371,10 @@ export interface GameState {
   mapData: MapResponseData | null;
   setMapVisible: (visible: boolean) => void;
   setMapData: (data: MapResponseData | null) => void;
+
+  // 门派
+  sectInfo: SectInfoResponseData | null;
+  setSectInfo: (data: SectInfoResponseData) => void;
 
   // 导航
   activeTab: string;
@@ -732,6 +737,10 @@ export const useGameStore = create<GameState>(set => ({
   mapData: null,
   setMapVisible: visible => set({ mapVisible: visible }),
   setMapData: data => set({ mapData: data }),
+
+  // 门派
+  sectInfo: null,
+  setSectInfo: data => set({ sectInfo: data }),
 
   // 导航
   activeTab: '江湖',

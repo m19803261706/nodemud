@@ -427,7 +427,8 @@ function App(): React.JSX.Element {
     const handleRoomObjectAdded = (data: any) => {
       const { addNpc, addGroundItem } = useGameStore.getState();
       if (data.objectType === 'npc' && data.npc) addNpc(data.npc);
-      else if (data.objectType === 'item' && data.item) addGroundItem(data.item);
+      else if (data.objectType === 'item' && data.item)
+        addGroundItem(data.item);
     };
 
     /** 房间对象移除 → 增量更新 NPC/地面物品列表 */
@@ -453,6 +454,11 @@ function App(): React.JSX.Element {
       }
     };
 
+    /** 门派信息响应 → 写入 store */
+    const handleSectInfoResponse = (data: any) => {
+      useGameStore.getState().setSectInfo(data);
+    };
+
     wsService.on('roomInfo', handleRoomInfo);
     wsService.on('commandResult', handleCommandResult);
     wsService.on('message', handleMessage);
@@ -476,6 +482,7 @@ function App(): React.JSX.Element {
     wsService.on('roomObjectRemoved', handleRoomObjectRemoved);
     wsService.on('mapResponse', handleMapResponse);
     wsService.on('navigateResponse', handleNavigateResponse);
+    wsService.on('sectInfoResponse', handleSectInfoResponse);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -501,6 +508,7 @@ function App(): React.JSX.Element {
       wsService.off('roomObjectRemoved', handleRoomObjectRemoved);
       wsService.off('mapResponse', handleMapResponse);
       wsService.off('navigateResponse', handleNavigateResponse);
+      wsService.off('sectInfoResponse', handleSectInfoResponse);
     };
   }, []);
 

@@ -62,6 +62,10 @@ import './handlers/mapRequest';
 import './handlers/mapResponse';
 import './handlers/navigateRequest';
 import './handlers/navigateResponse';
+// 门派系统消息
+import './handlers/sectInfoRequest';
+import './handlers/sectInfoResponse';
+import './handlers/sectTeleport';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';

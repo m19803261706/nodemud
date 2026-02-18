@@ -18,6 +18,7 @@ import { ItemInfoModal } from '../components/game/NpcList/ItemInfoModal';
 import { InventoryPage } from '../components/game/Inventory';
 import { CharacterPage } from '../components/game/Character';
 import { SkillPage } from '../components/game/SkillPage';
+import { SectPage } from '../components/game/SectPage';
 import { BottomNavBar } from '../components/game/BottomNavBar';
 import { QuestListModal } from '../components/game/QuestListModal';
 import { MapModal } from '../components/game/MapModal';
@@ -32,6 +33,7 @@ export const GameHomeScreen = ({ route: _route }: any) => {
   const isInventory = activeTab === '背包';
   const isCharacter = activeTab === '人物';
   const isSkill = activeTab === '技能';
+  const isSect = activeTab === '门派';
 
   return (
     <LinearGradient
@@ -43,13 +45,15 @@ export const GameHomeScreen = ({ route: _route }: any) => {
     >
       <View style={[s.safeArea, { paddingTop: insets.top }]}>
         <PlayerStats />
-        {isInventory || isCharacter || isSkill ? (
+        {isInventory || isCharacter || isSkill || isSect ? (
           /* 全屏功能页：替换 LocationHeader + mainContent */
           <View style={s.fullContent}>
             {isInventory ? (
               <InventoryPage />
             ) : isCharacter ? (
               <CharacterPage />
+            ) : isSect ? (
+              <SectPage />
             ) : (
               <SkillPage />
             )}

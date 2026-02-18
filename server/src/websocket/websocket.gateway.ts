@@ -23,6 +23,7 @@ import { CharacterHandler } from './handlers/character.handler';
 import { CommandHandler } from './handlers/command.handler';
 import { SkillHandler } from './handlers/skill.handler';
 import { MapHandler } from './handlers/map.handler';
+import { SectHandler } from './handlers/sect.handler';
 import { sendPlayerStats } from './handlers/stats.utils';
 import { sendInventoryUpdate } from './handlers/room-utils';
 import { CharacterService } from '../character/character.service';
@@ -50,6 +51,7 @@ export class GameGateway
     private readonly commandHandler: CommandHandler,
     private readonly skillHandler: SkillHandler,
     private readonly mapHandler: MapHandler,
+    private readonly sectHandler: SectHandler,
     private readonly characterService: CharacterService,
     private readonly objectManager: ObjectManager,
   ) {}
@@ -269,6 +271,12 @@ export class GameGateway
         break;
       case 'navigateRequest':
         await this.mapHandler.handleNavigateRequest(client, session, message.data as any);
+        break;
+      case 'sectInfoRequest':
+        await this.sectHandler.handleSectInfoRequest(session);
+        break;
+      case 'sectTeleport':
+        await this.sectHandler.handleSectTeleport(client, session, message.data as any);
         break;
       case 'ping':
         // 心跳，无需处理
