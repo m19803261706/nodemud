@@ -18,6 +18,7 @@ import {
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useGameStore, type LogEntry } from '../../../stores/useGameStore';
 import { RichText } from '../../RichText';
 
@@ -45,6 +46,10 @@ export const LogScrollView = ({
   const flatListRef = useRef<FlatList<LogEntry>>(null);
   const isAtBottomRef = useRef(true);
   const lastLogCountRef = useRef(gameLog.length);
+  /** 记录有滚动请求但 FlatList 不可见未能执行 */
+  const pendingScrollRef = useRef(false);
+  /** 上一次 onLayout 的高度，用于检测"从不可见变为可见" */
+  const lastLayoutHeightRef = useRef(0);
   const [hasNewMessage, setHasNewMessage] = useState(false);
 
   /** 将是否贴底状态写入 ref，避免异步 state 误判 */
@@ -68,6 +73,11 @@ export const LogScrollView = ({
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+      // 内容比视口小时始终视为贴底
+      if (contentSize.height <= layoutMeasurement.height) {
+        setBottomState(true);
+        return;
+      }
       const distanceFromBottom =
         contentSize.height - (contentOffset.y + layoutMeasurement.height);
       const atBottom = distanceFromBottom <= BOTTOM_THRESHOLD;
@@ -92,11 +102,22 @@ export const LogScrollView = ({
 
     if (!appended) return;
     if (isAtBottomRef.current) {
+      pendingScrollRef.current = true;
       scheduleScrollToEnd(true);
     } else {
       setHasNewMessage(true);
     }
   }, [gameLog.length, scheduleScrollToEnd]);
+
+  /** 页面重新获焦时：补偿隐藏期间未能执行的滚动 */
+  useFocusEffect(
+    useCallback(() => {
+      if (isAtBottomRef.current) {
+        pendingScrollRef.current = false;
+        scheduleScrollToEnd(false);
+      }
+    }, [scheduleScrollToEnd]),
+  );
 
   /** 点击浮标 → 滚动到底部 */
   const scrollToBottom = useCallback(() => {
@@ -115,8 +136,19 @@ export const LogScrollView = ({
         keyExtractor={keyExtractor}
         onScroll={handleScroll}
         onContentSizeChange={handleContentSizeChange}
-        onLayout={() => {
-          if (isAtBottomRef.current) {
+        onLayout={e => {
+          const { height } = e.nativeEvent.layout;
+          const wasHidden = lastLayoutHeightRef.current === 0 && height > 0;
+          const becameVisible =
+            lastLayoutHeightRef.current !== height && height > 0;
+          lastLayoutHeightRef.current = height;
+
+          // 组件变为可见或尺寸变化时，补偿之前未执行的滚动
+          if (
+            (wasHidden || becameVisible || pendingScrollRef.current) &&
+            isAtBottomRef.current
+          ) {
+            pendingScrollRef.current = false;
             scheduleScrollToEnd(false);
           }
         }}
