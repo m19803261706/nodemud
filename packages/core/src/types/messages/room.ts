@@ -46,6 +46,13 @@ export interface RoomObjectRemovedMessage extends ServerMessage {
   };
 }
 
+/** 房间动态动作（采集、挖矿等地图事件按钮） */
+export interface RoomAction {
+  id: string;
+  label: string;
+  command: string;
+}
+
 /** 房间信息消息（服务端 → 客户端） */
 export interface RoomInfoMessage extends ServerMessage {
   type: 'roomInfo';
@@ -57,5 +64,6 @@ export interface RoomInfoMessage extends ServerMessage {
     coordinates: RoomCoordinates; // 地图坐标（预留）
     npcs: NpcBrief[]; // 房间内 NPC 列表
     items: ItemBrief[]; // 房间地面物品列表
+    roomActions?: RoomAction[]; // 房间动态动作按钮（采集等）
   };
 }

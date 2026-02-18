@@ -65,6 +65,9 @@ const SPECIAL_EXIT_LABEL: Record<string, string> = {
 /** 特殊出口 → logQuickAction ID 前缀 */
 const SPECIAL_EXIT_ACTION_PREFIX = 'exit-';
 
+/** 房间动态动作 → logQuickAction ID 前缀 */
+const ROOM_ACTION_PREFIX = 'room-action-';
+
 function buildLocationActions(): string[] {
   return ['回城', '飞行', '地图', '邮件'];
 }
@@ -171,6 +174,21 @@ function App(): React.JSX.Element {
         data.exitNames,
       );
       specialExits.forEach(action => upsertLogQuickAction(action));
+
+      // 清除上一个房间的动态动作按钮，添加当前房间的
+      logQuickActions
+        .filter(a => a.id.startsWith(ROOM_ACTION_PREFIX))
+        .forEach(a => removeLogQuickAction(a.id));
+      if (data.roomActions && data.roomActions.length > 0) {
+        for (const ra of data.roomActions) {
+          upsertLogQuickAction({
+            id: `${ROOM_ACTION_PREFIX}${ra.id}`,
+            label: ra.label,
+            command: ra.command,
+            consumeOnPress: false,
+          });
+        }
+      }
 
       if (shortName !== '嵩阳山道') {
         removeLogQuickAction(SONGYANG_GATE_INTENT_ACTION_ID);

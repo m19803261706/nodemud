@@ -4,7 +4,7 @@
  */
 
 import { MessageFactory } from '@packages/core';
-import type { NpcBrief, ItemBrief, InventoryItem } from '@packages/core';
+import type { NpcBrief, ItemBrief, InventoryItem, RoomAction } from '@packages/core';
 import { BaseEntity } from '../../engine/base-entity';
 import { PlayerBase } from '../../engine/game-objects/player-base';
 import type { RoomBase } from '../../engine/game-objects/room-base';
@@ -138,6 +138,9 @@ export function sendRoomInfo(
     .filter((e): e is ItemBase => e instanceof ItemBase)
     .map((item) => buildItemBrief(item));
 
+  // 读取房间配置的动态动作（采集、挖矿等，由房间自行定义）
+  const roomActions = room.get<RoomAction[]>('roomActions') ?? [];
+
   const msg = MessageFactory.create(
     'roomInfo',
     room.getShort(),
@@ -147,6 +150,7 @@ export function sendRoomInfo(
     exitNames,
     npcs,
     items,
+    roomActions,
   );
   if (msg) {
     player.sendToClient(MessageFactory.serialize(msg));

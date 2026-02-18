@@ -40,11 +40,13 @@ export default class SongyangMountainStream extends RoomBase {
       {
         id: 'herb-金线草',
         name: '金线草',
-        messages: [
-          '你在溪流转弯处发现几株野生的{name}。',
-          '青苔间夹杂着一株{name}，你弯腰采下。',
-        ],
+        messages: ['你在溪流转弯处发现几株野生的{name}。', '青苔间夹杂着一株{name}，你弯腰采下。'],
       },
+    ]);
+
+    // 房间动态动作按钮
+    this.set('roomActions', [
+      { id: 'gather', label: '采集', command: 'gather' },
     ]);
   }
 }

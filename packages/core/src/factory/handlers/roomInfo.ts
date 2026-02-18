@@ -4,7 +4,12 @@
  */
 
 import { MessageHandler, type IMessageHandler } from '../MessageFactory';
-import type { RoomInfoMessage, RoomCoordinates, NpcBrief } from '../../types/messages/room';
+import type {
+  RoomInfoMessage,
+  RoomCoordinates,
+  NpcBrief,
+  RoomAction,
+} from '../../types/messages/room';
 import type { ItemBrief } from '../../types/messages/inventory';
 
 @MessageHandler('roomInfo')
@@ -17,6 +22,7 @@ export class RoomInfoHandler implements IMessageHandler {
     exitNames?: Record<string, string>,
     npcs?: NpcBrief[],
     items?: ItemBrief[],
+    roomActions?: RoomAction[],
   ): RoomInfoMessage {
     return {
       type: 'roomInfo',
@@ -28,6 +34,7 @@ export class RoomInfoHandler implements IMessageHandler {
         coordinates,
         npcs: npcs ?? [],
         items: items ?? [],
+        roomActions: roomActions && roomActions.length > 0 ? roomActions : undefined,
       },
       timestamp: Date.now(),
     };

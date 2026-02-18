@@ -55,5 +55,10 @@ export default class SongyangHerbGarden extends RoomBase {
         ],
       },
     ]);
+
+    // 房间动态动作按钮
+    this.set('roomActions', [
+      { id: 'gather', label: '采集', command: 'gather' },
+    ]);
   }
 }
