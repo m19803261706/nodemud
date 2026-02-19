@@ -22,6 +22,7 @@ export default class CentralPlainRuinsSquare extends RoomBase {
     this.set('coordinates', { x: 0, y: 1, z: 0 });
     this.set('exits', {
       north: 'area/central-plain/north-gate',
+      south: 'area/road-nanjiang/north-end',
       east: 'area/central-plain/broken-hall',
       west: 'area/central-plain/old-tavern',
     });

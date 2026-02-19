@@ -243,22 +243,24 @@ describe('Wave 1 地图出口对称性', () => {
     expect(northGate.getExit('north')).toBe('area/road-central/south-end');
   });
 
-  it('洛阳废都万宗广场应有 3 个出口（north/east/west）', () => {
+  it('洛阳废都万宗广场应有 4 个出口（north/south/east/west）', () => {
     const ruinsSquare = objectManager.findById('area/central-plain/ruins-square') as RoomBase;
     const exits = ruinsSquare.getExits();
     const dirs = Object.keys(exits);
 
-    expect(dirs).toHaveLength(3);
+    expect(dirs).toHaveLength(4);
     expect(dirs).toContain('north');
+    expect(dirs).toContain('south');
     expect(dirs).toContain('east');
     expect(dirs).toContain('west');
   });
 
-  it('残灯酒肆和断壁残殿应只有单方向出口连回广场', () => {
+  it('残灯酒肆应有东+西出口，断壁残殿应有西出口', () => {
     const oldTavern = objectManager.findById('area/central-plain/old-tavern') as RoomBase;
     const tavernExits = oldTavern.getExits();
-    expect(Object.keys(tavernExits)).toHaveLength(1);
+    expect(Object.keys(tavernExits)).toHaveLength(2);
     expect(tavernExits.east).toBe('area/central-plain/ruins-square');
+    expect(tavernExits.west).toBe('area/road-western/east-end');
 
     const brokenHall = objectManager.findById('area/central-plain/broken-hall') as RoomBase;
     const hallExits = brokenHall.getExits();

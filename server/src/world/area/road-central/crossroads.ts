@@ -22,6 +22,8 @@ export default class RoadCentralCrossroads extends RoomBase {
     this.set('exits', {
       north: 'area/road-central/old-bridge',
       south: 'area/road-central/south-end',
+      east: 'area/road-jiangnan/west-end',
+      northeast: 'area/road-north/south-end',
     });
   }
 }

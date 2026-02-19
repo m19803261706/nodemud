@@ -22,6 +22,7 @@ export default class CentralPlainOldTavern extends RoomBase {
     this.set('coordinates', { x: -1, y: 1, z: 0 });
     this.set('exits', {
       east: 'area/central-plain/ruins-square',
+      west: 'area/road-western/east-end',
     });
   }
 }
