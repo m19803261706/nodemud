@@ -3,11 +3,9 @@
  * 所有门派共享的日常/周常任务模板。
  * 门派特色模板由各门派的 SectPolicy.getCustomDailyPool()/getCustomWeeklyPool() 提供。
  */
-import type {
-  SectTaskTemplate,
-  SectTaskInstance,
-  TaskGenContext,
-} from './types';
+import type { SectTaskTemplate, SectTaskInstance, TaskGenContext } from './types';
+import { ServiceLocator } from '../service-locator';
+import { RoomBase } from '../game-objects/room-base';
 
 // ========== 辅助函数 ==========
 
@@ -19,6 +17,14 @@ function pick<T>(arr: T[]): T {
 /** 随机整数 [min, max] */
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/** 通过房间 ID 获取中文房间名 */
+function getRoomName(roomId: string): string {
+  const room = ServiceLocator.objectManager?.findById(roomId);
+  if (room instanceof RoomBase) return room.getShort();
+  // 降级：取路径最后一段
+  return roomId.split('/').pop() ?? roomId;
 }
 
 // ========== 通用日常模板 ==========
@@ -33,19 +39,20 @@ const patrol: SectTaskTemplate = {
   toneFilter: null,
   weight: 10,
   paramGen: (ctx: TaskGenContext): SectTaskInstance => {
-    const rooms = ctx.areaRoomIds.length >= 3
-      ? ctx.areaRoomIds.sort(() => Math.random() - 0.5).slice(0, 3)
-      : ['area/songyang/gate', 'area/songyang/drill-ground', 'area/songyang/mountain-path'];
+    const rooms =
+      ctx.areaRoomIds.length >= 3
+        ? ctx.areaRoomIds.sort(() => Math.random() - 0.5).slice(0, 3)
+        : ['area/songyang/gate', 'area/songyang/drill-ground', 'area/songyang/mountain-path'];
     return {
       templateId: 'common-daily-patrol',
       category: 'daily',
       name: '巡山',
       description: `按照执事安排，依次巡视${rooms.length}个地点，确认无异常。`,
-      objectives: rooms.map((roomId, i) => ({
+      objectives: rooms.map((roomId) => ({
         type: 'goto' as const,
         targetId: roomId,
         count: 1,
-        description: `前往第${i + 1}个巡视点`,
+        description: `前往${getRoomName(roomId)}`,
         current: 0,
       })),
       timeLimit: 30 * 60 * 1000,
@@ -261,11 +268,11 @@ const escort: SectTaskTemplate = {
       category: 'weekly',
       name: '护送行商',
       description: '护送行商安全下山至官道。',
-      objectives: waypoints.map((roomId, i) => ({
+      objectives: waypoints.map((roomId) => ({
         type: 'goto' as const,
         targetId: roomId,
         count: 1,
-        description: `护送至第${i + 1}个路点`,
+        description: `护送至${getRoomName(roomId)}`,
         current: 0,
       })),
       timeLimit: 7 * 24 * 60 * 60 * 1000,
@@ -323,20 +330,17 @@ const infiltrate: SectTaskTemplate = {
   toneFilter: null,
   weight: 8,
   paramGen: (ctx: TaskGenContext): SectTaskInstance => {
-    const targets = [
-      'area/songyang/road-songshan',
-      'area/songyang/road-rift',
-    ];
+    const targets = ['area/songyang/road-songshan', 'area/songyang/road-rift'];
     return {
       templateId: 'common-weekly-infiltrate',
       category: 'weekly',
       name: '刺探情报',
       description: '前往官道一带刺探消息。',
-      objectives: targets.map((roomId, i) => ({
+      objectives: targets.map((roomId) => ({
         type: 'goto' as const,
         targetId: roomId,
         count: 1,
-        description: `前往目标地点${i + 1}`,
+        description: `前往${getRoomName(roomId)}`,
         current: 0,
       })),
       timeLimit: 7 * 24 * 60 * 60 * 1000,
