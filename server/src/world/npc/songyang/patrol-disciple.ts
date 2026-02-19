@@ -40,5 +40,16 @@ export default class PatrolDisciple extends NpcBase {
       门派: '巡山弟子抱拳道：「在下只是巡山执勤的内门弟子，门派事务还请问执事院。」',
       default: '巡山弟子道：「师兄有何吩咐？我正巡山呢。」',
     });
+
+    // 漫游：巡山弟子在嵩阳宗山道区域巡视
+    this.set('wander', {
+      chance: 3, // 每心跳 3% 概率（平均 ~67s 移动一次，体现缓缓巡视）
+      rooms: [
+        'area/songyang/pine-pavilion',
+        'area/songyang/mountain-path',
+        'area/songyang/mountain-path-middle',
+        'area/songyang/mountain-path-lower',
+      ],
+    });
   }
 }

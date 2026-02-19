@@ -63,6 +63,18 @@ export default class OldBeggar extends NpcBase {
       default: '老乞丐迷迷糊糊地摇了摇头：「嗯？啥？行行好赏口饭吃……」',
     });
     this.set('equipment', [{ blueprintId: 'item/rift-town/torn-rags', position: 'body' }]);
+
+    // 漫游：老乞丐在裂隙镇公共区域闲逛
+    this.set('wander', {
+      chance: 5, // 每心跳 5% 概率（平均 ~40s 移动一次）
+      rooms: [
+        'area/rift-town/south-street',
+        'area/rift-town/square',
+        'area/rift-town/north-street',
+        'area/rift-town/tavern',
+        'area/rift-town/south-gate',
+      ],
+    });
   }
 
   /**

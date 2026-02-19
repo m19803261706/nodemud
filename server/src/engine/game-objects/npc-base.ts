@@ -16,7 +16,12 @@ import { LivingBase } from './living-base';
 import type { PlayerBase } from './player-base';
 import { RemainsBase } from './remains-base';
 import { RoomBase } from './room-base';
-import { notifyRoomObjectAdded, notifyRoomObjectRemoved } from '../../websocket/handlers/room-utils';
+import {
+  notifyRoomObjectAdded,
+  notifyRoomObjectRemoved,
+  getDirectionCN,
+  getOppositeDirectionCN,
+} from '../../websocket/handlers/room-utils';
 
 /** NPC 性格倾向 */
 export type NpcPersonality = 'stern' | 'friendly' | 'cunning' | 'grumpy' | 'timid';
@@ -56,6 +61,38 @@ const SECT_TITLE_MAP: Record<string, [string, string]> = {
 /** 高等级判定阈值（玩家等级 >= 此值视为高等级） */
 const HIGH_LEVEL_THRESHOLD = 15;
 
+/** NPC 漫游配置 */
+export interface WanderConfig {
+  /** 每次心跳漫游概率（百分比，如 5 = 5%） */
+  chance: number;
+  /** 允许漫游的房间 ID 白名单 */
+  rooms: string[];
+}
+
+/** 默认离开文案池（{name} = NPC 名字, {dir} = 方向中文） */
+const DEFAULT_WANDER_LEAVE = [
+  '[emote][npc]{name}[/npc]向{dir}走去。[/emote]',
+  '[emote][npc]{name}[/npc]的身影渐渐消失在{dir}。[/emote]',
+  '[emote][npc]{name}[/npc]缓步向{dir}走去。[/emote]',
+];
+
+/** 默认到达文案池 */
+const DEFAULT_WANDER_ARRIVE = [
+  '[emote][npc]{name}[/npc]从{dir}走来。[/emote]',
+  '[emote][npc]{name}[/npc]从{dir}缓步走来。[/emote]',
+  '[emote][npc]{name}[/npc]的身影从{dir}出现。[/emote]',
+];
+
+/** 不直连时的通用离开文案 */
+const GENERIC_WANDER_LEAVE = [
+  '[emote][npc]{name}[/npc]转身离开了。[/emote]',
+];
+
+/** 不直连时的通用到达文案 */
+const GENERIC_WANDER_ARRIVE = [
+  '[emote][npc]{name}[/npc]来到此处。[/emote]',
+];
+
 export class NpcBase extends LivingBase {
   /** NPC 可克隆（非虚拟对象） */
   static virtual = false;
@@ -67,7 +104,8 @@ export class NpcBase extends LivingBase {
 
   /**
    * AI 行为钩子
-   * 默认实现：检查战斗状态，非战斗时执行闲聊
+   * 默认实现：检查战斗状态，非战斗时执行漫游和闲聊
+   * 漫游和闲聊互斥：漫游成功则跳过本次闲聊
    * 蓝图可覆写扩展更多行为
    */
   protected onAI(): void {
@@ -79,6 +117,9 @@ export class NpcBase extends LivingBase {
       this.doCombatAI();
       return;
     }
+
+    // 漫游成功则跳过闲聊（刚到新房间不该立刻说话）
+    if (this.doWander()) return;
 
     this.doChat();
   }
@@ -107,6 +148,75 @@ export class NpcBase extends LivingBase {
     if (env && env instanceof RoomBase) {
       env.broadcast(`[npc]${this.getName()}[/npc]${msg}`);
     }
+  }
+
+  /**
+   * 漫游：按概率从白名单房间中随机选目标移动
+   * @returns true 表示漫游成功（调用方应跳过后续行为）
+   */
+  protected doWander(): boolean {
+    const wander = this.get<WanderConfig>('wander');
+    if (!wander || wander.chance <= 0 || !wander.rooms || wander.rooms.length === 0) return false;
+
+    // 概率判定
+    if (Math.random() * 100 >= wander.chance) return false;
+
+    const oldRoom = this.getEnvironment();
+    if (!oldRoom || !(oldRoom instanceof RoomBase)) return false;
+
+    // 从白名单中排除当前房间，随机选目标
+    const candidates = wander.rooms.filter((r) => r !== oldRoom.id);
+    if (candidates.length === 0) return false;
+
+    const targetId = candidates[Math.floor(Math.random() * candidates.length)];
+    const targetRoom = ServiceLocator.objectManager.findById(targetId);
+    if (!targetRoom || !(targetRoom instanceof RoomBase)) return false;
+
+    // 查找方向：遍历当前房间出口，判断目标是否直连
+    let leaveDir: string | null = null;
+    const exits = oldRoom.get<Record<string, string>>('exits') || {};
+    for (const [dir, roomId] of Object.entries(exits)) {
+      if (roomId === targetId) {
+        leaveDir = dir;
+        break;
+      }
+    }
+
+    // 构建广播文案
+    const name = this.getName();
+    let leaveMsg: string;
+    let arriveMsg: string;
+
+    if (leaveDir) {
+      // 直连：使用带方向的文案
+      const leaveMsgs = this.get<string[]>('wander_leave_msg') ?? DEFAULT_WANDER_LEAVE;
+      const arriveMsgs = this.get<string[]>('wander_arrive_msg') ?? DEFAULT_WANDER_ARRIVE;
+      leaveMsg = leaveMsgs[Math.floor(Math.random() * leaveMsgs.length)]
+        .replace(/\{name\}/g, name)
+        .replace(/\{dir\}/g, getDirectionCN(leaveDir));
+      arriveMsg = arriveMsgs[Math.floor(Math.random() * arriveMsgs.length)]
+        .replace(/\{name\}/g, name)
+        .replace(/\{dir\}/g, getOppositeDirectionCN(leaveDir));
+    } else {
+      // 不直连：使用通用文案
+      leaveMsg = GENERIC_WANDER_LEAVE[Math.floor(Math.random() * GENERIC_WANDER_LEAVE.length)]
+        .replace(/\{name\}/g, name);
+      arriveMsg = GENERIC_WANDER_ARRIVE[Math.floor(Math.random() * GENERIC_WANDER_ARRIVE.length)]
+        .replace(/\{name\}/g, name);
+    }
+
+    // 静默移动（不触发事件链）
+    this.moveTo(targetRoom, { quiet: true });
+
+    // 旧房间：广播离去 + 增量通知前端
+    oldRoom.broadcast(leaveMsg);
+    notifyRoomObjectRemoved(oldRoom, this.id, 'npc');
+
+    // 新房间：广播到达 + 增量通知前端
+    targetRoom.broadcast(arriveMsg);
+    notifyRoomObjectAdded(targetRoom, this);
+
+    return true;
   }
 
   /** NPC 失去环境（不在任何房间）→ 可清理 */

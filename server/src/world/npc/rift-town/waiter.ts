@@ -50,5 +50,11 @@ export default class InnWaiter extends NpcBase {
         return `店小二挠挠头：「${title}若要住店歇脚，我这就能给你安排。」`;
       },
     });
+
+    // 漫游：店小二在客栈楼上楼下穿梭
+    this.set('wander', {
+      chance: 8, // 每心跳 8% 概率（平均 ~25s 移动一次，体现忙碌穿梭）
+      rooms: ['area/rift-town/inn', 'area/rift-town/inn-upstairs'],
+    });
   }
 }
