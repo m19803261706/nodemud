@@ -200,15 +200,17 @@ describe('裂隙镇地图', () => {
     expect(registry.has('npc/rift-town/academy-lecturer')).toBe(true);
   });
 
-  it('北门应连通山道，南门保持单出口', () => {
+  it('北门应连通山道，南门连通官道', () => {
     const northGate = objectManager.findById('area/rift-town/north-gate') as RoomBase;
     expect(Object.keys(northGate.getExits())).toHaveLength(2);
     expect(northGate.getExit('south')).toBe('area/rift-town/north-road');
     expect(northGate.getExit('north')).toBe('area/songyang/road-rift');
 
+    // 南门现已开放，连通官道·中原段
     const southGate = objectManager.findById('area/rift-town/south-gate') as RoomBase;
-    expect(Object.keys(southGate.getExits())).toHaveLength(1);
+    expect(Object.keys(southGate.getExits())).toHaveLength(2);
     expect(southGate.getExit('north')).toBe('area/rift-town/south-road');
+    expect(southGate.getExit('south')).toBe('area/road-central/north-end');
   });
 
   it('地下暗道应只有 up 出口', () => {

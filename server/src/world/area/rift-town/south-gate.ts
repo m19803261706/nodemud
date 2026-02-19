@@ -1,7 +1,7 @@
 /**
  * 裂隙镇·南门
  * 坐标: (0, 3, 0)
- * 南方出口（通往中原）暂不开放，留给后续区域扩展
+ * 南方出口通往官道·中原段
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
 
@@ -17,6 +17,7 @@ export default class RiftTownSouthGate extends RoomBase {
     this.set('coordinates', { x: 0, y: 3, z: 0 });
     this.set('exits', {
       north: 'area/rift-town/south-road',
+      south: 'area/road-central/north-end',
     });
   }
 }
