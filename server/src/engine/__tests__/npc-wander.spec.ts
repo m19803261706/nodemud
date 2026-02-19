@@ -1,8 +1,8 @@
 /**
  * NPC 漫游系统 (doWander) 单元测试
  *
- * 覆盖：无配置跳过、chance=0 跳过、概率命中移动+广播+通知、
- * 白名单只有当前房间时不移动、目标房间不存在时跳过、方向查找与文案
+ * 覆盖：无配置跳过、chance=0 跳过、概率命中通过出口移动+广播+通知、
+ * 白名单只有当前房间时不移动、出口目标不在白名单时不移动、方向文案
  */
 import { NpcBase } from '../game-objects/npc-base';
 import { RoomBase } from '../game-objects/room-base';
@@ -18,7 +18,12 @@ jest.mock('../../websocket/handlers/room-utils', () => ({
     return map[dir] ?? dir;
   },
   getOppositeDirectionCN: (dir: string) => {
-    const map: Record<string, string> = { north: '南方', south: '北方', east: '西方', west: '东方' };
+    const map: Record<string, string> = {
+      north: '南方',
+      south: '北方',
+      east: '西方',
+      west: '东方',
+    };
     return map[dir] ?? '远方';
   },
 }));
@@ -62,7 +67,6 @@ describe('NPC 漫游系统 (doWander)', () => {
 
   it('无 wander 配置时不漫游', async () => {
     await npc.moveTo(roomA, { quiet: true });
-    // 触发心跳（会调 onAI → doWander）
     npc.onHeartbeat();
     expect(npc.getEnvironment()).toBe(roomA);
     expect(notifyRoomObjectRemoved).not.toHaveBeenCalled();
@@ -91,13 +95,22 @@ describe('NPC 漫游系统 (doWander)', () => {
     expect(notifyRoomObjectRemoved).not.toHaveBeenCalled();
   });
 
-  it('chance=100 时必定漫游到白名单中的其他房间', async () => {
+  it('出口目标不在白名单中时不移动', async () => {
+    // roomA 有出口到 room/b，但白名单只包含 room/a 和 room/c（不存在的房间）
+    npc.set('wander', { chance: 100, rooms: ['room/a', 'room/c'] });
+    await npc.moveTo(roomA, { quiet: true });
+    npc.onHeartbeat();
+    expect(npc.getEnvironment()).toBe(roomA);
+    expect(notifyRoomObjectRemoved).not.toHaveBeenCalled();
+  });
+
+  it('chance=100 时通过出口漫游到相邻房间', async () => {
     npc.set('wander', { chance: 100, rooms: ['room/a', 'room/b'] });
     await npc.moveTo(roomA, { quiet: true });
 
     npc.onHeartbeat();
 
-    // NPC 应该移动到 roomB（白名单中唯一的其他房间）
+    // NPC 应该通过 north 出口移动到 roomB
     expect(npc.getEnvironment()).toBe(roomB);
   });
 
@@ -136,7 +149,7 @@ describe('NPC 漫游系统 (doWander)', () => {
     expect(notifyRoomObjectAdded).toHaveBeenCalledWith(roomB, npc);
   });
 
-  it('直连房间的广播文案包含方向信息', async () => {
+  it('广播文案包含出口方向信息', async () => {
     npc.set('wander', { chance: 100, rooms: ['room/a', 'room/b'] });
     await npc.moveTo(roomA, { quiet: true });
     const leaveSpy = jest.spyOn(roomA, 'broadcast');
@@ -153,35 +166,22 @@ describe('NPC 漫游系统 (doWander)', () => {
     expect(arriveMsg).toContain('南方');
   });
 
-  it('不直连房间时使用通用文案（无方向）', async () => {
-    // roomC 在白名单中但与 roomA 不直连
+  it('多个可走出口时随机选择', async () => {
+    // roomA 有两个出口，都在白名单内
     const roomC = new RoomBase('room/c');
-    roomC.set('short', '地下室');
+    roomC.set('short', '东巷');
+    roomC.set('exits', { west: 'room/a' });
     objectManager.register(roomC);
 
-    npc.set('wander', { chance: 100, rooms: ['room/a', 'room/c'] });
-    await npc.moveTo(roomA, { quiet: true });
-    const leaveSpy = jest.spyOn(roomA, 'broadcast');
-
-    npc.onHeartbeat();
-
-    expect(npc.getEnvironment()).toBe(roomC);
-    // 通用文案不含具体方向
-    const leaveMsg = leaveSpy.mock.calls[0][0] as string;
-    expect(leaveMsg).toContain('离开');
-    expect(leaveMsg).not.toContain('北');
-    expect(leaveMsg).not.toContain('南');
-  });
-
-  it('目标房间不存在时静默跳过', async () => {
-    npc.set('wander', { chance: 100, rooms: ['room/a', 'room/nonexistent'] });
+    roomA.set('exits', { north: 'room/b', east: 'room/c' });
+    npc.set('wander', { chance: 100, rooms: ['room/a', 'room/b', 'room/c'] });
     await npc.moveTo(roomA, { quiet: true });
 
     npc.onHeartbeat();
 
-    // NPC 应该还在 roomA（目标房间不存在，跳过）
-    expect(npc.getEnvironment()).toBe(roomA);
-    expect(notifyRoomObjectRemoved).not.toHaveBeenCalled();
+    // NPC 应该移动到 roomB 或 roomC（两者之一）
+    const env = npc.getEnvironment();
+    expect(env === roomB || env === roomC).toBe(true);
   });
 
   it('漫游成功后跳过闲聊（互斥）', async () => {
@@ -189,24 +189,19 @@ describe('NPC 漫游系统 (doWander)', () => {
     npc.set('chat_chance', 100);
     npc.set('chat_msg', ['测试闲聊']);
     await npc.moveTo(roomA, { quiet: true });
+    const roomASpy = jest.spyOn(roomA, 'broadcast');
 
     npc.onHeartbeat();
 
     // NPC 移动了
     expect(npc.getEnvironment()).toBe(roomB);
-
-    // roomB 只收到到达广播，没有闲聊广播
-    const roomBBroadcast = jest.spyOn(roomB, 'broadcast');
-    // 注意：闲聊是在移动后的下一个心跳才可能发生
-    // 但本次心跳中漫游成功会 return true，doChat 被跳过
-    // 验证方式：roomA 的广播只有离去文案（1 次），不包含闲聊
-    // 已经在前面的测试验证了旧房间只有 1 次广播
+    // roomA 只收到离去文案（1 次），没有闲聊
+    expect(roomASpy).toHaveBeenCalledTimes(1);
   });
 
   it('战斗中不漫游（onAI 已守卫）', async () => {
     npc.set('wander', { chance: 100, rooms: ['room/a', 'room/b'] });
     await npc.moveTo(roomA, { quiet: true });
-    // 模拟战斗中
     npc.setTemp('combat/state', 'fighting');
     npc.setTemp('combat/target', 'some-enemy');
 
@@ -219,7 +214,6 @@ describe('NPC 漫游系统 (doWander)', () => {
   it('死亡状态不漫游（onAI 已守卫）', async () => {
     npc.set('wander', { chance: 100, rooms: ['room/a', 'room/b'] });
     await npc.moveTo(roomA, { quiet: true });
-    // 模拟死亡
     npc.setTemp('combat/state', 'dead');
 
     npc.onHeartbeat();

@@ -83,16 +83,6 @@ const DEFAULT_WANDER_ARRIVE = [
   '[emote][npc]{name}[/npc]的身影从{dir}出现。[/emote]',
 ];
 
-/** 不直连时的通用离开文案 */
-const GENERIC_WANDER_LEAVE = [
-  '[emote][npc]{name}[/npc]转身离开了。[/emote]',
-];
-
-/** 不直连时的通用到达文案 */
-const GENERIC_WANDER_ARRIVE = [
-  '[emote][npc]{name}[/npc]来到此处。[/emote]',
-];
-
 export class NpcBase extends LivingBase {
   /** NPC 可克隆（非虚拟对象） */
   static virtual = false;
@@ -164,46 +154,31 @@ export class NpcBase extends LivingBase {
     const oldRoom = this.getEnvironment();
     if (!oldRoom || !(oldRoom instanceof RoomBase)) return false;
 
-    // 从白名单中排除当前房间，随机选目标
-    const candidates = wander.rooms.filter((r) => r !== oldRoom.id);
-    if (candidates.length === 0) return false;
-
-    const targetId = candidates[Math.floor(Math.random() * candidates.length)];
-    const targetRoom = ServiceLocator.objectManager.findById(targetId);
-    if (!targetRoom || !(targetRoom instanceof RoomBase)) return false;
-
-    // 查找方向：遍历当前房间出口，判断目标是否直连
-    let leaveDir: string | null = null;
+    // 从当前房间出口中筛选：目标在白名单内的出口
     const exits = oldRoom.get<Record<string, string>>('exits') || {};
+    const validExits: { dir: string; roomId: string }[] = [];
     for (const [dir, roomId] of Object.entries(exits)) {
-      if (roomId === targetId) {
-        leaveDir = dir;
-        break;
+      if (wander.rooms.includes(roomId) && roomId !== oldRoom.id) {
+        validExits.push({ dir, roomId });
       }
     }
+    if (validExits.length === 0) return false;
 
-    // 构建广播文案
+    // 随机选一个可走的出口
+    const chosen = validExits[Math.floor(Math.random() * validExits.length)];
+    const targetRoom = ServiceLocator.objectManager.findById(chosen.roomId);
+    if (!targetRoom || !(targetRoom instanceof RoomBase)) return false;
+
+    // 构建广播文案（始终带方向，因为一定是通过出口移动）
     const name = this.getName();
-    let leaveMsg: string;
-    let arriveMsg: string;
-
-    if (leaveDir) {
-      // 直连：使用带方向的文案
-      const leaveMsgs = this.get<string[]>('wander_leave_msg') ?? DEFAULT_WANDER_LEAVE;
-      const arriveMsgs = this.get<string[]>('wander_arrive_msg') ?? DEFAULT_WANDER_ARRIVE;
-      leaveMsg = leaveMsgs[Math.floor(Math.random() * leaveMsgs.length)]
-        .replace(/\{name\}/g, name)
-        .replace(/\{dir\}/g, getDirectionCN(leaveDir));
-      arriveMsg = arriveMsgs[Math.floor(Math.random() * arriveMsgs.length)]
-        .replace(/\{name\}/g, name)
-        .replace(/\{dir\}/g, getOppositeDirectionCN(leaveDir));
-    } else {
-      // 不直连：使用通用文案
-      leaveMsg = GENERIC_WANDER_LEAVE[Math.floor(Math.random() * GENERIC_WANDER_LEAVE.length)]
-        .replace(/\{name\}/g, name);
-      arriveMsg = GENERIC_WANDER_ARRIVE[Math.floor(Math.random() * GENERIC_WANDER_ARRIVE.length)]
-        .replace(/\{name\}/g, name);
-    }
+    const leaveMsgs = this.get<string[]>('wander_leave_msg') ?? DEFAULT_WANDER_LEAVE;
+    const arriveMsgs = this.get<string[]>('wander_arrive_msg') ?? DEFAULT_WANDER_ARRIVE;
+    const leaveMsg = leaveMsgs[Math.floor(Math.random() * leaveMsgs.length)]
+      .replace(/\{name\}/g, name)
+      .replace(/\{dir\}/g, getDirectionCN(chosen.dir));
+    const arriveMsg = arriveMsgs[Math.floor(Math.random() * arriveMsgs.length)]
+      .replace(/\{name\}/g, name)
+      .replace(/\{dir\}/g, getOppositeDirectionCN(chosen.dir));
 
     // 静默移动（不触发事件链）
     this.moveTo(targetRoom, { quiet: true });
