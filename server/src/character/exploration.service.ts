@@ -44,4 +44,15 @@ export class ExplorationService {
     });
     return records.map((r) => r.roomId);
   }
+
+  /**
+   * 检查玩家是否探索过指定区域（任意一个房间即可）
+   */
+  async hasExploredArea(characterId: string, areaId: string): Promise<boolean> {
+    const count = await this.explorationRepo.count({
+      where: { characterId, areaId },
+      take: 1,
+    });
+    return count > 0;
+  }
 }

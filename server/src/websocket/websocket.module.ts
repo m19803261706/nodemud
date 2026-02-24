@@ -15,6 +15,7 @@ import { CommandHandler } from './handlers/command.handler';
 import { SkillHandler } from './handlers/skill.handler';
 import { MapHandler } from './handlers/map.handler';
 import { SectHandler } from './handlers/sect.handler';
+import { StationHandler } from './handlers/station.handler';
 import { SkillModule } from '../skill/skill.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { SkillModule } from '../skill/skill.module';
     SkillHandler,
     MapHandler,
     SectHandler,
+    StationHandler,
   ],
   exports: [GameGateway],
 })

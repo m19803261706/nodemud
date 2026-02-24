@@ -77,6 +77,11 @@ import './handlers/sectTaskAbandon';
 import './handlers/sectTaskProgressUpdate';
 // 活动状态消息
 import './handlers/activityUpdate';
+// 驿站传送消息
+import './handlers/stationListRequest';
+import './handlers/stationListResponse';
+import './handlers/stationTeleportRequest';
+import './handlers/stationTeleportResponse';
 
 // 导出工厂类
 export { MessageFactory, MessageHandler, type IMessageHandler } from './MessageFactory';
