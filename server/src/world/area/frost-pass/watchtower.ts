@@ -25,6 +25,8 @@ export default class FrostPassWatchtower extends RoomBase {
     this.set('coordinates', { x: -1, y: -1, z: 0 });
     this.set('exits', {
       east: 'area/frost-pass/main-street',
+      west: 'area/frost-pass/kitchen',
+      north: 'area/frost-pass/training-ground',
     });
   }
 }

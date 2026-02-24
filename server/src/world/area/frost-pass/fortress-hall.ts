@@ -23,6 +23,10 @@ export default class FrostPassFortressHall extends RoomBase {
     this.set('coordinates', { x: 0, y: -2, z: 0 });
     this.set('exits', {
       south: 'area/frost-pass/main-street',
+      north: 'area/frost-pass/war-camp',
+      west: 'area/frost-pass/training-ground',
+      east: 'area/frost-pass/infirmary',
+      down: 'area/frost-pass/dungeon',
     });
   }
 }

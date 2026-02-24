@@ -25,6 +25,8 @@ export default class FrostPassSouthGate extends RoomBase {
     this.set('exits', {
       south: 'area/road-north/north-end',
       north: 'area/frost-pass/main-street',
+      west: 'area/frost-pass/tavern',
+      east: 'area/frost-pass/supply-depot',
     });
   }
 }

@@ -25,6 +25,7 @@ export default class JiangnanMainCanal extends RoomBase {
       west: 'area/jiangnan/west-dock',
       north: 'area/jiangnan/teahouse',
       east: 'area/jiangnan/east-dock',
+      south: 'area/jiangnan/stone-bridge',
     });
   }
 }

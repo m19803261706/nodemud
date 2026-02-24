@@ -25,6 +25,7 @@ export default class FrostPassArmory extends RoomBase {
     this.set('coordinates', { x: 1, y: -1, z: 0 });
     this.set('exits', {
       west: 'area/frost-pass/main-street',
+      east: 'area/frost-pass/warehouse',
     });
   }
 }

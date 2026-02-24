@@ -22,6 +22,8 @@ export default class JiangnanWestDock extends RoomBase {
     this.set('exits', {
       west: 'area/road-jiangnan/east-end',
       east: 'area/jiangnan/main-canal',
+      north: 'area/jiangnan/waterside-house',
+      south: 'area/jiangnan/fishing-village',
     });
   }
 }

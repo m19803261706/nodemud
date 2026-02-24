@@ -22,6 +22,9 @@ export default class JiangnanTeahouse extends RoomBase {
     );
     this.set('coordinates', { x: 1, y: -1, z: 0 });
     this.set('exits', {
+      north: 'area/jiangnan/academy',
+      east: 'area/jiangnan/silk-shop',
+      west: 'area/jiangnan/waterside-house',
       south: 'area/jiangnan/main-canal',
     });
   }
