@@ -23,6 +23,9 @@ export default class CentralPlainBrokenHall extends RoomBase {
     this.set('coordinates', { x: 1, y: 1, z: 0 });
     this.set('exits', {
       west: 'area/central-plain/ruins-square',
+      east: 'area/central-plain/noble-quarter',
+      south: 'area/central-plain/temple-ruins',
+      down: 'area/central-plain/hidden-cellar',
     });
   }
 }

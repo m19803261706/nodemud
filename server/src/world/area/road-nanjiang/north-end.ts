@@ -19,7 +19,7 @@ export default class RoadNanjiangNorthEnd extends RoomBase {
     );
     this.set('coordinates', { x: 0, y: 0, z: 0 });
     this.set('exits', {
-      north: 'area/central-plain/ruins-square',
+      north: 'area/central-plain/south-gate',
       south: 'area/road-nanjiang/bamboo-path',
     });
   }

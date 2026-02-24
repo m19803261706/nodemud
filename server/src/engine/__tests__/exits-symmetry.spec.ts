@@ -47,10 +47,37 @@ const ROAD_CENTRAL_ROOMS = [
 
 /** 洛阳废都所有房间 */
 const CENTRAL_PLAIN_ROOMS = [
+  // 核心区
   'area/central-plain/north-gate',
   'area/central-plain/ruins-square',
   'area/central-plain/old-tavern',
   'area/central-plain/broken-hall',
+  // 北区·军事区
+  'area/central-plain/governor-mansion',
+  'area/central-plain/guard-barracks',
+  'area/central-plain/watchtower',
+  'area/central-plain/arena-ruins',
+  // 城墙
+  'area/central-plain/collapsed-tower',
+  'area/central-plain/patrol-road',
+  'area/central-plain/east-wall',
+  'area/central-plain/west-wall',
+  // 西区·市井区
+  'area/central-plain/market-ruins',
+  'area/central-plain/blacksmith-alley',
+  'area/central-plain/refugee-camp',
+  // 东区·权贵区
+  'area/central-plain/noble-quarter',
+  'area/central-plain/old-library',
+  // 南区
+  'area/central-plain/south-avenue',
+  'area/central-plain/south-gate',
+  'area/central-plain/temple-ruins',
+  'area/central-plain/meditation-garden',
+  'area/central-plain/underground-entrance',
+  // 地下层
+  'area/central-plain/well-bottom',
+  'area/central-plain/hidden-cellar',
 ];
 
 /** 全部新增房间 */
@@ -101,14 +128,14 @@ describe('Wave 1 地图出口对称性', () => {
     }
   });
 
-  it('应加载洛阳废都区域（Area + 4 Room）', () => {
+  it('应加载洛阳废都区域（Area + 24 Room）', () => {
     const area = objectManager.findById('area/central-plain/area');
     expect(area).toBeDefined();
     expect(area).toBeInstanceOf(Area);
 
     const areaInstance = area as Area;
     const roomIds = areaInstance.getRoomIds();
-    expect(roomIds).toHaveLength(4);
+    expect(roomIds).toHaveLength(24);
 
     for (const roomId of CENTRAL_PLAIN_ROOMS) {
       expect(roomIds).toContain(roomId);
@@ -243,29 +270,41 @@ describe('Wave 1 地图出口对称性', () => {
     expect(northGate.getExit('north')).toBe('area/road-central/south-end');
   });
 
-  it('洛阳废都万宗广场应有 4 个出口（north/south/east/west）', () => {
+  it('洛阳废都万宗广场应有 5 个出口（north/south/east/west/down）', () => {
     const ruinsSquare = objectManager.findById('area/central-plain/ruins-square') as RoomBase;
     const exits = ruinsSquare.getExits();
     const dirs = Object.keys(exits);
 
-    expect(dirs).toHaveLength(4);
+    expect(dirs).toHaveLength(5);
     expect(dirs).toContain('north');
     expect(dirs).toContain('south');
     expect(dirs).toContain('east');
     expect(dirs).toContain('west');
+    expect(dirs).toContain('down');
   });
 
-  it('残灯酒肆应有东+西出口，断壁残殿应有西出口', () => {
+  it('核心区房间出口应正确连接扩展区域', () => {
+    // 残灯酒肆: 4 个出口（north/east/south/west）
     const oldTavern = objectManager.findById('area/central-plain/old-tavern') as RoomBase;
     const tavernExits = oldTavern.getExits();
-    expect(Object.keys(tavernExits)).toHaveLength(2);
+    expect(Object.keys(tavernExits)).toHaveLength(4);
     expect(tavernExits.east).toBe('area/central-plain/ruins-square');
     expect(tavernExits.west).toBe('area/road-western/east-end');
+    expect(tavernExits.south).toBe('area/central-plain/blacksmith-alley');
+    expect(tavernExits.north).toBe('area/central-plain/collapsed-tower');
 
+    // 断壁残殿: 4 个出口（west/east/south/down）
     const brokenHall = objectManager.findById('area/central-plain/broken-hall') as RoomBase;
     const hallExits = brokenHall.getExits();
-    expect(Object.keys(hallExits)).toHaveLength(1);
+    expect(Object.keys(hallExits)).toHaveLength(4);
     expect(hallExits.west).toBe('area/central-plain/ruins-square');
+    expect(hallExits.east).toBe('area/central-plain/noble-quarter');
+    expect(hallExits.south).toBe('area/central-plain/temple-ruins');
+    expect(hallExits.down).toBe('area/central-plain/hidden-cellar');
+
+    // 北城门: 4 个出口
+    const northGate = objectManager.findById('area/central-plain/north-gate') as RoomBase;
+    expect(Object.keys(northGate.getExits())).toHaveLength(4);
   });
 
   it('官道·中原段 NPC 刷新规则应配置盗匪', () => {
@@ -282,19 +321,26 @@ describe('Wave 1 地图出口对称性', () => {
     expect(registry.has('npc/road-central/road-bandit')).toBe(true);
   });
 
-  it('洛阳废都 NPC 刷新规则应配置 3 个 NPC', () => {
+  it('洛阳废都 NPC 刷新规则应配置 17 条规则', () => {
     const area = objectManager.findById('area/central-plain/area') as Area;
     const spawnRules = area.getSpawnRules();
-    expect(spawnRules).toHaveLength(3);
+    expect(spawnRules).toHaveLength(17);
 
     const blueprintIds = spawnRules.map((r) => r.blueprintId);
+    // 核心区 NPC
     expect(blueprintIds).toContain('npc/central-plain/xie-wenyuan');
     expect(blueprintIds).toContain('npc/central-plain/merchant-liu');
     expect(blueprintIds).toContain('npc/central-plain/city-guard');
+    // 扩展区 NPC
+    expect(blueprintIds).toContain('npc/central-plain/governor-aide');
+    expect(blueprintIds).toContain('npc/central-plain/arena-keeper');
+    expect(blueprintIds).toContain('npc/central-plain/old-monk');
+    expect(blueprintIds).toContain('npc/central-plain/librarian');
 
-    // 验证蓝图已注册
-    expect(registry.has('npc/central-plain/xie-wenyuan')).toBe(true);
-    expect(registry.has('npc/central-plain/merchant-liu')).toBe(true);
-    expect(registry.has('npc/central-plain/city-guard')).toBe(true);
+    // 验证所有蓝图已注册
+    const uniqueIds = [...new Set(blueprintIds)];
+    for (const id of uniqueIds) {
+      expect(registry.has(id)).toBe(true);
+    }
   });
 });

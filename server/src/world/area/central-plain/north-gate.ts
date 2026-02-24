@@ -21,6 +21,8 @@ export default class CentralPlainNorthGate extends RoomBase {
     this.set('exits', {
       north: 'area/road-central/south-end',
       south: 'area/central-plain/ruins-square',
+      east: 'area/central-plain/patrol-road',
+      west: 'area/central-plain/collapsed-tower',
     });
   }
 }
