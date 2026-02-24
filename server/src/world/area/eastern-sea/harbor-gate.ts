@@ -23,6 +23,8 @@ export default class EasternSeaHarborGate extends RoomBase {
     this.set('exits', {
       west: 'area/road-eastern/reef-path',
       south: 'area/eastern-sea/harbor-square',
+      east: 'area/eastern-sea/shipyard',
+      north: 'area/eastern-sea/rope-bridge',
     });
   }
 }

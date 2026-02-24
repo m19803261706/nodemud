@@ -24,6 +24,8 @@ export default class EasternSeaHarborInn extends RoomBase {
     this.set('coordinates', { x: -1, y: 1, z: 0 });
     this.set('exits', {
       east: 'area/eastern-sea/harbor-square',
+      west: 'area/eastern-sea/drunk-alley',
+      south: 'area/eastern-sea/sailor-dorm',
     });
   }
 }

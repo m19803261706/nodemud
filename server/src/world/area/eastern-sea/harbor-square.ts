@@ -26,6 +26,7 @@ export default class EasternSeaHarborSquare extends RoomBase {
       north: 'area/eastern-sea/harbor-gate',
       east: 'area/eastern-sea/wharf',
       west: 'area/eastern-sea/harbor-inn',
+      south: 'area/eastern-sea/tavern',
     });
   }
 }

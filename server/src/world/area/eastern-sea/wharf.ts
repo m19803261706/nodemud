@@ -24,7 +24,10 @@ export default class EasternSeaWharf extends RoomBase {
     );
     this.set('coordinates', { x: 1, y: 1, z: 0 });
     this.set('exits', {
+      north: 'area/eastern-sea/shipyard',
       west: 'area/eastern-sea/harbor-square',
+      east: 'area/eastern-sea/fishing-dock',
+      south: 'area/eastern-sea/blade-street',
     });
   }
 }
