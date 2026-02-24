@@ -1,6 +1,6 @@
 /**
  * 水路·莲花湖 — 水路·江南段
- * 坐标: (3,0,0)
+ * 坐标: (6,0,0)
  * 采集点（莲根须），视野开阔，远眺烟雨镇
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadJiangnanLotusLake extends RoomBase {
         '莲根在水下盘根错节，据说挖来晒干可作药引。' +
         '对岸隐约可见粉墙黛瓦的轮廓，炊烟从高处飘散，那便是烟雨镇了。',
     );
-    this.set('coordinates', { x: 3, y: 0, z: 0 });
+    this.set('coordinates', { x: 6, y: 0, z: 0 });
     this.set('exits', {
-      west: 'area/road-jiangnan/misty-bridge',
-      east: 'area/road-jiangnan/east-end',
+      west: 'area/road-jiangnan/stone-bridge',
+      east: 'area/road-jiangnan/rain-ferry',
     });
   }
 }

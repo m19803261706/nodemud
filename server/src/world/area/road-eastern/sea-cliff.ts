@@ -1,6 +1,6 @@
 /**
  * 海路·海蚀崖 — 海路·东海段
- * 坐标: (2,0,0)
+ * 坐标: (3,0,0)
  * 野怪房，海蚀崖洞，海盗斥候出没
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadEasternSeaCliff extends RoomBase {
         '洞口高处有人为搭建的简陋嘹望台，用几根粗木钉进崖壁而成，' +
         '上面摆着一架望远镜，已经生锈，显然是海盗用来监视海面的哨位。',
     );
-    this.set('coordinates', { x: 2, y: 0, z: 0 });
+    this.set('coordinates', { x: 3, y: 0, z: 0 });
     this.set('exits', {
-      west: 'area/road-eastern/coastal-road',
-      east: 'area/road-eastern/reef-path',
+      west: 'area/road-eastern/salt-flat',
+      east: 'area/road-eastern/wind-cliff',
     });
   }
 }

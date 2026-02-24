@@ -22,7 +22,7 @@ export default class RoadEasternCoastalRoad extends RoomBase {
     this.set('coordinates', { x: 1, y: 0, z: 0 });
     this.set('exits', {
       west: 'area/road-eastern/west-end',
-      east: 'area/road-eastern/sea-cliff',
+      east: 'area/road-eastern/salt-flat',
     });
   }
 }

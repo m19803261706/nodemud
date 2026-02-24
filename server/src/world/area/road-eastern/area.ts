@@ -15,7 +15,12 @@ export default class RoadEasternArea extends Area {
     this.set('rooms', [
       'area/road-eastern/west-end',
       'area/road-eastern/coastal-road',
+      'area/road-eastern/salt-flat',
       'area/road-eastern/sea-cliff',
+      'area/road-eastern/wind-cliff',
+      'area/road-eastern/pirate-fork',
+      'area/road-eastern/fishing-village',
+      'area/road-eastern/seaside-boardwalk',
       'area/road-eastern/reef-path',
     ]);
     this.set('spawn_rules', [
@@ -30,6 +35,18 @@ export default class RoadEasternArea extends Area {
         roomId: 'area/road-eastern/sea-cliff',
         count: 1,
         interval: 60000,
+      },
+      {
+        blueprintId: 'npc/road-eastern/salt-worker',
+        roomId: 'area/road-eastern/salt-flat',
+        count: 1,
+        interval: 120000,
+      },
+      {
+        blueprintId: 'npc/road-eastern/fisher-woman',
+        roomId: 'area/road-eastern/fishing-village',
+        count: 1,
+        interval: 120000,
       },
     ]);
     this.set('item_spawn_rules', []);

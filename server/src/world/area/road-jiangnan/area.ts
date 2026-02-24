@@ -15,8 +15,12 @@ export default class RoadJiangnanArea extends Area {
     this.set('rooms', [
       'area/road-jiangnan/west-end',
       'area/road-jiangnan/willow-road',
+      'area/road-jiangnan/willow-gallery',
+      'area/road-jiangnan/waterside-inn',
       'area/road-jiangnan/misty-bridge',
+      'area/road-jiangnan/stone-bridge',
       'area/road-jiangnan/lotus-lake',
+      'area/road-jiangnan/rain-ferry',
       'area/road-jiangnan/east-end',
     ]);
     this.set('spawn_rules', [
@@ -25,6 +29,18 @@ export default class RoadJiangnanArea extends Area {
         roomId: 'area/road-jiangnan/willow-road',
         count: 2,
         interval: 60000,
+      },
+      {
+        blueprintId: 'npc/road-jiangnan/inn-keeper',
+        roomId: 'area/road-jiangnan/waterside-inn',
+        count: 1,
+        interval: 120000,
+      },
+      {
+        blueprintId: 'npc/road-jiangnan/ferry-boatman',
+        roomId: 'area/road-jiangnan/rain-ferry',
+        count: 1,
+        interval: 120000,
       },
     ]);
     this.set('item_spawn_rules', []);

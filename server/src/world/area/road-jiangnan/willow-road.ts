@@ -21,7 +21,7 @@ export default class RoadJiangnanWillowRoad extends RoomBase {
     this.set('coordinates', { x: 1, y: 0, z: 0 });
     this.set('exits', {
       west: 'area/road-jiangnan/west-end',
-      east: 'area/road-jiangnan/misty-bridge',
+      east: 'area/road-jiangnan/willow-gallery',
     });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * 海路·礁石道 — 海路·东海段
- * 坐标: (3,0,0)
+ * 坐标: (8,0,0)
  * 野怪房（礁石蟹），退潮时才能通行的礁石小路
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,9 +19,9 @@ export default class RoadEasternReefPath extends RoomBase {
         '远处的潮汐港已依稀可见，低矮的港口建筑在雾气中若隐若现，' +
         '偶尔能听到港口方向传来的喧嚣声和锚链拖拽的声响。',
     );
-    this.set('coordinates', { x: 3, y: 0, z: 0 });
+    this.set('coordinates', { x: 8, y: 0, z: 0 });
     this.set('exits', {
-      west: 'area/road-eastern/sea-cliff',
+      west: 'area/road-eastern/seaside-boardwalk',
       east: 'area/eastern-sea/harbor-gate',
     });
   }

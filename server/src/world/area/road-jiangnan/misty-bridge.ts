@@ -1,6 +1,6 @@
 /**
  * 水路·烟雨桥 — 水路·江南段
- * 坐标: (2,0,0)
+ * 坐标: (4,0,0)
  * 烟雾笼罩的石拱桥，桥头有卖茶老妪
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadJiangnanMistyBridge extends RoomBase {
         '茶壶里的水已烧干，袅袅白气散入雾里，分不清哪是茶烟哪是雾气。' +
         '桥栏上有人刻了几个字："此去烟雨里，不知归路期。"',
     );
-    this.set('coordinates', { x: 2, y: 0, z: 0 });
+    this.set('coordinates', { x: 4, y: 0, z: 0 });
     this.set('exits', {
-      west: 'area/road-jiangnan/willow-road',
-      east: 'area/road-jiangnan/lotus-lake',
+      west: 'area/road-jiangnan/waterside-inn',
+      east: 'area/road-jiangnan/stone-bridge',
     });
   }
 }

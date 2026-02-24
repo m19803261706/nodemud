@@ -1,6 +1,6 @@
 /**
  * 水路·烟雨镇外 — 水路·江南段
- * 坐标: (4,0,0)
+ * 坐标: (8,0,0)
  * 烟雨镇入口，码头与牌坊
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,9 +19,9 @@ export default class RoadJiangnanEastEnd extends RoomBase {
         '牌坊两侧各有一株老柳，根已深入码头石缝，' +
         '枝条垂落及肩，过往行人须低头弯腰才能穿过。',
     );
-    this.set('coordinates', { x: 4, y: 0, z: 0 });
+    this.set('coordinates', { x: 8, y: 0, z: 0 });
     this.set('exits', {
-      west: 'area/road-jiangnan/lotus-lake',
+      west: 'area/road-jiangnan/rain-ferry',
       east: 'area/jiangnan/west-dock',
     });
   }
