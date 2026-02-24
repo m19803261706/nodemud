@@ -24,6 +24,9 @@ export default class WesternWastesMeditationTent extends RoomBase {
     this.set('coordinates', { x: -1, y: 1, z: 0 });
     this.set('exits', {
       north: 'area/western-wastes/bazaar',
+      east: 'area/western-wastes/sutra-hall',
+      west: 'area/western-wastes/curio-shop',
+      south: 'area/western-wastes/star-ruins',
     });
   }
 }

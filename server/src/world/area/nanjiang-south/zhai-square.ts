@@ -24,6 +24,7 @@ export default class NanjiangSouthZhaiSquare extends RoomBase {
       north: 'area/nanjiang-south/zhai-gate',
       east: 'area/nanjiang-south/herb-hut',
       south: 'area/nanjiang-south/spirit-tree',
+      west: 'area/nanjiang-south/council-hall',
     });
   }
 }

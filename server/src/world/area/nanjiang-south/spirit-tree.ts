@@ -22,6 +22,8 @@ export default class NanjiangSouthSpiritTree extends RoomBase {
     this.set('coordinates', { x: 0, y: 2, z: 0 });
     this.set('exits', {
       north: 'area/nanjiang-south/zhai-square',
+      east: 'area/nanjiang-south/gu-room',
+      west: 'area/nanjiang-south/altar',
       south: 'area/nanjiang-south/south-boundary',
     });
   }

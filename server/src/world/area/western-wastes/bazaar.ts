@@ -24,6 +24,8 @@ export default class WesternWastesBazaar extends RoomBase {
     this.set('exits', {
       east: 'area/western-wastes/east-gate',
       south: 'area/western-wastes/meditation-tent',
+      north: 'area/western-wastes/caravansary',
+      west: 'area/western-wastes/spice-stall',
     });
   }
 }

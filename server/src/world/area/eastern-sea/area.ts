@@ -15,34 +15,34 @@ export default class EasternSeaArea extends Area {
     this.set('level_range', { min: 15, max: 22 });
     this.set('rooms', [
       // --- 港口入口与北区 ---
-      'area/eastern-sea/rope-bridge',       // (0,-1,0)  绳桥栈道
-      'area/eastern-sea/harbor-gate',       // (0,0,0)   港口入口
-      'area/eastern-sea/shipyard',          // (1,0,0)   船坞
-      'area/eastern-sea/net-workshop',      // (2,0,0)   渔网作坊
-      'area/eastern-sea/lighthouse',        // (1,-1,0)  破旧灯塔
+      'area/eastern-sea/rope-bridge', // (0,-1,0)  绳桥栈道
+      'area/eastern-sea/harbor-gate', // (0,0,0)   港口入口
+      'area/eastern-sea/shipyard', // (1,0,0)   船坞
+      'area/eastern-sea/net-workshop', // (2,0,0)   渔网作坊
+      'area/eastern-sea/lighthouse', // (1,-1,0)  破旧灯塔
       // --- 中心商业区 ---
-      'area/eastern-sea/harbor-square',     // (0,1,0)   鱼市广场
-      'area/eastern-sea/wharf',             // (1,1,0)   远航码头
-      'area/eastern-sea/fishing-dock',      // (2,1,0)   渔人栈桥
+      'area/eastern-sea/harbor-square', // (0,1,0)   鱼市广场
+      'area/eastern-sea/wharf', // (1,1,0)   远航码头
+      'area/eastern-sea/fishing-dock', // (2,1,0)   渔人栈桥
       'area/eastern-sea/shipwreck-graveyard', // (3,1,0) 沉船墓地
-      'area/eastern-sea/harbor-inn',        // (-1,1,0)  海风客栈
-      'area/eastern-sea/drunk-alley',       // (-2,1,0)  醉汉巷
+      'area/eastern-sea/harbor-inn', // (-1,1,0)  海风客栈
+      'area/eastern-sea/drunk-alley', // (-2,1,0)  醉汉巷
       // --- 南区·商业与居住 ---
-      'area/eastern-sea/tavern',            // (0,2,0)   鲸吞酒馆
-      'area/eastern-sea/blade-street',      // (1,2,0)   刀锋街
-      'area/eastern-sea/salt-flat',         // (2,2,0)   晒盐场
-      'area/eastern-sea/sailor-dorm',       // (-1,2,0)  水手宿舍
-      'area/eastern-sea/watchtower',        // (-2,2,0)  瞭望塔
+      'area/eastern-sea/tavern', // (0,2,0)   鲸吞酒馆
+      'area/eastern-sea/blade-street', // (1,2,0)   刀锋街
+      'area/eastern-sea/salt-flat', // (2,2,0)   晒盐场
+      'area/eastern-sea/sailor-dorm', // (-1,2,0)  水手宿舍
+      'area/eastern-sea/watchtower', // (-2,2,0)  瞭望塔
       // --- 深处·黑市与地下 ---
-      'area/eastern-sea/black-market',      // (0,3,0)   黑市
-      'area/eastern-sea/gambling-den',      // (1,3,0)   骰子赌坊
-      'area/eastern-sea/freshwater-well',   // (-1,3,0)  淡水井
-      'area/eastern-sea/pirate-den',        // (-2,3,0)  海盗窝
+      'area/eastern-sea/black-market', // (0,3,0)   黑市
+      'area/eastern-sea/gambling-den', // (1,3,0)   骰子赌坊
+      'area/eastern-sea/freshwater-well', // (-1,3,0)  淡水井
+      'area/eastern-sea/pirate-den', // (-2,3,0)  海盗窝
       'area/eastern-sea/smuggler-warehouse', // (0,4,0)  走私仓库
-      'area/eastern-sea/arena',             // (-1,4,0)  斗兽场
+      'area/eastern-sea/arena', // (-1,4,0)  斗兽场
       // --- 地下层 ---
-      'area/eastern-sea/smuggler-tunnel',   // (0,4,-1)  走私密道
-      'area/eastern-sea/treasure-cave',     // (1,4,-1)  藏宝洞
+      'area/eastern-sea/smuggler-tunnel', // (0,4,-1)  走私密道
+      'area/eastern-sea/treasure-cave', // (1,4,-1)  藏宝洞
     ]);
     this.set('spawn_rules', [
       // === 友好/中立 NPC（interval: 0，不重生） ===

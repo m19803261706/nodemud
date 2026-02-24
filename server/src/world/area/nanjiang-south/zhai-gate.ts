@@ -16,12 +16,17 @@ export default class NanjiangSouthZhaiGate extends RoomBase {
         '门顶挂着一串骨制风铃，大小不一，形状各异，山风一吹，发出清脆而空灵的碰撞声。' +
         '门框两侧各站着一名苗疆哨兵，身着蜡染短衣，腰间挂着竹制短弩，' +
         '他们不开口说话，只是沉默地打量每一个到来的人，眼神中有一种根深蒂固的警惕。' +
-        '寨门内可以听见生活的声音——说话声、柴火噼啪声、偶尔的笑声。',
+        '寨门内可以听见生活的声音——说话声、柴火噼啪声、偶尔的笑声。' +
+        '西边是一片吊脚竹楼，东边隐约可见猎人们的营地。' +
+        '门旁还有一条石阶向上通往寨门上方的瞭望台。',
     );
     this.set('coordinates', { x: 0, y: 0, z: 0 });
     this.set('exits', {
       north: 'area/road-nanjiang/south-end',
       south: 'area/nanjiang-south/zhai-square',
+      east: 'area/nanjiang-south/hunting-camp',
+      west: 'area/nanjiang-south/bamboo-houses',
+      up: 'area/nanjiang-south/watchtower',
     });
   }
 }

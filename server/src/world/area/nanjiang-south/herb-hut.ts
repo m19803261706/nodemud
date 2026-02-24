@@ -23,6 +23,7 @@ export default class NanjiangSouthHerbHut extends RoomBase {
     this.set('coordinates', { x: 1, y: 1, z: 0 });
     this.set('exits', {
       west: 'area/nanjiang-south/zhai-square',
+      east: 'area/nanjiang-south/drying-yard',
     });
   }
 }

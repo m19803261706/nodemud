@@ -23,6 +23,7 @@ export default class WesternWastesEastGate extends RoomBase {
     this.set('exits', {
       east: 'area/road-western/west-end',
       west: 'area/western-wastes/bazaar',
+      north: 'area/western-wastes/stable',
     });
   }
 }
