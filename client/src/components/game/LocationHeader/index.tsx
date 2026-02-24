@@ -33,6 +33,20 @@ export const LocationHeader = () => {
         data: {},
         timestamp: Date.now(),
       });
+    } else if (label === '驿站') {
+      // 发送驿站列表请求
+      wsService.send({
+        type: 'stationListRequest',
+        data: {},
+        timestamp: Date.now(),
+      });
+    } else if (label === '回城') {
+      // 直接发送传送请求到裂谷镇
+      wsService.send({
+        type: 'stationTeleportRequest',
+        data: { targetAreaId: 'area/rift-town' },
+        timestamp: Date.now(),
+      });
     } else if (label === '上楼') {
       sendCommand('go up');
     } else if (label === '下楼') {
@@ -40,8 +54,12 @@ export const LocationHeader = () => {
     }
   };
 
-  /** 将 actions 中的"邮件"替换为"任务" */
-  const actions = location.actions.map(a => (a === '邮件' ? '任务' : a));
+  /** 将 actions 中的"邮件"替换为"任务"，"飞行"替换为"驿站" */
+  const actions = location.actions.map(a => {
+    if (a === '邮件') return '任务';
+    if (a === '飞行') return '驿站';
+    return a;
+  });
 
   return (
     <View style={s.container}>

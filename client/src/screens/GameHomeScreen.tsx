@@ -22,6 +22,7 @@ import { SectPage } from '../components/game/SectPage';
 import { BottomNavBar } from '../components/game/BottomNavBar';
 import { QuestListModal } from '../components/game/QuestListModal';
 import { MapModal } from '../components/game/MapModal';
+import { StationModal } from '../components/game/StationModal';
 
 export const GameHomeScreen = ({ route: _route }: any) => {
   const insets = useSafeAreaInsets();
@@ -75,6 +76,7 @@ export const GameHomeScreen = ({ route: _route }: any) => {
         <BottomNavBar />
         <QuestListModal />
         <MapModal />
+        <StationModal />
         <ItemInfoModal
           detail={itemDetail}
           onClose={() => setItemDetail(null)}

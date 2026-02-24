@@ -512,6 +512,25 @@ function App(): React.JSX.Element {
       useGameStore.getState().updateSectTaskProgress(data);
     };
 
+    /** 驿站列表响应 → 写入 store + 打开弹窗 */
+    const handleStationListResponse = (data: any) => {
+      const { setStationData, setStationVisible } = useGameStore.getState();
+      setStationData(data);
+      setStationVisible(true);
+    };
+
+    /** 驿站传送响应 → 关闭弹窗 + 失败时 toast */
+    const handleStationTeleportResponse = (data: any) => {
+      const { setStationVisible } = useGameStore.getState();
+      if (!data.success && data.message) {
+        useGameStore
+          .getState()
+          .appendLog({ text: data.message, color: '#8B3A3A' });
+      }
+      // 无论成功失败都关闭弹窗（成功时 roomInfo 会紧随推送）
+      setStationVisible(false);
+    };
+
     /** 活动状态更新（通用忙碌管理器） → 动态显示/隐藏停止按钮 */
     const handleActivityUpdate = (data: any) => {
       const { upsertLogQuickAction, removeLogQuickAction } =
@@ -558,6 +577,8 @@ function App(): React.JSX.Element {
     wsService.on('sectTaskAbandonResult', handleSectTaskAbandonResult);
     wsService.on('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
     wsService.on('activityUpdate', handleActivityUpdate);
+    wsService.on('stationListResponse', handleStationListResponse);
+    wsService.on('stationTeleportResponse', handleStationTeleportResponse);
 
     return () => {
       wsService.off('roomInfo', handleRoomInfo);
@@ -590,6 +611,8 @@ function App(): React.JSX.Element {
       wsService.off('sectTaskAbandonResult', handleSectTaskAbandonResult);
       wsService.off('sectTaskProgressUpdate', handleSectTaskProgressUpdate);
       wsService.off('activityUpdate', handleActivityUpdate);
+      wsService.off('stationListResponse', handleStationListResponse);
+      wsService.off('stationTeleportResponse', handleStationTeleportResponse);
     };
   }, []);
 

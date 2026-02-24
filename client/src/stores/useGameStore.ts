@@ -267,6 +267,23 @@ export interface QuestState {
   completed: CompletedQuestInfo[];
 }
 
+/** 驿站城镇信息 */
+export interface StationInfo {
+  areaId: string;
+  name: string;
+  description: string;
+  region: string;
+  levelRange: { min: number; max: number };
+  isExplored: boolean;
+  isCurrent: boolean;
+  entryRoomId: string;
+}
+
+/** 驿站列表响应数据 */
+export interface StationListResponseData {
+  stations: StationInfo[];
+}
+
 export interface GameState {
   // 玩家
   player: PlayerData;
@@ -377,6 +394,12 @@ export interface GameState {
   setMapVisible: (visible: boolean) => void;
   setMapData: (data: MapResponseData | null) => void;
 
+  // 驿站弹窗
+  stationVisible: boolean;
+  stationData: StationListResponseData | null;
+  setStationVisible: (visible: boolean) => void;
+  setStationData: (data: StationListResponseData | null) => void;
+
   // 门派
   sectInfo: SectInfoResponseData | null;
   setSectInfo: (data: SectInfoResponseData) => void;
@@ -386,7 +409,10 @@ export interface GameState {
   setSectTaskData: (data: SectTaskResponseData | null) => void;
   updateSectTaskFromAccept: (data: SectTaskAcceptResultData) => void;
   updateSectTaskFromComplete: (data: SectTaskCompleteResultData) => void;
-  updateSectTaskFromAbandon: (data: SectTaskAbandonResultData, category: 'daily' | 'weekly') => void;
+  updateSectTaskFromAbandon: (
+    data: SectTaskAbandonResultData,
+    category: 'daily' | 'weekly',
+  ) => void;
   updateSectTaskProgress: (data: SectTaskProgressUpdateData) => void;
 
   // 导航
@@ -750,6 +776,12 @@ export const useGameStore = create<GameState>(set => ({
   mapData: null,
   setMapVisible: visible => set({ mapVisible: visible }),
   setMapData: data => set({ mapData: data }),
+
+  // 驿站弹窗
+  stationVisible: false,
+  stationData: null,
+  setStationVisible: visible => set({ stationVisible: visible }),
+  setStationData: data => set({ stationData: data }),
 
   // 门派
   sectInfo: null,
