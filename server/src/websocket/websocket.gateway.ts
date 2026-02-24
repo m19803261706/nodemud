@@ -227,7 +227,7 @@ export class GameGateway
         await this.authHandler.handleLogin(client, session, message.data as any);
         break;
       case 'register':
-        await this.authHandler.handleRegister(client, message.data as any);
+        await this.authHandler.handleRegister(client, session, message.data as any);
         break;
       case 'createCharacterStep1':
         await this.characterHandler.handleStep1(client, session, message.data as any);
@@ -296,7 +296,11 @@ export class GameGateway
         await this.stationHandler.handleStationListRequest(session);
         break;
       case 'stationTeleportRequest':
-        await this.stationHandler.handleStationTeleportRequest(client, session, message.data as any);
+        await this.stationHandler.handleStationTeleportRequest(
+          client,
+          session,
+          message.data as any,
+        );
         break;
       case 'ping':
         // 心跳，无需处理

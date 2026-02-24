@@ -88,10 +88,15 @@ export class AuthHandler {
   /**
    * 处理注册
    */
-  async handleRegister(client: any, data: { username: string; password: string; phone: string }) {
+  async handleRegister(client: any, session: Session, data: { username: string; password: string; phone: string }) {
     const result = await this.accountService.register(data.username, data.password, data.phone);
 
     if (result.success) {
+      // 注册成功后设置 Session 认证状态
+      session.authenticated = true;
+      session.accountId = result.accountId!;
+      session.username = data.username;
+
       client.send(
         MessageFactory.serialize(
           MessageFactory.create(

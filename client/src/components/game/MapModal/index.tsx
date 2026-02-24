@@ -4,13 +4,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import type { MapRoom } from '@packages/core';
 import { useGameStore } from '../../../stores/useGameStore';
 import { useUI } from '../../UIProvider';
@@ -30,29 +24,37 @@ export const MapModal = () => {
     setMapVisible(false);
   };
 
-  /** 点击房间节点 → 确认导航 */
+  /** 点击房间节点 → 先关闭地图，再弹确认（避免 Modal 嵌套） */
   const handleRoomPress = (room: MapRoom) => {
     if (room.isCurrent) return;
 
-    showAlert({
-      type: 'success',
-      title: '前往目的地',
-      message: `确定前往「${room.name}」？`,
-      buttons: [
-        { text: '取消' },
-        {
-          text: '前往',
-          onPress: () => {
-            wsService.send({
-              type: 'navigateRequest',
-              data: { targetRoomId: room.roomId },
-              timestamp: Date.now(),
-            });
-            setMapVisible(false);
+    setMapVisible(false);
+
+    setTimeout(() => {
+      showAlert({
+        type: 'success',
+        title: '前往目的地',
+        message: `确定前往「${room.name}」？`,
+        buttons: [
+          {
+            text: '取消',
+            onPress: () => {
+              setMapVisible(true);
+            },
           },
-        },
-      ],
-    });
+          {
+            text: '前往',
+            onPress: () => {
+              wsService.send({
+                type: 'navigateRequest',
+                data: { targetRoomId: room.roomId },
+                timestamp: Date.now(),
+              });
+            },
+          },
+        ],
+      });
+    }, 300);
   };
 
   if (!mapVisible || !mapData) return null;

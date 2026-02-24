@@ -30,28 +30,39 @@ export const StationModal = () => {
     setStationVisible(false);
   };
 
-  /** 点击已探索城镇 → 确认传送 */
+  /** 点击已探索城镇 → 先关闭驿站弹窗，再弹确认（避免 Modal 嵌套） */
   const handleStationPress = (station: StationInfo) => {
     if (!station.isExplored || station.isCurrent) return;
 
-    showAlert({
-      type: 'success',
-      title: '驿站传送',
-      message: `确定要传送到「${station.name}」吗？`,
-      buttons: [
-        { text: '取消' },
-        {
-          text: '传送',
-          onPress: () => {
-            wsService.send({
-              type: 'stationTeleportRequest',
-              data: { targetAreaId: station.areaId },
-              timestamp: Date.now(),
-            });
+    // 先关闭 StationModal，再弹 Alert 确认
+    setStationVisible(false);
+
+    setTimeout(() => {
+      showAlert({
+        type: 'success',
+        title: '驿站传送',
+        message: `确定要传送到「${station.name}」吗？`,
+        buttons: [
+          {
+            text: '取消',
+            onPress: () => {
+              // 取消时重新打开驿站弹窗
+              setStationVisible(true);
+            },
           },
-        },
-      ],
-    });
+          {
+            text: '传送',
+            onPress: () => {
+              wsService.send({
+                type: 'stationTeleportRequest',
+                data: { targetAreaId: station.areaId },
+                timestamp: Date.now(),
+              });
+            },
+          },
+        ],
+      });
+    }, 300);
   };
 
   if (!stationVisible || !stationData) return null;
