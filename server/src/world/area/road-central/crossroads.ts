@@ -1,6 +1,6 @@
 /**
  * 官道·十字路口 — 官道中原段
- * 坐标: (0, 3, 0)
+ * 坐标: (0, 7, 0)
  * 东西南北交汇要道，立有指路石碑
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -18,9 +18,9 @@ export default class RoadCentralCrossroads extends RoomBase {
         '有商队在路口歇脚，脚夫们围着石碑猜那块模糊的字写的是哪里。' +
         '时不时有武人策马而过，扬起一阵黄尘。',
     );
-    this.set('coordinates', { x: 0, y: 3, z: 0 });
+    this.set('coordinates', { x: 0, y: 7, z: 0 });
     this.set('exits', {
-      north: 'area/road-central/old-bridge',
+      north: 'area/road-central/relay-station',
       south: 'area/road-central/south-end',
       east: 'area/road-jiangnan/west-end',
       northeast: 'area/road-north/south-end',

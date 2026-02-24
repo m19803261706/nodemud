@@ -15,8 +15,12 @@ export default class RoadNorthArea extends Area {
     this.set('rooms', [
       'area/road-north/south-end',
       'area/road-north/wind-pass',
+      'area/road-north/dead-woods',
       'area/road-north/frozen-trail',
+      'area/road-north/stone-cairn',
+      'area/road-north/hunter-camp',
       'area/road-north/grassland',
+      'area/road-north/ruined-beacon',
       'area/road-north/north-end',
     ]);
     this.set('spawn_rules', [
@@ -31,6 +35,12 @@ export default class RoadNorthArea extends Area {
         roomId: 'area/road-north/grassland',
         count: 1,
         interval: 90000,
+      },
+      {
+        blueprintId: 'npc/road-north/border-hunter',
+        roomId: 'area/road-north/hunter-camp',
+        count: 1,
+        interval: 120000,
       },
     ]);
     this.set('item_spawn_rules', []);

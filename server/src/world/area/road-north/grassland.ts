@@ -1,6 +1,6 @@
 /**
  * 官道·草原边缘 — 官道北境段
- * 坐标: (0, -3, 0)
+ * 坐标: (0, -6, 0)
  * 官道尽头，草原豁然开朗，草原劫匪出没之地
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -20,10 +20,10 @@ export default class RoadNorthGrassland extends RoomBase {
         '他们熟知这片草原的每一道沟壑，来去如风，杀人越货后消失于天地之间。' +
         '路边有几具被草没了半截的白骨，那是没能通过这里的倒霉旅人。',
     );
-    this.set('coordinates', { x: 0, y: -3, z: 0 });
+    this.set('coordinates', { x: 0, y: -6, z: 0 });
     this.set('exits', {
-      south: 'area/road-north/frozen-trail',
-      north: 'area/road-north/north-end',
+      south: 'area/road-north/hunter-camp',
+      north: 'area/road-north/ruined-beacon',
     });
   }
 }

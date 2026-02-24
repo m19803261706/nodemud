@@ -15,7 +15,11 @@ export default class RoadCentralArea extends Area {
     this.set('rooms', [
       'area/road-central/north-end',
       'area/road-central/dusty-road',
+      'area/road-central/tea-stall',
       'area/road-central/old-bridge',
+      'area/road-central/ruined-village',
+      'area/road-central/ancient-battlefield',
+      'area/road-central/relay-station',
       'area/road-central/crossroads',
       'area/road-central/south-end',
     ]);
@@ -31,6 +35,12 @@ export default class RoadCentralArea extends Area {
         roomId: 'area/road-central/old-bridge',
         count: 1,
         interval: 60000,
+      },
+      {
+        blueprintId: 'npc/road-central/old-tea-seller',
+        roomId: 'area/road-central/tea-stall',
+        count: 1,
+        interval: 120000,
       },
     ]);
     this.set('item_spawn_rules', []);

@@ -1,6 +1,6 @@
 /**
  * 官道·冻原小径 — 官道北境段
- * 坐标: (0, -2, 0)
+ * 坐标: (0, -3, 0)
  * 霜冻覆盖的路段，野狼出没之地
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadNorthFrozenTrail extends RoomBase {
         '偶尔远处会传来低沉的嗥叫，回荡在空旷的冻原上久久不散。' +
         '走这条路的商旅都会结伴而行，不敢单独落单。',
     );
-    this.set('coordinates', { x: 0, y: -2, z: 0 });
+    this.set('coordinates', { x: 0, y: -3, z: 0 });
     this.set('exits', {
-      south: 'area/road-north/wind-pass',
-      north: 'area/road-north/grassland',
+      south: 'area/road-north/dead-woods',
+      north: 'area/road-north/stone-cairn',
     });
   }
 }

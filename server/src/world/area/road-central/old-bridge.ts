@@ -1,6 +1,6 @@
 /**
  * 官道·旧石桥 — 官道中原段
- * 坐标: (0, 2, 0)
+ * 坐标: (0, 3, 0)
  * 采集点：断碑拓片，桥头野怪盘踞
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -18,10 +18,10 @@ export default class RoadCentralOldBridge extends RoomBase {
         '有人说这座桥建于前朝极盛时期，河水干涸后桥也失去了用处，' +
         '只剩石碑还在，记录着一段被遗忘的历史。',
     );
-    this.set('coordinates', { x: 0, y: 2, z: 0 });
+    this.set('coordinates', { x: 0, y: 3, z: 0 });
     this.set('exits', {
-      north: 'area/road-central/dusty-road',
-      south: 'area/road-central/crossroads',
+      north: 'area/road-central/tea-stall',
+      south: 'area/road-central/ruined-village',
     });
   }
 }

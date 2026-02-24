@@ -22,7 +22,7 @@ export default class RoadNorthWindPass extends RoomBase {
     this.set('coordinates', { x: 0, y: -1, z: 0 });
     this.set('exits', {
       south: 'area/road-north/south-end',
-      north: 'area/road-north/frozen-trail',
+      north: 'area/road-north/dead-woods',
     });
   }
 }

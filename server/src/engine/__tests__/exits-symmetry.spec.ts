@@ -114,14 +114,14 @@ describe('Wave 1 地图出口对称性', () => {
     }
   });
 
-  it('应加载官道·中原段区域（Area + 5 Room）', () => {
+  it('应加载官道·中原段区域（Area + 9 Room）', () => {
     const area = objectManager.findById('area/road-central/area');
     expect(area).toBeDefined();
     expect(area).toBeInstanceOf(Area);
 
     const areaInstance = area as Area;
     const roomIds = areaInstance.getRoomIds();
-    expect(roomIds).toHaveLength(5);
+    expect(roomIds).toHaveLength(9);
 
     for (const roomId of ROAD_CENTRAL_ROOMS) {
       expect(roomIds).toContain(roomId);

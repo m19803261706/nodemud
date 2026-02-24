@@ -20,7 +20,7 @@ export default class RoadCentralDustyRoad extends RoomBase {
     this.set('coordinates', { x: 0, y: 1, z: 0 });
     this.set('exits', {
       north: 'area/road-central/north-end',
-      south: 'area/road-central/old-bridge',
+      south: 'area/road-central/tea-stall',
     });
   }
 }

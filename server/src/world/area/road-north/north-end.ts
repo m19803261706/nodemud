@@ -1,6 +1,6 @@
 /**
  * 官道·边关近郊 — 官道北境段
- * 坐标: (0, -4, 0)
+ * 坐标: (0, -8, 0)
  * 朔云关城墙已隐约可见，关头旗帜猎猎作响
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -20,9 +20,9 @@ export default class RoadNorthNorthEnd extends RoomBase {
         '路边有个简陋的茶棚，棚主是个独臂老汉，据说当年就是在守关时丢的那条胳膊。' +
         '他卖的茶水滚烫，是这条路上难得的温热。',
     );
-    this.set('coordinates', { x: 0, y: -4, z: 0 });
+    this.set('coordinates', { x: 0, y: -8, z: 0 });
     this.set('exits', {
-      south: 'area/road-north/grassland',
+      south: 'area/road-north/ruined-beacon',
       north: 'area/frost-pass/south-gate',
     });
   }
