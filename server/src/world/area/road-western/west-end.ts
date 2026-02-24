@@ -1,6 +1,6 @@
 /**
  * 丝路·驿站近郊 — 西域丝路西端
- * 坐标: (-4, 0, 0)
+ * 坐标: (-9, 0, 0)
  * 通往黄沙驿的最后一段路
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,9 +19,9 @@ export default class RoadWesternWestEnd extends RoomBase {
         '否则往西便是一望无际的荒漠，没有任何可以依靠的地方。' +
         '驿门就在前方，可以闻到炊烟和骆驼的气息。',
     );
-    this.set('coordinates', { x: -4, y: 0, z: 0 });
+    this.set('coordinates', { x: -9, y: 0, z: 0 });
     this.set('exits', {
-      east: 'area/road-western/oasis-ruin',
+      east: 'area/road-western/ruined-wall',
       west: 'area/western-wastes/east-gate',
     });
   }

@@ -1,6 +1,6 @@
 /**
  * 丝路·绿洲废墟 — 西域丝路第四段
- * 坐标: (-3, 0, 0)
+ * 坐标: (-6, 0, 0)
  * 干涸绿洲，太古纪石雕残片，采集点：血玉砂，沙蝎出没
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadWesternOasisRuin extends RoomBase {
         '据说是太古纪留下来的，那时候这里还是繁盛之地。' +
         '沙地里散落着暗红色的细砂，是西域特有的血玉砂，据说可以入药炼器。',
     );
-    this.set('coordinates', { x: -3, y: 0, z: 0 });
+    this.set('coordinates', { x: -6, y: 0, z: 0 });
     this.set('exits', {
-      east: 'area/road-western/sandstorm-pass',
-      west: 'area/road-western/west-end',
+      east: 'area/road-western/abandoned-camp',
+      west: 'area/road-western/poplar-deadwood',
     });
   }
 }

@@ -1,6 +1,6 @@
 /**
  * 丝路·风沙隘口 — 西域丝路第三段
- * 坐标: (-2, 0, 0)
+ * 坐标: (-4, 0, 0)
  * 两块巨岩间的隘口，风沙旋成漏斗
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -20,10 +20,10 @@ export default class RoadWesternSandstormPass extends RoomBase {
         '岩壁上有前人用尖石刻下的图案，是各种语言的字迹和路标，' +
         '叠在一起看不懂，却证明无数人曾在此经过。',
     );
-    this.set('coordinates', { x: -2, y: 0, z: 0 });
+    this.set('coordinates', { x: -4, y: 0, z: 0 });
     this.set('exits', {
-      east: 'area/road-western/dusty-wasteland',
-      west: 'area/road-western/oasis-ruin',
+      east: 'area/road-western/wind-eroded-pillars',
+      west: 'area/road-western/abandoned-camp',
     });
   }
 }

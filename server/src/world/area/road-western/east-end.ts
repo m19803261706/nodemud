@@ -22,7 +22,7 @@ export default class RoadWesternEastEnd extends RoomBase {
     this.set('coordinates', { x: 0, y: 0, z: 0 });
     this.set('exits', {
       east: 'area/central-plain/old-tavern',
-      west: 'area/road-western/dusty-wasteland',
+      west: 'area/road-western/gobi-flats',
     });
   }
 }

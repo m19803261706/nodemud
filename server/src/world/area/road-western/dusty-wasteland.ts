@@ -1,6 +1,6 @@
 /**
  * 丝路·黄沙漫道 — 西域丝路第二段
- * 坐标: (-1, 0, 0)
+ * 坐标: (-2, 0, 0)
  * 黄沙漫天，靠路边石堆辨别方向，沙漠强盗出没
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadWesternDustyWasteland extends RoomBase {
         '周围没有任何遮蔽，感觉自己完全暴露在天地之间——' +
         '这意味着你也能被远处的人看见。',
     );
-    this.set('coordinates', { x: -1, y: 0, z: 0 });
+    this.set('coordinates', { x: -2, y: 0, z: 0 });
     this.set('exits', {
-      east: 'area/road-western/east-end',
-      west: 'area/road-western/sandstorm-pass',
+      east: 'area/road-western/gobi-flats',
+      west: 'area/road-western/wind-eroded-pillars',
     });
   }
 }
