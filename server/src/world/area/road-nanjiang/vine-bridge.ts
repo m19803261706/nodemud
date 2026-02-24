@@ -1,6 +1,6 @@
 /**
  * 山路·藤桥 — 蛮疆山路第三段
- * 坐标: (0, 2, 0)
+ * 坐标: (0, 3, 0)
  * 横跨深谷的藤蔓桥，谷底白雾弥漫
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadNanjiangVineBridge extends RoomBase {
         '偶尔有山风从谷底涌上来，带着湿冷的气息，吹得桥身微微摆动。' +
         '不知道谷有多深。',
     );
-    this.set('coordinates', { x: 0, y: 2, z: 0 });
+    this.set('coordinates', { x: 0, y: 3, z: 0 });
     this.set('exits', {
-      north: 'area/road-nanjiang/bamboo-path',
-      south: 'area/road-nanjiang/mist-valley',
+      north: 'area/road-nanjiang/creek-trail',
+      south: 'area/road-nanjiang/miasma-woods',
     });
   }
 }

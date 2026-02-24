@@ -1,6 +1,6 @@
 /**
  * 山路·寨前石阶 — 蛮疆山路南端
- * 坐标: (0, 4, 0)
+ * 坐标: (0, 8, 0)
  * 通往雾岚寨的石阶，图腾柱初现
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,9 +19,9 @@ export default class RoadNanjiangSouthEnd extends RoomBase {
         '顺着石阶往上望，山顶隐约可见木寨的轮廓，炊烟从林梢升起，' +
         '空气里开始混入草药和肉烟的气息。',
     );
-    this.set('coordinates', { x: 0, y: 4, z: 0 });
+    this.set('coordinates', { x: 0, y: 8, z: 0 });
     this.set('exits', {
-      north: 'area/road-nanjiang/mist-valley',
+      north: 'area/road-nanjiang/hunter-shed',
       south: 'area/nanjiang-south/zhai-gate',
     });
   }

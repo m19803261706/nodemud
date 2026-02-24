@@ -22,7 +22,7 @@ export default class RoadNanjiangBambooPath extends RoomBase {
     this.set('coordinates', { x: 0, y: 1, z: 0 });
     this.set('exits', {
       north: 'area/road-nanjiang/north-end',
-      south: 'area/road-nanjiang/vine-bridge',
+      south: 'area/road-nanjiang/creek-trail',
     });
   }
 }

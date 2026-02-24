@@ -1,6 +1,6 @@
 /**
  * 山路·迷雾谷 — 蛮疆山路第四段
- * 坐标: (0, 3, 0)
+ * 坐标: (0, 5, 0)
  * 常年云雾缭绕，林中猛兽出没
  */
 import { RoomBase } from '../../../engine/game-objects/room-base';
@@ -19,10 +19,10 @@ export default class RoadNanjiangMistValley extends RoomBase {
         '像是有人在林子更深处挂了什么东西，随风而鸣，提醒外人：这里有人住。' +
         '草丛里偶尔传来重物踩踏的声音，是什么大型动物在雾中游走。',
     );
-    this.set('coordinates', { x: 0, y: 3, z: 0 });
+    this.set('coordinates', { x: 0, y: 5, z: 0 });
     this.set('exits', {
-      north: 'area/road-nanjiang/vine-bridge',
-      south: 'area/road-nanjiang/south-end',
+      north: 'area/road-nanjiang/miasma-woods',
+      south: 'area/road-nanjiang/rocky-slope',
     });
   }
 }
